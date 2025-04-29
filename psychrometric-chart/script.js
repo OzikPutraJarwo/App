@@ -5,7 +5,7 @@ const form = document.getElementById('manualForm');
 
 const elements = {
   dryBulb: document.getElementById('dryBulb'),
-  humidityRatio: document.getElementById('humidityRatio'),
+  humidityAbsolute: document.getElementById('humidityAbsolute'),
   enthalpy: document.getElementById('enthalpy'),
   rh: document.getElementById('rh'),
   dewPoint: document.getElementById('dewPoint'),
@@ -30,7 +30,7 @@ document.querySelectorAll('input[name="markerMode"]').forEach(radio => {
 
 // Combinations
 const validCombinations = new Set([
-  'dryBulb-humidityRatio',
+  'dryBulb-humidityAbsolute',
   'dryBulb-rh',
   'dryBulb-dewPoint',
   'dryBulb-enthalpy',
@@ -71,21 +71,21 @@ param2.addEventListener('change', () => {
 });
 
 // Update Marker and Output
-const updateFromValues = (dryBulb, humidityRatio) => {
+const updateFromValues = (dryBulb, humidityAbsolute) => {
   const width = chart.width;
   const height = chart.height;
 
   const x = ((dryBulb + 12.6) / 60) * width;
-  const y = (1.07 - (humidityRatio / 0.030)) * height;
+  const y = (1.07 - (humidityAbsolute / 0.030)) * height;
 
   marker.style.left = `${x}px`;
   marker.style.top = `${y}px`;
   marker.style.display = 'block';
 
-  const h = 1.006 * dryBulb + humidityRatio * (2501 + 1.86 * dryBulb);
+  const h = 1.006 * dryBulb + humidityAbsolute * (2501 + 1.86 * dryBulb);
   const p_atm = 101.325;
   const pws = 0.61078 * Math.exp((17.27 * dryBulb) / (dryBulb + 237.3));
-  const pv = (humidityRatio * p_atm) / (0.622 + humidityRatio);
+  const pv = (humidityAbsolute * p_atm) / (0.622 + humidityAbsolute);
   const rh = (pv / pws) * 95;
 
   const a = 17.27, b = 237.7;
@@ -98,10 +98,10 @@ const updateFromValues = (dryBulb, humidityRatio) => {
 
   const R_da = 0.287042;
   const T_k = dryBulb + 273.15;
-  const v = R_da * T_k * (1 + 1.6078 * humidityRatio) / p_atm;
+  const v = R_da * T_k * (1 + 1.6078 * humidityAbsolute) / p_atm;
 
   elements.dryBulb.textContent = dryBulb.toFixed(1);
-  elements.humidityRatio.textContent = (humidityRatio * 1000).toFixed(1);
+  elements.humidityAbsolute.textContent = (humidityAbsolute * 1000).toFixed(1);
   elements.enthalpy.textContent = h.toFixed(1);
   elements.rh.textContent = rh.toFixed(1);
   elements.dewPoint.textContent = dewPoint.toFixed(1);
@@ -121,7 +121,7 @@ const tryUpdateFromSelectedParams = () => {
 
   const params = {
     dryBulb: null,
-    humidityRatio: null,
+    humidityAbsolute: null,
     rh: null,
     dewPoint: null,
     enthalpy: null,
@@ -151,43 +151,43 @@ const tryUpdateFromSelectedParams = () => {
   const deriveFromEnthalpy = (h, T) => (h - 1.006 * T) / (2501 + 1.86 * T);
 
   let dryBulb = null;
-  let humidityRatio = null;
+  let humidityAbsolute = null;
 
   if (params.dryBulb != null && params.rh != null) {
-    [dryBulb, humidityRatio] = deriveFromDryBulbAndRH(params.dryBulb, params.rh);
-  } else if (params.dryBulb != null && params.humidityRatio != null) {
+    [dryBulb, humidityAbsolute] = deriveFromDryBulbAndRH(params.dryBulb, params.rh);
+  } else if (params.dryBulb != null && params.humidityAbsolute != null) {
     dryBulb = params.dryBulb;
-    humidityRatio = params.humidityRatio / 1000;
+    humidityAbsolute = params.humidityAbsolute / 1000;
   } else if (params.rh != null && params.dewPoint != null) {
     const W = deriveFromDewPoint(params.dewPoint);
     for (let T = -10; T <= 60; T += 0.1) {
       const [testDB, testW] = deriveFromDryBulbAndRH(T, params.rh);
       if (Math.abs(testW - W) < 0.0005) {
         dryBulb = testDB;
-        humidityRatio = testW;
+        humidityAbsolute = testW;
         break;
       }
     }
   } else if (params.dryBulb != null && params.dewPoint != null) {
     const pv = pws(params.dewPoint);
-    humidityRatio = 0.622 * pv / (p_atm - pv);
+    humidityAbsolute = 0.622 * pv / (p_atm - pv);
     dryBulb = params.dryBulb;
   } else if (params.dryBulb != null && params.enthalpy != null) {
     dryBulb = params.dryBulb;
-    humidityRatio = deriveFromEnthalpy(params.enthalpy, dryBulb);
+    humidityAbsolute = deriveFromEnthalpy(params.enthalpy, dryBulb);
   } else if (params.enthalpy != null && params.rh != null) {
     for (let T = -10; T <= 60; T += 0.1) {
       const [testDB, testW] = deriveFromDryBulbAndRH(T, params.rh);
       const h = 1.006 * testDB + testW * (2501 + 1.86 * testDB);
       if (Math.abs(h - params.enthalpy) < 1) {
         dryBulb = testDB;
-        humidityRatio = testW;
+        humidityAbsolute = testW;
         break;
       }
     }
   } else if (params.dryBulb != null && params.vp != null) {
     const pv = params.vp;
-    humidityRatio = 0.622 * pv / (p_atm - pv);
+    humidityAbsolute = 0.622 * pv / (p_atm - pv);
     dryBulb = params.dryBulb;
   } else if (params.rh != null && params.vp != null) {
     for (let T = -10; T <= 60; T += 0.1) {
@@ -195,19 +195,19 @@ const tryUpdateFromSelectedParams = () => {
       const expectedVP = (params.rh / 100) * pws_val;
       if (Math.abs(expectedVP - params.vp) < 0.05) {
         dryBulb = T;
-        humidityRatio = 0.622 * params.vp / (p_atm - params.vp);
+        humidityAbsolute = 0.622 * params.vp / (p_atm - params.vp);
         break;
       }
     }
   } else if (params.dryBulb != null && params.vSpec != null) {
     const T_k = params.dryBulb + 273.15;
     const R_da = 0.287042;
-    humidityRatio = ((params.vSpec * p_atm) / (R_da * T_k) - 1) / 1.6078;
+    humidityAbsolute = ((params.vSpec * p_atm) / (R_da * T_k) - 1) / 1.6078;
     dryBulb = params.dryBulb;
   }
 
-  if (dryBulb != null && humidityRatio != null) {
-    updateFromValues(dryBulb, humidityRatio);
+  if (dryBulb != null && humidityAbsolute != null) {
+    updateFromValues(dryBulb, humidityAbsolute);
   }
 };
 
@@ -262,9 +262,9 @@ chartContainer.addEventListener('mousemove', function (e) {
   currentY = y;
 
   const dryBulb = -10 + (x / width) * 60;
-  const humidityRatio = (1 - (y / height)) * 0.030;
+  const humidityAbsolute = (1 - (y / height)) * 0.030;
 
-  updateFromValues(dryBulb, humidityRatio);
+  updateFromValues(dryBulb, humidityAbsolute);
 });
 
 // Download
