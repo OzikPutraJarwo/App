@@ -88,7 +88,8 @@ main #set #input {
 
 main #set #input #modeToggle {
     display: flex;
-    gap: 2rem
+    gap: 2rem;
+    display: none;
 }
 
 #manualInput {
@@ -112,11 +113,21 @@ main #set #input #modeToggle {
 }
 
 #manualInput form > div > div {
-    display: grid;
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    grid-template-rows: 1fr 1fr; 
+    gap: 0px 0px; 
+    grid-template-areas: 
+      "param-name param-name"
+      "param-label param-value"; 
     gap: .5rem;
 }
 
-#manualInput form input {
+.param-name { grid-area: param-name; }
+.param-label { grid-area: param-label; }
+.param-value { grid-area: param-value; }
+
+#manualInput form input, #manualInput form select {
     border: unset;
     outline: none;
     font-size: 0.8rem;
