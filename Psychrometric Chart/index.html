@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Psychrometric Chart</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+</head>
+
+<body>
+
+  <div id="overlay" class="hide"></div>
+
+  <main>
+
+    <header>
+      <div class="icon" id="tutor">
+        <img src="./icon/info.png" alt="Information">
+      </div>
+      <h1>Psychrometric Chart</h1>
+      <div class="icon" id="download">
+        <img src="./icon/download.png" alt="Download">
+      </div>
+    </header>
+
+    <div id="content">
+
+      <div id="set">
+
+        <div id="input">
+          <div id="modeToggle">
+            <label><input type="radio" name="markerMode" value="single" checked> Single Marker</label>
+            <label><input type="radio" name="markerMode" value="multi"> Multi Marker</label>
+          </div>
+          <div id="manualInput">
+            <h3>Manual Input</h3>
+            <form id="manualForm">
+              <div>
+                <div>
+                  <label for="inputDryBulb">Dry Bulb (°C):</label>
+                  <input type="number" id="inputDryBulb" step="0.1" required>
+                </div>
+                <div>
+                  <label for="inputHumidityRatio">Humidity Ratio (g/kg):</label>
+                  <input type="number" id="inputHumidityRatio" step="0.1" required>
+                </div>
+              </div>
+              <div>
+                <button type="submit">Apply</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div id="output">
+          <h3>Output</h3>
+          <div id="parameter">
+            <div class="item">
+              <div class="icon"><img src="./icon/enthalpy.png" alt="Enthalpy"></div>
+              <div class="name">Enthalpy</div>
+              <div class="value"><span id="enthalpy">-</span></div>
+              <div class="unit">kJ/kg</div>
+            </div>
+            <div class="item">
+              <div class="icon"><img src="./icon/humidityratio.png" alt="Humidity Ratio"></div>
+              <div class="name">Humidity Ratio</div>
+              <div class="value"><span id="humidityRatio">-</span></div>
+              <div class="unit">g/kg</div>
+            </div>
+            <div class="item">
+              <div class="icon"><img src="./icon/relativehumidity.png" alt="Relative Humidity"></div>
+              <div class="name">Relative Humidity</div>
+              <div class="value"><span id="rh">-</span></div>
+              <div class="unit">%</div>
+            </div>
+            <div class="item">
+              <div class="icon"><img src="./icon/vaporpressure.png" alt="Vapor Pressure"></div>
+              <div class="name">Vapor Pressure</div>
+              <div class="value"><span id="vp">-</span></div>
+              <div class="unit">kPa</div>
+            </div>
+            <div class="item">
+              <div class="icon"><img src="./icon/specificvolume.png" alt="Specific Volume"></div>
+              <div class="name">Specific Volume</div>
+              <div class="value"><span id="vSpec">-</span></div>
+              <div class="unit">m³/kg d.a.</div>
+            </div>
+            <div class="item">
+              <div class="icon"><img src="./icon/drybulb.png" alt="Dry Bulb"></div>
+              <div class="name">Dry Bulb</div>
+              <div class="value"><span id="dryBulb">-</span></div>
+              <div class="unit">°C</div>
+            </div>
+            <div class="item">
+              <div class="icon"><img src="./icon/wetbulb.png" alt="Wet Bulb"></div>
+              <div class="name">Wet bulb</div>
+              <div class="value"><span id="wetBulb">-</span></div>
+              <div class="unit">°C</div>
+            </div>
+            <div class="item">
+              <div class="icon"><img src="./icon/dewpoint.png" alt="Dew Point"></div>
+              <div class="name">Dew Point</div>
+              <div class="value"><span id="dewPoint">-</span></div>
+              <div class="unit">°C</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div id="chart">
+        <img id="chartImage" src="Chart3.png" alt="Psychrometric Chart" draggable="false">
+        <img id="chartAxes" src="Axes.png" alt="Psychrometric Chart Axes" draggable="false">
+        <div id="marker"></div>
+      </div>
+
+    </div>
+
+    <footer>
+      <p>Created with pure 🤍 by Ozik</p>
+    </footer>
+    
+  </main>
+
+
+  <div id="pop" class="hide">
+    <div class="wrap">
+      <p class="title">Information</p>
+      <div class="content">
+        <p><b>Left click</b> on the chart to locate interactive marker.</p>
+        <p><b>Right click</b> on the chart to set the marker.</p>
+      </div>
+      <div id="popclose">
+        <img src="./icon/close.png" alt="Close">
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+
+</html>
