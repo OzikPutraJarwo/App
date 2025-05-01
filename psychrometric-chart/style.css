@@ -46,14 +46,14 @@ main {
 main header {
     text-align: center;
     display: grid;
-    grid-template-columns: 40px 1fr 40px;
+    grid-template-columns: 40px 1fr 40px 40px;
+    gap: 2rem;
     padding-top: 2rem;
 }
 
 main header .icon {
     display: grid;
     align-items: center;
-    box-shadow: 0 5px 20px 0 rgb(0 0 0 / 50%);
     border-radius: 100%;
     transition: .2s all;
     cursor: pointer;
@@ -61,6 +61,16 @@ main header .icon {
 
 main header .icon:hover {
     opacity: .5;
+}
+
+main header .icon img {
+    box-shadow: 0 5px 20px 0 rgb(0 0 0 / 50%);
+    border-radius: 100%;
+}
+
+main header .icon span {
+    font-size: .75rem;
+    margin-top:.3rem
 }
 
 main #content {
@@ -178,6 +188,7 @@ main #set #input #modeToggle {
     aspect-ratio: 650 / 480;
     background-color: white;
     border-radius: 2rem;
+    border: .5rem solid white;
 }
 
 #marker {

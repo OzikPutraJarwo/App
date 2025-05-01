@@ -268,13 +268,13 @@ chartContainer.addEventListener('mousemove', function (e) {
 });
 
 // Download
-document.getElementById('download').addEventListener('click', function () {
+document.getElementById('downloadimg').addEventListener('click', function () {
   html2canvas(chartContainer, {
     scale: 3,
     useCORS: true
   }).then(canvas => {
     const link = document.createElement('a');
-    link.download = 'psychrometric.png';
+    link.download = 'psychrometric-chart.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
   });
@@ -290,3 +290,35 @@ const toggleVisibility = () => {
 
 // Filtering on page load
 filterDropdownOptions();
+
+// Download output text
+document.getElementById('downloadtxt').addEventListener('click', function() {
+  const now = new Date();
+  const content = 
+`Psychrometric Chart
+${now}
+
+Enthalpy: ${enthalpy.textContent} kJ/kg
+Absolute Humidity: ${humidityAbsolute.textContent} g/kg
+Relative Humidity: ${rh.textContent}%
+Vapor Pressure: ${vp.textContent} kPa
+Specific Volume: ${vSpec.textContent} m³/kg
+Dry Bulb: ${dryBulb.textContent}°C
+Wet Bulb: ${wetBulb.textContent}°C
+Dew Point: ${dewPoint.textContent}°C
+
+Source: https://ozikputrajarwo.github.io/App/psychrometric-chart/`;
+
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'psychrometric-chart.txt';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  
+  URL.revokeObjectURL(url);
+
+});
