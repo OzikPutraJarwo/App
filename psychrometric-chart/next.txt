@@ -5,3 +5,4 @@ Next features:
 ⚠️ Single & Multiple marker
 - LocalStorage marker data save
 - Mobile responsiveness
+- Custom marker
