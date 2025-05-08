@@ -1,3 +1,3 @@
-# App
+# App List
 
-- [Psychrometric Chart](/App/psychrometric-chart/)
+- [Psychrometric Chart](/psychrometric-chart/)
