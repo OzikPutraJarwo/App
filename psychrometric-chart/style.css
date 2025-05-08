@@ -36,11 +36,13 @@ main {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 90%;
+    width: 100%;
+    max-width: 1400px;
     display: grid;
     gap: 2rem;
     color: white;
     max-height: 100%;
+    padding: 2rem;
 }
 
 main header {
