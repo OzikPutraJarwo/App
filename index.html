@@ -2,31 +2,186 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App List</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>App List</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <h1>App List</h1>
 
-    <ul>
-        <li>CropID</li>
-        <li><a href="/psychrometric-chart/">Psychrometric Chart</a></li>
-        <li><a href="/kolmogorov-smirnov/">Kolmogorof-Smirnov</a></li>
-        <li>QR Generator</li>
-        <li>OCR (Image to Text)</li>
-        <li>DOI Link to APA Citation Style</li>
-        <li>Bulk File Renamer</li>
-        <li>PDF Combiner</li>
-        <li>Image Format Converter</li>
-        <li>Image Text Watermark</li>
-        <li>Image Compressor (JPG & WebP)</li>
-        <li>Unit Converter</li>
-        <li>File Analyzer</li>
-        <li>Balik Huruf Kedelai</li>
-    </ul>
+  <header>
+    <div class="header wrap">
+      <div class="site-title">App by Kode Jarwo</div>
+      <div class="site-search"></div>
+      <div class="site-option"></div>
+    </div>
+  </header>
+
+  <main>
+    <div class="main wrap">
+      <a href="https://cropid.kodejarwo.com" class="item">
+        <div class="item-head">
+          <div class="item-logo">
+            <img src="./icon/cropid.png" alt="" width="50" height="50">
+          </div>
+          <h2 class="item-title">CropID</h2>
+        </div>
+        <div class="item-desc">
+          <p>ANOVA tests of various designs, post-hoc (Tukey's HSD, Fisher's LSD, Duncan's DMRT, & SNK), etc.</p>
+        </div>
+      </a>
+      <a href="/psychrometric-chart/" class="item">
+        <div class="item-head">
+          <div class="item-logo">
+            <img src="./icon/psychrometric-chart.png" alt="Psychrometric Chart" width="50" height="50">
+          </div>
+          <h2 class="item-title">Psychrometric Chart</h2>
+        </div>
+        <div class="item-desc">
+          <p>An interactive chart for troubleshooting greenhouse or livestock building environmental problems.</p>
+        </div>
+      </a>
+      <a href="/kolmogorov-smirnov/" class="item">
+        <div class="item-head">
+          <div class="item-logo">
+            <img src="./icon/kolmogorov-smirnov.png" alt="Kolmogorov-Smirnov Test" width="50" height="50">
+          </div>
+          <h2 class="item-title">Kolmogorov-Smirnov Test</h2>
+        </div>
+        <div class="item-desc">
+          <p>Non-parametric test of the equality of continuous one-dimensional probability distributions.</p>
+        </div>
+      </a>
+      <a href="" class="item">
+        <div class="item-head">
+          <div class="item-logo">
+            <img src="./icon/qr-generator.png" alt="" width="50" height="50">
+          </div>
+          <h2 class="item-title">QR Generator</h2>
+        </div>
+        <div class="item-desc">
+          <p>Interactive QR code generator with various customizations. Powered by Github: kozakdenys/qr-code-styling.</p>
+        </div>
+      </a>
+      <a href="" class="item">
+        <div class="item-head">
+          <div class="item-logo">
+            <img src="./icon/no-picture.png" alt="" width="50" height="50">
+          </div>
+          <h2 class="item-title">OCR (Image to Text)</h2>
+        </div>
+        <div class="item-desc">
+          <p>Converts images of text, whether printed, typed, or handwritten, into text. Powered by Tesseract.js.</p>
+        </div>
+      </a>
+      <a href="" class="item">
+        <div class="item-head">
+          <div class="item-logo">
+            <img src="./icon/no-picture.png" alt="" width="50" height="50">
+          </div>
+          <h2 class="item-title">DOI Link to APA Cite</h2>
+        </div>
+        <div class="item-desc">
+          <p>Convert multiple DOI (Digital Object Identifier) links to APA 7th style citations for bibliography or references.</p>
+        </div>
+      </a>
+      <a href="" class="item">
+        <div class="item-head">
+          <div class="item-logo">
+            <img src="./icon/no-picture.png" alt="" width="50" height="50">
+          </div>
+          <h2 class="item-title">Bulk File Renamer</h2>
+        </div>
+        <div class="item-desc">
+          <p>Rename multiple files (bulk) without uploading or downloading.</p>
+        </div>
+      </a>
+      <a href="" class="item">
+        <div class="item-head">
+          <div class="item-logo">
+            <img src="./icon/no-picture.png" alt="" width="50" height="50">
+          </div>
+          <h2 class="item-title">PDF Combiner</h2>
+        </div>
+        <div class="item-desc">
+          <p>Combine multiple PDFs without uploading or downloading.</p>
+        </div>
+      </a>
+      <a href="" class="item">
+        <div class="item-head">
+          <div class="item-logo">
+            <img src="./icon/no-picture.png" alt="" width="50" height="50">
+          </div>
+          <h2 class="item-title">Image Format Converter</h2>
+        </div>
+        <div class="item-desc">
+          <p>Convert any image format to PNG, JPEG, or WebP.</p>
+        </div>
+      </a>
+      <a href="" class="item">
+        <div class="item-head">
+          <div class="item-logo">
+            <img src="./icon/no-picture.png" alt="" width="50" height="50">
+          </div>
+          <h2 class="item-title">Image Text Watermark</h2>
+        </div>
+        <div class="item-desc">
+          <p>Add adjustable watermarks (text and image) to your images.</p>
+        </div>
+      </a>
+      <a href="" class="item">
+        <div class="item-head">
+          <div class="item-logo">
+            <img src="./icon/no-picture.png" alt="" width="50" height="50">
+          </div>
+          <h2 class="item-title">Image Compressor</h2>
+        </div>
+        <div class="item-desc">
+          <p>Resize image and size compressor for WebP and JPG format.</p>
+        </div>
+      </a>
+      <a href="" class="item">
+        <div class="item-head">
+          <div class="item-logo">
+            <img src="./icon/no-picture.png" alt="" width="50" height="50">
+          </div>
+          <h2 class="item-title">Unit Converter</h2>
+        </div>
+        <div class="item-desc">
+          <p>Complete unit converter: IU, imperial, and US Customary.</p>
+        </div>
+      </a>
+      <a href="" class="item">
+        <div class="item-head">
+          <div class="item-logo">
+            <img src="./icon/no-picture.png" alt="" width="50" height="50">
+          </div>
+          <h2 class="item-title">File Analyzer</h2>
+        </div>
+        <div class="item-desc">
+          <p>Very comprehensive hidden file meta data analysis.</p>
+        </div>
+      </a>
+      <a href="" class="item">
+        <div class="item-head">
+          <div class="item-logo">
+            <img src="./icon/no-picture.png" alt="" width="50" height="50">
+          </div>
+          <h2 class="item-title">Balik Huruf Kedelai</h2>
+        </div>
+        <div class="item-desc">
+          <p>Balik susunan huruf notasi (lettering) untuk analisis data penelitian kedelai.</p>
+        </div>
+      </a>
+    </div>
+  </main>
+
+  <footer></footer>
+
 </body>
 
 </html>
