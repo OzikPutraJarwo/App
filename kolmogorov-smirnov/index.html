@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uji Normalitas Kolmogorov-Smirnov</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Uji Normalitas Kolmogorov-Smirnov</h1>
+        <h2>Oleh Ozik Jarwo</h2>
+        
+        <div class="input-section">
+            <h2>Input Data</h2>
+            <p>Masukkan data sampel:</p>
+            <textarea id="dataInput" placeholder="Contoh:
+0,112
+0,176
+0,22
+0,271
+0,273"></textarea>
+            <div id="errorMessage" class="error"></div>
+            <button id="calculateBtn">Hitung Uji Normalitas</button>
+        </div>
+        
+        <div id="resultsSection" style="display: none;">
+            <div class="scrollable-table">
+                <table id="sampleTable">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nilai Sampel</th>
+                            <th>Frequency</th>
+                            <th>Cumulative</th>
+                            <th>Sn(x)</th>
+                            <th>Z-Score</th>
+                            <th>F(x)</th>
+                            <th>Difference</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sampleTableBody">
+                    </tbody>
+                </table>
+            </div>
+            
+            <table class="result-table">
+                <tr>
+                    <td>N Sampel (N)</td>
+                    <td id="nSample"></td>
+                </tr>
+                <tr>
+                    <td>Mean (Rata-rata)</td>
+                    <td id="mean"></td>
+                </tr>
+                <tr>
+                    <td>Simpangan Baku (SD)</td>
+                    <td id="stdDev"></td>
+                </tr>
+                <tr>
+                    <td>Dn (Maks Difference)</td>
+                    <td id="dn"></td>
+                </tr>
+                <tr>
+                    <td>KS Tabel</td>
+                    <td id="ksTable"></td>
+                </tr>
+            </table>
+            
+            <div id="conclusion" class="conclusion">
+            </div>
+        </div>
+    </div>
+
+    <script src="./script.js"></script>
+</body>
+</html>
