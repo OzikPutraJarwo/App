@@ -95,6 +95,18 @@ main {
   transition: .2s;
 }
 
+footer {
+  text-align: center;
+  padding: 1.5rem;
+  background-color: #fff;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px -1px 2px 0px;
+  font-size: .9rem;
+}
+
+footer span {
+  color: red;
+}
+
 @media (max-width: 480px) {
   html {
     font-size: 14px;
