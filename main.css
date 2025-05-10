@@ -40,12 +40,17 @@ header {
 }
 
 .header.wrap {
-  display: flex;
+  display: grid;
+  grid-template-columns: 31px 1fr 31px 31px;
   align-items: center;
   gap: 1.5rem;
 }
 
-.site-back {
+.home .header.wrap {
+  grid-template-columns: 1fr 31px 31px;
+}
+
+.site-button {
   box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em,
               rgb(204, 219, 232, 0) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0) -3px -3px 6px 1px inset;
   display: flex;
@@ -56,15 +61,20 @@ header {
   cursor: pointer;
   transition: .2s;
   border-radius: .2rem;
+  height: 31px;
 }
 
-.site-back svg {
+.site-button svg, .site-button img {
   width: 15px;
 }
 
-.site-back:hover {
+.site-button:hover {
   box-shadow: rgba(67, 71, 85, 0) 0px 0px 0.25em, rgba(90, 125, 188, 0) 0px 0.25em 1em,
               rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
+}
+
+.site-github {
+  margin-left: auto;
 }
 
 .site-title {
@@ -88,6 +98,18 @@ main {
 @media (max-width: 480px) {
   html {
     font-size: 14px;
+  }
+
+  header {
+    padding: 1rem 1.5rem
+  }
+
+  .header.wrap {
+    gap: 1.2rem;
+  }
+  
+  .site-title {
+    font-size: 1.1rem;
   }
 
   main {
