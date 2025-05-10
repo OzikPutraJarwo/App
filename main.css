@@ -1,0 +1,96 @@
+:root {
+  --box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+}
+
+*{margin:0;padding:0;font-family:"Nunito", sans-serif;}
+*,:after,:before{-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
+html{font-size:15px;color:#292929}
+html,body{-webkit-text-size-adjust:none;-moz-text-size-adjust:none;-ms-text-size-adjust:none;height:100%;scroll-behavior:smooth;color:var(--text)}
+body{line-height:1.4;margin:0;padding:0;-webkit-font-smoothing:antialiased;word-wrap:break-word;-ms-word-wrap:break-word;letter-spacing:.2px}
+table{border-collapse:collapse;border-spacing:0}
+textarea{transition:none;max-width:100%}
+input,button,select,textarea{line-height:normal;vertical-align:baseline}
+a,h1,h2,h3,h4,h5,h6{text-decoration:none}
+a{color:#292929}
+a:hover{text-decoration:none}
+h1{font-size:2rem}
+h2{font-size:1.8rem}
+h3{font-size:1.6rem}
+pre,code{font-size:.8rem;max-width:100%;overflow-x:auto;padding:.75rem;font-family:monospace}
+code{padding:.5rem 1rem}
+sup,sub{font-size:.7rem}
+img{max-width:100%;height:auto}
+ul, ol{margin-left:1.5rem}
+.clear{clear:both}
+.none{display:none}
+
+body {
+  background-color: #f5f7f6;
+}
+
+.wrap {
+  max-width: 1440px;
+  margin: auto
+}
+
+header {
+  background-color: #ffffff;
+  padding: 1rem 2rem;
+  box-shadow: var(--box-shadow);
+}
+
+.header.wrap {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.site-back {
+  box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em,
+              rgb(204, 219, 232, 0) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0) -3px -3px 6px 1px inset;
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  align-items: center;
+  padding: 8px;
+  cursor: pointer;
+  transition: .2s;
+  border-radius: .2rem;
+}
+
+.site-back svg {
+  width: 15px;
+}
+
+.site-back:hover {
+  box-shadow: rgba(67, 71, 85, 0) 0px 0px 0.25em, rgba(90, 125, 188, 0) 0px 0.25em 1em,
+              rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
+}
+
+.site-title {
+  font-weight: bold;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+main {
+  padding: 2rem;
+}
+
+.item {
+  padding: 1.5rem;
+  background-color: #ffffff;
+  border-radius: 1rem;
+  box-shadow: var(--box-shadow);
+  transition: .2s;
+}
+
+@media (max-width: 480px) {
+  html {
+    font-size: 14px;
+  }
+
+  main {
+    padding: 1.5rem;
+  }
+}

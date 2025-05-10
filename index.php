@@ -1,3 +1,7 @@
+<?php
+include './components/header.php';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -6,20 +10,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>App List</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="main.css">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
-  <header>
-    <div class="header wrap">
-      <div class="site-title">App by Kode Jarwo</div>
-      <div class="site-search"></div>
-      <div class="site-option"></div>
-    </div>
-  </header>
+  <?php renderHeader("App by Kode Jarwo", $showBack = false); ?>
 
   <main>
     <div class="main wrap">
@@ -33,6 +30,7 @@
         <div class="item-desc">
           <p>ANOVA tests of various designs, post-hoc (Tukey's HSD, Fisher's LSD, Duncan's DMRT, & SNK), etc.</p>
         </div>
+        <div class="item-status maintenance"></div>
       </a>
       <a href="/psychrometric-chart/" class="item">
         <div class="item-head">
@@ -44,6 +42,7 @@
         <div class="item-desc">
           <p>An interactive chart for troubleshooting greenhouse or livestock building environmental problems.</p>
         </div>
+        <div class="item-status online"></div>
       </a>
       <a href="/kolmogorov-smirnov/" class="item">
         <div class="item-head">
@@ -55,8 +54,21 @@
         <div class="item-desc">
           <p>Non-parametric test of the equality of continuous one-dimensional probability distributions.</p>
         </div>
+        <div class="item-status online"></div>
       </a>
-      <a href="" class="item">
+      <a href="/balik-huruf-kedelai/" class="item">
+        <div class="item-head">
+          <div class="item-logo">
+            <img src="./icon/balik-huruf-kedelai.png" alt="" width="50" height="50">
+          </div>
+          <h2 class="item-title">Balik Huruf Kedelai</h2>
+        </div>
+        <div class="item-desc">
+          <p>Balik susunan huruf notasi (lettering) untuk analisis data penelitian kedelai.</p>
+        </div>
+        <div class="item-status online"></div>
+      </a>
+      <a href="#" class="item">
         <div class="item-head">
           <div class="item-logo">
             <img src="./icon/qr-generator.png" alt="" width="50" height="50">
@@ -66,8 +78,9 @@
         <div class="item-desc">
           <p>Interactive QR code generator with various customizations. Powered by Github: kozakdenys/qr-code-styling.</p>
         </div>
+        <div class="item-status offline"></div>
       </a>
-      <a href="" class="item">
+      <a href="#" class="item">
         <div class="item-head">
           <div class="item-logo">
             <img src="./icon/no-picture.png" alt="" width="50" height="50">
@@ -77,8 +90,9 @@
         <div class="item-desc">
           <p>Converts images of text, whether printed, typed, or handwritten, into text. Powered by Tesseract.js.</p>
         </div>
+        <div class="item-status offline"></div>
       </a>
-      <a href="" class="item">
+      <a href="#" class="item">
         <div class="item-head">
           <div class="item-logo">
             <img src="./icon/no-picture.png" alt="" width="50" height="50">
@@ -88,8 +102,9 @@
         <div class="item-desc">
           <p>Convert multiple DOI (Digital Object Identifier) links to APA 7th style citations for bibliography or references.</p>
         </div>
+        <div class="item-status offline"></div>
       </a>
-      <a href="" class="item">
+      <a href="#" class="item">
         <div class="item-head">
           <div class="item-logo">
             <img src="./icon/no-picture.png" alt="" width="50" height="50">
@@ -99,8 +114,9 @@
         <div class="item-desc">
           <p>Rename multiple files (bulk) without uploading or downloading.</p>
         </div>
+        <div class="item-status offline"></div>
       </a>
-      <a href="" class="item">
+      <a href="#" class="item">
         <div class="item-head">
           <div class="item-logo">
             <img src="./icon/no-picture.png" alt="" width="50" height="50">
@@ -110,8 +126,9 @@
         <div class="item-desc">
           <p>Combine multiple PDFs without uploading or downloading.</p>
         </div>
+        <div class="item-status offline"></div>
       </a>
-      <a href="" class="item">
+      <a href="#" class="item">
         <div class="item-head">
           <div class="item-logo">
             <img src="./icon/no-picture.png" alt="" width="50" height="50">
@@ -121,8 +138,9 @@
         <div class="item-desc">
           <p>Convert any image format to PNG, JPEG, or WebP.</p>
         </div>
+        <div class="item-status offline"></div>
       </a>
-      <a href="" class="item">
+      <a href="#" class="item">
         <div class="item-head">
           <div class="item-logo">
             <img src="./icon/no-picture.png" alt="" width="50" height="50">
@@ -132,8 +150,9 @@
         <div class="item-desc">
           <p>Add adjustable watermarks (text and image) to your images.</p>
         </div>
+        <div class="item-status offline"></div>
       </a>
-      <a href="" class="item">
+      <a href="#" class="item">
         <div class="item-head">
           <div class="item-logo">
             <img src="./icon/no-picture.png" alt="" width="50" height="50">
@@ -143,8 +162,9 @@
         <div class="item-desc">
           <p>Resize image and size compressor for WebP and JPG format.</p>
         </div>
+        <div class="item-status offline"></div>
       </a>
-      <a href="" class="item">
+      <a href="#" class="item">
         <div class="item-head">
           <div class="item-logo">
             <img src="./icon/no-picture.png" alt="" width="50" height="50">
@@ -154,8 +174,9 @@
         <div class="item-desc">
           <p>Complete unit converter: IU, imperial, and US Customary.</p>
         </div>
+        <div class="item-status offline"></div>
       </a>
-      <a href="" class="item">
+      <a href="#" class="item">
         <div class="item-head">
           <div class="item-logo">
             <img src="./icon/no-picture.png" alt="" width="50" height="50">
@@ -165,17 +186,7 @@
         <div class="item-desc">
           <p>Very comprehensive hidden file meta data analysis.</p>
         </div>
-      </a>
-      <a href="" class="item">
-        <div class="item-head">
-          <div class="item-logo">
-            <img src="./icon/no-picture.png" alt="" width="50" height="50">
-          </div>
-          <h2 class="item-title">Balik Huruf Kedelai</h2>
-        </div>
-        <div class="item-desc">
-          <p>Balik susunan huruf notasi (lettering) untuk analisis data penelitian kedelai.</p>
-        </div>
+        <div class="item-status offline"></div>
       </a>
     </div>
   </main>
