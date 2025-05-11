@@ -1,0 +1,5 @@
+Next update:
+- Host font
+- Set image width and height
+- CDN resources
+- Analytical traffic

@@ -66,11 +66,16 @@ header {
 
 .site-button svg, .site-button img {
   width: 15px;
+  transition: .2s;
 }
 
 .site-button:hover {
   box-shadow: rgba(67, 71, 85, 0) 0px 0px 0.25em, rgba(90, 125, 188, 0) 0px 0.25em 1em,
               rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
+}
+
+.site-button:hover svg, .site-button:hover img {
+  scale: .9;
 }
 
 .site-github {
