@@ -3,7 +3,7 @@ document.getElementById('calculateBtn').addEventListener('click', function() {
     const errorElement = document.getElementById('errorMessage');
     errorElement.textContent = '';
     if (!inputText) {
-        errorElement.textContent = 'Silakan masukkan data terlebih dahulu.';
+        errorElement.textContent = 'Please input data first.';
         return;
     }
     const lines = inputText.split('\n');
@@ -15,15 +15,18 @@ document.getElementById('calculateBtn').addEventListener('click', function() {
         const normalizedLine = line.replace(',', '.');
         const number = parseFloat(normalizedLine);
         if (isNaN(number)) {
-            errorElement.textContent = `Baris ${i + 1}: "${line}" bukan angka yang valid.`;
+            errorElement.textContent = `Line ${i + 1}: "${line}" is not a valid number (NaN)`;
+            errorElement.classList.add('show');
             hasError = true;
             break;
+        } else {
+            errorElement.classList.remove('show');
         }
         sampleData.push(number);
     }
     if (hasError) return;
     if (sampleData.length < 3) {
-        errorElement.textContent = 'Minimal diperlukan 3 data untuk melakukan uji normalitas.';
+        errorElement.textContent = 'Minimum 3 data required.';
         return;
     }
     const testResult = performKSTest(sampleData.sort((a, b) => a - b));
@@ -93,8 +96,8 @@ function performKSTest(data) {
     });
     const ksTableValue = 1.36 / Math.sqrt(n);
     const conclusion = maxDifference < ksTableValue ? 
-        "Data terdistribusi normal (Dn < KS Tabel)" : 
-        "Data tidak terdistribusi normal (Dn ≥ KS Tabel)";
+        "Data is normally distributed (Maximum Difference < KS Table)" : 
+        "Data is not normally distributed (Maximum Difference ≥ KS Table)";
     return {
         n,
         mean,
@@ -107,7 +110,7 @@ function performKSTest(data) {
 }
 
 function displayResults(testResult) {
-    document.getElementById('resultsSection').style.display = 'block';
+    document.getElementById('resultsSection').style.display = 'flex';
     const tableBody = document.getElementById('sampleTableBody');
     tableBody.innerHTML = '';
     testResult.results.forEach((item, index) => {

@@ -9,7 +9,7 @@ html,body{-webkit-text-size-adjust:none;-moz-text-size-adjust:none;-ms-text-size
 body{line-height:1.4;margin:0;padding:0;-webkit-font-smoothing:antialiased;word-wrap:break-word;-ms-word-wrap:break-word;letter-spacing:.2px}
 table{border-collapse:collapse;border-spacing:0}
 textarea{transition:none;max-width:100%}
-input,button,select,textarea{line-height:normal;vertical-align:baseline}
+input,button,select,textarea{line-height:normal;vertical-align:baseline;font-size:.9rem}
 a,h1,h2,h3,h4,h5,h6{text-decoration:none}
 a{color:#292929}
 a:hover{text-decoration:none}
@@ -131,5 +131,11 @@ footer span {
 
   main {
     padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  html {
+    font-size: 17px;
   }
 }
