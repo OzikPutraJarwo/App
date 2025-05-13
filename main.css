@@ -24,6 +24,21 @@ ul, ol{margin-left:1.5rem}
 .clear{clear:both}
 .none{display:none}
 
+button {
+  background: #18abea;
+  color: white;
+  padding: 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  transition: .2s;
+  cursor: pointer;
+  box-shadow: var(--box-shadow);
+}
+
+button:hover {
+  background: #1181b1;
+}
+
 body {
   background-color: #f5f7f6;
 }

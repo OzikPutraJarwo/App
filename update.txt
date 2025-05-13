@@ -3,3 +3,6 @@ Next update:
 - Set image width and height
 - CDN resources
 - Analytical traffic
+- OCR
+    - Multiple image support
+    - Multiple language features
