@@ -44,23 +44,6 @@ svg {
   grid-template-columns: 1fr 1fr;
 }
 
-input,
-select {
-  background: #f5f7f6;
-  outline: 0;
-  border: none;
-  padding: .7rem 1rem;
-  border-radius: .7rem;
-  width: 100%;
-}
-
-input[type="color"] {
-  height: 2rem;
-  cursor: pointer;
-  padding: 0;
-  background: 0 0;
-}
-
 .grid-1 {
   display: grid;
   gap: .75rem;
@@ -78,11 +61,6 @@ input[type="color"] {
   display: grid;
   grid-template-columns: 2fr 1.2fr;
   gap: 1rem;
-}
-
-select {
-  cursor: pointer;
-  border-right: 0.4rem solid #f5f7f6;
 }
 
 @media (max-width: 768px) {

@@ -39,6 +39,28 @@ button:hover {
   background: #1181b1;
 }
 
+input,
+select {
+  background: #f5f7f6;
+  outline: 0;
+  border: none;
+  padding: .7rem 1rem;
+  border-radius: .7rem;
+  width: 100%;
+}
+
+input[type="color"] {
+  height: 2rem;
+  cursor: pointer;
+  padding: 0;
+  background: 0 0;
+}
+
+select {
+  cursor: pointer;
+  border-right: 0.4rem solid #f5f7f6;
+}
+
 body {
   background-color: #f5f7f6;
 }
