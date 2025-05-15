@@ -1,25 +1,25 @@
-const pdfInput = document.getElementById('pdc-input-files');
-const pdcfileList = document.getElementById('pdc-file-list');
-const combineBtn = document.getElementById('pdc-combine');
-const outputFileName = document.getElementById('pdc-file-name');
-let pdcfiles = [];
-let pdcthumbnails = [];
+const pdfInput = document.getElementById('input-files');
+const fileList = document.getElementById('file-list');
+const combineBtn = document.getElementById('combine');
+const outputFileName = document.getElementById('file-name');
+let files = [];
+let thumbnails = [];
 pdfInput.addEventListener('change', async (event) => {
-  pdcfileList.innerHTML = "Loading...";
+  fileList.innerHTML = "Loading...";
   const newFiles = Array.from(event.target.files);
   for (const file of newFiles) {
-    pdcfiles.push(file);
+    files.push(file);
     const thumbnailSrc = await createThumbnail(file);
-    pdcthumbnails.push(thumbnailSrc);
+    thumbnails.push(thumbnailSrc);
   }
   displayFiles();
-  combineBtn.disabled = pdcfiles.length === 0;
+  combineBtn.disabled = files.length === 0;
 });
 
 function displayFiles() {
-  pdcfileList.innerHTML = '';
-  for (let i = 0; i < pdcfiles.length; i++) {
-    if (pdcthumbnails[i] === undefined) {
+  fileList.innerHTML = '';
+  for (let i = 0; i < files.length; i++) {
+    if (thumbnails[i] === undefined) {
       continue;
     }
 
@@ -27,15 +27,15 @@ function displayFiles() {
     fileItem.className = 'file-item';
 
     fileItem.innerHTML = `
-            <img src="${pdcthumbnails[i]}" class="thumbnail" alt="Thumbnail">
-            <span>${pdcfiles[i].name}</span>
+            <img src="${thumbnails[i]}" class="thumbnail" alt="Thumbnail">
+            <span>${files[i].name}</span>
             <div>
                 <button onclick="moveFile(${i}, -1)"><svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 13l-6-6-6 6"/> </svg></button>
                 <button onclick="moveFile(${i}, 1)"><svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7l6 6 6-6"/> </svg></button>
                 <button onclick="removeFile(${i})"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M16 8L8 16M8 8L16 16" stroke-width="2" stroke-linecap="round"/></button>
             </div>
         `;
-    pdcfileList.appendChild(fileItem);
+    fileList.appendChild(fileItem);
   }
 }
 
@@ -63,25 +63,25 @@ async function createThumbnail(file) {
 
 function moveFile(index, direction) {
   const newIndex = index + direction;
-  if (newIndex < 0 || newIndex >= pdcfiles.length) return;
+  if (newIndex < 0 || newIndex >= files.length) return;
 
-  [pdcfiles[index], pdcfiles[newIndex]] = [pdcfiles[newIndex], pdcfiles[index]];
-  [pdcthumbnails[index], pdcthumbnails[newIndex]] = [pdcthumbnails[newIndex], pdcthumbnails[index]];
+  [files[index], files[newIndex]] = [files[newIndex], files[index]];
+  [thumbnails[index], thumbnails[newIndex]] = [thumbnails[newIndex], thumbnails[index]];
   displayFiles();
 }
 
 function removeFile(index) {
-  pdcfiles.splice(index, 1);
-  pdcthumbnails.splice(index, 1);
+  files.splice(index, 1);
+  thumbnails.splice(index, 1);
   displayFiles();
-  combineBtn.disabled = pdcfiles.length === 0;
+  combineBtn.disabled = files.length === 0;
 }
 
 combineBtn.addEventListener('click', async () => {
-  pdcfiles = pdcfiles.filter((_, index) => pdcthumbnails[index] !== undefined);
-  pdcthumbnails = pdcthumbnails.filter(thumbnail => thumbnail !== undefined);
+  files = files.filter((_, index) => thumbnails[index] !== undefined);
+  thumbnails = thumbnails.filter(thumbnail => thumbnail !== undefined);
 
-  if (pdcfiles.length === 0) {
+  if (files.length === 0) {
     // showMessage("Upload file first!");
     return;
   }
@@ -90,7 +90,7 @@ combineBtn.addEventListener('click', async () => {
   pdfDoc.setTitle('App by Kode Jarwo');
   pdfDoc.setAuthor('App by Kode Jarwo');
 
-  for (const file of pdcfiles) {
+  for (const file of files) {
     const fileData = await file.arrayBuffer();
     const pdfToMerge = await PDFLib.PDFDocument.load(fileData);
     const copiedPages = await pdfDoc.copyPages(pdfToMerge, pdfToMerge.getPageIndices());
