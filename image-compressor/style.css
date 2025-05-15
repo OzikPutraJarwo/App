@@ -4,7 +4,7 @@ h3 {
 
 .input {
     display: grid;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
 .input-options {
@@ -24,19 +24,19 @@ h3 {
 
 .input-actions {
     display: flex;
-    gap: 2rem;
+    gap: 1.5rem;
     justify-content: space-between;
 }
 
 .wrap {
     display: grid;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
 #Preview {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
 #Preview img {

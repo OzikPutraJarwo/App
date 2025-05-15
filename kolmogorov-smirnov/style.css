@@ -1,7 +1,7 @@
 .wrap {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
 .input-section {
@@ -48,7 +48,7 @@ button:hover {
 
 #resultsSection {
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
 table {

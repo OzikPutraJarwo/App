@@ -1,7 +1,7 @@
 .main.wrap {
 	display: grid;
 	grid-template-columns: 400px 1fr;
-	gap: 2rem;
+	gap: 1.5rem;
 }
 
 h3 {
@@ -11,7 +11,7 @@ h3 {
 .input {
 	display: flex;
 	flex-direction: column;
-	gap: 2rem;
+	gap: 1.5rem;
 }
 
 .input-rules {
@@ -64,7 +64,7 @@ h3 {
 .output {
 	display: flex;
 	flex-direction: column;
-	gap: 2rem;
+	gap: 1.5rem;
 }
 
 .output-rules {

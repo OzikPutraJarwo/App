@@ -6,13 +6,13 @@
 
 .input {
   display: grid;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
 .input-settings {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
 .input-settings select {
@@ -29,7 +29,7 @@
 
 .output {
   display: grid;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
 #main-container {
