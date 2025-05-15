@@ -39,7 +39,7 @@ function bfrInsert() {
 		insertPosition.value = '';
 		bfrUpdateFiles();
 	} else {
-		showMessage('Please fill in the text to insert.');
+		// showMessage('Please fill in the text to insert.');
 	}
     scrollToTopRules();
 }
@@ -54,7 +54,7 @@ function bfrRemove() {
 		removeText.value = '';
 		bfrUpdateFiles();
 	} else {
-		showMessage('Please fill in the text to remove.');
+		// showMessage('Please fill in the text to remove.');
 	}
     scrollToTopRules();
 }
@@ -70,7 +70,7 @@ function bfrReplace() {
 		to.value = '';
 		bfrUpdateFiles();
 	} else {
-		showMessage('Please fill in both fields to add a replace rule.');
+		// showMessage('Please fill in both fields to add a replace rule.');
 	}
     scrollToTopRules();
 }

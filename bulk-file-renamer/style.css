@@ -8,67 +8,6 @@ h3 {
     font-size: 1.4rem !important;
 }
 
-.input-files {
-    border: 0.2rem dashed #18abea;
-	border-radius: 0.5rem;
-	padding: 0.8rem;
-}
-
-.input-files label {
-    box-shadow: var(--box-shadow);
-	text-align: center;
-	padding: 2rem;
-	cursor: pointer;
-	transition: .2s all;
-	display: block;
-	border-radius: 0.5rem;
-	background: #fff;
-	height: 100%;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-}
-
-.input-files label:hover,
-.input-files label.drag-active {
-	background: transparent;
-    box-shadow: none;
-}
-
-.input-files label p {
-	font-weight: bold;
-	font-size: 1.2rem;
-}
-
-.input-files label span {
-	opacity: .8;
-	margin: 0.5rem 0 1rem;
-	display: block;
-}
-
-.input-files label div {
-	width: 3rem;
-	height: 3rem;
-	margin: 0 auto;
-	background: #18abea;
-	border-radius: 100%;
-	padding: 0.3rem;
-	transition: .2s all;
-}
-
-.input-files label svg {
-	fill: #fff;
-	transition: .2s all;
-}
-
-.input-files label:hover div {
-	background: #fff;
-}
-
-.input-files label:hover svg {
-	fill: #18abea;
-}
-
 .input {
 	display: flex;
 	flex-direction: column;

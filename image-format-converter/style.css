@@ -1,0 +1,131 @@
+.main.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem
+}
+
+.input {
+  display: grid;
+  gap: 2rem;
+}
+
+.input-settings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
+.input-settings select {
+  background: #2a2d32;
+  outline: none;
+  border: none;
+  padding: 0.7rem 1rem;
+  border-radius: 0.7rem;
+  color: #d3d3d3;
+  width: 100%;
+  cursor: pointer;
+  border-right: 1rem solid #2a2d32;
+}
+
+.output {
+  display: grid;
+  gap: 2rem;
+}
+
+#main-container {
+  display: grid;
+  gap: 1rem;
+}
+
+.fileContainer {
+  display: grid;
+  grid-template-columns: 130px 120px 1fr 1fr 10px repeat(3, 1fr) 50px;
+  gap: 1rem;
+  background: #fff;
+  padding: 1rem;
+  border-radius: .5rem;
+}
+
+.fileContainer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  max-height: 100px;
+}
+
+.fileContainer>div {
+  display: flex;
+  align-items: center;
+}
+
+.file-title {
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.file-percentage {
+  font-weight: bold;
+}
+
+.red {
+  color: red;
+}
+
+.green {
+  color: limegreen;
+}
+
+.separator {
+  color: #ff5467;
+  font-weight: bold;
+  font-size: 1.3rem;
+}
+
+.file-download {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin: auto;
+  padding: 0;
+  border-radius: .3rem;
+}
+
+.file-download svg {
+  fill: #fff;
+  width: 17px;
+  height: 17px;
+}
+
+.fileContainer :not(.file-title) {
+  text-align: center;
+  justify-content: center;
+}
+
+
+#summary-container {
+  background: #fff;
+  padding: 1rem;
+  border-radius: .5rem;
+}
+
+#summary-container>div {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+}
+
+@media (max-width: 840px) {
+  .file-ext,
+  .file-originsize,
+  .separator,
+  .file-convext,
+  .file-convsize,
+  .file-percentage {
+    display: none !important;
+  }
+
+  .fileContainer {
+    grid-template-columns: 130px 1fr 50px;
+  }
+}
