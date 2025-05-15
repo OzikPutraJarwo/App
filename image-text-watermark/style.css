@@ -1,0 +1,64 @@
+.active,
+.wrap,
+.input,
+.output {
+  display: grid;
+  gap: 2rem;
+}
+
+.input {
+  grid-template-columns: 1fr;
+}
+
+.input-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+}
+
+.input-options>div {
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: .8rem;
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+  position: relative;
+}
+
+input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.output {
+  position: relative;
+  display: none;
+  max-width: calc(100dvw - 5rem);
+  flex-direction: column;
+  gap: 1.5rem
+}
+
+#image {
+  overflow: auto;
+  max-height: 400px;
+}
+
+#download {
+  text-align: center;
+}
+
+#image canvas {
+  cursor: grab;
+}
+
+.c-grabbing #image canvas {
+  cursor: grabbing;
+}
+
+@media (max-width: 840px) {
+  .input-options {
+    grid-template-columns: 1fr 1fr;
+  }
+}
