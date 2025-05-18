@@ -1,14 +1,7 @@
 let values;
 
-document.querySelector('.outer-line').addEventListener('mousemove', function (event) {
-  const svg = event.currentTarget.ownerSVGElement;
-  const mar = svg.querySelector("[name='marker']");
-  const point = svg.createSVGPoint();
-  point.x = event.clientX;
-  point.y = event.clientY;
-
-  const svgPoint = point.matrixTransform(svg.getScreenCTM().inverse());
-  const bbox = this.getBBox();
+function countChart(outer, svgPoint) {
+  const bbox = outer.getBBox();
   const xPercent = ((svgPoint.x - bbox.x) / bbox.width);
   const yPercent = 1 - ((svgPoint.y - bbox.y) / bbox.height);
 
@@ -43,7 +36,7 @@ document.querySelector('.outer-line').addEventListener('mousemove', function (ev
   she = 1.006 + (hrag * 1.86)
   den = (par / (287 * tdbk)) * (1 + hrag) * (1 - (pw / par))
 
-    ;
+  ;
 
   if (rhu > 80) {
     rhu = rhu - 1
@@ -54,8 +47,6 @@ document.querySelector('.outer-line').addEventListener('mousemove', function (ev
   if (rhu < 0) {
     rhu = 0
   }
-
-  const toFixedAll = 2;
 
   values = {
     par,
@@ -77,13 +68,35 @@ document.querySelector('.outer-line').addEventListener('mousemove', function (ev
     const el = document.querySelector(`.${key}`);
     if (el) el.innerHTML = val;
   });
+};
 
+document.querySelector('.outer-line').addEventListener('mousemove', function (event) {
+  const svg = event.currentTarget.ownerSVGElement;
+  const point = svg.createSVGPoint();
+  point.x = event.clientX;
+  point.y = event.clientY;
+  const svgPoint = point.matrixTransform(svg.getScreenCTM().inverse());
+  countChart(this, svgPoint);
   const dot = document.querySelector(".cursor-marker");
   dot.classList.remove('hide');
   dot.setAttribute("cx", svgPoint.x);
   dot.setAttribute("cy", svgPoint.y);
   dot.setAttribute("r", 3);
+});
 
+document.querySelector('.cursor-marker').addEventListener('click', function (event) {
+  const svg = event.currentTarget.ownerSVGElement;
+  const point = svg.createSVGPoint();
+  point.x = event.clientX;
+  point.y = event.clientY;
+  const svgPoint = point.matrixTransform(svg.getScreenCTM().inverse());
+  const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  dot.setAttribute("cx", svgPoint.x);
+  dot.setAttribute("cy", svgPoint.y);
+  dot.setAttribute("r", 3);
+  dot.setAttribute("data-info", JSON.stringify(values));
+  const mar = svg.querySelector("[name='marker']");
+  mar.appendChild(dot);
 });
 
 document.querySelector('.chart svg').addEventListener('mouseenter', function () {
@@ -94,22 +107,6 @@ document.querySelector('.chart svg').addEventListener('mouseenter', function () 
 document.querySelector('.chart svg').addEventListener('mouseleave', function () {
   const dot = document.querySelector(".cursor-marker");
   dot.classList.add('hide');
-});
-
-document.querySelector('.cursor-marker').addEventListener('click', function (event) {
-  const svg = event.currentTarget.ownerSVGElement;
-  const mar = svg.querySelector("[name='marker']");
-  const point = svg.createSVGPoint();
-  point.x = event.clientX;
-  point.y = event.clientY;
-  const svgPoint = point.matrixTransform(svg.getScreenCTM().inverse());
-
-  const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  dot.setAttribute("cx", svgPoint.x);
-  dot.setAttribute("cy", svgPoint.y);
-  dot.setAttribute("r", 3);
-  dot.setAttribute("data-info", JSON.stringify(values));
-  mar.appendChild(dot);
 });
 
 const svgRoot = document.querySelector(".chart svg");

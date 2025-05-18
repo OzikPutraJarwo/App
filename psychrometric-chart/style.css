@@ -8,8 +8,7 @@ svg {
 
 .main.wrap {
   display: grid;
-  grid-template-columns: 4fr 2fr;
-  /* grid-template-columns: 1fr; */
+  grid-template-columns: 1fr 375px;
   gap: 1.5rem;
 }
 
@@ -21,9 +20,12 @@ svg {
 
 .item.chart {
   padding: 0;
-  max-width: 900px;
   width: 100%;
   margin: auto;
+}
+
+.value {
+  font-size: 90%;
 }
 
 .title {
@@ -34,7 +36,7 @@ svg {
 
 .content {
   display: grid;
-  grid-template-columns: 1fr 90px 60px;
+  grid-template-columns: 1fr 65px 55px;
   gap: .5rem
 }
 
@@ -104,4 +106,16 @@ g[name="outerline"] {
 
 .marker-popup .popup-close:hover {
   color: #000;
+}
+
+@media (min-width: 1440px) {
+  html {
+    font-size: 15px !important;
+  }
+}
+
+@media (max-width: 940px) {
+  .main.wrap {
+    grid-template-columns: 1fr;
+  }
 }
