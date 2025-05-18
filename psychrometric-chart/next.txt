@@ -1,8 +1,0 @@
-Next features:
-
-✅ Add X and Y axes
-✅ Download marker data
-⚠️ Single & Multiple marker
-- LocalStorage marker data save
-- Mobile responsiveness
-- Custom marker
