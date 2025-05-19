@@ -48,6 +48,13 @@ function countChart(outer, svgPoint) {
     rhu = 0
   }
 
+  if (tdb > 50 || tdb < -10 || hra > 30 || hra < 0 || rhu > 100) {
+    document.querySelector('.cursor-marker').classList.add('hidemore');
+    return
+  } else {
+    document.querySelector('.cursor-marker').classList.remove('hidemore');
+  }
+
   values = {
     par: {v1: par, v2: "Pa"},
     tdb: {v1: tdb.toFixed(2), v2: "°C"},
@@ -55,7 +62,7 @@ function countChart(outer, svgPoint) {
     rhu: {v1: rhu.toFixed(0), v2: "%"},
     twb: {v1: twb.toFixed(2), v2: "°C"},
     tde: {v1: tde.toFixed(2), v2: "°C"},
-    tsa: {v1: tsa.toFixed(2), v2: "°C"},
+    // tsa: {v1: tsa.toFixed(2), v2: "°C"},
     ent: {v1: ent.toFixed(2), v2: "kJ/kg"},
     pva: {v1: pva.toFixed(2), v2: "Pa"},
     psv: {v1: psv.toFixed(2), v2: "Pa"},
