@@ -1,14 +1,14 @@
 let values;
 
-function countChart(outer, svgPoint) {
+function countChart(outer, svgPoint, c_tdb = null, c_hra = null) {
   const bbox = outer.getBBox();
-  const xPercent = ((svgPoint.x - bbox.x) / bbox.width);
-  const yPercent = 1 - ((svgPoint.y - bbox.y) / bbox.height);
+  let xPercent = ((svgPoint.x - bbox.x) / bbox.width);
+  let yPercent = 1 - ((svgPoint.y - bbox.y) / bbox.height);
 
   let
 
-  tdb = 60 * xPercent - 10
-  hra = 30 * yPercent
+  tdb = c_tdb !== null ? c_tdb : 60 * xPercent - 10;
+  hra = c_hra !== null ? c_hra : 30 * yPercent
 
   tdbk = (tdb + 273.15)
   hrag = (hra * 0.001)
@@ -199,3 +199,105 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
     link.click();
   });
 });
+
+const options = {
+  tdb: ["hra"],
+  // tdb: ["hra", "ent", "rhu", "tde"],
+  // hra: ["tdb"],
+  // ent: ["tdb", "rhu"],
+  // rhu: ["tdb", "ent", "tde"],
+  // tde: ["tdb", "rhu"]
+};
+
+const customLabels = {
+  tdb: "Temperature Dry Bulb",
+  hra: "Absolute Humidity",
+  ent: "Enthalpy",
+  rhu: "Relative Humidity",
+  tde: "Temperature Dew"
+};
+
+function updateOptions() {
+  const select1 = document.getElementById("select-first-param");
+  const select1Input = select1.nextElementSibling?.lastElementChild;
+  const select2 = document.getElementById("select-second-param");
+  const selectedValue = select1.value;
+
+  select2.innerHTML = '';
+
+  if (selectedValue) {
+    const availableOptions = options[selectedValue];
+    availableOptions.forEach(option => {
+      const newOption = document.createElement("option");
+      newOption.value = option;
+      newOption.textContent = customLabels[option];
+      select2.appendChild(newOption);
+    });
+  } else {
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = "Silahkan pilih opsi 1 terlebih dahulu";
+    select2.appendChild(defaultOption);
+  }
+
+  if (selectedValue == "tdb") {
+    select1Input.value = "°C";
+  } else if (selectedValue == "hra") {
+    select1Input.value = "g/kg"
+  } 
+  // else if (selectedValue == "ent") {
+  //   select1Input.value = "kJ/kg"
+  // } else if (selectedValue == "rhu") {
+  //   select1Input.value = "%"
+  // } else if (selectedValue == "tde") {
+  //   select1Input.value = "°C";
+  // }
+
+};
+
+function updateSecondUnit() {
+  const select2 = document.getElementById("select-second-param");
+  const select2Input = document.getElementById("select-second-unit");
+  const selectedValue2 = select2.value;
+  if (selectedValue2 == "tdb") {
+    select2Input.value = "°C";
+  } else if (selectedValue2 == "hra") {
+    select2Input.value = "g/kg"
+  } else if (selectedValue2 == "ent") {
+    select2Input.value = "kJ/kg"
+  } else if (selectedValue2 == "rhu") {
+    select2Input.value = "%"
+  } else if (selectedValue2 == "tde") {
+    select2Input.value = "°C";
+  }
+}
+
+function submitCustom() {
+  const select1 = document.getElementById("select-first-param");
+  const select1Input = document.getElementById("first-param");
+  const select2 = document.getElementById("select-second-param");
+  const select2Input = document.getElementById("second-param");
+  const selectedValue1 = select1.value;
+  const selectedValue2 = select2.value;
+
+  let v_tdb, v_hra;
+
+  if (selectedValue1 == "tdb" || selectedValue2 == "hra") {
+    v_tdb = Number(select1Input.value);
+    v_hra = Number(select2Input.value);
+  }
+
+  console.log(v_tdb, 15)
+
+  const outerLine = document.querySelector('.outer-line');
+  countChart(outerLine, svgPoint = 0, c_tdb = v_tdb, c_hra = v_hra);
+
+  const svg = document.querySelector('.chart svg');
+  const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  dot.setAttribute("cx", (12.71 * v_tdb + 194.2));
+  dot.setAttribute("cy", (-17.933 * v_hra + 589));
+  dot.setAttribute("r", 3);
+  dot.setAttribute("data-info", JSON.stringify(values));
+  const mar = svg.querySelector("[name='marker']");
+  mar.appendChild(dot);
+}

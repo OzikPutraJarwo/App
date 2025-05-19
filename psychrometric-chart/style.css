@@ -21,10 +21,14 @@ svg {
   gap: 1.5rem
 }
 
-.item.chart {
-  padding: 0;
-  width: 100%;
-  margin: auto;
+.chart-container {
+  display: grid;
+  padding: 0 !important;
+}
+
+.chart {
+  margin: auto 0;
+  background-color: #fff;
 }
 
 .value {
@@ -115,6 +119,32 @@ g[name="outerline"] {
 
 .marker-popup .popup-close:hover {
   color: #000;
+}
+
+.custom hr {
+  margin: 1rem 0;
+}
+
+.custom .param-input {
+  margin-top: 1rem;
+  display: flex;
+}
+
+.custom .param-input input:first-child {
+  flex-grow: 1;
+}
+
+.custom .param-input input:last-child {
+  width: 40px;
+  font-size: 90%;
+  background: white;
+  padding: 0;
+  text-align: right;
+}
+
+.custom #custom-submit {
+  width: 100%;
+  margin-top: 1.5rem
 }
 
 @media (min-width: 1900px) {
