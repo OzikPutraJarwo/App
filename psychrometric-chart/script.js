@@ -49,25 +49,26 @@ function countChart(outer, svgPoint) {
   }
 
   values = {
-    par,
-    tdb: tdb.toFixed(2),
-    hra: hra.toFixed(2),
-    rhu: rhu.toFixed(0),
-    twb: twb.toFixed(2),
-    tde: tde.toFixed(2),
-    tsa: tsa.toFixed(2),
-    ent: ent.toFixed(2),
-    pva: pva.toFixed(2),
-    psv: psv.toFixed(2),
-    she: she.toFixed(2),
-    svo: svo.toFixed(2),
-    den: den.toFixed(2),
+    par: {v1: par, v2: "Pa"},
+    tdb: {v1: tdb.toFixed(2), v2: "°C"},
+    hra: {v1: hra.toFixed(2), v2: "g/kg"},
+    rhu: {v1: rhu.toFixed(0), v2: "%"},
+    twb: {v1: twb.toFixed(2), v2: "°C"},
+    tde: {v1: tde.toFixed(2), v2: "°C"},
+    tsa: {v1: tsa.toFixed(2), v2: "°C"},
+    ent: {v1: ent.toFixed(2), v2: "kJ/kg"},
+    pva: {v1: pva.toFixed(2), v2: "Pa"},
+    psv: {v1: psv.toFixed(2), v2: "Pa"},
+    she: {v1: she.toFixed(2), v2: "kJ/(kg.K)"},
+    svo: {v1: svo.toFixed(2), v2: "m³/kg"},
+    den: {v1: den.toFixed(2), v2: "kg/m³"}
   };
 
-  Object.entries(values).forEach(([key, val]) => {
-    const el = document.querySelector(`.${key}`);
-    if (el) el.innerHTML = val;
-  });
+    Object.entries(values).forEach(([key, val]) => {
+      const el = document.querySelector(`.${key}`);
+      if (el) el.innerHTML = val.v1;
+      if (el) el.nextElementSibling.innerHTML = val.v2;
+    });
 };
 
 document.querySelector('.chart svg').addEventListener('mousemove', function (event) {
@@ -135,7 +136,7 @@ svgRoot.addEventListener("click", (e) => {
     <button class="popup-close" style="border:none; background:none; font-size:16px; cursor:pointer;">&times;</button>
   </div>
   ${Object.entries(data)
-      .map(([k, v]) => `<div><strong>${k.toUpperCase()}</strong>: ${v}</div>`)
+      .map(([k, v]) => `<div><b>${k.toUpperCase()}</b><span>:</span> <span>${v.v1}</span> <span>${v.v2}</span></div>`)
       .join("")}
 `;
 

@@ -94,6 +94,12 @@ g[name="outerline"] {
   border-bottom-color:#ccc;
 }
 
+.marker-popup div {
+  display: grid
+;
+  grid-template-columns: 35px 10px 55px 50px;
+}
+
 .marker-popup .popup-close {
   position: absolute;
   top: 5px;
@@ -111,9 +117,21 @@ g[name="outerline"] {
   color: #000;
 }
 
+@media (min-width: 1900px) {
+  .marker-popup {
+    transform: translateX(0);
+  }
+}
+
 @media (min-width: 1440px) {
   html {
     font-size: 15px !important;
+  }
+}
+
+@media (min-width: 1283px) {
+  .marker-popup {
+    transform: translateX(7px);
   }
 }
 
