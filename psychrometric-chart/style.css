@@ -1,6 +1,13 @@
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .hide {
   display: none !important;
 }
+
 .hidemore {
   display: none !important;
 }
@@ -99,9 +106,8 @@ g[name="outerline"] {
 }
 
 .marker-popup div {
-  display: grid
-;
-  grid-template-columns: 35px 10px 55px 50px;
+  display: grid;
+  grid-template-columns: 35px 10px 65px 50px;
 }
 
 .marker-popup .popup-close {
@@ -159,7 +165,7 @@ g[name="outerline"] {
   }
 }
 
-@media (min-width: 1283px) {
+@media (min-width: 1440px) {
   .marker-popup {
     transform: translateX(7px);
   }

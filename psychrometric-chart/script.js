@@ -15,7 +15,7 @@ function countChart(outer, svgPoint, c_tdb = null, c_hra = null) {
 
   patm = 101.325
   par = patm * 1000
-  ent = 1.006 * tdb + hrag * (2501 + 1.86 * tdb)
+  ent = 1.006 * tdb + (hra * 0.001) * (2501 + 1.86 * tdb)
 
   pw = (hra * patm) / (0.622 + hrag)
   pws = 0.61078 * Math.exp((17.27 * tdb) / (tdb + 237.3))
@@ -202,11 +202,11 @@ document.getElementById("downloadBtn").addEventListener("click", () => {
 
 const options = {
   tdb: ["hra"],
-  // tdb: ["hra", "ent", "rhu", "tde"],
-  // hra: ["tdb"],
-  // ent: ["tdb", "rhu"],
-  // rhu: ["tdb", "ent", "tde"],
-  // tde: ["tdb", "rhu"]
+  tdb: ["hra", "ent", "rhu", "tde"],
+  hra: ["tdb"],
+  ent: ["tdb", "rhu"],
+  rhu: ["tdb", "ent", "tde"],
+  tde: ["tdb", "rhu"]
 };
 
 const customLabels = {
@@ -244,14 +244,13 @@ function updateOptions() {
     select1Input.value = "°C";
   } else if (selectedValue == "hra") {
     select1Input.value = "g/kg"
-  } 
-  // else if (selectedValue == "ent") {
-  //   select1Input.value = "kJ/kg"
-  // } else if (selectedValue == "rhu") {
-  //   select1Input.value = "%"
-  // } else if (selectedValue == "tde") {
-  //   select1Input.value = "°C";
-  // }
+  } else if (selectedValue == "ent") {
+    select1Input.value = "kJ/kg"
+  } else if (selectedValue == "rhu") {
+    select1Input.value = "%"
+  } else if (selectedValue == "tde") {
+    select1Input.value = "°C";
+  }
 
 };
 
@@ -280,24 +279,260 @@ function submitCustom() {
   const selectedValue1 = select1.value;
   const selectedValue2 = select2.value;
 
+  let select1Number = Number(select1Input.value);
+  let select2Number = Number(select2Input.value);
+
   let v_tdb, v_hra;
 
-  if (selectedValue1 == "tdb" || selectedValue2 == "hra") {
+  if (selectedValue1 == "tdb" && selectedValue2 == "hra") {
     v_tdb = Number(select1Input.value);
     v_hra = Number(select2Input.value);
+  } else if (selectedValue1 == "tdb" && selectedValue2 == "ent") {
+    function calculateHRA(tdb, ent) {
+      const numerator = ent - (1.006 * tdb);
+      const denominator = 2501 + (1.86 * tdb);
+      const hra = (numerator / denominator) * 1000;
+      return hra
+    }
+    const tdb = select1Number;
+    const ent = select2Number;
+    v_tdb = Number(select1Input.value);
+    v_hra = Number(calculateHRA(tdb, ent));
+  } else if (selectedValue1 == "tdb" && selectedValue2 == "rhu") {
+    v_tdb = Number(select1Input.value);
+    v_hra = (select2Number * 0.61078 * Math.exp((17.27 * select1Number) / (select1Number + 237.3)) * 0.622) / (0.096 * 101.325 - select2Number * 0.61078 * Math.exp((17.27 * select1Number) / (select1Number + 237.3)) * 0.001);
+  } else if (selectedValue1 == "tdb" && selectedValue2 == "tde") {
+    v_tdb = Number(select1Input.value);
+    function findHRA(targetTDE) {
+      const patm = 101.325;
+      const a = 611.2;
+      const b = 17.67;
+      const c = 243.5;
+      let hra = 0;
+      let step = 0.01;
+      let maxIter = 10000;
+      let tolerance = 0.0001;
+      let iter = 0;
+      while (iter < maxIter) {
+        const hrag = hra * 0.001;
+        const pw = (hra * patm) / (0.622 + hrag);
+        const logRatio = Math.log(pw / a);
+        const tde = (c * logRatio) / (b - logRatio);
+        if (Math.abs(tde - targetTDE) < tolerance) {
+          return hra;
+        }
+        hra += step;
+        iter++;
+      }
+      throw new Error("HRA not found within iteration limit.");
+    }
+    v_hra = findHRA(select2Number);
+    console.log(v_hra)
   }
 
-  console.log(v_tdb, 15)
+  if (selectedValue1 == "hra" && selectedValue2 == "tdb") {
+    v_hra = Number(select1Input.value);
+    v_tdb = Number(select2Input.value);
+  }
+
+  if (selectedValue1 == "ent" && selectedValue2 == "tdb") {
+    function calculateHRA(tdb, ent) {
+      const numerator = ent - (1.006 * tdb);
+      const denominator = 2501 + (1.86 * tdb);
+      const hra = (numerator / denominator) * 1000;
+      return hra
+    }
+    const tdb = select2Number;
+    const ent = select1Number;
+    v_tdb = Number(select2Input.value);
+    v_hra = Number(calculateHRA(tdb, ent));
+  } else if (selectedValue1 == "ent" && selectedValue2 == "rhu") {
+    function findTdbAndHra(targetEnt, targetRhu) {
+      const patm = 101.325;
+      let bestError = Infinity;
+      let bestTdb = null;
+      let bestHra = null;
+      for (let tdb = 0; tdb <= 50; tdb += 0.1) {
+        for (let hra = 0; hra <= 30; hra += 0.1) {
+          const hrag = hra * 0.001;
+          const pw = (hra * patm) / (0.622 + hrag);
+          const pws = 0.61078 * Math.exp((17.27 * tdb) / (tdb + 237.3));
+          const rhu = (pw / pws) * 0.096;
+          const ent = 1.006 * tdb + hrag * (2501 + 1.86 * tdb);
+          const errEnt = Math.abs(ent - targetEnt);
+          const errRhu = Math.abs(rhu - targetRhu);
+          const totalError = errEnt + errRhu;
+          if (totalError < bestError) {
+            bestError = totalError;
+            bestTdb = tdb;
+            bestHra = hra;
+          }
+        }
+      }
+      return {
+        tdb: bestTdb.toFixed(4),
+        hra: bestHra.toFixed(4),
+        error: bestError.toFixed(6)
+      };
+    }
+    const result = findTdbAndHra(Number(select1Input.value), Number(select2Input.value));
+    v_tdb = Number(result.tdb);
+    v_hra = Number(result.hra);
+  }
+
+  if (selectedValue1 == "rhu" && selectedValue2 == "tdb") {
+    v_tdb = Number(select2Input.value);
+    v_hra = (select1Number * 0.61078 * Math.exp((17.27 * select2Number) / (select2Number + 237.3)) * 0.622) / (0.096 * 101.325 - select1Number * 0.61078 * Math.exp((17.27 * select2Number) / (select2Number + 237.3)) * 0.001);
+  } else if (selectedValue1 == "rhu" && selectedValue2 == "ent") {
+    [select1Number, select2Number] = [select2Number, select1Number];
+    function findTdbAndHra(targetEnt, targetRhu) {
+      const patm = 101.325;
+      let bestError = Infinity;
+      let bestTdb = null;
+      let bestHra = null;
+      for (let tdb = 0; tdb <= 50; tdb += 0.1) {
+        for (let hra = 0; hra <= 30; hra += 0.1) {
+          const hrag = hra * 0.001;
+          const pw = (hra * patm) / (0.622 + hrag);
+          const pws = 0.61078 * Math.exp((17.27 * tdb) / (tdb + 237.3));
+          const rhu = (pw / pws) * 0.096;
+          const ent = 1.006 * tdb + hrag * (2501 + 1.86 * tdb);
+          const errEnt = Math.abs(ent - targetEnt);
+          const errRhu = Math.abs(rhu - targetRhu);
+          const totalError = errEnt + errRhu;
+          if (totalError < bestError) {
+            bestError = totalError;
+            bestTdb = tdb;
+            bestHra = hra;
+          }
+        }
+      }
+      return {
+        tdb: bestTdb.toFixed(4),
+        hra: bestHra.toFixed(4),
+        error: bestError.toFixed(6)
+      };
+    }
+    const result = findTdbAndHra(select1Number, select2Number);
+    v_tdb = Number(result.tdb);
+    v_hra = Number(result.hra);
+  } else if (selectedValue1 == "rhu" && selectedValue2 == "tde") {
+    function findTdbAndHraFromRhuTde(targetRhu, targetTde) {
+      const patm = 101.325;
+      const a = 611.2;
+      const b = 17.67;
+      const c = 243.5;
+      let bestError = Infinity;
+      let bestTdb = null;
+      let bestHra = null;
+      for (let tdb = 0; tdb <= 50; tdb += 0.1) {
+        for (let hra = 0.1; hra <= 30; hra += 0.1) {
+          const hrag = hra * 0.001;
+          const pw = (hra * patm) / (0.622 + hrag);
+          const logPwOverA = Math.log(pw / a);
+          const tde = (c * logPwOverA) / (b - logPwOverA);
+          const pws = 0.61078 * Math.exp((17.27 * tdb) / (tdb + 237.3));
+          const rhu = (pw / pws) * 0.096;
+          const errTde = Math.abs(tde - targetTde);
+          const errRhu = Math.abs(rhu - targetRhu);
+          const totalError = errTde + errRhu;
+          if (totalError < bestError) {
+            bestError = totalError;
+            bestTdb = tdb;
+            bestHra = hra;
+          }
+        }
+      }
+      return {
+        tdb: bestTdb.toFixed(4),
+        hra: bestHra.toFixed(4),
+        error: bestError.toFixed(6)
+      };
+    }
+    const rhu = select1Number;
+    const tde = select2Number;
+    const result = findTdbAndHraFromRhuTde(rhu, tde);
+    v_tdb = Number(result.tdb);
+    v_hra = Number(result.hra);
+  }
+
+  if (selectedValue1 == "tde" && selectedValue2 == "tdb") {
+    v_tdb = select2Number;
+    function findHRA(targetTDE) {
+      const patm = 101.325;
+      const a = 611.2;
+      const b = 17.67;
+      const c = 243.5;
+      let hra = 0;
+      let step = 0.01;
+      let maxIter = 10000;
+      let tolerance = 0.0001;
+      let iter = 0;
+      while (iter < maxIter) {
+        const hrag = hra * 0.001;
+        const pw = (hra * patm) / (0.622 + hrag);
+        const logRatio = Math.log(pw / a);
+        const tde = (c * logRatio) / (b - logRatio);
+        if (Math.abs(tde - targetTDE) < tolerance) {
+          return hra;
+        }
+        hra += step;
+        iter++;
+      }
+      throw new Error("HRA not found within iteration limit.");
+    }
+    v_hra = findHRA(select1Number);
+  } else if (selectedValue1 == "tde" && selectedValue2 == "rhu") {
+    function findTdbAndHraFromRhuTde(targetRhu, targetTde) {
+      const patm = 101.325;
+      const a = 611.2;
+      const b = 17.67;
+      const c = 243.5;
+      let bestError = Infinity;
+      let bestTdb = null;
+      let bestHra = null;
+      for (let tdb = 0; tdb <= 50; tdb += 0.1) {
+        for (let hra = 0.1; hra <= 30; hra += 0.1) {
+          const hrag = hra * 0.001;
+          const pw = (hra * patm) / (0.622 + hrag);
+          const logPwOverA = Math.log(pw / a);
+          const tde = (c * logPwOverA) / (b - logPwOverA);
+          const pws = 0.61078 * Math.exp((17.27 * tdb) / (tdb + 237.3));
+          const rhu = (pw / pws) * 0.096;
+          const errTde = Math.abs(tde - targetTde);
+          const errRhu = Math.abs(rhu - targetRhu);
+          const totalError = errTde + errRhu;
+          if (totalError < bestError) {
+            bestError = totalError;
+            bestTdb = tdb;
+            bestHra = hra;
+          }
+        }
+      }
+      return {
+        tdb: bestTdb.toFixed(4),
+        hra: bestHra.toFixed(4),
+        error: bestError.toFixed(6)
+      };
+    }
+    const rhu = select2Number;
+    const tde = select1Number;
+    const result = findTdbAndHraFromRhuTde(rhu, tde);
+    v_tdb = Number(result.tdb);
+    v_hra = Number(result.hra);
+  }
 
   const outerLine = document.querySelector('.outer-line');
   countChart(outerLine, svgPoint = 0, c_tdb = v_tdb, c_hra = v_hra);
 
   const svg = document.querySelector('.chart svg');
   const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  dot.setAttribute("cx", (12.71 * v_tdb + 194.2));
-  dot.setAttribute("cy", (-17.933 * v_hra + 589));
+  dot.setAttribute("cx", (12.710000000000002 * v_tdb + 194.20000000000002));
+  dot.setAttribute("cy", (-17.933000000000003 * v_hra + 589));
   dot.setAttribute("r", 3);
   dot.setAttribute("data-info", JSON.stringify(values));
   const mar = svg.querySelector("[name='marker']");
   mar.appendChild(dot);
 }
+
+// Created with love by Ozik Jarwo, 2025. Full of battle, mixed with reversed engineering.
