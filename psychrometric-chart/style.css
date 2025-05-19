@@ -1,6 +1,9 @@
 .hide {
   display: none !important;
 }
+.hidemore {
+  display: none !important;
+}
   
 svg {
   font-size: 80%;

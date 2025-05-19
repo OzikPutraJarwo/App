@@ -70,18 +70,31 @@ function countChart(outer, svgPoint) {
   });
 };
 
-document.querySelector('.outer-line').addEventListener('mousemove', function (event) {
-  const svg = event.currentTarget.ownerSVGElement;
-  const point = svg.createSVGPoint();
-  point.x = event.clientX;
-  point.y = event.clientY;
-  const svgPoint = point.matrixTransform(svg.getScreenCTM().inverse());
-  countChart(this, svgPoint);
+document.querySelector('.chart svg').addEventListener('mousemove', function (event) {
+  const outerLine = document.querySelector('.outer-line');
+  const boundingRect = this.getBoundingClientRect();
+
+  const scaleX = this.viewBox.baseVal.width / boundingRect.width;
+  const scaleY = this.viewBox.baseVal.height / boundingRect.height;
+
+  const x = (event.clientX - boundingRect.left) * scaleX;
+  const y = (event.clientY - boundingRect.top) * scaleY;
+
+  countChart(outerLine, { x, y });
+  const dot = document.querySelector(".cursor-marker");
+  dot.setAttribute("cx", x);
+  dot.setAttribute("cy", y);
+  dot.setAttribute("r", 3);
+});
+
+document.querySelector('.chart svg').addEventListener('mouseenter', function () {
   const dot = document.querySelector(".cursor-marker");
   dot.classList.remove('hide');
-  dot.setAttribute("cx", svgPoint.x);
-  dot.setAttribute("cy", svgPoint.y);
-  dot.setAttribute("r", 3);
+});
+
+document.querySelector('.chart svg').addEventListener('mouseleave', function () {
+  const dot = document.querySelector(".cursor-marker");
+  dot.classList.add('hide');
 });
 
 document.querySelector('.cursor-marker').addEventListener('click', function (event) {
@@ -97,16 +110,6 @@ document.querySelector('.cursor-marker').addEventListener('click', function (eve
   dot.setAttribute("data-info", JSON.stringify(values));
   const mar = svg.querySelector("[name='marker']");
   mar.appendChild(dot);
-});
-
-document.querySelector('.chart svg').addEventListener('mouseenter', function () {
-  const dot = document.querySelector(".cursor-marker");
-  dot.classList.remove('hide');
-});
-
-document.querySelector('.chart svg').addEventListener('mouseleave', function () {
-  const dot = document.querySelector(".cursor-marker");
-  dot.classList.add('hide');
 });
 
 const svgRoot = document.querySelector(".chart svg");
