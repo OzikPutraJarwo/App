@@ -535,4 +535,24 @@ function submitCustom() {
   mar.appendChild(dot);
 }
 
+const btnInfo = document.querySelector('#infoBtn');
+const contentInfo = document.querySelector('.help');
+btnInfo.addEventListener('click', () => {
+  if (contentInfo.style.display === "block") {
+    contentInfo.style.height = contentInfo.scrollHeight + 'px';
+    setTimeout(() => {
+      contentInfo.style.height = '0';
+    }, 10);
+    setTimeout(() => {
+      contentInfo.style.display = 'none';
+    }, 150);
+  } else {
+    contentInfo.style.display = 'block';
+    contentInfo.style.height = '0';
+    setTimeout(() => {
+      contentInfo.style.height = contentInfo.scrollHeight + 'px';
+    }, 10);
+  }
+});
+
 // Created with love by Ozik Jarwo, 2025. Full of battle, mixed with reversed engineering.

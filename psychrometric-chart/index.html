@@ -410,9 +410,31 @@
 
       <div class="info">
 
-        <button id="downloadBtn">Download Chart (PNG)</button>
+        <div class="button-action">
+          <button id="infoBtn">?</button>
+          <button id="downloadBtn">Download Chart (PNG)</button>
+        </div>
 
-        <div class="item value">
+        <div class="item help">
+          <div class="title">Help</div>
+          <div class="content">
+            <ul>
+              <li>Hover the cursor over the chart and the value will appear in "Cursor Info".</li>
+              <li>Click on the chart to place a marker.</li>
+              <li>Click on marker to see its chart value.</li>
+              <li>For custom value:</li>
+              <ul>
+                <li>Select First Parameter</li>
+                <li>Select Second Parameter</li>
+                <li>Fill in the input value</li>
+                <li>Click Apply</li>
+              </ul>
+              <li>To download a chart with marker values, click on one of the markers until the chart value appears, then "Download Chart".</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="item cursor">
           <div class="title">Cursor Info</div>
           <div class="content">
   
@@ -473,26 +495,30 @@
 
         <div class="item custom">
           <div class="title">Custom Value</div>
-          <select id="select-first-param" onchange="updateOptions();updateSecondUnit()">
-              <option value disabled selected>First Parameter</option>
-              <option value="tdb">Temperature Dry Bulb</option>
-              <option value="hra">Absolute Humidity</option>
-              <option value="ent">Enthalpy</option>
-              <option value="rhu">Relative Humidity</option>
-              <option value="tde">Temperature Dew</option>
-          </select>
-          <div class="param-input first-param">
-            <input type="number" id="first-param" placeholder="Input value here">
-            <input type="text" id="select-first-unit" value="" readonly>
+          <div class="custom-param">
+            <select id="select-first-param" onchange="updateOptions();updateSecondUnit()">
+                <option value disabled selected>First Parameter</option>
+                <option value="tdb">Temperature Dry Bulb</option>
+                <option value="hra">Absolute Humidity</option>
+                <option value="ent">Enthalpy</option>
+                <option value="rhu">Relative Humidity</option>
+                <option value="tde">Temperature Dew</option>
+            </select>
+            <div class="param-input first-param">
+              <input type="number" id="first-param" placeholder="Input value here">
+              <input type="text" id="select-first-unit" value="-" readonly>
+            </div>
           </div>
           <hr>
-          <select id="select-second-param" onchange="updateSecondUnit()">
-            <option value selected disabled>Second Parameter</option>
-            <option value disabled>Choose 'First Parameter' first</option>
-          </select>
-          <div class="param-input second-param">
-            <input type="number" id="second-param" placeholder="Input value here">
-            <input type="text" id="select-second-unit" value="" readonly>
+          <div class="custom-param">
+            <select id="select-second-param" onchange="updateSecondUnit()">
+              <option value selected disabled>Second Parameter</option>
+              <option value disabled>Choose 'First Parameter' first</option>
+            </select>
+            <div class="param-input second-param">
+              <input type="number" id="second-param" placeholder="Input value here">
+              <input type="text" id="select-second-unit" value="-" readonly>
+            </div>
           </div>
           <button id="custom-submit" onclick="submitCustom()">Apply</button>
         </div>

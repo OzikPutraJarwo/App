@@ -4,6 +4,14 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
+input, select {
+  padding: .7rem !important
+}
+
+button {
+  user-select: none;
+}
+
 .hide {
   display: none !important;
 }
@@ -31,6 +39,7 @@ svg {
 .chart-container {
   display: grid;
   padding: 0 !important;
+  overflow: hidden;
 }
 
 .chart {
@@ -38,7 +47,20 @@ svg {
   background-color: #fff;
 }
 
-.value {
+.button-action {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 50px 1fr;
+}
+
+.help {
+  overflow: hidden;
+  height: 0;
+  display: none;
+  transition: height 0.5s;
+}
+
+.cursor {
   font-size: 90%;
 }
 
@@ -48,7 +70,7 @@ svg {
   font-weight: bold;
 }
 
-.content {
+.cursor .content {
   display: grid;
   grid-template-columns: 1fr 65px 55px;
   gap: .5rem
@@ -127,13 +149,22 @@ g[name="outerline"] {
   color: #000;
 }
 
+.custom .custom-param {
+  display: grid;
+  grid-template-columns: 1fr 130px;
+  gap: 1rem
+}
+
 .custom hr {
   margin: 1rem 0;
 }
 
 .custom .param-input {
-  margin-top: 1rem;
   display: flex;
+}
+
+.custom .param-input input {
+  text-align: center;
 }
 
 .custom .param-input input:first-child {
@@ -144,7 +175,7 @@ g[name="outerline"] {
   width: 40px;
   font-size: 90%;
   background: white;
-  padding: 0;
+  padding: 0 !important;
   text-align: right;
 }
 
@@ -165,7 +196,7 @@ g[name="outerline"] {
   }
 }
 
-@media (min-width: 1440px) {
+@media (min-width: 1900px) {
   .marker-popup {
     transform: translateX(7px);
   }
