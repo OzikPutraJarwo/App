@@ -222,9 +222,7 @@ function updateOptions() {
   const select1Input = select1.nextElementSibling?.lastElementChild;
   const select2 = document.getElementById("select-second-param");
   const selectedValue = select1.value;
-
   select2.innerHTML = '';
-
   if (selectedValue) {
     const availableOptions = options[selectedValue];
     availableOptions.forEach(option => {
@@ -234,40 +232,34 @@ function updateOptions() {
       select2.appendChild(newOption);
     });
   } else {
-    const defaultOption = document.createElement("option");
-    defaultOption.value = "";
-    defaultOption.textContent = "Silahkan pilih opsi 1 terlebih dahulu";
+    const defaultOption = new Option("Silahkan pilih opsi 1 terlebih dahulu", "");
     select2.appendChild(defaultOption);
   }
-
-  if (selectedValue == "tdb") {
-    select1Input.value = "°C";
-  } else if (selectedValue == "hra") {
-    select1Input.value = "g/kg"
-  } else if (selectedValue == "ent") {
-    select1Input.value = "kJ/kg"
-  } else if (selectedValue == "rhu") {
-    select1Input.value = "%"
-  } else if (selectedValue == "tde") {
-    select1Input.value = "°C";
+  const unitMap = {
+    tdb: "°C",
+    hra: "g/kg",
+    ent: "kJ/kg",
+    rhu: "%",
+    tde: "°C"
+  };
+  if (unitMap[selectedValue]) {
+    select1Input.value = unitMap[selectedValue];
   }
-
-};
+}
 
 function updateSecondUnit() {
   const select2 = document.getElementById("select-second-param");
   const select2Input = document.getElementById("select-second-unit");
+  const unitMap = {
+    tdb: "°C",
+    hra: "g/kg",
+    ent: "kJ/kg",
+    rhu: "%",
+    tde: "°C"
+  };
   const selectedValue2 = select2.value;
-  if (selectedValue2 == "tdb") {
-    select2Input.value = "°C";
-  } else if (selectedValue2 == "hra") {
-    select2Input.value = "g/kg"
-  } else if (selectedValue2 == "ent") {
-    select2Input.value = "kJ/kg"
-  } else if (selectedValue2 == "rhu") {
-    select2Input.value = "%"
-  } else if (selectedValue2 == "tde") {
-    select2Input.value = "°C";
+  if (unitMap[selectedValue2]) {
+    select2Input.value = unitMap[selectedValue2];
   }
 }
 
@@ -279,248 +271,129 @@ function submitCustom() {
   const selectedValue1 = select1.value;
   const selectedValue2 = select2.value;
 
-  let select1Number = Number(select1Input.value);
-  let select2Number = Number(select2Input.value);
-
+  const select1Number = Number(select1Input.value);
+  const select2Number = Number(select2Input.value);
+  
   let v_tdb, v_hra;
-
-  if (selectedValue1 == "tdb" && selectedValue2 == "hra") {
-    v_tdb = Number(select1Input.value);
-    v_hra = Number(select2Input.value);
-  } else if (selectedValue1 == "tdb" && selectedValue2 == "ent") {
-    function calculateHRA(tdb, ent) {
-      const numerator = ent - (1.006 * tdb);
-      const denominator = 2501 + (1.86 * tdb);
-      const hra = (numerator / denominator) * 1000;
-      return hra
+  
+  const pair = `${selectedValue1}-${selectedValue2}`;
+  
+  const patm = 101.325;
+  
+  function calculateHRA(tdb, ent) {
+    return ((ent - 1.006 * tdb) / (2501 + 1.86 * tdb)) * 1000;
+  }
+  
+  function findHRAFromTDE(targetTDE) {
+    const a = 611.2, b = 17.67, c = 243.5;
+    let hra = 0, step = 0.01, maxIter = 10000, tolerance = 0.0001;
+    for (let i = 0; i < maxIter; i++) {
+      const hrag = hra * 0.001;
+      const pw = (hra * patm) / (0.622 + hrag);
+      const logRatio = Math.log(pw / a);
+      const tde = (c * logRatio) / (b - logRatio);
+      if (Math.abs(tde - targetTDE) < tolerance) return hra;
+      hra += step;
     }
-    const tdb = select1Number;
-    const ent = select2Number;
-    v_tdb = Number(select1Input.value);
-    v_hra = Number(calculateHRA(tdb, ent));
-  } else if (selectedValue1 == "tdb" && selectedValue2 == "rhu") {
-    v_tdb = Number(select1Input.value);
-    v_hra = (select2Number * 0.61078 * Math.exp((17.27 * select1Number) / (select1Number + 237.3)) * 0.622) / (0.096 * 101.325 - select2Number * 0.61078 * Math.exp((17.27 * select1Number) / (select1Number + 237.3)) * 0.001);
-  } else if (selectedValue1 == "tdb" && selectedValue2 == "tde") {
-    v_tdb = Number(select1Input.value);
-    function findHRA(targetTDE) {
-      const patm = 101.325;
-      const a = 611.2;
-      const b = 17.67;
-      const c = 243.5;
-      let hra = 0;
-      let step = 0.01;
-      let maxIter = 10000;
-      let tolerance = 0.0001;
-      let iter = 0;
-      while (iter < maxIter) {
+    throw new Error("HRA not found within iteration limit.");
+  }
+  
+  function findTdbAndHra(targetEnt, targetRhu) {
+    let bestError = Infinity, bestTdb = null, bestHra = null;
+    for (let tdb = 0; tdb <= 50; tdb += 0.1) {
+      for (let hra = 0; hra <= 30; hra += 0.1) {
         const hrag = hra * 0.001;
         const pw = (hra * patm) / (0.622 + hrag);
-        const logRatio = Math.log(pw / a);
-        const tde = (c * logRatio) / (b - logRatio);
-        if (Math.abs(tde - targetTDE) < tolerance) {
-          return hra;
-        }
-        hra += step;
-        iter++;
-      }
-      throw new Error("HRA not found within iteration limit.");
-    }
-    v_hra = findHRA(select2Number);
-    console.log(v_hra)
-  }
-
-  if (selectedValue1 == "hra" && selectedValue2 == "tdb") {
-    v_hra = Number(select1Input.value);
-    v_tdb = Number(select2Input.value);
-  }
-
-  if (selectedValue1 == "ent" && selectedValue2 == "tdb") {
-    function calculateHRA(tdb, ent) {
-      const numerator = ent - (1.006 * tdb);
-      const denominator = 2501 + (1.86 * tdb);
-      const hra = (numerator / denominator) * 1000;
-      return hra
-    }
-    const tdb = select2Number;
-    const ent = select1Number;
-    v_tdb = Number(select2Input.value);
-    v_hra = Number(calculateHRA(tdb, ent));
-  } else if (selectedValue1 == "ent" && selectedValue2 == "rhu") {
-    function findTdbAndHra(targetEnt, targetRhu) {
-      const patm = 101.325;
-      let bestError = Infinity;
-      let bestTdb = null;
-      let bestHra = null;
-      for (let tdb = 0; tdb <= 50; tdb += 0.1) {
-        for (let hra = 0; hra <= 30; hra += 0.1) {
-          const hrag = hra * 0.001;
-          const pw = (hra * patm) / (0.622 + hrag);
-          const pws = 0.61078 * Math.exp((17.27 * tdb) / (tdb + 237.3));
-          const rhu = (pw / pws) * 0.096;
-          const ent = 1.006 * tdb + hrag * (2501 + 1.86 * tdb);
-          const errEnt = Math.abs(ent - targetEnt);
-          const errRhu = Math.abs(rhu - targetRhu);
-          const totalError = errEnt + errRhu;
-          if (totalError < bestError) {
-            bestError = totalError;
-            bestTdb = tdb;
-            bestHra = hra;
-          }
+        const pws = 0.61078 * Math.exp((17.27 * tdb) / (tdb + 237.3));
+        const rhu = (pw / pws) * 0.096;
+        const ent = 1.006 * tdb + hrag * (2501 + 1.86 * tdb);
+        const totalError = Math.abs(ent - targetEnt) + Math.abs(rhu - targetRhu);
+        if (totalError < bestError) {
+          bestError = totalError;
+          bestTdb = tdb;
+          bestHra = hra;
         }
       }
-      return {
-        tdb: bestTdb.toFixed(4),
-        hra: bestHra.toFixed(4),
-        error: bestError.toFixed(6)
-      };
     }
-    const result = findTdbAndHra(Number(select1Input.value), Number(select2Input.value));
-    v_tdb = Number(result.tdb);
-    v_hra = Number(result.hra);
+    return { tdb: Number(bestTdb.toFixed(4)), hra: Number(bestHra.toFixed(4)) };
   }
-
-  if (selectedValue1 == "rhu" && selectedValue2 == "tdb") {
-    v_tdb = Number(select2Input.value);
-    v_hra = (select1Number * 0.61078 * Math.exp((17.27 * select2Number) / (select2Number + 237.3)) * 0.622) / (0.096 * 101.325 - select1Number * 0.61078 * Math.exp((17.27 * select2Number) / (select2Number + 237.3)) * 0.001);
-  } else if (selectedValue1 == "rhu" && selectedValue2 == "ent") {
-    [select1Number, select2Number] = [select2Number, select1Number];
-    function findTdbAndHra(targetEnt, targetRhu) {
-      const patm = 101.325;
-      let bestError = Infinity;
-      let bestTdb = null;
-      let bestHra = null;
-      for (let tdb = 0; tdb <= 50; tdb += 0.1) {
-        for (let hra = 0; hra <= 30; hra += 0.1) {
-          const hrag = hra * 0.001;
-          const pw = (hra * patm) / (0.622 + hrag);
-          const pws = 0.61078 * Math.exp((17.27 * tdb) / (tdb + 237.3));
-          const rhu = (pw / pws) * 0.096;
-          const ent = 1.006 * tdb + hrag * (2501 + 1.86 * tdb);
-          const errEnt = Math.abs(ent - targetEnt);
-          const errRhu = Math.abs(rhu - targetRhu);
-          const totalError = errEnt + errRhu;
-          if (totalError < bestError) {
-            bestError = totalError;
-            bestTdb = tdb;
-            bestHra = hra;
-          }
-        }
-      }
-      return {
-        tdb: bestTdb.toFixed(4),
-        hra: bestHra.toFixed(4),
-        error: bestError.toFixed(6)
-      };
-    }
-    const result = findTdbAndHra(select1Number, select2Number);
-    v_tdb = Number(result.tdb);
-    v_hra = Number(result.hra);
-  } else if (selectedValue1 == "rhu" && selectedValue2 == "tde") {
-    function findTdbAndHraFromRhuTde(targetRhu, targetTde) {
-      const patm = 101.325;
-      const a = 611.2;
-      const b = 17.67;
-      const c = 243.5;
-      let bestError = Infinity;
-      let bestTdb = null;
-      let bestHra = null;
-      for (let tdb = 0; tdb <= 50; tdb += 0.1) {
-        for (let hra = 0.1; hra <= 30; hra += 0.1) {
-          const hrag = hra * 0.001;
-          const pw = (hra * patm) / (0.622 + hrag);
-          const logPwOverA = Math.log(pw / a);
-          const tde = (c * logPwOverA) / (b - logPwOverA);
-          const pws = 0.61078 * Math.exp((17.27 * tdb) / (tdb + 237.3));
-          const rhu = (pw / pws) * 0.096;
-          const errTde = Math.abs(tde - targetTde);
-          const errRhu = Math.abs(rhu - targetRhu);
-          const totalError = errTde + errRhu;
-          if (totalError < bestError) {
-            bestError = totalError;
-            bestTdb = tdb;
-            bestHra = hra;
-          }
-        }
-      }
-      return {
-        tdb: bestTdb.toFixed(4),
-        hra: bestHra.toFixed(4),
-        error: bestError.toFixed(6)
-      };
-    }
-    const rhu = select1Number;
-    const tde = select2Number;
-    const result = findTdbAndHraFromRhuTde(rhu, tde);
-    v_tdb = Number(result.tdb);
-    v_hra = Number(result.hra);
-  }
-
-  if (selectedValue1 == "tde" && selectedValue2 == "tdb") {
-    v_tdb = select2Number;
-    function findHRA(targetTDE) {
-      const patm = 101.325;
-      const a = 611.2;
-      const b = 17.67;
-      const c = 243.5;
-      let hra = 0;
-      let step = 0.01;
-      let maxIter = 10000;
-      let tolerance = 0.0001;
-      let iter = 0;
-      while (iter < maxIter) {
+  
+  function findTdbAndHraFromRhuTde(targetRhu, targetTde) {
+    const a = 611.2, b = 17.67, c = 243.5;
+    let bestError = Infinity, bestTdb = null, bestHra = null;
+    for (let tdb = 0; tdb <= 50; tdb += 0.1) {
+      for (let hra = 0.1; hra <= 30; hra += 0.1) {
         const hrag = hra * 0.001;
         const pw = (hra * patm) / (0.622 + hrag);
-        const logRatio = Math.log(pw / a);
-        const tde = (c * logRatio) / (b - logRatio);
-        if (Math.abs(tde - targetTDE) < tolerance) {
-          return hra;
-        }
-        hra += step;
-        iter++;
-      }
-      throw new Error("HRA not found within iteration limit.");
-    }
-    v_hra = findHRA(select1Number);
-  } else if (selectedValue1 == "tde" && selectedValue2 == "rhu") {
-    function findTdbAndHraFromRhuTde(targetRhu, targetTde) {
-      const patm = 101.325;
-      const a = 611.2;
-      const b = 17.67;
-      const c = 243.5;
-      let bestError = Infinity;
-      let bestTdb = null;
-      let bestHra = null;
-      for (let tdb = 0; tdb <= 50; tdb += 0.1) {
-        for (let hra = 0.1; hra <= 30; hra += 0.1) {
-          const hrag = hra * 0.001;
-          const pw = (hra * patm) / (0.622 + hrag);
-          const logPwOverA = Math.log(pw / a);
-          const tde = (c * logPwOverA) / (b - logPwOverA);
-          const pws = 0.61078 * Math.exp((17.27 * tdb) / (tdb + 237.3));
-          const rhu = (pw / pws) * 0.096;
-          const errTde = Math.abs(tde - targetTde);
-          const errRhu = Math.abs(rhu - targetRhu);
-          const totalError = errTde + errRhu;
-          if (totalError < bestError) {
-            bestError = totalError;
-            bestTdb = tdb;
-            bestHra = hra;
-          }
+        const logPwOverA = Math.log(pw / a);
+        const tde = (c * logPwOverA) / (b - logPwOverA);
+        const pws = 0.61078 * Math.exp((17.27 * tdb) / (tdb + 237.3));
+        const rhu = (pw / pws) * 0.096;
+        const totalError = Math.abs(tde - targetTde) + Math.abs(rhu - targetRhu);
+        if (totalError < bestError) {
+          bestError = totalError;
+          bestTdb = tdb;
+          bestHra = hra;
         }
       }
-      return {
-        tdb: bestTdb.toFixed(4),
-        hra: bestHra.toFixed(4),
-        error: bestError.toFixed(6)
-      };
     }
-    const rhu = select2Number;
-    const tde = select1Number;
-    const result = findTdbAndHraFromRhuTde(rhu, tde);
-    v_tdb = Number(result.tdb);
-    v_hra = Number(result.hra);
+    return { tdb: Number(bestTdb.toFixed(4)), hra: Number(bestHra.toFixed(4)) };
   }
+  
+  switch (pair) {
+    case "tdb-hra":
+    case "hra-tdb":
+      v_tdb = selectedValue1 === "tdb" ? select1Number : select2Number;
+      v_hra = selectedValue1 === "hra" ? select1Number : select2Number;
+      break;
+  
+    case "tdb-ent":
+    case "ent-tdb":
+      const tdb1 = pair === "tdb-ent" ? select1Number : select2Number;
+      const ent1 = pair === "tdb-ent" ? select2Number : select1Number;
+      v_tdb = tdb1;
+      v_hra = calculateHRA(tdb1, ent1);
+      break;
+  
+    case "tdb-rhu":
+      v_tdb = select1Number;
+      v_hra = (select2Number * 0.61078 * Math.exp((17.27 * select1Number) / (select1Number + 237.3)) * 0.622) /
+              (0.096 * patm - select2Number * 0.61078 * Math.exp((17.27 * select1Number) / (select1Number + 237.3)) * 0.001);
+      break;
+    case "rhu-tdb":
+      v_tdb = select2Number;
+      v_hra = (select1Number * 0.61078 * Math.exp((17.27 * select2Number) / (select2Number + 237.3)) * 0.622) /
+              (0.096 * patm - select1Number * 0.61078 * Math.exp((17.27 * select2Number) / (select2Number + 237.3)) * 0.001);
+      break;
+  
+    case "tdb-tde":
+    case "tde-tdb":
+      v_tdb = pair === "tdb-tde" ? select1Number : select2Number;
+      const targetTDE = pair === "tdb-tde" ? select2Number : select1Number;
+      v_hra = findHRAFromTDE(targetTDE);
+      break;
+  
+    case "ent-rhu":
+    case "rhu-ent":
+      const ent2 = pair === "ent-rhu" ? select1Number : select2Number;
+      const rhu1 = pair === "ent-rhu" ? select2Number : select1Number;
+      const result1 = findTdbAndHra(ent2, rhu1);
+      v_tdb = result1.tdb;
+      v_hra = result1.hra;
+      break;
+  
+    case "rhu-tde":
+    case "tde-rhu":
+      const rhu2 = pair === "rhu-tde" ? select1Number : select2Number;
+      const tde2 = pair === "rhu-tde" ? select2Number : select1Number;
+      const result2 = findTdbAndHraFromRhuTde(rhu2, tde2);
+      v_tdb = result2.tdb;
+      v_hra = result2.hra;
+      break;
+  
+    default:
+      throw new Error("Kombinasi input tidak dikenali.");
+  }  
 
   const outerLine = document.querySelector('.outer-line');
   countChart(outerLine, svgPoint = 0, c_tdb = v_tdb, c_hra = v_hra);
