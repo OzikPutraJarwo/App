@@ -107,7 +107,7 @@ map.on('click', async ({ latlng: { lat, lng } }) => {
     const address = addressJSON.display_name || 'Not found';
 
     function fetchData(callback) {
-      const url = `https://text.pollinations.ai/Mention names of plants (only names, no explanation, separate with comma) that suitable to plant in ${address} area, soil type of ${soilSummary}, pH ${phActual ?? 'No data'}, ${elev} m elev, and ${cw.temperature ?? 'No data'}°C temp. Give 5 very accurate and most suitable plant names, don't be careless, and use English names, not Latin. Adjust to the country, don't use commodities that are rarely or never planted in the country's province. Remember, must be suitable with the data! And if you don't know because not enough data or anything, just say "Unknown"`;
+      const url = `https://text.pollinations.ai/Mention names of plants (only names, no explanation, separate with comma) that suitable to plant in ${address} area, soil type of ${soilSummary}, pH ${phActual ?? 'No data'}, ${elev} m elev, and ${cw.temperature ?? 'No data'}°C temp. If the elevation is 1-3 and (must) unknown pH, give the suitable 4 water plant and 1 land plant. Give 5 very accurate and most suitable plant names, don't be careless, and use English names, not Latin. Adjust to the country, don't use commodities that are rarely or never planted in the country's province. Remember, must be suitable with the data! And if the elevation is 0 or you don't know because not enough data or anything, just say "Unknown"`;
       fetch(url)
         .then(response => {
           if (!response.ok) {
