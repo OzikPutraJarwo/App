@@ -64,6 +64,9 @@ map.on('click', async ({ latlng: { lat, lng } }) => {
     const soilSummaryHTML = summaries.length
       ? summaries.map(s => `${s.soil_type} (${s.count}%)`).join(', ')
       : 'No data.';
+    const soilSummary = summaries.length
+      ? summaries.map(s => `${s.soil_type}`).join(', ')
+      : 'No data.';
 
     /* 3) Properti tanah ------------------------------- */
     const layers = propJSON.properties?.layers || [];
@@ -323,32 +326,58 @@ map.on('click', async ({ latlng: { lat, lng } }) => {
       return isSoilTypeSuitable && isElevSuitable && isPhSuitable && isTempSuitable;
     }).map(([plant]) => `${plant}`).join(', ');
 
+    function fetchData(callback) {
+      const url = `https://text.pollinations.ai/Mention names of plants (only names, no explanation, separate with comma) that suitable to plant in ${address} area, soil type of ${soilSummary}, pH ${phActual ?? 'n/a'}, ${elev} m elev, and ${cw.temperature ?? 'n/a'}°C temp. Give 5 very accurate and most suitable plant names, don't be careless, and use English names, not Latin. Adjust to the country, don't use commodities that are rarely or never planted in the country's province. Remember, must be suitable with the data!`;
+      console.log(url);
+      fetch(url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Connection error');
+          }
+          return response.text();
+        })
+        .then(data => {
+          callback(data);
+        })
+        .catch(error => {
+          callback('Something went wrong: ' + error.message);
+        });
+    }
+
+    // <span class="title">Suitable Plants</span><br>
+    // ${suitablePlantsHTML || 'No data'}<br><br></br>
+
     /* 7) Tampilkan popup ------------------------------ */
-    m.setPopupContent(`
-      <span class="title">Location</span><br>
-      ${address}<br><br>
-
-      <span class="title">Coordinate</span><br>
-      ${lat.toFixed(5)}, ${lng.toFixed(5)}<br><br>
-
-      <span class="title">Soil type</span><br>
-      ${soilSummaryHTML.replace("No_information", "Unknown")}<br><br>
-
-      <span class="title">Suitable Plants</span><br>
-      ${suitablePlantsHTML || 'No data'}<br><br>
-
-      <span class="title">Soil property</span><br>
-      BDOD: ${bdod ?? 'n/a'} ${bdodUnit}<br>
-      Nitrogen: ${nitrogen ?? 'n/a'} ${nitrogenUnit}<br>
-      Actual pH: ${phActual ?? 'n/a'} - ${phCategory ?? 'n/a'}<br><br>
-
-      <span class="title">Climate (now)</span><br>
-      Temp: ${cw.temperature ?? 'n/a'} °C<br>
-      Wind: ${cw.windspeed ?? 'n/a'} km/h<br><br>
-
-      <span class="title">Elevation</span><br>
-      ${elev} m
-    `);
+    fetchData(AI => {
+      const soilType = soilSummaryHTML.replace("No_information", "Unknown");
+      const suitablePlants = soilType === "Unknown (100%)" ? "Unknown" : AI;
+  
+      m.setPopupContent(`
+        <span class="title">Location</span><br>
+        ${address}<br><br>
+  
+        <span class="title">Coordinate</span><br>
+        ${lat.toFixed(5)}, ${lng.toFixed(5)}<br><br>
+  
+        <span class="title">Soil type</span><br>
+        ${soilType}<br><br>
+  
+        <span class="title">Suitable Plants</span><br>
+        ${suitablePlants}<br><br>
+  
+        <span class="title">Soil property</span><br>
+        BDOD: ${bdod ?? 'n/a'} ${bdodUnit}<br>
+        Nitrogen: ${nitrogen ?? 'n/a'} ${nitrogenUnit}<br>
+        Actual pH: ${phActual ?? 'n/a'} - ${phCategory ?? 'n/a'}<br><br>
+  
+        <span class="title">Climate (now)</span><br>
+        Temp: ${cw.temperature ?? 'n/a'}°C<br>
+        Wind: ${cw.windspeed ?? 'n/a'} km/h<br><br>
+  
+        <span class="title">Elevation</span><br>
+        ${elev} m
+      `);
+  });
   } catch (err) {
     console.error(err);
     m.setPopupContent('<span style="color:red">Failed to fetch data!</span>');
