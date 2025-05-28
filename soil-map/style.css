@@ -1,0 +1,4 @@
+html,body{margin:0;height:100%}
+#map{width:100%;height:calc(100% - 61px)}
+.leaflet-popup-content{font-size:.9rem;line-height:1.35}
+.title{font-weight:600}
