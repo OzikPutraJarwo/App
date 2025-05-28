@@ -10,7 +10,10 @@ function makeParams(obj) {
 
 /* ----------  peta  ---------- */
 const map = L.map('map').setView([-2, 117], 5);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+// https://leaflet-extras.github.io/leaflet-providers/preview/
+// L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.png', {
+  maxZoom: 20,
   attribution: "2025 © OpenStreetMap & Kode Jarwo"
 }).addTo(map);
 
@@ -59,7 +62,7 @@ map.on('click', async ({ latlng: { lat, lng } }) => {
     /* 2) Ringkasan jenis tanah ------------------------ */
     const summaries = summaryJSON.properties?.summaries || [];
     const soilSummaryHTML = summaries.length
-      ? summaries.map(s => `${s.soil_type} (${s.count})`).join(', ')
+      ? summaries.map(s => `${s.soil_type} (${s.count}%)`).join(', ')
       : 'No data.';
 
     /* 3) Properti tanah ------------------------------- */
