@@ -1,5 +1,3 @@
-/* ----------  util  ---------- */
-/** Buat URLSearchParams yg mendukung nilai array (repeat param) */
 function makeParams(obj) {
   const p = new URLSearchParams();
   Object.entries(obj).forEach(([k, v]) => {
@@ -8,16 +6,20 @@ function makeParams(obj) {
   return p.toString();
 }
 
-/* ----------  peta  ---------- */
 const map = L.map('map').setView([-2, 117], 5);
-// https://leaflet-extras.github.io/leaflet-providers/preview/
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-// L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.png', {
+
+var control = L.control.geonames({
+  // username: 'ozikjarwo'
+  username: 'cbi.test'
+});
+map.addControl(control);
+
+L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg', {
+  minZoom: 2,
   maxZoom: 20,
-  attribution: "2025 © OpenStreetMap & Kode Jarwo"
+  attribution: "<a href='https://www.kodejarwo.com'>Ozik Jarwo</a>"
 }).addTo(map);
 
-/* ----------  event click  ---------- */
 map.on('click', async ({ latlng: { lat, lng } }) => {
   const m = L.marker([lat, lng]).addTo(map)
     .bindPopup('<em>Fetching data...</em>').openPopup();
@@ -28,7 +30,6 @@ map.on('click', async ({ latlng: { lat, lng } }) => {
     min_lon: lng - delta, max_lon: lng + delta
   };
 
-  /* 1) Siapkan semua fetch secara paralel ------------- */
   const soilSummaryURL = 'https://api.openepi.io/soil/type/summary?' +
     makeParams(bbox);
 
@@ -59,7 +60,6 @@ map.on('click', async ({ latlng: { lat, lng } }) => {
       fetch(addressURL).then(r => r.json())
     ]);
 
-    /* 2) Ringkasan jenis tanah ------------------------ */
     const summaries = summaryJSON.properties?.summaries || [];
     const soilSummaryHTML = summaries.length
       ? summaries.map(s => `${s.soil_type} (${s.count}%)`).join(', ')
@@ -68,7 +68,6 @@ map.on('click', async ({ latlng: { lat, lng } }) => {
       ? summaries.map(s => `${s.soil_type}`).join(', ')
       : 'No data.';
 
-    /* 3) Properti tanah ------------------------------- */
     const layers = propJSON.properties?.layers || [];
     const getLayer = name => layers.find(l => l.name.toLowerCase().includes(name));
     const bdodLayer = getLayer('bdod') || {};
@@ -76,8 +75,8 @@ map.on('click', async ({ latlng: { lat, lng } }) => {
     const phLayer = getLayer('ph');
     const bdod = bdodLayer.depths?.[0]?.values?.mean;
     const bdodUnit = bdodLayer.unit_measure?.mapped_units || '';
-    const ph = phLayer?.depths?.[1]?.values?.['mean'] ?? 'n/a';
-    const phActual = (ph / 10).toFixed(1) ?? 'n/a';
+    const ph = phLayer?.depths?.[1]?.values?.['mean'] ?? 'No data';
+    const phActual = (ph / 10).toFixed(1) ?? 'No data';
     const nitrogen = nitrogenLayer?.depths?.[1]?.values?.['mean'];
     const nitrogenUnit = nitrogenLayer?.unit_measure?.mapped_units || '';
 
@@ -102,233 +101,13 @@ map.on('click', async ({ latlng: { lat, lng } }) => {
       phCategory = "Unknown"
     }
 
-    /* 4) Elevasi dan cuaca ------------------------------ */
-    const elev = elevJSON.elevation?.[0] ?? 'n/a';
+    const elev = elevJSON.elevation?.[0] ?? 'No data';
     const cw = wxJSON.current_weather || {};
 
-    /* 5) Alamat --------------------------------------- */
     const address = addressJSON.display_name || 'Not found';
 
-    /* 6) Tanaman yang cocok --------------------------- */
-    const suitablePlants = {
-      "Coffee": {
-        soilTypes: ["Acrisols", "Nitisols"],
-        elev: { min: 0, max: 1000 },
-        ph: { min: 5.0, max: 6.0 },
-        temp: { min: 20, max: 25 }
-      },
-      "Rice": {
-        soilTypes: ["Fluvisols", "Gleysols", "Planosols"],
-        elev: { min: 0, max: 500 },
-        ph: { min: 5.0, max: 7.5 },
-        temp: { min: 25, max: 30 }
-      },
-      "Rubber tree": {
-        soilTypes: ["Ferralsols", "Nitisols"],
-        elev: { min: 0, max: 800 },
-        ph: { min: 4.0, max: 6.5 },
-        temp: { min: 25, max: 30 }
-      },
-      "Cocoa": {
-        soilTypes: ["Acrisols", "Ferralsols"],
-        elev: { min: 0, max: 1000 },
-        ph: { min: 5.0, max: 7.0 },
-        temp: { min: 20, max: 30 }
-      },
-      "Corn": {
-        soilTypes: ["Albeluvisols", "Luvisols"],
-        elev: { min: 0, max: 1500 },
-        ph: { min: 5.5, max: 7.0 },
-        temp: { min: 20, max: 30 }
-      },
-      "Soybean": {
-        soilTypes: ["Regosols", "Luvisols"],
-        elev: { min: 0, max: 1200 },
-        ph: { min: 5.5, max: 7.0 },
-        temp: { min: 20, max: 30 }
-      },
-      "Mango": {
-        soilTypes: ["Acrisols", "Ferralsols"],
-        elev: { min: 0, max: 1000 },
-        ph: { min: 5.5, max: 7.5 },
-        temp: { min: 25, max: 35 }
-      },
-      "Bananas": {
-        soilTypes: ["Andosols", "Ferralsols"],
-        elev: { min: 0, max: 600 },
-        ph: { min: 5.0, max: 7.0 },
-        temp: { min: 25, max: 30 }
-      },
-      "Papaya": {
-        soilTypes: ["Acrisols", "Regosols"],
-        elev: { min: 0, max: 800 },
-        ph: { min: 5.0, max: 7.5 },
-        temp: { min: 25, max: 35 }
-      },
-      "Pineapple": {
-        soilTypes: ["Arenosols", "Regosols"],
-        elev: { min: 0, max: 500 },
-        ph: { min: 5.0, max: 7.0 },
-        temp: { min: 20, max: 30 }
-      },
-      "Chili peppers": {
-        soilTypes: ["Luvisols", "Cambisols"],
-        elev: { min: 0, max: 1000 },
-        ph: { min: 5.5, max: 7.0 },
-        temp: { min: 20, max: 30 }
-      },
-      "Avocado": {
-        soilTypes: ["Andosols", "Leptosols"],
-        elev: { min: 0, max: 800 },
-        ph: { min: 5.0, max: 7.0 },
-        temp: { min: 20, max: 30 }
-      },
-      "Sugarcane": {
-        soilTypes: ["Fluvisols", "Gleysols"],
-        elev: { min: 0, max: 1000 },
-        ph: { min: 5.0, max: 7.5 },
-        temp: { min: 25, max: 35 }
-      },
-      "Tomato": {
-        soilTypes: ["Cambisols", "Luvisols"],
-        elev: { min: 0, max: 1000 },
-        ph: { min: 5.5, max: 7.0 },
-        temp: { min: 20, max: 30 }
-      },
-      "Cassava": {
-        soilTypes: ["Acrisols", "Cambisols"],
-        elev: { min: 0, max: 1200 },
-        ph: { min: 5.0, max: 7.0 },
-        temp: { min: 25, max: 35 }
-      },
-      "Spinach": {
-        soilTypes: ["Acrisols", "Luvisols"],
-        elev: { min: 0, max: 1000 },
-        ph: { min: 6.0, max: 7.5 },
-        temp: { min: 15, max: 25 }
-      },
-      "Eggplant": {
-        soilTypes: ["Luvisols", "Regosols"],
-        elev: { min: 0, max: 1000 },
-        ph: { min: 5.5, max: 7.0 },
-        temp: { min: 20, max: 30 }
-      },
-      "Peanut": {
-        soilTypes: ["Arenosols", "Regosols"],
-        elev: { min: 0, max: 800 },
-        ph: { min: 5.5, max: 7.0 },
-        temp: { min: 20, max: 30 }
-      },
-      "Taro": {
-        soilTypes: ["Gleysols"],
-        elev: { min: 0, max: 500 },
-        ph: { min: 5.0, max: 7.0 },
-        temp: { min: 20, max: 30 }
-      },
-      "Bitter melon": {
-        soilTypes: ["Acrisols", "Cambisols"],
-        elev: { min: 0, max: 1000 },
-        ph: { min: 5.5, max: 7.5 },
-        temp: { min: 25, max: 35 }
-      },
-      "Sorghum": {
-        soilTypes: ["Regosols", "Arenosols"],
-        elev: { min: 0, max: 1200 },
-        ph: { min: 5.0, max: 7.0 },
-        temp: { min: 25, max: 35 }
-      },
-      "Barley": {
-        soilTypes: ["Regosols", "Andosols"],
-        elev: { min: 0, max: 1000 },
-        ph: { min: 6.0, max: 7.5 },
-        temp: { min: 15, max: 25 }
-      },
-      "Mint": {
-        soilTypes: ["Acrisols", "Cambisols"],
-        elev: { min: 0, max: 800 },
-        ph: { min: 5.5, max: 7.0 },
-        temp: { min: 20, max: 30 }
-      },
-      "Zucchini": {
-        soilTypes: ["Luvisols", "Cambisols"],
-        elev: { min: 0, max: 1000 },
-        ph: { min: 6.0, max: 7.5 },
-        temp: { min: 20, max: 30 }
-      },
-      "Lemongrass": {
-        soilTypes: ["Acrisols", "Regosols"],
-        elev: { min: 0, max: 800 },
-        ph: { min: 5.0, max: 7.0 },
-        temp: { min: 20, max: 35 }
-      },
-      "Tea": {
-        soilTypes: ["Acrisols", "Andosols"],
-        elev: { min: 0, max: 2500 },
-        ph: { min: 4.5, max: 6.0 },
-        temp: { min: 15, max: 25 }
-      },
-      "Coconut": {
-        soilTypes: ["Arenosols", "Regosols"],
-        elev: { min: 0, max: 600 },
-        ph: { min: 5.0, max: 7.0 },
-        temp: { min: 20, max: 30 }
-      },
-      "Paprika": {
-        soilTypes: ["Luvisols", "Regosols"],
-        elev: { min: 0, max: 1000 },
-        ph: { min: 6.0, max: 7.5 },
-        temp: { min: 20, max: 30 }
-      },
-      "Kale": {
-        soilTypes: ["Loamy soils"],
-        elev: { min: 0, max: 1000 },
-        ph: { min: 6.0, max: 7.0 },
-        temp: { min: 15, max: 25 }
-      },
-      "Durian": {
-        soilTypes: ["Acrisols", "Ferralsols"],
-        elev: { min: 0, max: 600 },
-        ph: { min: 5.5, max: 7.0 },
-        temp: { min: 25, max: 35 }
-      },
-      "Jackfruit": {
-        soilTypes: ["Acrisols", "Ferralsols"],
-        elev: { min: 0, max: 800 },
-        ph: { min: 5.0, max: 7.5 },
-        temp: { min: 25, max: 35 }
-      },
-      "Kencur": {
-        soilTypes: ["Acrisols", "Regosols"],
-        elev: { min: 0, max: 800 },
-        ph: { min: 5.0, max: 7.0 },
-        temp: { min: 20, max: 30 }
-      },
-      "Ginger": {
-        soilTypes: ["Andosols", "Acrisols"],
-        elev: { min: 0, max: 600 },
-        ph: { min: 5.5, max: 7.0 },
-        temp: { min: 20, max: 30 }
-      },
-      "Turmeric": {
-        soilTypes: ["Acrisols", "Regosols"],
-        elev: { min: 0, max: 600 },
-        ph: { min: 5.5, max: 7.0 },
-        temp: { min: 20, max: 30 }
-      },
-    };
-
-    const suitablePlantsHTML = Object.entries(suitablePlants).filter(([plant, criteria]) => {
-      const isSoilTypeSuitable = summaries.some(s => criteria.soilTypes.includes(s.soil_type));
-      const isElevSuitable = (elev >= criteria.elev.min && elev <= criteria.elev.max);
-      const isPhSuitable = (ph / 10 >= criteria.ph.min && ph / 10 <= criteria.ph.max);
-      const isTempSuitable = (cw.temperature >= criteria.temp.min && cw.temperature <= criteria.temp.max);
-
-      return isSoilTypeSuitable && isElevSuitable && isPhSuitable && isTempSuitable;
-    }).map(([plant]) => `${plant}`).join(', ');
-
     function fetchData(callback) {
-      const url = `https://text.pollinations.ai/Mention names of plants (only names, no explanation, separate with comma) that suitable to plant in ${address} area, soil type of ${soilSummary}, pH ${phActual ?? 'n/a'}, ${elev} m elev, and ${cw.temperature ?? 'n/a'}°C temp. Give 5 very accurate and most suitable plant names, don't be careless, and use English names, not Latin. Adjust to the country, don't use commodities that are rarely or never planted in the country's province. Remember, must be suitable with the data!`;
-      console.log(url);
+      const url = `https://text.pollinations.ai/Mention names of plants (only names, no explanation, separate with comma) that suitable to plant in ${address} area, soil type of ${soilSummary}, pH ${phActual ?? 'No data'}, ${elev} m elev, and ${cw.temperature ?? 'No data'}°C temp. Give 5 very accurate and most suitable plant names, don't be careless, and use English names, not Latin. Adjust to the country, don't use commodities that are rarely or never planted in the country's province. Remember, must be suitable with the data! And if you don't know because not enough data or anything, just say "Unknown"`;
       fetch(url)
         .then(response => {
           if (!response.ok) {
@@ -340,44 +119,42 @@ map.on('click', async ({ latlng: { lat, lng } }) => {
           callback(data);
         })
         .catch(error => {
-          callback('Something went wrong: ' + error.message);
+          callback(error.message);
         });
     }
 
-    // <span class="title">Suitable Plants</span><br>
-    // ${suitablePlantsHTML || 'No data'}<br><br></br>
-
-    /* 7) Tampilkan popup ------------------------------ */
     fetchData(AI => {
       const soilType = soilSummaryHTML.replace("No_information", "Unknown");
       const suitablePlants = soilType === "Unknown (100%)" ? "Unknown" : AI;
-  
+
       m.setPopupContent(`
         <span class="title">Location</span><br>
         ${address}<br><br>
   
         <span class="title">Coordinate</span><br>
         ${lat.toFixed(5)}, ${lng.toFixed(5)}<br><br>
+
+        <span class="title">Suitable Plants</span><br>
+        ${suitablePlants}<br><br>
+
+        <hr><br>
   
         <span class="title">Soil type</span><br>
         ${soilType}<br><br>
   
-        <span class="title">Suitable Plants</span><br>
-        ${suitablePlants}<br><br>
-  
         <span class="title">Soil property</span><br>
-        BDOD: ${bdod ?? 'n/a'} ${bdodUnit}<br>
-        Nitrogen: ${nitrogen ?? 'n/a'} ${nitrogenUnit}<br>
-        Actual pH: ${phActual ?? 'n/a'} - ${phCategory ?? 'n/a'}<br><br>
+        BDOD: ${bdod ?? 'No data'} ${bdodUnit}<br>
+        Nitrogen: ${nitrogen ?? 'No data'} ${nitrogenUnit}<br>
+        Actual pH: ${phActual ?? 'No data'} - ${phCategory ?? 'No data'}<br><br>
   
         <span class="title">Climate (now)</span><br>
-        Temp: ${cw.temperature ?? 'n/a'}°C<br>
-        Wind: ${cw.windspeed ?? 'n/a'} km/h<br><br>
+        Temp: ${cw.temperature ?? 'No data'}°C<br>
+        Wind: ${cw.windspeed ?? 'No data'} km/h<br><br>
   
         <span class="title">Elevation</span><br>
         ${elev} m
       `);
-  });
+    });
   } catch (err) {
     console.error(err);
     m.setPopupContent('<span style="color:red">Failed to fetch data!</span>');
