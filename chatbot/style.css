@@ -1,0 +1,54 @@
+.main {
+  display: grid;
+  gap: 2rem
+}
+
+.chat-box {
+  display: grid;
+  gap: 1rem;
+}
+
+.chat-box .item {
+  width: 80%;
+}
+
+.chat-box .item:before {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #1d95c9;
+  font-size: 1.2rem;
+}
+
+.chat-box .item:nth-child(odd) {
+  margin-left: auto;
+  text-align: right;
+}
+
+.chat-box .item:nth-child(odd):before {
+  content: "You";
+}
+
+.chat-box .item:nth-child(even):before {
+  content: "Chatbot";
+}
+
+.input-area {
+  display: grid;
+  grid-template-columns: 60px 1fr 60px;
+  position: sticky;
+  bottom: 0;
+  gap: 1rem;
+}
+
+.input-area button {
+  display: flex;
+  padding: .7rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-area svg {
+  width: 20px;
+  height: 20px;
+}
