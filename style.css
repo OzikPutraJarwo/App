@@ -59,6 +59,10 @@
   background-color: red;
 }
 
+.item-status.development:before {
+  background-color: dodgerblue;
+}
+
 .item-status.maintenance:before {
   background-color: orange;
 }
@@ -73,6 +77,10 @@
 
 .item-status.offline:after {
   content: "Offline";
+}
+
+.item-status.development:after {
+  content: "Development";
 }
 
 .item-status.maintenance:after {
