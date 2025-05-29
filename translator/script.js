@@ -1,6 +1,12 @@
+const inputSelect = document.querySelector('.input.lang-select select');
+const outputSelect = document.querySelector('.output.lang-select select');
+
+const storedIn = localStorage.getItem('inputLang');
+const storedOut = localStorage.getItem('outputLang');
+if (storedIn && [...inputSelect.options].some(o => o.value === storedIn)) inputSelect.value = storedIn;
+if (storedOut && [...outputSelect.options].some(o => o.value === storedOut)) outputSelect.value = storedOut;
+
 function updateLanguageOptions() {
-  const inputSelect = document.querySelector('.input.lang-select select');
-  const outputSelect = document.querySelector('.output.lang-select select');
   const inVal = inputSelect.value;
   const outVal = outputSelect.value;
   Array.from(outputSelect.options).forEach(o => {
@@ -11,13 +17,24 @@ function updateLanguageOptions() {
   });
 }
 
-document.querySelector('.input.lang-select select').addEventListener('change', updateLanguageOptions);
-document.querySelector('.output.lang-select select').addEventListener('change', updateLanguageOptions);
+function saveLangPrefs() {
+  localStorage.setItem('inputLang', inputSelect.value);
+  localStorage.setItem('outputLang', outputSelect.value);
+}
+
+inputSelect.addEventListener('change', () => {
+  updateLanguageOptions();
+  saveLangPrefs();
+});
+outputSelect.addEventListener('change', () => {
+  updateLanguageOptions();
+  saveLangPrefs();
+});
 updateLanguageOptions();
 
 async function translate() {
-  const inputLang = document.querySelector('.input.lang-select select').value;
-  const outputLang = document.querySelector('.output.lang-select select').value;
+  const inputLang = inputSelect.value;
+  const outputLang = outputSelect.value;
   const outputPolite = document.querySelector('.set.polite-select select').value;
   const inputText = document.querySelector('#text-input').value;
   const resultsEl = document.querySelector('#text-output');
@@ -48,26 +65,26 @@ copyHandler(document.querySelector('.input-wrapper .copy-text'), () => document.
 copyHandler(document.querySelector('.output-wrapper .copy-text'), () => document.querySelector('#text-output').textContent);
 
 document.querySelector('.swap').addEventListener('click', () => {
-  const inSel = document.querySelector('.input.lang-select select');
-  const outSel = document.querySelector('.output.lang-select select');
-  const tempLang = inSel.value;
-  inSel.value = outSel.value;
-  outSel.value = tempLang;
+  const tempLang = inputSelect.value;
+  inputSelect.value = outputSelect.value;
+  outputSelect.value = tempLang;
   const inTxt = document.querySelector('#text-input');
   const outTxt = document.querySelector('#text-output');
   const tempTxt = inTxt.value;
   inTxt.value = outTxt.textContent;
   outTxt.textContent = tempTxt;
   updateLanguageOptions();
+  saveLangPrefs();
+  translate();
 });
 
 const textarea = document.querySelector('#text-input');
 const div = document.querySelector('#text-output');
 
-textarea.addEventListener('input', function() {
-    this.style.height = 'auto';
-    this.style.height = this.scrollHeight + 'px';
-    div.style.height = this.scrollHeight + 'px';
+textarea.addEventListener('input', function () {
+  this.style.height = 'auto';
+  this.style.height = this.scrollHeight + 'px';
+  div.style.height = this.scrollHeight + 'px';
 });
 
 textarea.dispatchEvent(new Event('input'));

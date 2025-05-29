@@ -22,6 +22,7 @@
 .settings-wrapper svg {
   width: 25px;
   height: 25px;
+  transition: .5s;
 }
 
 .lang-select {
@@ -117,10 +118,15 @@
   font-size: .9rem;
 }
 
-@media (max-width: 680px) {
+@media (max-width: 780px) {
   main {
     padding: 1rem !important;
   }
+
+  .item {
+    padding: 1rem !important;
+  }
+
   .main.wrap {
     grid-template-columns: 1fr;
   }
@@ -143,19 +149,21 @@
 
   .settings-wrapper {
     display: grid;
-    grid-template-columns: 50px 1fr 75px;
+    grid-template-columns: 50px 1fr 80px;
   }
 
   .settings-wrapper svg {
+    order: 1;
     width: 20px;
     height: 20px;
+    transform: rotate(90deg);
   }
-
+  
   .translate {
-    font-size: .7rem;
+    font-size: .8rem;
   }
   
   .translate span {
-    margin-top: .25rem
+    margin-bottom: .5rem
   }
 }
