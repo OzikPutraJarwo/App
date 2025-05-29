@@ -17,7 +17,7 @@ map.addControl(control);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   minZoom: 2,
   maxZoom: 20,
-  attribution: "<a href='https://www.kodejarwo.com'>Ozik Jarwo</a>"
+  attribution: `<a href='https://www.kodejarwo.com'><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="leaflet-attribution-flag"><path fill="#ff0000" d="M0 0h12v4H0z"></path><path fill="#FFFFFF" d="M0 4h12v3H0z"></path><path fill="#dfdfdf" d="M0 7h12v1H0z"></path></svg> Ozik Jarwo</a>`
 }).addTo(map);
 
 map.on('click', async ({ latlng: { lat, lng } }) => {
