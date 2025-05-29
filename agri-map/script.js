@@ -14,7 +14,7 @@ var control = L.control.geonames({
 });
 map.addControl(control);
 
-L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_satellite/{z}/{x}/{y}{r}.jpg', {
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   minZoom: 2,
   maxZoom: 20,
   attribution: "<a href='https://www.kodejarwo.com'>Ozik Jarwo</a>"
