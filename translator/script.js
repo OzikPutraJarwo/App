@@ -22,7 +22,7 @@ async function translate() {
   const inputText = document.querySelector('#text-input').value;
   const resultsEl = document.querySelector('#text-output');
   resultsEl.textContent = 'Translating...';
-  const query = `Please translate the following sentence from ${encodeURIComponent(inputLang)} into proper and correct ${encodeURIComponent(outputLang)}, with a polite level of ${encodeURIComponent(outputPolite)}, and give me only the translation, without any additional sentences (e.g. opening or closing), I only want you to answer the translation. Here is the sentence you have to translate: ${encodeURIComponent(inputText)}`;
+  const query = `Please translate the following sentence from ${encodeURIComponent(inputLang)} into proper and correct ${encodeURIComponent(outputLang)}, with a polite level of ${encodeURIComponent(outputPolite)}, and give me only the translation, without any additional sentences (e.g. opening or closing), I only want you to answer the translation. Here is the sentence you have to translate: [${encodeURIComponent(inputText)}]`;
   const url = `https://text.pollinations.ai/${query}`;
   try {
     const res = await fetch(url);
@@ -65,10 +65,9 @@ const textarea = document.querySelector('#text-input');
 const div = document.querySelector('#text-output');
 
 textarea.addEventListener('input', function() {
-    this.style.height = 'auto'; // Reset height
-    this.style.height = this.scrollHeight + 'px'; // Set height sesuai konten
-    div.style.height = this.scrollHeight + 'px'; // Sesuaikan tinggi div
+    this.style.height = 'auto';
+    this.style.height = this.scrollHeight + 'px';
+    div.style.height = this.scrollHeight + 'px';
 });
 
-// Inisialisasi tinggi saat halaman dimuat
 textarea.dispatchEvent(new Event('input'));

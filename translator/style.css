@@ -1,11 +1,27 @@
 .main.wrap {
   display: grid;
-  grid-template-columns: 1fr 100px 1fr;
+  grid-template-columns: 1fr 150px 1fr;
   gap: 1rem
 }
 
 .item {
   position: relative;
+}
+
+.settings-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  user-select: none;
+}
+
+.settings-wrapper .swap {
+  line-height: 0;
+}
+
+.settings-wrapper svg {
+  width: 25px;
+  height: 25px;
 }
 
 .lang-select {
@@ -21,26 +37,125 @@
   right: 1px;
   top: 1px;
   padding: .5rem;
-  background-color: #0000000d;
-  border-radius: .5rem;
   cursor: pointer;
+}
+
+.copy-text svg {
+  width: 20px;
+}
+
+.copy-text svg path {
   transition: .2s;
 }
 
-.copy-text:hover {
-  background-color: #0000003b;
+.copy-text:hover svg path {
+  stroke: #18abea;
 }
 
-#text-input, #text-output {
+.copy-text .check {
+  display: none;
+}
+
+.copy-text.done .check {
+  display: block;
+}
+
+.copy-text.done>svg {
+  display: none;
+}
+
+#text-input,
+#text-output {
   width: 100%;
   border: 1px solid #0000000d;
-  padding: 1rem;
+  padding: 1rem 2rem 1rem 1rem;
   border-radius: .5rem;
   min-height: 150px;
-  font-size: .9rem;
+  font-size: 1rem;
 }
 
 #text-input {
   resize: none;
   overflow: hidden;
+}
+
+.button {
+  text-align: center;
+  background-color: #18abea;
+  color: white;
+  padding: 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  transition: .2s;
+  cursor: pointer;
+  box-shadow: var(--box-shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.button:hover {
+  background-color: #1181b1;
+}
+
+.translate {
+  background-color: mediumseagreen;
+  font-size: .9rem;
+}
+
+.translate:hover {
+  background-color: seagreen;
+}
+
+.polite-select {
+  padding: .5rem !important;
+  text-align: center;
+  border-radius: .5rem !important;
+  display: grid;
+  gap: .5rem;
+  font-size: .9rem;
+}
+
+@media (max-width: 680px) {
+  main {
+    padding: 1rem !important;
+  }
+  .main.wrap {
+    grid-template-columns: 1fr;
+  }
+
+  .button {
+    padding: .5rem;
+  }
+
+  .input-wrapper {
+    order: 1;
+  }
+
+  .settings-wrapper {
+    order: 2;
+  }
+
+  .output-wrapper {
+    order: 3;
+  }
+
+  .settings-wrapper {
+    display: grid;
+    grid-template-columns: 50px 1fr 75px;
+  }
+
+  .settings-wrapper svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .translate {
+    font-size: .7rem;
+  }
+  
+  .translate span {
+    margin-top: .25rem
+  }
 }
