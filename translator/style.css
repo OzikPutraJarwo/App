@@ -1,0 +1,46 @@
+.main.wrap {
+  display: grid;
+  grid-template-columns: 1fr 100px 1fr;
+  gap: 1rem
+}
+
+.item {
+  position: relative;
+}
+
+.lang-select {
+  margin-bottom: 1.5rem;
+}
+
+.wrap-inout {
+  position: relative;
+}
+
+.copy-text {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  padding: .5rem;
+  background-color: #0000000d;
+  border-radius: .5rem;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.copy-text:hover {
+  background-color: #0000003b;
+}
+
+#text-input, #text-output {
+  width: 100%;
+  border: 1px solid #0000000d;
+  padding: 1rem;
+  border-radius: .5rem;
+  min-height: 150px;
+  font-size: .9rem;
+}
+
+#text-input {
+  resize: none;
+  overflow: hidden;
+}
