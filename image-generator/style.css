@@ -1,0 +1,100 @@
+.main.wrap,
+.input,
+.prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem
+}
+
+.prompt-wrap {
+  display: grid;
+  gap: .5rem
+}
+
+.prompt-wrap .label {
+  font-weight: bold;
+}
+
+.prompt-wrap textarea {
+  resize: none;
+  height: 100px;
+  border-radius: .5rem;
+  padding: .75rem;
+  border-color: #b8b8b8
+}
+
+.settings {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 150px;
+  gap: 1rem
+}
+
+.settings .advanced-settings {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem
+}
+
+.settings .item {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  justify-content: center;
+  text-align: center;
+  font-weight: bold;
+  padding: 1rem;
+}
+
+[type="checkbox"] {
+  margin: 0 auto;
+  width: 20px;
+  height: 20px;
+}
+
+.generate {
+  display: grid;
+  gap: 1rem
+}
+
+.generate button {
+  padding: .5rem;
+}
+
+.output img {
+  margin: auto;
+  display: block;
+}
+
+@media (max-width: 1100px) {
+  .settings {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-areas: "a a a a" "b b c c";
+  }
+  
+  .advanced-settings {
+    grid-area: b;
+  }
+
+  .generate {
+    grid-area: c;
+  }
+}
+
+@media (max-width: 700px) {
+  .settings {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "a a" "a a" "b b" "c c";
+  }
+    
+  .advanced-settings {
+    grid-area: b;
+  }
+
+  .generate {
+    grid-area: c;
+  }
+
+  .generate button {
+    padding: 1rem;
+  }
+}
