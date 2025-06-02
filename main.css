@@ -34,7 +34,7 @@ ul, ol{margin-left:1.5rem}
 .none{display:none}
 
 button {
-  background: #18abea;
+  background-color: #18abea;
   color: white;
   padding: 1rem;
   border: none;
@@ -45,7 +45,12 @@ button {
 }
 
 button:hover {
-  background: #1181b1;
+  background-color: #1181b1;
+}
+
+button:disabled {
+  background-color: #b8b8b8;
+  cursor: not-allowed;
 }
 
 input,
