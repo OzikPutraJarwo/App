@@ -106,7 +106,7 @@ tr:hover {
 }
 
 .scrollable-table {
-    max-height: 400px;
+    max-height: 405px;
     overflow-y: auto;
     display: block;
 }
