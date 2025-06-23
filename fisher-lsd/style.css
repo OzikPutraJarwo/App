@@ -79,16 +79,16 @@ th {
 }
 
 #letterTable tr th {
-    position: relative;
-    user-select: none;
+  position: relative;
+  user-select: none;
 }
 
 #letterTable tr th svg {
-    width: 15px;
-    position: absolute;
-    top: 50%;
-    right: 1rem;
-    transform: translateY(-50%);
+  width: 15px;
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
 }
 
 #letterTable tr th.opacity svg {
@@ -96,16 +96,23 @@ th {
 }
 
 #letterTable tr th.rev svg {
-    margin-top: -15px;
-    transform: rotate(180deg) translateY(-50%);
+  margin-top: -15px;
+  transform: rotate(180deg) translateY(-50%);
 }
 
 #letterTable tr th.rev svg {
-    margin-top: -15px;
-    transform: rotate(180deg) translateY(-50%);
+  margin-top: -15px;
+  transform: rotate(180deg) translateY(-50%);
 }
 
 .resp-table {
   overflow: auto;
   padding: 1px;
+}
+
+@media (max-width: 600px) {
+  th#renderbyData,
+  th#renderbyMerged {
+    padding-right: 2.5rem;
+  }
 }
