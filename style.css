@@ -1,7 +1,8 @@
 .sub-title {
   font-size: 1.5rem;
   font-weight: 700;
-  margin: 2rem 0;
+  margin: 2rem auto;
+  max-width: 1440px;
 }
 
 .sub-title:first-child {
