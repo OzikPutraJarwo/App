@@ -1,3 +1,13 @@
+.sub-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 2rem 0;
+}
+
+.sub-title:first-child {
+  margin-top: 0;
+}
+
 .main.wrap {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -100,6 +110,9 @@
 }
 
 @media (max-width: 480px) {
+  .sub-title:first-child {
+    margin-top: .5rem;
+  }
   .main.wrap {
     gap: 1.5rem
   }
