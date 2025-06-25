@@ -2,7 +2,7 @@ function hitungDMRT() {
   const inputPerlakuan = document.querySelector('#input-perlakuan').value;
   const inputUlangan = document.querySelector('#input-ulangan').value;
   const inputKTG = document.querySelector('#input-ktg').value;
-  const inputSig = 1 - (document.querySelector('#input-sig').value * 0.01);
+  const inputSig = (document.querySelector('#input-sig').value * 0.01);
 
   const valueDBG = (inputPerlakuan - 1) * (inputUlangan - 1);
   const valueSD = Math.sqrt(inputKTG / inputUlangan);
@@ -20,8 +20,8 @@ function hitungDMRT() {
   elementDMRTC.innerHTML = `<th>DMRT Hitung</th>`;
   for (let i = 2; i <= inputPerlakuan; i++) {
     elementDMRTP.innerHTML += `<td>${i}</td>`;
-    elementDMRTT.innerHTML += `<td>${jStat.tukey.inv(inputSig, i, valueDBG).toFixed(2)}</td>`;
-    elementDMRTC.innerHTML += `<td data-p="${i}">${(valueSD * jStat.tukey.inv(inputSig, i, valueDBG)).toFixed(2)}</td>`;
+    elementDMRTT.innerHTML += `<td>${jrStat.studentq.inv(inputSig, i, valueDBG).toFixed(2)}</td>`;
+    elementDMRTC.innerHTML += `<td data-p="${i}">${(valueSD * jrStat.studentq.inv(inputSig, i, valueDBG)).toFixed(2)}</td>`;
   }
 }
 
