@@ -259,11 +259,14 @@ function initClient() {
 function updateSigninStatus(isSignedIn) {
     if (isSignedIn) {
         console.log('Signed in');
+        showUserInfo();
         loadDataFromDrive();
     } else {
         console.log('Signed out');
+        document.getElementById('user-info').innerText = 'Not logged in';
     }
 }
+
 
 function handleSignInClick() {
     gapi.auth2.getAuthInstance().signIn();
@@ -326,3 +329,15 @@ function loadDataFromDrive() {
     });
 }
 
+function showUserInfo() {
+    const user = gapi.auth2.getAuthInstance().currentUser.get();
+    const profile = user.getBasicProfile();
+
+    if (profile) {
+        const name = profile.getName();
+        const email = profile.getEmail();
+        document.getElementById('user-info').innerText = `Logged in as ${name} (${email})`;
+    } else {
+        document.getElementById('user-info').innerText = '';
+    }
+}
