@@ -42,7 +42,7 @@ function handleSignoutClick() {
 }
 
 function authOnLogin() {
-  showNotification('Logged in', 'success');
+  // showNotification('Logged in', 'success');
   document.querySelector('header').classList.add('logged-in');
   ['login-btn'].forEach(id => document.getElementById(id).style.display = 'none');
   ['logout-btn'].forEach(id => document.getElementById(id).style.display = '');
@@ -50,7 +50,7 @@ function authOnLogin() {
 }
 
 function authOnLogout() {
-  showNotification('Logged out', 'info');
+  // showNotification('Logged out', 'info');
   document.querySelector('header').classList.remove('logged-in');
   ['login-btn'].forEach(id => document.getElementById(id).style.display = '');
   ['logout-btn'].forEach(id => document.getElementById(id).style.display = 'none');
