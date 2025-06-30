@@ -203,6 +203,7 @@ header {
   display: grid;
   align-items: center;
   grid-template-columns: 31px 1fr 90px;
+  gap: 1.5rem;
 }
 
 .logged-in .header.wrap {
