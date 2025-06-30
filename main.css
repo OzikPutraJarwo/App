@@ -418,6 +418,14 @@ footer span {
     font-size: 1.1rem;
   }
 
+  .site-user #user-name {
+    display: none;
+  }
+
+  .logged-in .header.wrap {
+    grid-template-columns: 31px 1fr 31px 31px;
+  }
+
   main {
     padding: 1.5rem;
   }
