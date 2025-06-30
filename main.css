@@ -202,7 +202,19 @@ header {
 .header.wrap {
   display: grid;
   align-items: center;
-  gap: 1.5rem;
+  grid-template-columns: 31px 1fr 90px;
+}
+
+.logged-in .header.wrap {
+  grid-template-columns: 31px 1fr 125px 31px
+}
+
+.home .header.wrap {
+  grid-template-columns: 1fr 90px;
+}
+
+.home .logged-in .header.wrap {
+  grid-template-columns: 1fr 125px 31px
 }
 
 .site-button {
@@ -230,18 +242,14 @@ header {
     rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
 }
 
+.site-back {
+  display: none;
+}
+
 .site-title {
   font-weight: bold;
   font-size: 1.25rem;
   font-weight: 900;
-}
-
-.header.wrap {
-  grid-template-columns: 31px 1fr 90px;
-}
-
-.logged-in .header.wrap {
-  grid-template-columns: 31px 1fr 125px 31px
 }
 
 .site-login {
@@ -414,16 +422,20 @@ footer span {
     gap: 1.2rem;
   }
 
+  .logged-in .header.wrap {
+    grid-template-columns: 31px 1fr 31px 31px;
+  }
+
+  .home .logged-in .header.wrap {
+    grid-template-columns: 1fr 31px 31px
+  }
+
   .site-title {
     font-size: 1.1rem;
   }
 
   .site-user #user-name {
     display: none;
-  }
-
-  .logged-in .header.wrap {
-    grid-template-columns: 31px 1fr 31px 31px;
   }
 
   main {
