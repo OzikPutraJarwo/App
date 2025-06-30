@@ -1,570 +1,390 @@
-// Formatting utilities
-Date.prototype.formatDate = function() {
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  return this.toLocaleDateString('en-US', options);
-};
+// ------ GLOBAL ------
 
-function formatNumber(number) {
-  return "₩ " + number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+let fileId = null;
+let data = {};
+let tags = {};
+let filter = { date: '', tag: '' };
+
+// ------ UTILITIES ------
+
+function formatNumber(num) {
+  return Number(num).toLocaleString();
 }
 
-// Global variables
-let data = [];
-let modalCallback = null;
-let userProfile = null;
-
-// Google API configuration
-const CLIENT_ID = '520286422685-nn0k38emnng9iuu61a2bkudgn2a8ajdd.apps.googleusercontent.com';
-const API_KEY = 'AIzaSyD_LtwkqAb7sGyBiwa0UAqLnaNydGfd7Xo';
-const SCOPES = 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.profile';
-
-let tokenClient;
-let gapiInited = false;
-let gisInited = false;
-
-// Modal functions
-function showModal(title, contentHTML, callback) {
-  document.getElementById('modal-title').innerText = title;
-  document.getElementById('modal-body').innerHTML = contentHTML;
-  document.getElementById('modal').classList.remove('hide');
-  modalCallback = callback;
-
-  const okBtn = document.getElementById('modal-ok');
-  const cancelBtn = document.getElementById('modal-cancel');
-
-  function handleKey(e) {
-    if (e.key === 'Enter') { e.preventDefault(); okBtn.click(); }
-    if (e.key === 'Escape') { e.preventDefault(); cancelBtn.click(); }
-  }
-
-  document.addEventListener('keydown', handleKey);
-
-  okBtn.onclick = () => { if (modalCallback) modalCallback(); closeModal(); };
-  cancelBtn.onclick = closeModal;
-
-  function closeModal() {
-    document.getElementById('modal').classList.add('hide');
-    modalCallback = null;
-    document.removeEventListener('keydown', handleKey);
-  }
+function getTagColor(tag) {
+  return tags[tag] ? tags[tag].color : '#000';
 }
 
-// Section management
-function showSectionModal(isEdit = false, index = null) {
-  const currentName = isEdit ? data[index].name : '';
-  showModal(
-    isEdit ? 'Edit Section' : 'Add New Section',
-    `<label>Name: <input type="text" id="sectionName" value="${currentName}"></label>`,
-    () => {
-      const name = document.getElementById('sectionName').value;
-      if (name.trim()) {
-        if (isEdit) {
-          data[index].name = name;
-        } else {
-          data.push({ name, items: [] });
-        }
-        saveData();
-      }
-    }
-  );
+// ------ GOOGLE API ------
+
+function appOnLogin() {
+  ['add-item-btn', 'save-data-btn', 'tag-editor-btn'].forEach(id => document.getElementById(id).style.display = '');
+  loadDataFromDrive();
 }
 
-function deleteSection(index) {
-  showModal('Confirmation', 'Delete this section?', () => {
-    data.splice(index, 1);
-    saveData();
-  });
+function appOnLogout() {
+  ['add-item-btn', 'save-data-btn', 'tag-editor-btn'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('data-container').innerHTML = '';
+  data = {};
+  tags = {};
+  fileId = null;
 }
 
-// Item management
-function showItemModal(sectionIndex, isEdit = false, itemIndex = null) {
-  const item = isEdit ? data[sectionIndex].items[itemIndex] : { 
-    tanggal: '', 
-    nama: '', 
-    deskripsi: '', 
-    tipe: 'income', 
-    amount: 0 
-  };
+loginCallbacks.push(appOnLogin);
+logoutCallbacks.push(appOnLogout);
 
-  showModal(
-    isEdit ? 'Edit Item' : 'Add New Item', 
-    `
-    <label>Name: <input type="text" id="nama" value="${item.nama}"></label>
-    <label>Description: <input type="text" id="deskripsi" value="${item.deskripsi}"></label>
-    <label>Date: <input type="date" id="tanggal" value="${item.tanggal}"></label>
-    <label>Type: 
-      <select id="tipe">
-        <option value="income" ${item.tipe === 'income' ? 'selected' : ''}>Income</option>
-        <option value="outcome" ${item.tipe === 'outcome' ? 'selected' : ''}>Outcome</option>
-      </select>
-    </label>
-    <label>Amount: <input type="number" id="amount" value="${item.amount}"></label>
-    `, 
-    () => {
-      const newItem = {
-        tanggal: document.getElementById('tanggal').value,
-        nama: document.getElementById('nama').value,
-        deskripsi: document.getElementById('deskripsi').value,
-        tipe: document.getElementById('tipe').value,
-        amount: parseFloat(document.getElementById('amount').value) || 0
-      };
-      
-      if (isEdit) {
-        data[sectionIndex].items[itemIndex] = newItem;
-      } else {
-        data[sectionIndex].items.push(newItem);
-      }
-      saveData();
-    }
-  );
+// ------ DATA --------
+
+function addItem(item) {
+  const date = new Date(item.date);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  if (!data[year]) data[year] = {};
+  if (!data[year][month]) data[year][month] = {};
+  if (!data[year][month][day]) data[year][month][day] = [];
+  data[year][month][day].push(item);
 }
 
-function deleteItem(sectionIndex, itemIndex) {
-  showModal('Confirmation', 'Delete this item?', () => {
-    data[sectionIndex].items.splice(itemIndex, 1);
-    saveData();
-  });
+function deleteItem(path, index) {
+  const [year, month, day] = path.split('/');
+  data[year][month][day].splice(index, 1);
+  if (data[year][month][day].length === 0) delete data[year][month][day];
+  if (Object.keys(data[year][month]).length === 0) delete data[year][month];
+  if (Object.keys(data[year]).length === 0) delete data[year];
 }
 
-// Rendering functions
-function render() {
-  const container = document.getElementById('sections');
+// ------ RENDER --------
+
+function renderData() {
+  const container = document.getElementById('data-container');
   container.innerHTML = '';
-
-  data.forEach((section, sectionIndex) => {
-    const sectionDiv = document.createElement('div');
-    sectionDiv.className = 'section item';
-
-    const totalPemasukan = section.items
-      .filter(i => i.tipe === 'income')
-      .reduce((sum, item) => sum + item.amount, 0);
-      
-    const totalPengeluaran = section.items
-      .filter(i => i.tipe === 'outcome')
-      .reduce((sum, item) => sum + item.amount, 0);
-      
-    const selisih = totalPemasukan - totalPengeluaran;
-
-    sectionDiv.innerHTML = `
-      <div class="section-header">
-        <div class="section-title">${section.name}</div>
-        <div class="section-actions">
-          <button onclick="showSectionModal(true, ${sectionIndex})">
-            <svg style="padding:3px" xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 1025 1023">
-              <path fill="var(--blue)" d="M896.428 1023h-768q-53 0-90.5-37.5T.428 895V127q0-53 37.5-90t90.5-37h576l-128 127h-384q-27 0-45.5 19t-18.5 45v640q0 27 19 45.5t45 18.5h640q27 0 45.5-18.5t18.5-45.5V447l128-128v576q0 53-37.5 90.5t-90.5 37.5zm-576-464l144 144l-208 64zm208 96l-160-159l479-480q17-16 40.5-16t40.5 16l79 80q16 16 16.5 39.5t-16.5 40.5z"/>
-            </svg>
-          </button>
-          <button onclick="showItemModal(${sectionIndex})">
-            <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 24 24">
-              <path fill="var(--green)" d="M17 13h-4v4h-2v-4H7v-2h4V7h2v4h4m2-8H5c-1.11 0-2 .89-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Z"/>
-            </svg>
-          </button>
-          <button onclick="deleteSection(${sectionIndex})">
-            <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 16 16">
-              <path fill="var(--red)" fill-rule="evenodd" d="M4 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4Zm1.75 5.25a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-4.5Z" clip-rule="evenodd"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div class="section-stats money-container">
-        <div class="money-wrap income">
-          <div class="section-stat-title">Income</div>
-          <div class="section-stat-value">${formatNumber(totalPemasukan)}</div>
-        </div>
-        <div class="money-wrap outcome">
-          <div class="section-stat-title">Outcome</div>
-          <div class="section-stat-value">${formatNumber(totalPengeluaran)}</div>
-        </div>
-        <div class="money-wrap balance">
-          <div class="section-stat-title">Balance</div>
-          <div class="section-stat-value">${formatNumber(selisih)}</div>
-        </div>
-      </div>
-      <div class="section-items" id="items-${sectionIndex}"></div>
-    `;
-
-    const itemsDiv = sectionDiv.querySelector(`#items-${sectionIndex}`);
-
-    section.items.forEach((item, itemIndex) => {
-      const formattedDate = new Date(item.tanggal).formatDate();
-      const itemDiv = document.createElement('div');
-      itemDiv.className = `items ${item.tipe}`;
-      itemDiv.innerHTML = `
-        <div class="items-info">
-          <span class="title">${item.nama}</span>
-          <span class="date">${formattedDate}</span>
-          <span class="desc">${item.deskripsi}</span>
-        </div>
-        <div class="items-${item.tipe}">
-          <span class="value">${formatNumber(item.amount)}</span>
-        </div>
-        <div class="items-actions">
-          <button onclick="showItemModal(${sectionIndex}, true, ${itemIndex})">
-            <svg style="padding:3px" xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 1025 1023">
-              <path fill="var(--blue)" d="M896.428 1023h-768q-53 0-90.5-37.5T.428 895V127q0-53 37.5-90t90.5-37h576l-128 127h-384q-27 0-45.5 19t-18.5 45v640q0 27 19 45.5t45 18.5h640q27 0 45.5-18.5t18.5-45.5V447l128-128v576q0 53-37.5 90.5t-90.5 37.5zm-576-464l144 144l-208 64zm208 96l-160-159l479-480q17-16 40.5-16t40.5 16l79 80q16 16 16.5 39.5t-16.5 40.5z"/>
-            </svg>
-          </button>
-          <button onclick="deleteItem(${sectionIndex}, ${itemIndex})">
-            <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 16 16">
-              <path fill="var(--red)" fill-rule="evenodd" d="M4 2a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H4Zm1.75 5.25a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-4.5Z" clip-rule="evenodd"/>
-            </svg>
-          </button>
-        </div>
-      `;
-      itemsDiv.appendChild(itemDiv);
-    });
-
-    container.appendChild(sectionDiv);
-  });
-
-  updateOverallStats();
-}
-
-function updateOverallStats() {
   let totalIncome = 0;
-  let totalOutcome = 0;
+  let totalExpense = 0;
+  const tagTotals = {};
 
-  data.forEach(section => {
-    section.items.forEach(item => {
-      if (item.tipe === 'income') {
-        totalIncome += item.amount;
-      } else if (item.tipe === 'outcome') {
-        totalOutcome += item.amount;
+  for (const year in data) {
+    const yearDiv = document.createElement('div');
+    yearDiv.className = 'year';
+    yearDiv.innerHTML = `<div class="title">${year}</div>`;
+    let yearIncome = 0, yearExpense = 0;
+
+    for (const month in data[year]) {
+      const monthDiv = document.createElement('div');
+      monthDiv.className = 'month';
+      monthDiv.innerHTML = `<div class="title">${month}</div>`;
+      let monthIncome = 0, monthExpense = 0;
+
+      for (const day in data[year][month]) {
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'day';
+        dayDiv.innerHTML = `<div class="title">${day}</div>`;
+        let dayIncome = 0, dayExpense = 0;
+        const ul = document.createElement('ul');
+
+        data[year][month][day].forEach((item, idx) => {
+          if ((filter.date && item.date !== filter.date) || (filter.tag && item.tag !== filter.tag)) return;
+
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <span class="tag-label" style="background:${getTagColor(item.tag)}">${item.tag}</span> 
+            <strong>${item.title}</strong> - ${item.type} - ${formatNumber(item.amount)}
+            <span class="actions">
+              <button onclick="editItem('${year}/${month}/${day}', ${idx})">Edit</button>
+              <button onclick="deleteItemConfirm('${year}/${month}/${day}', ${idx})">Delete</button>
+            </span>
+          `;
+          ul.appendChild(li);
+
+          if (item.type === 'income') dayIncome += Number(item.amount);
+          else dayExpense += Number(item.amount);
+
+          tagTotals[item.tag] = (tagTotals[item.tag] || 0) + Number(item.amount);
+        });
+
+        if (ul.children.length > 0) {
+          dayDiv.appendChild(ul);
+          const dayBalance = dayIncome - dayExpense;
+          dayDiv.innerHTML += `<strong>Day Total - Income: ${formatNumber(dayIncome)}, Expense: ${formatNumber(dayExpense)}, Balance: ${formatNumber(dayBalance)}</strong>`;
+          monthIncome += dayIncome;
+          monthExpense += dayExpense;
+          monthDiv.appendChild(dayDiv);
+        }
       }
-    });
-  });
 
-  const balance = totalIncome - totalOutcome;
-
-  document.getElementById('wrap-income').innerText = formatNumber(totalIncome);
-  document.getElementById('wrap-outcome').innerText = formatNumber(totalOutcome);
-  document.getElementById('wrap-balance').innerText = formatNumber(balance);
-}
-
-// Google Drive integration
-async function uploadDataToDrive() {
-  try {
-    const token = gapi.client.getToken();
-    if (!token) {
-      updateLog('Please login first.');
-      return;
+      const monthBalance = monthIncome - monthExpense;
+      if (monthIncome > 0 || monthExpense > 0) {
+        monthDiv.innerHTML += `<strong>Month Total - Income: ${formatNumber(monthIncome)}, Expense: ${formatNumber(monthExpense)}, Balance: ${formatNumber(monthBalance)}</strong>`;
+        yearIncome += monthIncome;
+        yearExpense += monthExpense;
+        yearDiv.appendChild(monthDiv);
+      }
     }
 
-    updateLog('Loading data...');
+    const yearBalance = yearIncome - yearExpense;
+    if (yearIncome > 0 || yearExpense > 0) {
+      yearDiv.innerHTML += `<strong>Year Total - Income: ${formatNumber(yearIncome)}, Expense: ${formatNumber(yearExpense)}, Balance: ${formatNumber(yearBalance)}</strong>`;
+      totalIncome += yearIncome;
+      totalExpense += yearExpense;
+      container.appendChild(yearDiv);
+    }
+  }
 
-    const response = await gapi.client.drive.files.list({
-      spaces: 'appDataFolder',
+  const totalBalance = totalIncome - totalExpense;
+  container.innerHTML += `<h2>Overall Total - Income: ${formatNumber(totalIncome)}, Expense: ${formatNumber(totalExpense)}, Balance: ${formatNumber(totalBalance)}</h2>`;
+
+}
+
+// ------ MODAL --------
+
+function openItemModal(edit = false) {
+  if (!edit) {
+    ['item-date', 'item-type', 'item-title', 'item-amount'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('edit-item-index').value = '';
+    document.getElementById('edit-item-path').value = '';
+  }
+  updateTagDropdown();
+  document.getElementById('item-modal').style.display = 'block';
+}
+
+function closeItemModal() { document.getElementById('item-modal').style.display = 'none'; }
+
+function editItem(path, index) {
+  const [year, month, day] = path.split('/');
+  const item = data[year][month][day][index];
+  document.getElementById('item-date').value = item.date;
+  document.getElementById('item-type').value = item.type;
+  document.getElementById('item-title').value = item.title;
+  document.getElementById('item-amount').value = item.amount;
+  document.getElementById('edit-item-path').value = path;
+  document.getElementById('edit-item-index').value = index;
+  updateTagDropdown();
+  document.getElementById('item-tag').value = item.tag;
+  openItemModal(true);
+}
+
+function saveItem() {
+  const item = {
+    date: document.getElementById('item-date').value,
+    type: document.getElementById('item-type').value,
+    title: document.getElementById('item-title').value,
+    amount: document.getElementById('item-amount').value,
+    tag: document.getElementById('item-tag').value
+  };
+  if (!item.date || !item.amount || !item.title || !item.tag) {
+    showNotification('Please fill all fields', 'error');
+    return;
+  }
+
+  const editIndex = document.getElementById('edit-item-index').value;
+  const editPath = document.getElementById('edit-item-path').value;
+
+  if (editIndex && editPath) {
+    deleteItem(editPath, editIndex);
+  }
+  addItem(item);
+  renderData();
+  closeItemModal();
+  showNotification('Item saved', 'success');
+  saveDataToDrive(); // <<< AUTO SAVE
+}
+
+function deleteItemConfirm(path, index) {
+  if (confirm('Are you sure to delete this item?')) {
+    deleteItem(path, index);
+    renderData();
+    showNotification('Item deleted', 'success');
+    saveDataToDrive(); // <<< AUTO SAVE
+  }
+}
+
+
+// ------ TAG --------
+
+function openTagModal() { document.getElementById('tag-modal').style.display = 'block'; }
+function closeTagModal() { document.getElementById('tag-modal').style.display = 'none'; }
+
+function saveTag() {
+  const name = document.getElementById('tag-name').value;
+  const color = document.getElementById('tag-color').value;
+  if (!name) {
+    showNotification('Tag name required!', 'error');
+    return;
+  }
+  tags[name] = { color };
+  updateTagDropdown();
+  updateFilterTagDropdown();
+  closeTagModal();
+  showNotification('Tag added', 'success');
+  saveDataToDrive(); // <<< AUTO SAVE
+}
+
+function updateTagDropdown() {
+  const tagSelect = document.getElementById('item-tag');
+  tagSelect.innerHTML = '';
+  for (const name in tags) {
+    const option = document.createElement('option');
+    option.value = name;
+    option.text = name;
+    option.setAttribute('style', `background-color: ${tags[name].color}`);
+    tagSelect.appendChild(option);
+  }
+}
+
+// ------ DRIVE ------
+
+async function loadDataFromDrive() {
+  try {
+    const res = await gapi.client.drive.files.list({
+      q: "name='fintrack-kodejarwo' and trashed=false",
       fields: 'files(id, name)',
-      q: "name='finance-data.kjf'",
+      spaces: 'drive',
     });
 
-    const existingFile = response.result.files[0];
-    const fileContent = JSON.stringify(data);
-    const file = new Blob([fileContent], { type: 'application/json' });
+    if (res.result.files && res.result.files.length > 0) {
+      fileId = res.result.files[0].id;
+      const file = await gapi.client.drive.files.get({
+        fileId: fileId,
+        alt: 'media'
+      });
+      const json = file.result;
+      data = json.data || {};
+      tags = json.tags || {};
+      updateTagDropdown();
+      renderData();
+    } else {
+      fileId = null;
+    }
+    showNotification('Data loaded', 'success');
+  } catch (e) {
+    console.log(e);
+    showNotification('Failed to load', 'error');
+  }
+}
 
+// ------ SAVE AUTOMATIC WITH STATUS ------
+
+async function saveDataToDrive() {
+  showNotification('Saving...');
+  try {
+    const fileContent = JSON.stringify({ data, tags });
+    const file = new Blob([fileContent], { type: 'application/json' });
     const metadata = {
-      name: 'finance-data.kjf',
-      mimeType: 'application/json',
+      name: 'fintrack-kodejarwo',
+      mimeType: 'application/json'
     };
 
-    if (existingFile) {
-      updateLog('Updating file...');
-
-      const boundary = '-------314159265358979323846';
-      const delimiter = "\r\n--" + boundary + "\r\n";
-      const close_delim = "\r\n--" + boundary + "--";
-      
-      const multipartRequestBody =
-        delimiter +
-        'Content-Type: application/json\r\n\r\n' +
-        JSON.stringify(metadata) +
-        delimiter +
-        'Content-Type: application/json\r\n\r\n' +
-        fileContent +
-        close_delim;
-
-      const request = gapi.client.request({
-        path: '/upload/drive/v3/files/' + existingFile.id,
-        method: 'PATCH',
-        params: {
-          uploadType: 'multipart',
-          fields: 'id',
-        },
-        headers: {
-          'Content-Type': 'multipart/related; boundary="' + boundary + '"'
-        },
-        body: multipartRequestBody
-      });
-
-      await request;
-      updateLog('File updated successfully!', true); // Status sukses
-      return;
-    }
-
-    updateLog('Creating new file...');
-
+    const accessToken = gapi.auth.getToken().access_token;
     const form = new FormData();
     form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
     form.append('file', file);
 
-    const uploadResponse = await fetch(
-      'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
-      {
-        method: 'POST',
-        headers: new Headers({
-          'Authorization': 'Bearer ' + token.access_token
-        }),
-        body: form,
-      }
-    );
-
-    if (!uploadResponse.ok) {
-      throw new Error('Upload failed: ' + uploadResponse.statusText);
-    }
-
-    const result = await uploadResponse.json();
-    updateLog('File uploaded successfully!', true); // Status sukses
-  } catch (error) {
-    console.error('Upload error:', error);
-    updateLog('Failed to upload data to Google Drive: ' + error.message);
-  }
-}
-
-async function downloadDataFromDrive() {
-  const token = gapi.client.getToken();
-  if (!token) {
-    updateLog('Please login first.');
-    return;
-  }
-
-  updateLog('Loading from Drive...');
-
-  const response = await gapi.client.drive.files.list({
-    spaces: 'appDataFolder',
-    fields: 'files(id, name)',
-    q: "name='finance-data.kjf'",
-  });
-
-  if (response.result.files.length > 0) {
-    const file = response.result.files[0];
-    const fileId = file.id;
-
-    updateLog('Downloading file...');
-
-    const download = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-      headers: new Headers({ 'Authorization': 'Bearer ' + token.access_token }),
+    const res = await fetch(fileId ?
+      `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart&fields=id` :
+      `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id`, {
+      method: fileId ? 'PATCH' : 'POST',
+      headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+      body: form
     });
 
-    if (!download.ok) {
-      throw new Error('Failed to download file');
-    }
+    if (!res.ok) throw new Error('Save failed');
 
-    const result = await download.json();
-    data = result;
-    saveData();
-    updateLog('Load from Drive successful!', true); // Status sukses
-  } else {
-    data = [];
-    await uploadDataToDrive();
-    updateLog('No file found. Created a new file.', true); // Status sukses
+    const result = await res.json();
+    fileId = result.id;
+    showNotification('Saved', 'success');
+  } catch (e) {
+    console.error(e);
+    showNotification('Save failed', 'error');
   }
 }
 
-// User profile functions
-async function getUserProfile() {
-  try {
-    const response = await fetch('https://www.googleapis.com/oauth2/v1/userinfo?alt=json', {
-      headers: {
-        'Authorization': `Bearer ${gapi.client.getToken().access_token}`
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch user profile');
-    }
-    
-    userProfile = await response.json();
-    updateUserProfileUI();
-  } catch (error) {
-    console.error('Error fetching user profile:', error);
-  }
-}
+// ------ TAG EDITOR ------
 
-function updateUserProfileUI() {
-  const loginInfo = document.getElementById('login-info');
-  const usernameElement = document.getElementById('username');
-  if (userProfile) {
-    usernameElement.innerText = `, ${userProfile.name || ''}`;
-    document.getElementById('account').classList.add('hide');
-    loginInfo.innerHTML = `
-      <div class="user-profile">
-        <img src="${userProfile.picture || ''}" alt="Profile" width="30" height="30">
-        <div>
-          <div class="user-name">${userProfile.name || 'User'}</div>
-          <div class="user-email">${userProfile.email || ''}</div>
-        </div>
+function openTagEditor() {
+  const container = document.getElementById('tag-list');
+  container.innerHTML = '';
+  for (const tag in tags) {
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <input type="text" value="${tag}" id="edit-tag-${tag}">
+      <input type="color" value="${tags[tag].color}" id="edit-color-${tag}">
+      <div class="modal-actions">
+        <button onclick="renameTag('${tag}')" class="ok">Update</button>
+        <button onclick="deleteTag('${tag}')" class="cancel">Delete</button>
       </div>
     `;
-  } else {
-    loginInfo.innerHTML = 'Not logged in. Login to save your data.';
+    container.appendChild(div);
   }
+  document.getElementById('tag-editor-modal').style.display = 'block';
 }
 
-// Google API initialization
-function gapiLoaded() {
-  gapi.load('client', initializeGapiClient);
+function closeTagEditor() {
+  document.getElementById('tag-editor-modal').style.display = 'none';
 }
 
-async function initializeGapiClient() {
-  await gapi.client.init({
-    apiKey: API_KEY,
-    discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
-  });
-  gapiInited = true;
-  
-  // Coba auto-login dari localStorage
-  const savedToken = localStorage.getItem('googleAuthToken');
-  if (savedToken) {
-    try {
-      const token = JSON.parse(savedToken);
-      
-      // Cek expiry token
-      if (token.expiry > Date.now()) {
-        gapi.client.setToken(token);
-        await getUserProfile();
-        await downloadDataFromDrive();
-        render();
-        return;
+function renameTag(oldName) {
+  const newName = document.getElementById(`edit-tag-${oldName}`).value.trim();
+  const newColor = document.getElementById(`edit-color-${oldName}`).value;
+  if (!newName) {
+    showNotification('Tag name cannot be empty!', 'error');
+    return;
+  }
+  if (newName !== oldName) {
+    if (tags[newName]) {
+      showNotification('Tag name already exists!', 'error');
+      return;
+    }
+    tags[newName] = { color: newColor };
+    delete tags[oldName];
+
+    // Update all items using the old tag
+    for (const year in data) {
+      for (const month in data[year]) {
+        for (const day in data[year][month]) {
+          data[year][month][day].forEach(item => {
+            if (item.tag === oldName) item.tag = newName;
+          });
+        }
       }
-    } catch (e) {
-      console.log('Invalid saved token', e);
-      localStorage.removeItem('googleAuthToken');
+    }
+  } else {
+    tags[newName].color = newColor;
+  }
+  updateTagDropdown();
+  renderData();
+  saveDataToDrive();
+  openTagEditor();
+  showNotification('Tag updated', 'success');
+}
+
+function deleteTag(name) {
+  if (!confirm(`Delete tag "${name}"? Items with this tag will NOT be deleted but their tag will be blank.`)) return;
+  delete tags[name];
+
+  // Remove tag from items
+  for (const year in data) {
+    for (const month in data[year]) {
+      for (const day in data[year][month]) {
+        data[year][month][day].forEach(item => {
+          if (item.tag === name) item.tag = '';
+        });
+      }
     }
   }
+  updateTagDropdown();
+  renderData();
+  saveDataToDrive();
+  openTagEditor();
+  showNotification('Tag deleted', 'success');
 }
 
-function gisLoaded() {
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID,
-    scope: SCOPES,
-    callback: async (resp) => {
-      if (resp.error !== undefined) {
-        throw (resp);
-      }
-      
-      // Simpan token ke localStorage
-      const tokenData = {
-        ...resp,
-        expiry: Date.now() + (resp.expires_in * 1000) // Hitung waktu expiry
-      };
-      localStorage.setItem('googleAuthToken', JSON.stringify(tokenData));
-      
-      gapi.client.setToken(resp);
-      await getUserProfile();
-      await downloadDataFromDrive();
-      render();
-    },
-    prompt: '' // Tidak tampilkan prompt jika token masih valid
-  });
-  gisInited = true;
-  maybeEnableButtons();
-}
+// ------ EVENTS ------
 
-function maybeEnableButtons() {
-  if (gapiInited && gisInited) {
-    document.getElementById('authorize_button').style.display = 'block';
-    document.getElementById('signout_button').style.display = 'none';
-  }
-}
 
-function handleAuthClick() {
-  tokenClient.callback = async (resp) => {
-    if (resp.error !== undefined) {
-      throw (resp);
-    }
-    
-    gapi.client.setToken(resp);
-    await getUserProfile();
-    await downloadDataFromDrive();
-    updateLog('Login successful!', true);
-    document.querySelector(".auth-buttons").classList.add('hide');
-  };
+document.getElementById('add-item-btn').onclick = () => openItemModal();
+document.getElementById('save-data-btn').onclick = saveDataToDrive;
+document.getElementById('save-item-btn').onclick = saveItem;
+document.getElementById('tag-editor-btn').onclick = openTagEditor;
 
-  // If we don't have a token or it's expired, prompt for consent
-  if (!gapi.client.getToken()) {
-    tokenClient.requestAccessToken({ prompt: 'consent' });
-  } else {
-    // If we have a valid token, just use it
-    tokenClient.requestAccessToken({ prompt: '' });
-  }
-}
+// ------ INIT ------
 
-function handleSignoutClick() {
-  const token = gapi.client.getToken();
-  if (token) {
-    google.accounts.oauth2.revoke(token.access_token);
-    gapi.client.setToken('');
-    localStorage.removeItem('googleAuthToken');
-    userProfile = null;
-    updateUserProfileUI();
-    data = [];
-    render();
-  }
-}
-
-function isLoggedIn() {
-  return !!gapi.client.getToken();
-}
-
-// Data management
-function saveData() {
-  if (isLoggedIn()) {
-    uploadDataToDrive();
-  }
-  render();
-}
-
-// Initialize the app
-function initializeApp() {
-  // Create UI buttons for Drive operations
-  // const btnContainer = document.createElement('div');
-  // btnContainer.className = 'drive-buttons';
-  
-  // const uploadDriveBtn = document.createElement('button');
-  // uploadDriveBtn.innerText = 'Save to Drive';
-  // uploadDriveBtn.onclick = uploadDataToDrive;
-
-  // const downloadDriveBtn = document.createElement('button');
-  // downloadDriveBtn.innerText = 'Load from Drive';
-  // downloadDriveBtn.onclick = downloadDataFromDrive;
-
-  // btnContainer.appendChild(uploadDriveBtn);
-  // btnContainer.appendChild(downloadDriveBtn);
-  // document.body.appendChild(btnContainer);
-
-  // Try to auto-login when the app loads
-  if (google.accounts.oauth2.hasGrantedAllScopes(
-    gapi.client.getToken(), 
-    'https://www.googleapis.com/auth/drive.appdata',
-    'https://www.googleapis.com/auth/userinfo.profile'
-  )) {
-    handleAuthClick();
-  }
-}
-
-// Start the app
-window.addEventListener('DOMContentLoaded', initializeApp);
-
-// Logs
-function updateLog(message, isSuccess = false) {
-  const logsElement = document.getElementById('logs');
-  logsElement.innerHTML = message;
-  logsElement.classList.add('show');
-
-  if (isSuccess) {
-    setTimeout(() => {
-      logsElement.innerHTML = '';
-      logsElement.classList.remove('show');
-    }, 2000);
-  }
-}
