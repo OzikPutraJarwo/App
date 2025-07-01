@@ -64,6 +64,10 @@ async function getUserInfo() {
     }
   });
   const userInfo = await response.json();
+  if (userInfo.name === undefined && userInfo.picture === undefined) {
+    handleSignoutClick();
+    return;
+  }
   document.getElementById('user-pic').src = userInfo.picture;
   document.getElementById('user-name').innerText = userInfo.name;
   document.getElementById('user-info').style.display = 'block';
