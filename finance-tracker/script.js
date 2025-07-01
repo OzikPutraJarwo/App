@@ -80,23 +80,36 @@ function renderData() {
       let monthIncome = 0, monthExpense = 0;
 
       for (const day in data[year][month]) {
-        const dayDiv = document.createElement('div');
+        const dayDiv = document.createElement('table');
         dayDiv.className = 'day';
-        dayDiv.innerHTML = `<div class="title">${day}</div>`;
+        // dayDiv.innerHTML = `<div class="title">${day}</div>`;
         let dayIncome = 0, dayExpense = 0;
-        const ul = document.createElement('ul');
+        dayDiv.innerHTML += `
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Type</th>
+              <th>Amount</th>
+            </tr>
+          </thead>`;
+        const ul = document.createElement('tbody');
 
         data[year][month][day].forEach((item, idx) => {
           if ((filter.date && item.date !== filter.date) || (filter.tag && item.tag !== filter.tag)) return;
 
-          const li = document.createElement('li');
+          const li = document.createElement('tr');
           li.innerHTML = `
-            <span class="tag-label" style="background:${getTagColor(item.tag)}">${item.tag}</span> 
-            <strong>${item.title}</strong> - ${item.type} - ${formatNumber(item.amount)}
-            <span class="actions">
+            <td class="date">${item.date.split('-')[2]}</td>
+            <td class="name">${item.title}</td>
+            <td class="category"><span style="background:${getTagColor(item.tag)}">${item.tag}</span></td>
+            <td class="type">${item.type}</td>
+            <td class="amount">${formatNumber(item.amount)}</td>
+            <td class="actions">
               <button onclick="editItem('${year}/${month}/${day}', ${idx})">Edit</button>
               <button onclick="deleteItemConfirm('${year}/${month}/${day}', ${idx})">Delete</button>
-            </span>
+            </td>
           `;
           ul.appendChild(li);
 
@@ -109,7 +122,7 @@ function renderData() {
         if (ul.children.length > 0) {
           dayDiv.appendChild(ul);
           const dayBalance = dayIncome - dayExpense;
-          dayDiv.innerHTML += `<strong>Day Total - Income: ${formatNumber(dayIncome)}, Expense: ${formatNumber(dayExpense)}, Balance: ${formatNumber(dayBalance)}</strong>`;
+          // dayDiv.innerHTML += `<strong>Day Total - Income: ${formatNumber(dayIncome)}, Expense: ${formatNumber(dayExpense)}, Balance: ${formatNumber(dayBalance)}</strong>`;
           monthIncome += dayIncome;
           monthExpense += dayExpense;
           monthDiv.appendChild(dayDiv);
@@ -118,7 +131,7 @@ function renderData() {
 
       const monthBalance = monthIncome - monthExpense;
       if (monthIncome > 0 || monthExpense > 0) {
-        monthDiv.innerHTML += `<strong>Month Total - Income: ${formatNumber(monthIncome)}, Expense: ${formatNumber(monthExpense)}, Balance: ${formatNumber(monthBalance)}</strong>`;
+        monthDiv.innerHTML += `<div class="total">Month Total - Income: ${formatNumber(monthIncome)}, Expense: ${formatNumber(monthExpense)}, Balance: ${formatNumber(monthBalance)}</div>`;
         yearIncome += monthIncome;
         yearExpense += monthExpense;
         yearDiv.appendChild(monthDiv);
@@ -127,7 +140,7 @@ function renderData() {
 
     const yearBalance = yearIncome - yearExpense;
     if (yearIncome > 0 || yearExpense > 0) {
-      yearDiv.innerHTML += `<strong>Year Total - Income: ${formatNumber(yearIncome)}, Expense: ${formatNumber(yearExpense)}, Balance: ${formatNumber(yearBalance)}</strong>`;
+      yearDiv.innerHTML += `<div class="total">Year Total - Income: ${formatNumber(yearIncome)}, Expense: ${formatNumber(yearExpense)}, Balance: ${formatNumber(yearBalance)}</div>`;
       totalIncome += yearIncome;
       totalExpense += yearExpense;
       container.appendChild(yearDiv);

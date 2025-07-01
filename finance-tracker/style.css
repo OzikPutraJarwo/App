@@ -79,3 +79,79 @@
 #save-data-btn {
   display: none !important;
 }
+
+.main.wrap, #data-container, .year {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.year > .title {
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.month {
+  background-color: #fff;
+  box-shadow: var(--box-shadow);
+}
+
+.month > .title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #eee;
+}
+
+.month .total {
+  padding: 1rem 1.25rem;
+}
+
+.month .day:nth-child(n+3) thead {
+  display: none;
+}
+
+.day {
+  width: 100%;
+}
+
+.day tr {
+  display: grid;
+  grid-template-columns: 70px 1fr 200px 200px 200px;
+}
+
+.day th  {
+  padding: .5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.day td {
+  padding: .5rem 1rem;
+  border-bottom: 1px solid #eee;
+  align-items: center;
+  display: flex;
+}
+
+.day .date, .day .category, .day .type, .day .amount {
+  justify-content: center;
+}
+
+.day .category {
+  display: flex;
+  justify-content: center;
+}
+
+.day .category span {
+  color: #fff;
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.5rem;
+  font-size: .9rem;
+}
+
+.day .type {
+  text-transform: capitalize;
+}
+
+.day .actions {
+  display: none;
+}
