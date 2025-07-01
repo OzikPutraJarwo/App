@@ -186,6 +186,7 @@ select {
 
 body {
   background-color: #f5f7f6;
+  padding-top: 61px;
 }
 
 .wrap {
@@ -197,6 +198,10 @@ header {
   background-color: #ffffff;
   padding: 1rem 2rem;
   box-shadow: var(--box-shadow);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1;
 }
 
 .header.wrap {
