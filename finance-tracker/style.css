@@ -111,6 +111,7 @@
   background-color: #fff;
   box-shadow: var(--box-shadow);
   border-radius: .5rem;
+  overflow: hidden;
 }
 
 .month>.title {
@@ -118,13 +119,54 @@
   font-weight: 600;
   padding: 1rem 1.25rem;
   border-bottom: 1px solid #eee;
+  background-color: var(--blue);
+  color: #fff;
+  position: relative;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.month>.title:hover {
+  background-color: var(--blue-hover);
+}
+
+.month>.title::after {
+  content: '';
+  background: url(../icon/arrow-down.png) no-repeat center center;
+  position: absolute;
+  width: 35px;
+  height: 100%;
+  scale: 0.6;
+  filter: invert(1);
+  display: block;
+  top: 0;
+  right: 1rem;
+}
+
+.month:has(> .month-container[data-collapsed='true']) .title::after {
+  transform: rotate(180deg);
+}
+
+.month .month-container {
+  overflow: hidden;
+  transition: .2s;
 }
 
 .month .total {
   border-top: 2px solid #eee;
+  transition: .2s;
 }
 
-.month .day:nth-child(n+3) thead {
+.month .month-container[data-collapsed='true']+.total {
+  border-top: unset;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.month .month-container[data-collapsed='true']+.total .date {
+  display: none;
+}
+
+.month .day:nth-child(n+2) thead {
   display: none;
 }
 
@@ -141,12 +183,12 @@
   grid-template-columns: 100px 1fr 200px 200px 200px;
   position: relative;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .day tbody tr:nth-child(odd) {
   background-color: #f9f9f9bd;
   transition: .2s;
-  cursor: pointer;
 }
 
 .day tbody tr:hover {

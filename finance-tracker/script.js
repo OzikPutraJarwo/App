@@ -32,6 +32,27 @@ function getTagColor(tag) {
   return tags[tag] ? tags[tag].color : '#000';
 }
 
+function smoothToggleNext(trigger) {
+  const el = trigger.nextElementSibling;
+  if (!el) return;
+  const isCollapsed = el.getAttribute('data-collapsed') === 'true';
+  if (isCollapsed) {
+    el.style.height = el.scrollHeight + 'px';
+    el.setAttribute('data-collapsed', 'false');
+    const removeHeight = () => {
+      el.style.height = '';
+      el.removeEventListener('transitionend', removeHeight);
+    };
+    el.addEventListener('transitionend', removeHeight);
+  } else {
+    el.style.height = el.scrollHeight + 'px';
+    requestAnimationFrame(() => {
+      el.style.height = '0';
+    });
+    el.setAttribute('data-collapsed', 'true');
+  }
+}
+
 // ------ GOOGLE API ------
 
 function appOnLogin() {
@@ -91,8 +112,11 @@ function renderData() {
     for (const month in data[year]) {
       const monthDiv = document.createElement('div');
       monthDiv.className = 'month';
-      monthDiv.innerHTML = `<div class="title">${formatMonth(month)}</div>`;
+      monthDiv.innerHTML = `<div class="title" onclick="smoothToggleNext(this)">${formatMonth(month)}</div>`;
       let monthIncome = 0, monthExpense = 0;
+      const monthContainer = document.createElement('div');
+      monthContainer.className = 'month-container';
+      monthDiv.appendChild(monthContainer);
 
       for (const day in data[year][month]) {
         const dayDiv = document.createElement('table');
@@ -140,7 +164,7 @@ function renderData() {
           // dayDiv.innerHTML += `<strong>Day Total - Income: ${formatNumber(dayIncome)}, Expense: ${formatNumber(dayExpense)}, Balance: ${formatNumber(dayBalance)}</strong>`;
           monthIncome += dayIncome;
           monthExpense += dayExpense;
-          monthDiv.appendChild(dayDiv);
+          monthContainer.appendChild(dayDiv);
         }
       }
 
@@ -265,7 +289,6 @@ function saveTag() {
   }
   tags[name] = { color };
   updateTagDropdown();
-  updateFilterTagDropdown();
   closeTagModal();
   showNotification('Tag added', 'success');
   saveDataToDrive(); // <<< AUTO SAVE
