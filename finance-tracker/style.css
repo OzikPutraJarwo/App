@@ -1,3 +1,17 @@
+.announcement {
+  text-align: center;
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: var(--box-shadow);
+}
+
+.main-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
 .modal {
   position: fixed;
   top: 0;
@@ -80,13 +94,15 @@
   display: none !important;
 }
 
-.main.wrap, #data-container, .year {
+.main.wrap,
+#data-container,
+.year {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
-.year > .title {
+.year>.title {
   font-size: 1.6rem;
   font-weight: 800;
 }
@@ -94,9 +110,10 @@
 .month {
   background-color: #fff;
   box-shadow: var(--box-shadow);
+  border-radius: .5rem;
 }
 
-.month > .title {
+.month>.title {
   font-size: 1.3rem;
   font-weight: 600;
   padding: 1rem 1.25rem;
@@ -104,7 +121,7 @@
 }
 
 .month .total {
-  padding: 1rem 1.25rem;
+  border-top: 2px solid #eee;
 }
 
 .month .day:nth-child(n+3) thead {
@@ -115,12 +132,28 @@
   width: 100%;
 }
 
-.day tr {
-  display: grid;
-  grid-template-columns: 70px 1fr 200px 200px 200px;
+.day thead {
+  background-color: #f0f0f0;
 }
 
-.day th  {
+.day tr {
+  display: grid;
+  grid-template-columns: 100px 1fr 200px 200px 200px;
+  position: relative;
+  overflow: hidden;
+}
+
+.day tbody tr:nth-child(odd) {
+  background-color: #f9f9f9bd;
+  transition: .2s;
+  cursor: pointer;
+}
+
+.day tbody tr:hover {
+  background-color: #f0f0f0;
+}
+
+.day th {
   padding: .5rem 0;
   border-bottom: 1px solid #eee;
 }
@@ -132,7 +165,10 @@
   display: flex;
 }
 
-.day .date, .day .category, .day .type, .day .amount {
+.day .date,
+.day .category,
+.day .type,
+.day .amount {
   justify-content: center;
 }
 
@@ -153,5 +189,89 @@
 }
 
 .day .actions {
-  display: none;
+  padding: 0;
+  width: 36px;
+  height: 100%;
+  position: absolute;
+  right: -36px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  transition: .2s;
+}
+
+.day tr:hover .actions {
+  right: 0;
+}
+
+.day .actions div {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: .2s;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.day .actions div:hover {
+  background-color: firebrick;
+}
+
+.day .actions div img {
+  width: 20px;
+  height: 20px;
+  transition: .2s;
+}
+
+.day .actions div:hover img {
+  filter: brightness(0) invert(1);
+}
+
+.total {
+  padding: 1rem 0;
+  display: grid;
+  grid-template-columns: 1fr 200px 200px 200px;
+  text-align: center;
+}
+
+.total>span {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.total .date {
+  font-weight: bold;
+}
+
+.total .title {
+  font-weight: bold;
+  font-size: .8rem;
+}
+
+.total .amount {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.total .income .amount {
+  color: var(--green);
+}
+
+.total .expense .amount {
+  color: var(--red);
+}
+
+.total .balance .amount {
+  color: var(--blue);
+}
+
+#data-container>.total,
+.year>.total {
+  background-color: #fff;
+  box-shadow: var(--box-shadow);
+  border-radius: .5rem;
 }

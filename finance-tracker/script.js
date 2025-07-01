@@ -9,10 +9,23 @@ let cloudSuccess = document.querySelector('.cloud-success');
 let cloudSync = document.querySelector('.cloud-sync');
 let cloudFailed = document.querySelector('.cloud-failed');
 
+let announcement = document.querySelector('.announcement');
+
 // ------ UTILITIES ------
 
 function formatNumber(num) {
   return Number(num).toLocaleString();
+}
+
+function formatMonth(month) {
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  if (month < 1 || month > 12) {
+    return "Invalid month";
+  }
+  return monthNames[month - 1];
 }
 
 function getTagColor(tag) {
@@ -23,6 +36,7 @@ function getTagColor(tag) {
 
 function appOnLogin() {
   ['add-item-btn', 'save-data-btn', 'tag-editor-btn'].forEach(id => document.getElementById(id).style.display = '');
+  announcement.classList.add('none');
   loadDataFromDrive();
 }
 
@@ -32,6 +46,7 @@ function appOnLogout() {
   data = {};
   tags = {};
   fileId = null;
+  announcement.classList.remove('none');
 }
 
 loginCallbacks.push(appOnLogin);
@@ -76,7 +91,7 @@ function renderData() {
     for (const month in data[year]) {
       const monthDiv = document.createElement('div');
       monthDiv.className = 'month';
-      monthDiv.innerHTML = `<div class="title">${month}</div>`;
+      monthDiv.innerHTML = `<div class="title">${formatMonth(month)}</div>`;
       let monthIncome = 0, monthExpense = 0;
 
       for (const day in data[year][month]) {
@@ -100,15 +115,15 @@ function renderData() {
           if ((filter.date && item.date !== filter.date) || (filter.tag && item.tag !== filter.tag)) return;
 
           const li = document.createElement('tr');
+          li.setAttribute('onclick', `editItem('${year}/${month}/${day}', ${idx})`);
           li.innerHTML = `
             <td class="date">${item.date.split('-')[2]}</td>
             <td class="name">${item.title}</td>
             <td class="category"><span style="background:${getTagColor(item.tag)}">${item.tag}</span></td>
             <td class="type">${item.type}</td>
             <td class="amount">${formatNumber(item.amount)}</td>
-            <td class="actions">
-              <button onclick="editItem('${year}/${month}/${day}', ${idx})">Edit</button>
-              <button onclick="deleteItemConfirm('${year}/${month}/${day}', ${idx})">Delete</button>
+            <td class="actions" onclick="event.stopPropagation();">
+              <div onclick="deleteItemConfirm('${year}/${month}/${day}', ${idx})"><img src="../icon/trash.png"></div>
             </td>
           `;
           ul.appendChild(li);
@@ -131,7 +146,14 @@ function renderData() {
 
       const monthBalance = monthIncome - monthExpense;
       if (monthIncome > 0 || monthExpense > 0) {
-        monthDiv.innerHTML += `<div class="total">Month Total - Income: ${formatNumber(monthIncome)}, Expense: ${formatNumber(monthExpense)}, Balance: ${formatNumber(monthBalance)}</div>`;
+        monthDiv.innerHTML += `
+          <div class="total">
+            <span class="date">Total in ${formatMonth(month)}</span>
+            <span class="income"><span class='title'>Income</span><span class='amount'>${formatNumber(monthIncome)}</span></span>
+            <span class="expense"><span class='title'>Expense</span><span class='amount'>${formatNumber(monthExpense)}</span></span>
+            <span class="balance"><span class='title'>Balance</span><span class='amount'>${formatNumber(monthBalance)}</span></span>
+          </div>
+        `;
         yearIncome += monthIncome;
         yearExpense += monthExpense;
         yearDiv.appendChild(monthDiv);
@@ -140,7 +162,14 @@ function renderData() {
 
     const yearBalance = yearIncome - yearExpense;
     if (yearIncome > 0 || yearExpense > 0) {
-      yearDiv.innerHTML += `<div class="total">Year Total - Income: ${formatNumber(yearIncome)}, Expense: ${formatNumber(yearExpense)}, Balance: ${formatNumber(yearBalance)}</div>`;
+      yearDiv.innerHTML += `
+          <div class="total">
+            <span class="date">Total in ${year}</span>
+            <span class="income"><span class='title'>Income</span><span class='amount'>${formatNumber(yearIncome)}</span></span>
+            <span class="expense"><span class='title'>Expense</span><span class='amount'>${formatNumber(yearExpense)}</span></span>
+            <span class="balance"><span class='title'>Balance</span><span class='amount'>${formatNumber(yearBalance)}</span></span>
+          </div>
+        `;
       totalIncome += yearIncome;
       totalExpense += yearExpense;
       container.appendChild(yearDiv);
@@ -148,7 +177,14 @@ function renderData() {
   }
 
   const totalBalance = totalIncome - totalExpense;
-  container.innerHTML += `<h2>Overall Total - Income: ${formatNumber(totalIncome)}, Expense: ${formatNumber(totalExpense)}, Balance: ${formatNumber(totalBalance)}</h2>`;
+  container.innerHTML += `
+          <div class="total">
+            <span class="date">Overall Total</span>
+            <span class="income"><span class='title'>Income</span><span class='amount'>${formatNumber(totalIncome)}</span></span>
+            <span class="expense"><span class='title'>Expense</span><span class='amount'>${formatNumber(totalExpense)}</span></span>
+            <span class="balance"><span class='title'>Balance</span><span class='amount'>${formatNumber(totalBalance)}</span></span>
+          </div>
+        `;
 
 }
 
@@ -202,7 +238,6 @@ function saveItem() {
   addItem(item);
   renderData();
   closeItemModal();
-  showNotification('Item saved', 'success');
   saveDataToDrive(); // <<< AUTO SAVE
 }
 
@@ -251,6 +286,10 @@ function updateTagDropdown() {
 // ------ DRIVE ------
 
 async function loadDataFromDrive() {
+  showNotification('Loading...');
+  cloudSync.classList.remove('none');
+  cloudSuccess.classList.add('none');
+  cloudFailed.classList.add('none');
   try {
     const res = await gapi.client.drive.files.list({
       q: "name='fintrack-kodejarwo' and trashed=false",
@@ -288,7 +327,6 @@ async function loadDataFromDrive() {
 // ------ SAVE AUTOMATIC WITH STATUS ------
 
 async function saveDataToDrive() {
-  showNotification('Saving...');
   cloudSync.classList.remove('none');
   cloudSuccess.classList.add('none');
   cloudFailed.classList.add('none');
@@ -317,13 +355,11 @@ async function saveDataToDrive() {
 
     const result = await res.json();
     fileId = result.id;
-    showNotification('Saved', 'success');
     cloudSync.classList.add('none');
     cloudSuccess.classList.remove('none');
     cloudFailed.classList.add('none');
   } catch (e) {
     console.error(e);
-    showNotification('Save failed', 'error');
     cloudSync.classList.add('none');
     cloudSuccess.classList.add('none');
     cloudFailed.classList.remove('none');
