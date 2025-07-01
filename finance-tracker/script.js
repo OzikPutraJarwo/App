@@ -5,6 +5,10 @@ let data = {};
 let tags = {};
 let filter = { date: '', tag: '' };
 
+let cloudSuccess = document.querySelector('.cloud-success');
+let cloudSync = document.querySelector('.cloud-sync');
+let cloudFailed = document.querySelector('.cloud-failed');
+
 // ------ UTILITIES ------
 
 function formatNumber(num) {
@@ -256,9 +260,15 @@ async function loadDataFromDrive() {
       fileId = null;
     }
     showNotification('Data loaded', 'success');
+    cloudSync.classList.add('none');
+    cloudSuccess.classList.remove('none');
+    cloudFailed.classList.add('none');
   } catch (e) {
     console.log(e);
     showNotification('Failed to load', 'error');
+    cloudSync.classList.add('none');
+    cloudSuccess.classList.add('none');
+    cloudFailed.classList.remove('none');
   }
 }
 
@@ -266,6 +276,9 @@ async function loadDataFromDrive() {
 
 async function saveDataToDrive() {
   showNotification('Saving...');
+  cloudSync.classList.remove('none');
+  cloudSuccess.classList.add('none');
+  cloudFailed.classList.add('none');
   try {
     const fileContent = JSON.stringify({ data, tags });
     const file = new Blob([fileContent], { type: 'application/json' });
@@ -292,9 +305,15 @@ async function saveDataToDrive() {
     const result = await res.json();
     fileId = result.id;
     showNotification('Saved', 'success');
+    cloudSync.classList.add('none');
+    cloudSuccess.classList.remove('none');
+    cloudFailed.classList.add('none');
   } catch (e) {
     console.error(e);
     showNotification('Save failed', 'error');
+    cloudSync.classList.add('none');
+    cloudSuccess.classList.add('none');
+    cloudFailed.classList.remove('none');
   }
 }
 

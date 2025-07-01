@@ -202,12 +202,19 @@ header {
 .header.wrap {
   display: grid;
   align-items: center;
-  grid-template-columns: 31px 1fr 90px;
   gap: 1.5rem;
 }
 
+.header.wrap {
+  grid-template-columns: 31px 1fr 90px;
+}
+
 .logged-in .header.wrap {
-  grid-template-columns: 31px 1fr 125px 31px
+  grid-template-columns: 31px 1fr auto 31px
+}
+
+.logged-in .header.wrap.cloud {
+  grid-template-columns: 31px 1fr 25px auto 31px
 }
 
 .home .header.wrap {
@@ -215,7 +222,31 @@ header {
 }
 
 .home .logged-in .header.wrap {
-  grid-template-columns: 1fr 125px 31px
+  grid-template-columns: 1fr auto 31px
+}
+
+.home .logged-in .header.wrap.cloud {
+  grid-template-columns: 1fr 25px auto 31px
+}
+
+.header.wrap .site-cloud {
+  display: none;
+}
+
+.logged-in .header.wrap .site-cloud {
+  display: flex;
+}
+
+.cloud-success {
+  filter: brightness(0) saturate(100%) invert(45%) sepia(54%) saturate(519%) hue-rotate(94deg) brightness(89%) contrast(85%);
+}
+
+.cloud-sync {
+  filter: brightness(0) saturate(100%) invert(36%) sepia(32%) saturate(2543%) hue-rotate(203deg) brightness(99%) contrast(87%);
+}
+
+.cloud-failed {
+  filter: brightness(0) saturate(100%) invert(14%) sepia(61%) saturate(3613%) hue-rotate(347deg) brightness(116%) contrast(93%);
 }
 
 .site-button {
@@ -423,12 +454,16 @@ footer span {
     gap: 1.2rem;
   }
 
-  .logged-in .header.wrap {
-    grid-template-columns: 31px 1fr 31px 31px;
+  .logged-in .header.wrap.cloud {
+    grid-template-columns: 31px 1fr 25px 31px 31px;
   }
 
   .home .logged-in .header.wrap {
     grid-template-columns: 1fr 31px 31px
+  }
+
+  .home .logged-in .header.wrap.cloud {
+    grid-template-columns: 1fr 25px 31px 31px
   }
 
   .site-title {
