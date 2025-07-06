@@ -203,6 +203,17 @@ th#renderbyMerged:hover svg {
   margin: 0 !important;
 }
 
+.excel .contoh-data a {
+  color: var(--blue);
+  text-decoration: underline;
+  transition: .2s;
+}
+
+.excel .contoh-data a:hover {
+  color: var(--blue-hover);
+  text-decoration: none;
+}
+
 .excel .input-files {
   padding: 0;
 }
