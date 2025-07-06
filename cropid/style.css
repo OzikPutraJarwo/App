@@ -225,8 +225,9 @@ th#renderbyMerged:hover svg {
   box-shadow: unset
 }
 
-.excel .input-files label>span {
-  display: flex;
+.excel .input-files label>span:first-child {
+  display: grid;
+  grid-template-columns: 1fr 28px;
   gap: 1rem;
   align-items: center;
 }
@@ -284,6 +285,19 @@ th#renderbyMerged:hover svg {
   font-size: 1.1rem;
   font-weight: bold;
   text-transform: uppercase;
+}
+
+.download {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: .75rem
+}
+
+.download img {
+  filter: invert(1);
+  width: 25px;
+  height: 25px;
 }
 
 #tableContainer {
@@ -353,6 +367,7 @@ th#renderbyMerged:hover svg {
   display: grid;
   align-items: center;
   justify-items: center;
+  overflow: auto;
 }
 
 #plotContainer, #chartContainer {
@@ -360,6 +375,7 @@ th#renderbyMerged:hover svg {
 }
 
 .download-svg {
+  background-color: #fff;;
   position: absolute;
   bottom: 1rem;
   right: 1rem;
@@ -391,7 +407,18 @@ th#renderbyMerged:hover svg {
   .type .content {
     grid-template-columns: 1fr;
   }
+  .excel .input-files label>span:first-child {
+    grid-template-columns: 1fr;
+    gap: .75rem;
+    justify-items: center;
+  }
+  .input-files label span {
+    order: 1;
+  }
   #buttonContainer button span:first-child {
     font-size: 1rem
+  }
+  #customNameUnit>div, #customNameInputsContainer>div {
+    grid-template-columns: 75px 1fr;
   }
 }
