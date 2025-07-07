@@ -30,6 +30,7 @@
   border: none;
   padding: .7rem 1rem;
   border-radius: .7rem;
+  white-space: nowrap;
 }
 
 .set {
@@ -38,10 +39,55 @@
   gap: 1rem;
 }
 
+label {
+  user-select: none;
+  cursor: pointer;
+}
+
+label.checkbox {
+  display: grid;
+  grid-template-columns: 15px 1fr 1fr;
+  gap: .5rem;
+  justify-content: center;
+}
+
+label.checkbox[for="height"] {
+  grid-template-columns: 1fr 1fr;
+}
+
+label.checkbox .tick {
+  display: grid;
+  grid-template-columns: 15px 1fr;
+  gap: .5rem;
+  justify-content: center;
+  margin-left: auto;
+}
+
+label.checkbox .tick label {
+  margin: 0;
+}
+
+label.checkbox input {
+  order: -1
+}
+
+.ratio {
+  display: grid;
+  grid-template-columns: 1fr 20px 1fr;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 1rem
+}
+
+.ratio input {
+  text-align: center;
+}
+
 .heatmap {
   width: 100%;
   overflow: hidden;
-  padding: 1rem !important;
+  padding: 0rem !important;
 }
 
 #heatmap {
@@ -49,8 +95,20 @@
   height: 100%;
 }
 
+.modebar-group {
+  background-color: unset !important;
+}
+
+.modebar-group:not(:last-child) {
+  display: none !important;
+}
+
 @media (max-width: 600px) {
   .input {
+    grid-template-columns: 1fr;
+  }
+
+  .set {
     grid-template-columns: 1fr;
   }
 }

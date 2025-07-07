@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="../main.css">
     <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
 
   </head>
 
@@ -98,26 +99,39 @@
             <div class="set">
               <div>
                 <label for="scale">Scale</label>
-                <input type="number" name="scale" id="scale" value="200">
+                <input type="number" name="scale" id="scale" value="100" min="0" max="1000">
               </div>
               <div>
-                <label for="height">Height (px)</label>
+                <label class="checkbox" for="height">Height (px)<div class="tick"><input type="checkbox"
+                      name="height-ratio" id="height-ratio"><label for="height-ratio">Ratio</label></div></label>
                 <input type="number" name="height" id="height" value="450">
+                <div class="ratio none">
+                  <input type="number" name="ratio-width" id="ratio-width" value="2" placeholder="Width" min="1">
+                  <span>/</span>
+                  <input type="number" name="ratio-height" id="ratio-height" value="1" placeholder="Height" min="1">
+                </div>
               </div>
               <div>
-                <label for="title">Title</label>
-                <input type="text" name="title" id="title" placeholder="-">
+                <label class="checkbox" for="title">Title<input type="checkbox" name="title" id="title"></label>
+                <input type="text" name="chart-title" id="chart-title" placeholder="-">
               </div>
               <div>
-                <label for="colorbar-title">Colorbar Title</label>
+                <label class="checkbox" for="colorbar">Colorbar<input type="checkbox" name="colorbar"
+                    id="colorbar"></label>
                 <input type="text" name="colorbar-title" id="colorbar-title" placeholder="-">
               </div>
               <div>
-                <label for="xaxis-title">X-axis Title</label>
+                <label class="checkbox" for="xaxis">X-axis<input type="checkbox" name="xaxis" id="xaxis">
+                  <div class="tick"><input type="checkbox" name="xaxis-tick" id="xaxis-tick"><label
+                      for="xaxis-tick">Tick</label></div>
+                </label>
                 <input type="text" name="xaxis-title" id="xaxis-title" placeholder="-">
               </div>
               <div>
-                <label for="yaxis-title">Y-axis Title</label>
+                <label class="checkbox" for="yaxis">Y-axis<input type="checkbox" name="yaxis" id="yaxis">
+                  <div class="tick"><input type="checkbox" name="yaxis-tick" id="yaxis-tick"><label
+                      for="yaxis-tick">Tick</label></div>
+                </label>
                 <input type="text" name="yaxis-title" id="yaxis-title" placeholder="-">
               </div>
             </div>
@@ -125,9 +139,10 @@
         </div>
 
         <div class="item heatmap">
-          <div id="heatmap" style="height:450px"></div>
+          <div id="heatmap"></div>
         </div>
 
+        <button class="download" onclick="download()">Download</button>
 
       </div>
 

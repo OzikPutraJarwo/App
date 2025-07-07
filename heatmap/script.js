@@ -11,7 +11,6 @@ const textarea = document.getElementById('dataInput');
  * @returns {number} Nilai Z pada koordinat yang diberikan atau nilai terdekat.
  */
 const getZValue = (z_original, r, c, originalRows, originalCols) => {
-  // Memastikan koordinat berada dalam batas yang valid
   const clampedR = Math.min(Math.max(r, 0), originalRows - 1);
   const clampedC = Math.min(Math.max(c, 0), originalCols - 1);
   return z_original[clampedR][clampedC];
@@ -19,30 +18,56 @@ const getZValue = (z_original, r, c, originalRows, originalCols) => {
 
 function generateHeatmap() {
   const input = textarea.value.trim();
+  const scaleInput = document.getElementById('scale').value;
+  const heightInput = document.getElementById('height').value;
+  const titleCheckbox = document.getElementById('title');
+  const titleInput = document.getElementById('chart-title').value.trim();
+  const colorbarCheckbox = document.getElementById('colorbar');
+  const colorbarInput = document.getElementById('colorbar-title').value.trim();
+  const xaxisCheckbox = document.getElementById('xaxis');
+  const xaxisTick = document.getElementById('xaxis-tick');
+  const xaxisInput = document.getElementById('xaxis-title').value.trim();
+  const yaxisCheckbox = document.getElementById('yaxis');
+  const yaxisTick = document.getElementById('yaxis-tick');
+  const yaxisInput = document.getElementById('yaxis-title').value.trim();
+
+  const ratioContainer = document.querySelector('.ratio');
+  const ratioNon = document.getElementById('height');
+  const ratioCheckbox = document.getElementById('height-ratio');
+  const heatmapWidth = document.getElementById('heatmap').offsetWidth;
+  const ratioWidth = document.getElementById('ratio-width').value;
+  const ratioHeight = document.getElementById('ratio-height').value;
+
+  if (ratioCheckbox.checked === true) {
+    ratioContainer.classList.remove('none');
+    ratioNon.classList.add('none');
+    document.getElementById('heatmap').style.height = heatmapWidth / ratioWidth * ratioHeight + "px";
+  } else {
+    ratioContainer.classList.add('none');
+    ratioNon.classList.remove('none');
+    document.getElementById('heatmap').style.height = heightInput ? heightInput + "px" : "450px";
+  }
 
   try {
     const z_original = input
       .split('\n')
       .map(row => row.trim().split(/\s+/).map(Number));
 
-    // Validasi data input
     if (!z_original.length || !z_original[0].length || z_original.some(r => r.length !== z_original[0].length || r.some(isNaN))) {
       throw new Error("Data tidak valid. Pastikan semua baris memiliki jumlah kolom yang sama dan hanya berisi angka.");
     }
 
     const originalRows = z_original.length;
     const originalCols = z_original[0].length;
-    const upscaleFactor = 200; // Faktor perbesaran
+    const upscaleFactor = scaleInput;
 
-    // Hitung dimensi heatmap yang diperbesar
     const upscaledRows = originalRows * upscaleFactor;
     const upscaledCols = originalCols * upscaleFactor;
     const z_upscaled = Array(upscaledRows).fill(0).map(() => Array(upscaledCols).fill(0));
 
-    // Interpolasi bilinear untuk memperhalus perubahan warna
     for (let r_new = 0; r_new < upscaledRows; r_new++) {
       for (let c_new = 0; c_new < upscaledCols; c_new++) {
-        // Hitung koordinat floating point di grid asli dengan pemetaan yang lebih akurat, memastikan bahwa pusat data asli dipetakan ke pusat blok yang diperbesar
+        // Hitung koordinat floating point di grid asli dengan pemetaan yang lebih akurat, memastikan pusat data asli dipetakan ke pusat blok yang diperbesar
         const r_orig_float = (originalRows > 1) ? r_new * ((originalRows - 1) / (upscaledRows - 1)) : 0;
         const c_orig_float = (originalCols > 1) ? c_new * ((originalCols - 1) / (upscaledCols - 1)) : 0;
 
@@ -74,22 +99,20 @@ function generateHeatmap() {
       }
     }
 
-    // Buat array X dan Y untuk Plotly berdasarkan dimensi yang diperbesar
     const x = [...Array(upscaledCols).keys()];
     const y = [...Array(upscaledRows).keys()];
 
-    // Hitung nilai min dan max dari data asli
     const allOriginalValues = z_original.flat();
     const zmin = Math.min(...allOriginalValues);
     const zmax = Math.max(...allOriginalValues);
 
     const data = [{
-      z: z_upscaled, // Gunakan data yang sudah diinterpolasi
+      z: z_upscaled,
       x: x,
       y: y,
       type: 'heatmap',
-      zmin: zmin, // Gunakan zmin dari data asli
-      zmax: zmax, // Gunakan zmax dari data asli
+      zmin: zmin,
+      zmax: zmax,
       colorscale: [
         [0.0, 'black'],
         [0.1, 'navy'],
@@ -100,41 +123,40 @@ function generateHeatmap() {
         [0.85, 'red'],
         [1.0, 'white']
       ],
+      showscale: colorbarCheckbox.checked ? true : false,
       colorbar: {
-        // title: 'Intensitas',
-        // Sesuaikan tickvals dan ticktext untuk mencerminkan rentang data yang sebenarnya
-        tickvals: [zmin, (zmin + zmax) / 2, zmax],
-        ticktext: [`${zmin.toFixed(0)}`, `${((zmin + zmax) / 2).toFixed(0)}`, `${zmax.toFixed(0)}`]
+        title: colorbarInput,
+        titleside: 'right'
       }
     }];
 
     const layout = {
-      // title: `Heatmap (Min: ${zmin.toFixed(0)}, Max: ${zmax.toFixed(0)})`,
+      title: titleCheckbox.checked ? titleInput : "",
       xaxis: {
-        // title: 'X (Original Scale)', // Mengubah judul sumbu X
-        tickvals: Array.from({length: originalCols}, (_, i) => i * upscaleFactor + upscaleFactor / 2), // Posisi tick di tengah sel yang diperbesar
-        ticktext: Array.from({length: originalCols}, (_, i) => i) // Label tick sesuai skala asli
+        showticklabels: xaxisTick.checked ? true : false,
+        ticks: xaxisTick.checked ? true : '',
+        title: xaxisCheckbox.checked ? xaxisInput : "",
+        tickvals: Array.from({ length: originalCols }, (_, i) => i * upscaleFactor + upscaleFactor / 2),
+        ticktext: Array.from({ length: originalCols }, (_, i) => i)
       },
       yaxis: {
-        // title: 'Y (Original Scale)', // Mengubah judul sumbu Y
-        tickvals: Array.from({length: originalRows}, (_, i) => i * upscaleFactor + upscaleFactor / 2), // Posisi tick di tengah sel yang diperbesar
-        ticktext: Array.from({length: originalRows}, (_, i) => i) // Label tick sesuai skala asli
+        showticklabels: yaxisTick.checked ? true : false,
+        ticks: yaxisTick.checked ? true : '',
+        title: yaxisCheckbox.checked ? yaxisInput : "",
+        tickvals: Array.from({ length: originalRows }, (_, i) => i * upscaleFactor + upscaleFactor / 2),
+        ticktext: Array.from({ length: originalRows }, (_, i) => i)
       },
-      // autosize: true,
-      margin: { l: 50, r: 50, b: 50, t: 0, pad: 0 }
+      margin: { l: yaxisCheckbox.checked ? 55 : 0, r: 0, b: xaxisCheckbox.checked ? 55 : 0, t: titleCheckbox.checked ? 50 : 0, pad: 0 }
     };
 
-    // Gambar heatmap baru
     Plotly.newPlot('heatmap', data, layout);
   } catch (e) {
-    document.getElementById('heatmap').innerHTML = `<p style="color: red; text-align: center;">⚠️ ${e.message}</p>`;
+    console.log("⚠️ " + e.message);
   }
 }
 
-// Jalankan saat halaman dibuka
 window.onload = generateHeatmap;
 
-// Jalankan saat textarea diubah
 textarea.addEventListener('input', generateHeatmap);
 
 let resizeTimer;
@@ -144,3 +166,26 @@ window.addEventListener('resize', () => {
     generateHeatmap();
   }, 250);
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+  const settingsInputs = document.querySelectorAll('.settings input');
+
+  settingsInputs.forEach(input => {
+    input.addEventListener('input', generateHeatmap);  // untuk input teks
+    input.addEventListener('change', generateHeatmap); // untuk checkbox
+  });
+});
+
+function download() {
+  const container = document.querySelector('.svg-container');
+  domtoimage.toPng(container)
+    .then(function (dataUrl) {
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = 'heatmap.png';
+      link.click();
+    })
+    .catch(function (error) {
+      console.error('Error generating image:', error);
+    });
+}
