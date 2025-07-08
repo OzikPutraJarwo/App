@@ -8,9 +8,9 @@
     <link rel="icon" type="image/x-icon" href="../icon/cropid.webp">
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="../main.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
-    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <script src="../assets/xlsx-0.18.5.js"></script>
+    <script src="../assets/jstat-latest.js"></script>
+    <script src="../assets/plotly-2.32.0.js"></script>
 
   </head>
 
@@ -92,11 +92,12 @@
               <select name="jenis-anova" id="jenis-anova">
                 <option value="ral">Rancangan Acak Lengkap (RAL)</option>
               </select>
-            </div>
+            </div>tt6
             <div class="jenis-posthoc">
               <label for="jenis-posthoc">Uji Lanjut (Post hoc)</label>
               <select name="jenis-posthoc" id="jenis-posthoc">
                 <option value="bnt">Beda Nyata Terkecil (BNT / Fisher's LSD)</option>
+                <option value="bnj">Beda Nyata Jujur (BNJ / Tukey's HSD)</option>
               </select>
             </div>
           </div>
