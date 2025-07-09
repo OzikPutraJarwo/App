@@ -1,6 +1,10 @@
-.main.wrap {
+.main.wrap, .left {
   display: grid;
   gap: 1.5rem;
+}
+
+.main.wrap {
+  grid-template-columns: 1fr 500px;
 }
 
 .item {
@@ -35,13 +39,13 @@
 
 .set {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 label {
   user-select: none;
   cursor: pointer;
+  font-weight: bold;
 }
 
 label.checkbox {
@@ -57,14 +61,19 @@ label.checkbox[for="height"] {
 
 label.checkbox .tick {
   display: grid;
-  grid-template-columns: 15px 1fr;
-  gap: .5rem;
+  grid-template-columns: 60px 120px;
+  gap: 1rem;
   justify-content: center;
   margin-left: auto;
 }
 
+label.checkbox .tick div {
+  display: grid;
+  grid-template-columns: 15px 1fr;
+}
+
 label.checkbox .tick label {
-  margin: 0;
+  margin: 0 0 0 .5rem;
 }
 
 label.checkbox input {
@@ -84,10 +93,40 @@ label.checkbox input {
   text-align: center;
 }
 
+.tick label {
+  font-weight: normal;
+}
+
 .heatmap {
   width: 100%;
   overflow: hidden;
   padding: 0rem !important;
+}
+
+.tick-settings {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.tick-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding-left: 1rem;
+  position: relative;
+}
+
+.tick-item:before {
+  content: '';
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background-color: black;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  border-radius: 100%;
 }
 
 #heatmap {
@@ -103,12 +142,14 @@ label.checkbox input {
   display: none !important;
 }
 
-@media (max-width: 600px) {
-  .input {
+@media (max-width: 1100px) {
+  .main.wrap {
     grid-template-columns: 1fr;
   }
+}
 
-  .set {
+@media (max-width: 600px) {
+  .input {
     grid-template-columns: 1fr;
   }
 }

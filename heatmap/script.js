@@ -27,9 +27,11 @@ function generateHeatmap() {
   const xaxisCheckbox = document.getElementById('xaxis');
   const xaxisTick = document.getElementById('xaxis-tick');
   const xaxisInput = document.getElementById('xaxis-title').value.trim();
+  const xaxisCustomTick = document.getElementById('xaxis-customtick');
   const yaxisCheckbox = document.getElementById('yaxis');
   const yaxisTick = document.getElementById('yaxis-tick');
   const yaxisInput = document.getElementById('yaxis-title').value.trim();
+  const yaxisCustomTick = document.getElementById('yaxis-customtick');
 
   const ratioContainer = document.querySelector('.ratio');
   const ratioNon = document.getElementById('height');
@@ -137,18 +139,63 @@ function generateHeatmap() {
         showticklabels: xaxisTick.checked ? true : false,
         ticks: xaxisTick.checked ? true : '',
         title: xaxisCheckbox.checked ? xaxisInput : "",
-        tickvals: Array.from({ length: originalCols }, (_, i) => i * upscaleFactor + upscaleFactor / 2),
-        ticktext: Array.from({ length: originalCols }, (_, i) => i)
+        tickvals: [],
+        ticktext: [],
       },
       yaxis: {
         showticklabels: yaxisTick.checked ? true : false,
         ticks: yaxisTick.checked ? true : '',
         title: yaxisCheckbox.checked ? yaxisInput : "",
-        tickvals: Array.from({ length: originalRows }, (_, i) => i * upscaleFactor + upscaleFactor / 2),
-        ticktext: Array.from({ length: originalRows }, (_, i) => i)
+        tickvals: [],
+        ticktext: [],
       },
       margin: { l: yaxisCheckbox.checked ? 55 : 0, r: 0, b: xaxisCheckbox.checked ? 55 : 0, t: titleCheckbox.checked ? 50 : 0, pad: 0 }
     };
+
+    function getTickData(axisClass, upscaledDim) {
+      const tickItems = document.querySelectorAll(`.tick-settings.${axisClass} .tick-item`);
+      const tickvalsResult = [];
+      const ticktextResult = [];
+      tickItems.forEach(item => {
+        const nameInput = item.querySelector('input[name="name"]');
+        const numberInput = item.querySelector('input[name="number"]');
+        if (nameInput && numberInput) {
+          ticktextResult.push(nameInput.value);
+          tickvalsResult.push((parseFloat(numberInput.value) / 100) * upscaledDim);
+        }
+      });
+      return {
+        tickvals: tickvalsResult, ticktext: ticktextResult
+      };
+    }
+
+    const tickDataX = getTickData('x', upscaledCols);
+    if (xaxisCustomTick.checked) {
+      layout.xaxis.tickvals = tickDataX.tickvals;
+      layout.xaxis.ticktext = tickDataX.ticktext;
+      document.querySelector('.tick-settings.x').classList.remove('none');
+    } else {
+      layout.xaxis.tickvals = Array.from({ length: originalCols }, (_, i) => i * upscaleFactor + upscaleFactor / 2);
+      layout.xaxis.ticktext = Array.from({ length: originalCols }, (_, i) => i);
+      document.querySelector('.tick-settings.x').classList.add('none');
+    }
+
+    const tickDataY = getTickData('y', upscaledRows);
+    if (yaxisCustomTick.checked) {
+      layout.yaxis.tickvals = tickDataY.tickvals;
+      layout.yaxis.ticktext = tickDataY.ticktext;
+      document.querySelector('.tick-settings.y').classList.remove('none');
+    } else {
+      layout.yaxis.tickvals = Array.from({ length: originalRows }, (_, i) => i * upscaleFactor + upscaleFactor / 2);
+      layout.yaxis.ticktext = Array.from({ length: originalRows }, (_, i) => i);
+      document.querySelector('.tick-settings.y').classList.add('none');
+    }
+
+    const tickInputs = document.querySelectorAll('.tick-item input');
+    tickInputs.forEach(input => {
+      input.addEventListener('input', generateHeatmap);
+      input.addEventListener('change', generateHeatmap);
+    });
 
     Plotly.newPlot('heatmap', data, layout);
   } catch (e) {
@@ -170,10 +217,9 @@ window.addEventListener('resize', () => {
 
 document.addEventListener("DOMContentLoaded", function () {
   const settingsInputs = document.querySelectorAll('.settings input');
-
   settingsInputs.forEach(input => {
-    input.addEventListener('input', generateHeatmap);  // untuk input teks
-    input.addEventListener('change', generateHeatmap); // untuk checkbox
+    input.addEventListener('input', generateHeatmap);
+    input.addEventListener('change', generateHeatmap);
   });
 });
 
@@ -189,4 +235,15 @@ function download() {
     .catch(function (error) {
       console.error('Error generating image:', error);
     });
-}
+};
+
+function addTick(e) {
+  const newTick = `
+      <div class="tick-item">
+        <input type="text" name="name" id="name" placeholder="Name" placeholder="Name">
+        <input type="number" name="number" id="number" placeholder="Position (%)" min="0" max="100" placeholder="Position (%)">
+      </div>
+      `;
+  e.insertAdjacentHTML('beforebegin', newTick);
+  generateHeatmap();
+};

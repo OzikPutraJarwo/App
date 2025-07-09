@@ -83,66 +83,121 @@
 
       <div class="main wrap">
 
-        <div class="input">
+        <div class="left">
+  
           <div class="item data">
-            <h3>Data</h3>
-            <textarea id="dataInput">
-0 0 0 0 0 0
-0 10 10 10 10 0
-0 10 30 30 10 0
-0 10 10 10 10 0
-0 0 0 0 0 0</textarea>
+              <h3>Data</h3>
+              <textarea id="dataInput">
+  0 0 0 0 0 0
+  0 5 10 10 5 0
+  0 10 30 30 10 0
+  0 5 10 10 5 0
+  0 0 0 0 0 0</textarea>
           </div>
+  
+          <div class="item heatmap">
+            <div id="heatmap"></div>
+          </div>
+  
+          <button class="download" onclick="download()">Download</button>
+
+        </div>
+
+        <div class="right">
 
           <div class="item settings">
-            <h3>Settings</h3>
-            <div class="set">
-              <div>
-                <label for="scale">Scale</label>
-                <input type="number" name="scale" id="scale" value="100" min="0" max="1000">
-              </div>
-              <div>
-                <label class="checkbox" for="height">Height (px)<div class="tick"><input type="checkbox"
-                      name="height-ratio" id="height-ratio"><label for="height-ratio">Ratio</label></div></label>
-                <input type="number" name="height" id="height" value="450">
-                <div class="ratio none">
-                  <input type="number" name="ratio-width" id="ratio-width" value="2" placeholder="Width" min="1">
-                  <span>/</span>
-                  <input type="number" name="ratio-height" id="ratio-height" value="1" placeholder="Height" min="1">
+              <h3>Settings</h3>
+              <div class="set">
+                <div>
+                  <label for="scale">Scale</label>
+                  <input type="number" name="scale" id="scale" value="10" min="0" max="1000">
+                </div>
+                <div>
+                  <label class="checkbox" for="height">
+                    Height (px)
+                    <div class="tick">
+                      <div></div>
+                      <div>
+                        <input type="checkbox" name="height-ratio" id="height-ratio">
+                        <label for="height-ratio">Ratio</label>
+                      </div>
+                    </div>
+                  </label>
+                  <input type="number" name="height" id="height" value="450">
+                  <div class="ratio none">
+                    <input type="number" name="ratio-width" id="ratio-width" value="2" placeholder="Width" min="1">
+                    <span>/</span>
+                    <input type="number" name="ratio-height" id="ratio-height" value="1" placeholder="Height" min="1">
+                  </div>
+                </div>
+                <div>
+                  <label class="checkbox" for="title">Title<input type="checkbox" name="title" id="title"></label>
+                  <input type="text" name="chart-title" id="chart-title" value="Heatmap">
+                </div>
+                <div>
+                  <label class="checkbox" for="colorbar">Colorbar<input type="checkbox" name="colorbar"
+                      id="colorbar"></label>
+                  <input type="text" name="colorbar-title" id="colorbar-title" value="Intensity">
+                </div>
+                <div>
+                  <label class="checkbox" for="xaxis">
+                    X-axis<input type="checkbox" name="xaxis" id="xaxis">
+                    <div class="tick">
+                      <div>
+                        <input type="checkbox" name="xaxis-tick" id="xaxis-tick">
+                        <label for="xaxis-tick">Tick</label>
+                      </div>
+                      <div>
+                        <input type="checkbox" name="xaxis-customtick" id="xaxis-customtick">
+                        <label for="xaxis-customtick">Custom Tick</label>
+                      </div>
+                    </div>
+                  </label>
+                  <input type="text" name="xaxis-title" id="xaxis-title" value="X">
+                  <div class="tick-settings x none">
+                    <div class="tick-item">
+                      <input type="text" name="name" id="name" placeholder="Name" value="A">
+                      <input type="number" name="number" id="number" placeholder="Position (%)" min="0" max="100" value="50">
+                    </div>
+                    <button class="add" onclick="addTick(this)">Add more</button>
+                  </div>
+                </div>
+                <div>
+                  <label class="checkbox" for="yaxis">
+                    Y-axis<input type="checkbox" name="yaxis" id="yaxis">
+                    <div class="tick">
+                      <div>
+                        <input type="checkbox" name="yaxis-tick" id="yaxis-tick">
+                        <label for="yaxis-tick">Tick</label>
+                      </div>
+                      <div>
+                        <input type="checkbox" name="yaxis-customtick" id="yaxis-customtick">
+                        <label for="yaxis-customtick">Custom Tick</label>
+                      </div>
+                    </div>
+                  </label>
+                  <input type="text" name="yaxis-title" id="yaxis-title" value="Y">
+                  <div class="tick-settings y none">
+                    <div class="tick-item">
+                      <input type="text" name="name" id="name" placeholder="Name" value="A">
+                      <input type="number" name="number" id="number" placeholder="Position (%)" min="0" max="100" value="50">
+                    </div>
+                    <button class="add" onclick="addTick(this)">Add more</button>
+                  </div>
                 </div>
               </div>
-              <div>
-                <label class="checkbox" for="title">Title<input type="checkbox" name="title" id="title"></label>
-                <input type="text" name="chart-title" id="chart-title" placeholder="-">
-              </div>
-              <div>
-                <label class="checkbox" for="colorbar">Colorbar<input type="checkbox" name="colorbar"
-                    id="colorbar"></label>
-                <input type="text" name="colorbar-title" id="colorbar-title" placeholder="-">
-              </div>
-              <div>
-                <label class="checkbox" for="xaxis">X-axis<input type="checkbox" name="xaxis" id="xaxis">
-                  <div class="tick"><input type="checkbox" name="xaxis-tick" id="xaxis-tick"><label
-                      for="xaxis-tick">Tick</label></div>
-                </label>
-                <input type="text" name="xaxis-title" id="xaxis-title" placeholder="-">
-              </div>
-              <div>
-                <label class="checkbox" for="yaxis">Y-axis<input type="checkbox" name="yaxis" id="yaxis">
-                  <div class="tick"><input type="checkbox" name="yaxis-tick" id="yaxis-tick"><label
-                      for="yaxis-tick">Tick</label></div>
-                </label>
-                <input type="text" name="yaxis-title" id="yaxis-title" placeholder="-">
-              </div>
+          </div>
+
+        </div>
+
+        <div id="popup" class="test">
+          <div class="popup">
+            <div class="popup-wrap">
+              <div class="popup-title">Test</div>
+              <div class="popup-content">Test content</div>
             </div>
           </div>
         </div>
-
-        <div class="item heatmap">
-          <div id="heatmap"></div>
-        </div>
-
-        <button class="download" onclick="download()">Download</button>
 
       </div>
 
