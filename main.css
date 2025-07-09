@@ -361,6 +361,57 @@ header {
   bottom: 1.5rem;
 }
 
+#popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 88;
+  background-color: #00000090;
+  padding: 2rem;
+  transition: .2s;
+  opacity: 0;
+  display: none;
+}
+
+.popup {
+  position: relative;
+  width: 100%;
+  height: auto;
+  max-width: 600px;
+  margin: auto;
+  background-color: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: .2s;
+}
+
+.popup-wrap {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.popup-title {
+  font-weight: bold;
+  font-size: 1.4rem;
+}
+
+.popup-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  border-radius: 100%;
+  transition: .2s;
+}
+
+.popup-close:hover {
+  scale: 1.2;
+}
+
 main {
   padding: 2rem;
 }

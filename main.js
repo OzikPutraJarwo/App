@@ -107,3 +107,32 @@ function onLogout() {
   authOnLogout();
   logoutCallbacks.forEach(fn => fn());
 }
+
+// ----- Popup -----
+
+const popupElement = document.querySelector('#popup');
+
+function popup(e) {
+  const p = document.querySelector(e);
+  if (p.style.opacity !== "1") {
+    p.classList.add('show');
+    p.style.display = "grid";
+    p.style.opacity = "0";
+    setTimeout(function(){p.style.opacity = "1";}, 200);
+  }
+}
+
+function popupClose(e) {
+  const p = e.closest('#popup');
+  p.classList.remove('show');
+  p.style.opacity = "0";
+  setTimeout(function(){p.style.display = "none"}, 200);
+}
+
+if (popupElement) {
+  popupElement.querySelector('.popup').innerHTML += `
+    <div class='popup-close'>
+      <img src="../icon/close.png" onclick="popupClose(this)" alt="Close Popup"/>
+    </div>
+  `;
+};
