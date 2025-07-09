@@ -105,9 +105,10 @@ function generateHeatmap() {
     const allOriginalValues = z_original.flat();
     const zmin = Math.min(...allOriginalValues);
     const zmax = Math.max(...allOriginalValues);
+    const z_flipped = z_upscaled.slice().reverse();
 
     const data = [{
-      z: z_upscaled,
+      z: z_flipped,
       x: x,
       y: y,
       type: 'heatmap',
