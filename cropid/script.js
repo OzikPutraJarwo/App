@@ -118,7 +118,7 @@ function smoothScroll(target, offset = 0) {
     const top = element.getBoundingClientRect().top + window.scrollY - offset;
     window.scrollTo({ top, behavior: 'smooth' });
   }, 100);
-}
+};
 
 function getFileName() {
   const x = document.getElementById('fileInput')
@@ -126,6 +126,13 @@ function getFileName() {
   document.getElementById('fileName').innerHTML = x.value.split('\\').pop();
   document.getElementById('fileName').style.margin = ".5rem 0 0";
   document.getElementById('fileName').style.padding = ".5rem 1rem";
+};
+
+const posthocInput = document.getElementById('jenis-posthoc');
+posthocInput.addEventListener('change', handlePosthoc);
+
+function handlePosthoc() {
+  resetSettings();
 }
 
 const fileInput = document.getElementById('fileInput');
@@ -243,11 +250,11 @@ window.dataAnalysis = {
   }
 };
 
-fileInput.addEventListener('change', handleFile);
-sheetSelect.addEventListener('change', displaySelectedSheet);
 perlakuanBtn.addEventListener('click', () => activateSetting('Perlakuan'));
 ulanganBtn.addEventListener('click', () => activateSetting('Ulangan'));
 hasilBtn.addEventListener('click', () => activateSetting('Hasil'));
+
+fileInput.addEventListener('change', handleFile);
 
 function handleFile(event) {
   const file = event.target.files[0];
@@ -299,6 +306,8 @@ function populateSheetSelector(sheetNames) {
     sheetSelect.appendChild(option);
   });
 }
+
+sheetSelect.addEventListener('change', displaySelectedSheet);
 
 function displaySelectedSheet() {
   if (currentWorkbook) {
@@ -426,12 +435,21 @@ function handleHeaderClick(event) {
     document.querySelector('.run').classList.remove('none');
     smoothScroll('.run', top = 70);
     document.querySelector('.run').addEventListener('click', () => {
+      document.querySelector('.separator').classList.remove('none');
       document.querySelector('.anova').classList.add('show');
       calculateCounts();
       calculateAveragesAndTotals();
       window.dataAnalysis._isDataReady = true;
       countAnova();
-      hitungBNT(); processData(); initializeInterpretationApp();
+
+      const selectedPostHoc = document.getElementById('jenis-posthoc').value;
+      if (selectedPostHoc === "bnt") {
+        hitungBNT(); processDataBNT();
+      } else if (selectedPostHoc === "bnj") {
+        hitungBNJ(); processDataBNJ();
+      }
+
+      initializeInterpretationApp();
       renderBarChart();
       createBoxplot();
       document.querySelector('.graph').classList.remove('none');
@@ -575,6 +593,11 @@ function resetSettings() {
   document.querySelectorAll('.setting-button').forEach(btn => {
     btn.classList.remove('active');
   });
+  document.querySelectorAll('#tableContainer .selected-header').forEach(e => {
+    e.removeAttribute('data-setting');
+    e.classList.remove('selected-header');
+  });
+  document.querySelector('.separator').classList.add('none');
   document.querySelector('.run').classList.add('none');
   document.querySelector('.graph').classList.add('none');
   document.querySelector('.download').classList.add('none');
@@ -646,8 +669,9 @@ function countAnova() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+// ----- Posthoc : BNT / Fisher's LSD -----
 let valueBNTH;
-
+let dataMapBNT;
 function hitungBNT() {
   const inputPerlakuan = document.querySelector('#input-perlakuan').value;
   const inputUlangan = document.querySelector('#input-ulangan').value;
@@ -659,29 +683,26 @@ function hitungBNT() {
   const valueBNTT = jStat.studentt.inv(inputSig, valueDBG);
   valueBNTH = valueSD * valueBNTT;
 
-  const outputSD = document.querySelector('.output-sd');
+  const outputSD = document.querySelector('.output-bntsd');
   const outputBNTT = document.querySelector('.output-bntt');
   const outputBNTH = document.querySelector('.output-bnth');
 
   outputSD.innerHTML = valueSD.toFixed(2);
   outputBNTT.innerHTML = valueBNTT.toFixed(2);
   outputBNTH.innerHTML = valueBNTH.toFixed(2);
-}
-
-let dataMap;
-
-function processData() {
+};
+function processDataBNT() {
   const input = document.getElementById('input-data').value.trim();
   const lines = input.split('\n');
-  dataMap = {};
+  dataMapBNT = {};
 
   lines.forEach(line => {
     const [perlakuan, nilai] = line.trim().split(/\s+/);
     const nilaiFloat = parseFloat(nilai);
-    dataMap[perlakuan] = nilaiFloat;
+    dataMapBNT[perlakuan] = nilaiFloat;
   });
 
-  const sortedEntries = Object.entries(dataMap).sort((a, b) => a[1] - b[1]);
+  const sortedEntries = Object.entries(dataMapBNT).sort((a, b) => a[1] - b[1]);
 
   const jsonOutput = JSON.stringify(sortedEntries, null, 2);
 
@@ -761,14 +782,14 @@ function processData() {
   for (const key in assigned) {
     merged[key] = {
       label: assigned[key],
-      value: dataMap[key]
+      value: dataMapBNT[key]
     };
   }
 
-  const dataMapKeyOrder = Object.keys(dataMap);
+  const dataMapBNTKeyOrder = Object.keys(dataMapBNT);
   const mergedCustomOrder = Object.keys(merged);
 
-  function renderTable(orderBy = 'dataMapKey', reverse = false) {
+  function renderTable(orderBy = 'dataMapBNTKey', reverse = false) {
     const tbody = document.querySelector("#letterTable tbody");
     tbody.innerHTML = "";
 
@@ -776,8 +797,8 @@ function processData() {
 
     if (orderBy === 'merged') {
       sortedKeys = [...mergedCustomOrder];
-    } else if (orderBy === 'dataMapKey') {
-      sortedKeys = dataMapKeyOrder.filter(k => merged[k]);
+    } else if (orderBy === 'dataMapBNTKey') {
+      sortedKeys = dataMapBNTKeyOrder.filter(k => merged[k]);
     }
 
     if (reverse) sortedKeys.reverse();
@@ -816,7 +837,7 @@ function processData() {
   };
 
   document.getElementById('renderbyData').onclick = function () {
-    renderTable('dataMapKey', isDataReversed);
+    renderTable('dataMapBNTKey', isDataReversed);
     isDataReversed = !isDataReversed;
     this.classList.toggle('rev');
     this.classList.remove('opacity');
@@ -825,7 +846,189 @@ function processData() {
 
   document.querySelectorAll('.output').forEach(el => el.classList.add('show'));
 
+};
+
+// ----- Posthoc : BNJ / Tukey's HSD -----
+let valueBNJH;
+let dataMapBNJ;
+function hitungBNJ() {
+  const inputPerlakuan = document.querySelector('#input-perlakuan').value;
+  const inputUlangan = document.querySelector('#input-ulangan').value;
+  const inputKTG = document.querySelector('#input-ktg').value;
+  const inputSig = 1 - (document.querySelector('#input-sig').value * 0.01);
+
+  const valueDBG = (inputPerlakuan - 1) * (inputUlangan - 1);
+  const valueSD = Math.sqrt(inputKTG / inputUlangan);
+  const valueBNJT = jStat.tukey.inv(inputSig, inputPerlakuan, valueDBG);
+  valueBNJH = valueSD * valueBNJT;
+
+  const outputSD = document.querySelector('.output-bnjsd');
+  const outputBNJT = document.querySelector('.output-bnjt');
+  const outputBNJH = document.querySelector('.output-bnjh');
+
+  outputSD.innerHTML = valueSD.toFixed(2);
+  outputBNJT.innerHTML = valueBNJT.toFixed(2);
+  outputBNJH.innerHTML = valueBNJH.toFixed(2);
 }
+function processDataBNJ() {
+  const input = document.getElementById('input-data').value.trim();
+  const lines = input.split('\n');
+  dataMapBNJ = {};
+
+  lines.forEach(line => {
+    const [perlakuan, nilai] = line.trim().split(/\s+/);
+    const nilaiFloat = parseFloat(nilai);
+    dataMapBNJ[perlakuan] = nilaiFloat;
+  });
+
+  const sortedEntries = Object.entries(dataMapBNJ).sort((a, b) => a[1] - b[1]);
+
+  const jsonOutput = JSON.stringify(sortedEntries, null, 2);
+
+  const matrixTableBody = document.querySelector('#matrixTable tbody');
+  const headerRow = document.createElement('tr');
+  headerRow.innerHTML = '<th></th>' + sortedEntries.map(entry => `<th>${entry[0]}</th>`).join('');
+  matrixTableBody.innerHTML = '';
+  matrixTableBody.appendChild(headerRow);
+
+  sortedEntries.forEach(([perlakuanA, nilaiA]) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `<th>${perlakuanA}</th>`;
+
+    sortedEntries.forEach(([perlakuanB, nilaiB]) => {
+      const difference = (nilaiA - nilaiB).toFixed(2);
+      if (difference <= valueBNJH && difference >= 0) {
+        row.innerHTML += `<td class="green">${difference}</td>`;
+      } else if (difference < 0) {
+        row.innerHTML += `<td class="gray">${difference}</td>`;
+      } else {
+        row.innerHTML += `<td>${difference}</td>`;
+      }
+    });
+
+    matrixTableBody.appendChild(row);
+  });
+
+  const table = document.getElementById('matrixTable');
+  const rows = table.querySelectorAll('tbody tr');
+
+  const results = {};
+
+  rows.forEach((row, rowIndex) => {
+    if (rowIndex === 0) return;
+
+    const treatmentName = row.querySelector('th').textContent.trim();
+
+    const greenColumns = [];
+
+    const cells = row.querySelectorAll('td');
+    cells.forEach((cell, cellIndex) => {
+      if (cell.classList.contains('green')) {
+        greenColumns.push(cellIndex + 1);
+      }
+    });
+
+    results[treatmentName] = greenColumns.join(',');
+  });
+
+  const labelMap = {};
+  const assigned = {};
+  let currentLabelCode = 'a'.charCodeAt(0);
+
+  function keysWithNumber(num) {
+    return Object.keys(results).filter(key =>
+      results[key].split(',').includes(String(num))
+    );
+  }
+
+  for (const key of Object.keys(results)) {
+    const nums = results[key].split(',');
+    const first = nums[0];
+
+    if (!labelMap[first]) {
+      const label = String.fromCharCode(currentLabelCode++);
+      labelMap[first] = label;
+
+      const relatedKeys = keysWithNumber(first);
+      for (const rk of relatedKeys) {
+        assigned[rk] = (assigned[rk] || '') + label;
+      }
+    }
+  }
+
+  const merged = {};
+
+  for (const key in assigned) {
+    merged[key] = {
+      label: assigned[key],
+      value: dataMapBNJ[key]
+    };
+  }
+
+  const dataMapBNJKeyOrder = Object.keys(dataMapBNJ);
+  const mergedCustomOrder = Object.keys(merged);
+
+  function renderTable(orderBy = 'dataMapBNJKey', reverse = false) {
+    const tbody = document.querySelector("#letterTable tbody");
+    tbody.innerHTML = "";
+
+    let sortedKeys;
+
+    if (orderBy === 'merged') {
+      sortedKeys = [...mergedCustomOrder];
+    } else if (orderBy === 'dataMapBNJKey') {
+      sortedKeys = dataMapBNJKeyOrder.filter(k => merged[k]);
+    }
+
+    if (reverse) sortedKeys.reverse();
+
+    sortedKeys.forEach(key => {
+      const row = document.createElement("tr");
+
+      const tdKey = document.createElement("td");
+      tdKey.textContent = key;
+
+      const tdValue = document.createElement("td");
+      tdValue.textContent = merged[key].value;
+
+      const tdLabel = document.createElement("td");
+      tdLabel.textContent = merged[key].label;
+
+      row.appendChild(tdKey);
+      row.appendChild(tdValue);
+      row.appendChild(tdLabel);
+
+      tbody.appendChild(row);
+    });
+  }
+
+  renderTable('merged', false);
+
+  let isMergedReversed = false;
+  let isDataReversed = false;
+
+  document.getElementById('renderbyMerged').onclick = function () {
+    renderTable('merged', !isMergedReversed);
+    isMergedReversed = !isMergedReversed;
+    this.classList.toggle('rev');
+    this.classList.remove('opacity');
+    document.getElementById('renderbyData').classList.add('opacity');
+  };
+
+  document.getElementById('renderbyData').onclick = function () {
+    renderTable('dataMapBNJKey', isDataReversed);
+    isDataReversed = !isDataReversed;
+    this.classList.toggle('rev');
+    this.classList.remove('opacity');
+    document.getElementById('renderbyMerged').classList.add('opacity');
+  };
+
+  document.querySelectorAll('.output').forEach(el => el.classList.add('show'));
+
+};
+
+// ----- Posthoc : SNK -----
+
 
 document.querySelectorAll('table').forEach(table => {
   const wrapper = document.createElement('div');
@@ -833,22 +1036,6 @@ document.querySelectorAll('table').forEach(table => {
   table.parentNode.insertBefore(wrapper, table);
   wrapper.appendChild(table);
 });
-
-const span = document.createElement('span');
-span.style.textAlign = 'center';
-span.style.fontSize = '.9rem';
-span.style.opacity = '.9';
-span.style.cursor = 'pointer';
-span.style.display = 'block';
-span.style.margin = '10px 0';
-span.textContent = 'Bingung? Klik untuk menggunakan data contoh';
-document.querySelector('.item.input button').before(span);
-span.onclick = () => {
-  document.getElementById('input-data').value = `M0 39.80815\nM1 52.47585\nM2 53.005425\nM3 64.3575\nM4 77.41665\nM5 64.400025\nM6 41.08125`;
-  document.getElementById('input-perlakuan').value = 7;
-  document.getElementById('input-ulangan').value = 3;
-  document.getElementById('input-ktg').value = 47.62;
-};
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 

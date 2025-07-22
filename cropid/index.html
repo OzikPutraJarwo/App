@@ -92,7 +92,7 @@
               <select name="jenis-anova" id="jenis-anova">
                 <option value="ral">Rancangan Acak Lengkap (RAL)</option>
               </select>
-            </div>tt6
+            </div>
             <div class="jenis-posthoc">
               <label for="jenis-posthoc">Uji Lanjut (Post hoc)</label>
               <select name="jenis-posthoc" id="jenis-posthoc">
@@ -128,23 +128,26 @@
             <label for="sheetSelect">Pilih Sheet:</label>
             <select id="sheetSelect"></select>
           </div>
-        </div>
-
-        <div class="item column" id="settingsContainer" style="display: none;">
-          <h3>Pengaturan Kolom</h3>
-          <span>Klik pada tombol berikut lalu pilih header kolom pada excel di bawahnya untuk memilih</span>
-          <div id="buttonContainer">
-            <button class="setting-button" id="perlakuanBtn" data-setting="Perlakuan"><span>Perlakuan</span><span
-                id="selectedPerlakuanHeader">Belum dipilih</span></button>
-            <button class="setting-button" id="ulanganBtn" data-setting="Ulangan"><span>Ulangan</span><span
-                id="selectedUlanganHeader">Belum dipilih</span></button>
-            <button class="setting-button" id="hasilBtn" data-setting="Hasil"><span>Hasil</span><span
-                id="selectedHasilHeader">Belum dipilih</span></button>
+          <div class="column" id="settingsContainer" style="display: none;">
+            <!-- <h3>Pengaturan Kolom</h3> -->
+            <span>Klik pada tombol berikut lalu pilih header kolom pada excel di bawahnya untuk memilih</span>
+            <div id="buttonContainer">
+              <button class="setting-button" id="perlakuanBtn" data-setting="Perlakuan"><span>Perlakuan</span><span
+                  id="selectedPerlakuanHeader">Belum dipilih</span></button>
+              <button class="setting-button" id="ulanganBtn" data-setting="Ulangan"><span>Ulangan</span><span
+                  id="selectedUlanganHeader">Belum dipilih</span></button>
+              <button class="setting-button" id="hasilBtn" data-setting="Hasil"><span>Hasil</span><span
+                  id="selectedHasilHeader">Belum dipilih</span></button>
+            </div>
+            <div id="tableContainer"></div>
           </div>
-          <div id="tableContainer"></div>
         </div>
 
         <button class="run none" onclick="smoothScroll('.anova', top = 70)">Analisis</button>
+
+        <div class="separator none">
+          <br><hr><br>
+        </div>
 
         <div class="item output anova">
           <div class="hasil-section" id="hasil">
@@ -236,18 +239,32 @@ P5   13.26"></textarea>
           <div class="hasil-section" id="hasil">
             <h3>Matriks</h3>
             <table id="matrixSup">
-              <thead>
+              <thead class="bnt">
                 <tr>
                   <th>Standar Deviasi</th>
                   <th>Tabel T</th>
                   <th>T Hitung</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody class="bnt">
                 <tr>
-                  <td class="output-sd"></td>
+                  <td class="output-bntsd"></td>
                   <td class="output-bntt"></td>
                   <td class="output-bnth"></td>
+                </tr>
+              </tbody>
+              <thead class="bnj">
+                <tr>
+                  <th>Standar Deviasi</th>
+                  <th>Tabel Tukey</th>
+                  <th>Tukey Hitung</th>
+                </tr>
+              </thead>
+              <tbody class="bnj">
+                <tr>
+                  <td class="output-bnjsd"></td>
+                  <td class="output-bnjt"></td>
+                  <td class="output-bnjh"></td>
                 </tr>
               </tbody>
             </table>
