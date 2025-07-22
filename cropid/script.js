@@ -443,6 +443,14 @@ function handleHeaderClick(event) {
       countAnova();
 
       const selectedPostHoc = document.getElementById('jenis-posthoc').value;
+      const allTheads = document.querySelectorAll('#matrixSup thead');
+      const targetThead = document.querySelector(`#matrixSup thead.${selectedPostHoc}`);
+      allTheads.forEach(thead => {
+        thead.classList.add('none');
+      });
+      if (targetThead) {
+        targetThead.classList.remove('none');
+      };
       if (selectedPostHoc === "bnt") {
         hitungBNT(); processDataBNT();
       } else if (selectedPostHoc === "bnj") {
