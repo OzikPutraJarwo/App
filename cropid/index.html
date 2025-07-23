@@ -10,8 +10,6 @@
     <link rel="stylesheet" href="../main.css">
     <script src="../assets/xlsx-0.18.5.js"></script>
     <script src="../assets/jstat-latest.js"></script>
-    <script src="../assets/plotly-2.32.0.js"></script>
-
   </head>
 
   <body>
@@ -98,6 +96,7 @@
               <select name="jenis-posthoc" id="jenis-posthoc">
                 <option value="bnt" selected>Beda Nyata Terkecil (BNT / Fisher's LSD)</option>
                 <option value="bnj">Beda Nyata Jujur (BNJ / Tukey's HSD)</option>
+                <option value="sk">Scott-Knott (SK)</option>
               </select>
             </div>
           </div>
@@ -267,6 +266,7 @@ P5   13.26"></textarea>
                   <td class="output-bnjh"></td>
                 </tr>
               </tbody>
+              <tbody class="sk none"></tbody>
             </table>
             <table id="matrixTable">
               <tbody>
@@ -306,41 +306,40 @@ P5   13.26"></textarea>
           </div>
         </div>
 
-        <div class="item output sum">
-          <div class="hasil-section" id="hasil">
-            <h3>Interpretasi</h3>
-            <div id="interpretationOutput" style="display: none;">
-              <p id="outputContent"></p>
-              <div class="show-set" data-element=".pengaturan">
-                <img src="../icon/gear.png" alt="Settings">
-              </div>
-              <div class="pengaturan show-settings hide">
-                <h3>Pengaturan Interpretasi</h3>
-                <div id="customNameUnit">
-                  <span class="title">Unit</span>
-                  <div>
-                    <label for="unitInput">Satuan:</label>
-                    <input type="text" id="unitInput" placeholder="misal: cm, kg, %">
-                  </div>
-                </div>
+        <div class="graph none">
+          <div class="item" id="chartContainer"></div>
 
-                <div>
-                  <span class="title">Nama Perlakuan</span>
-                  <div id="customNameInputsContainer">
+          <div class="item output sum">
+            <div class="hasil-section" id="hasil">
+              <h3>Interpretasi</h3>
+              <div id="interpretationOutput" style="display: none;">
+                <p id="outputContent"></p>
+                <div class="show-set" data-element=".pengaturan">
+                  <img src="../icon/gear.png" alt="Settings">
+                </div>
+                <div class="pengaturan show-settings hide">
+                  <h3>Pengaturan Interpretasi</h3>
+                  <div id="customNameUnit">
+                    <span class="title">Unit</span>
+                    <div>
+                      <label for="unitInput">Satuan:</label>
+                      <input type="text" id="unitInput" placeholder="misal: cm, kg, %">
+                    </div>
+                  </div>
+  
+                  <div>
+                    <span class="title">Nama Perlakuan</span>
+                    <div id="customNameInputsContainer">
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div id="errorMessage" style="display: none;">
-              <h3>Terjadi Kesalahan:</h3>
-              <p id="errorContent"></p>
+              <div id="errorMessage" style="display: none;">
+                <h3>Terjadi Kesalahan:</h3>
+                <p id="errorContent"></p>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div class="graph none">
-          <div class="item" id="plotContainer"></div>
-          <div class="item" id="chartContainer"></div>
         </div>
         
         <button class="download none" onclick="downloadMainAsExcel()">

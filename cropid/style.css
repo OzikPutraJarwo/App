@@ -70,6 +70,10 @@ th {
   background: #18abea50;
 }
 
+.grayth {
+  background-color: #b9b9b950;
+}
+
 .green {
   background-color: #18ea2850;
 }
@@ -357,20 +361,11 @@ th#renderbyMerged:hover svg {
 
 .graph {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1.5fr;
   gap: 1.5rem;
 }
 
-#plotContainer {
-  padding: 0;
-  overflow: hidden;
-  display: grid;
-  align-items: center;
-  justify-items: center;
-  overflow: auto;
-}
-
-#plotContainer, #chartContainer {
+#chartContainer {
   position: relative;
 }
 

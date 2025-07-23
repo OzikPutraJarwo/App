@@ -1,10 +1,15 @@
 function downloadMainAsExcel() {
+
+  const selectedPostHoc = document.getElementById('jenis-posthoc').value;
+  // const postHocSection = (selectedPostHoc === "bnt" || selectedPostHoc === "bnj") ? [["Uji Lanjut", "#matrixSup"]] : [];
+  const matrixSection = (selectedPostHoc === "bnt" || selectedPostHoc === "bnj") ? [["Matriks", "#matrixTable"]] : [];
+
   const sections = [
     ["Data", "#tableContainer table"],
     ["ANOVA", "#anovaTable"],
     ["KK, FK, GT", "#anovaSup"],
-    ["Uji Lanjut", "#matrixSup"],
-    ["Matriks", "#matrixTable"],
+    ["Uji Lanjut", "#matrixSup"], // ...postHocSection,
+    ...matrixSection,
     ["Notasi", "#letterTable"],
     ["Interpretasi", "#outputContent"]
   ];
@@ -50,31 +55,31 @@ function downloadMainAsExcel() {
 };
 
 function downloadSvgAsPng(buttonElement) {
-    const parent = buttonElement.parentElement;
-    const svgElement = parent.querySelector('svg');
+  const parent = buttonElement.parentElement;
+  const svgElement = parent.querySelector('svg');
 
-    if (svgElement) {
-        const svgData = new XMLSerializer().serializeToString(svgElement);
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = new Image();
+  if (svgElement) {
+    const svgData = new XMLSerializer().serializeToString(svgElement);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
 
-        img.onload = () => {
-            const scale = 5; 
-            canvas.width = img.width * scale;
-            canvas.height = img.height * scale;
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    img.onload = () => {
+      const scale = 5;
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            const pngUrl = canvas.toDataURL('image/png');
-            const a = document.createElement('a');
-            a.href = pngUrl;
-            a.download = 'chart.png';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        };
-        img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
-    }
+      const pngUrl = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = pngUrl;
+      a.download = 'chart.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    };
+    img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
+  }
 }
 
 document.querySelectorAll('.collapse').forEach(collapse => {
@@ -155,11 +160,11 @@ let selectedHeaders = { Perlakuan: null, Ulangan: null, Hasil: null };
 window.dataAnalysis = {
   _uniquePerlakuanCount: 0,
   _uniqueUlanganCount: 0,
-  _perlakuanResults: {}, 
-  _ulanganResults: {},   
+  _perlakuanResults: {},
+  _ulanganResults: {},
   _grandTotal: 0,
-  _grandTotalSquared: 0, 
-  _isDataReady: false, 
+  _grandTotalSquared: 0,
+  _isDataReady: false,
 
   getPerlakuan: function () {
     if (!this._isDataReady) {
@@ -246,7 +251,7 @@ window.dataAnalysis = {
       const data = this._perlakuanResults[perlakuan];
       output += `${perlakuan} ${data.average}\n`;
     }
-    return output.trim(); 
+    return output.trim();
   }
 };
 
@@ -443,8 +448,8 @@ function handleHeaderClick(event) {
       countAnova();
 
       const selectedPostHoc = document.getElementById('jenis-posthoc').value;
-      const allTheads = document.querySelectorAll('#matrixSup thead');
-      const targetThead = document.querySelector(`#matrixSup thead.${selectedPostHoc}`);
+      const allTheads = document.querySelectorAll('#matrixSup > *');
+      const targetThead = document.querySelector(`#matrixSup > *.${selectedPostHoc}`);
       allTheads.forEach(thead => {
         thead.classList.add('none');
       });
@@ -455,18 +460,18 @@ function handleHeaderClick(event) {
         hitungBNT(); processDataBNT();
       } else if (selectedPostHoc === "bnj") {
         hitungBNJ(); processDataBNJ();
+      } else if (selectedPostHoc === "sk") {
+        processDataSK();
       }
 
       initializeInterpretationApp();
       renderBarChart();
-      createBoxplot();
       document.querySelector('.graph').classList.remove('none');
       document.querySelector('.download').classList.remove('none');
-      document.querySelector('#plotContainer').innerHTML += `<div class="download-svg" onclick="downloadSvgAsPng(this)"><img src="../icon/download.png"></div>`;
       document.querySelector('#chartContainer').innerHTML += `<div class="download-svg" onclick="downloadSvgAsPng(this)"><img src="../icon/download.png"></div>`;
     });
   } else {
-    window.dataAnalysis._isDataReady = false; 
+    window.dataAnalysis._isDataReady = false;
   }
 }
 
@@ -533,7 +538,7 @@ function calculateAveragesAndTotals() {
   const perlakuanData = {};
   const ulanganData = {};
   let grandTotal = 0;
-  let grandTotalSquared = 0; 
+  let grandTotalSquared = 0;
 
   for (let i = 1; i < currentTableData.length; i++) {
     const row = currentTableData[i];
@@ -570,10 +575,10 @@ function calculateAveragesAndTotals() {
     const data = perlakuanData[perlakuan];
     const average = data.count > 0 ? (data.sum / data.count).toFixed(2) : 0;
     window.dataAnalysis._perlakuanResults[perlakuan] = {
-      rawSum: data.sum, 
+      rawSum: data.sum,
       count: data.count,
       average: average,
-      formattedSum: data.sum.toFixed(2) 
+      formattedSum: data.sum.toFixed(2)
     };
   }
 
@@ -1035,15 +1040,145 @@ function processDataBNJ() {
 
 };
 
-// ----- Posthoc : SNK -----
+// ----- Posthoc : Scott Knott -----
+const chi2table = {
+  "0.05": [null, 3.84, 5.99, 7.81, 9.49, 11.07, 12.59, 14.07, 15.51, 16.92, 18.31],
+  "0.01": [null, 6.63, 9.21, 11.34, 13.28, 15.09, 16.81, 18.48, 20.09, 21.67, 23.21]
+}
+function getNotation(index) {
+  let label = '';
+  index++;
+  while (index > 0) {
+    let rem = (index - 1) % 26;
+    label = String.fromCharCode(97 + rem) + label; // 97 = 'a'
+    index = Math.floor((index - 1) / 26);
+  }
+  return label;
+}
+function parseInput(raw) {
+  const lines = raw.trim().split('\n');
+  const data = [];
+  for (let line of lines) {
+    let [nama, nilai] = line.trim().split(/\s+/);
+    if (nama && nilai && !isNaN(parseFloat(nilai))) {
+      data.push({ nama, nilai: parseFloat(nilai) });
+    }
+  }
+  return data;
+}
+function mean(arr) {
+  if (arr.length === 0) return 0;
+  return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+function scottKnott(groups, alpha) {
+  let results = [];
+  for (let group of groups) {
+    if (group.length < 2) {
+      results.push({ homogen: true, group, lambda: null, chi2: null });
+      continue;
+    }
 
+    group = group.slice().sort((a, b) => a.nilai - b.nilai);
 
-document.querySelectorAll('table').forEach(table => {
-  const wrapper = document.createElement('div');
-  wrapper.classList.add('resp-table');
-  table.parentNode.insertBefore(wrapper, table);
-  wrapper.appendChild(table);
-});
+    let n = group.length;
+    let totalMean = mean(group.map(x => x.nilai));
+
+    let bestSplit = null;
+    let maxLambda = -Infinity;
+    for (let i = 1; i < n; i++) {
+      let left = group.slice(0, i);
+      let right = group.slice(i);
+      let n1 = left.length, n2 = right.length;
+      let mean1 = mean(left.map(x => x.nilai));
+      let mean2 = mean(right.map(x => x.nilai));
+      // λ (lambda) = [n1*(mean1 - totalMean)^2 + n2*(mean2 - totalMean)^2]
+      let lambda = n1 * Math.pow(mean1 - totalMean, 2) + n2 * Math.pow(mean2 - totalMean, 2);
+      if (lambda > maxLambda) {
+        maxLambda = lambda;
+        bestSplit = { left, right, lambda };
+      }
+    }
+
+    let db = 1;
+    let chi2 = chi2table[alpha][db];
+
+    if (maxLambda <= chi2) {
+      results.push({ homogen: true, group, lambda: maxLambda, chi2 });
+    } else {
+      let leftResults = scottKnott([bestSplit.left], alpha);
+      let rightResults = scottKnott([bestSplit.right], alpha);
+      results = results.concat(leftResults, rightResults);
+    }
+  }
+  return results;
+}
+function renderResult(homogeneityGroups) {
+  let html;
+  let groupNum = 1;
+  for (let group of homogeneityGroups) {
+    html += `<tr><th colspan="2">Gugus ${groupNum}</th></tr>`;
+    for (let d of group.group) {
+      html += `<tr><td>${d.nama}</td><td>${d.nilai}</td></tr>`;
+    }
+    let B0s = group.group.map(x => x.nilai);
+    html += `
+  <tr>
+    <th class="grayth">B<sub>0</sub></th>
+    <th class="grayth">${mean(B0s).toFixed(4)}</th>
+  </tr>
+  ${group.lambda !== null ? `
+  <tr>
+    <th class="grayth">λ</th>
+    <th class="grayth">${group.lambda.toFixed(4)}</th>
+  </tr>
+  <tr>
+    <th class="grayth">χ<sup>2</sup>(α, db=1)</th>
+    <th class="grayth">${group.chi2.toFixed(4)}</th>
+  </tr>
+  <tr>
+    <td colspan="2"></td>
+  </tr>
+  ` : ''}`;
+    groupNum++;
+  }
+  return html;
+}
+function renderHasil(data, homogeneityGroups) {
+  let notasiMap = {};
+  let notasiIndex = 0;
+  for (let group of homogeneityGroups) {
+    for (let d of group.group) {
+      notasiMap[d.nama] = getNotation(notasiIndex);
+    }
+    notasiIndex++;
+  }
+  let html = '<tbody>';
+  for (let d of data) {
+    html += `<tr><td>${d.nama}</td><td>${d.nilai}</td><td>${notasiMap[d.nama]}</td></tr>`;
+  }
+  html += '</tbody>';
+  return html;
+}
+
+function processDataSK() {
+  const raw = document.getElementById('input-data').value;
+  const alpha = "0.05";
+  const data = parseInput(raw);
+  if (data.length < 2) {
+    alert("Minimal 2 data diperlukan!");
+    return;
+  }
+  document.querySelectorAll('.output').forEach(el => {
+    el.classList.add('show');
+  });
+  const result = scottKnott([data], alpha);
+  document.querySelector('tbody.sk').innerHTML = renderResult(result);
+  const tbody = document.querySelector('tbody.sk');
+  if (tbody) {
+    tbody.innerHTML = tbody.innerHTML.replace('undefined', '');
+  }
+  document.querySelector('#letterTable tbody').innerHTML = renderHasil(data, result);
+}
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1302,92 +1437,6 @@ function initializeInterpretationApp() {
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-
-function createBoxplot() {
-  const table = document.querySelector('#tableContainer table');
-  if (!table) {
-    console.error("Tabel tidak ditemukan.");
-    return;
-  }
-
-  const headers = table.querySelectorAll('th');
-  let perlakuanColIndex = -1;
-  let hasilColIndex = -1;
-  let hasilColName = '';
-
-  headers.forEach((header, index) => {
-    const dataSetting = header.getAttribute('data-setting');
-    if (dataSetting === 'Perlakuan') {
-      perlakuanColIndex = index;
-    } else if (dataSetting === 'Hasil') {
-      hasilColIndex = index;
-      hasilColName = header.innerText;
-    }
-  });
-
-  if (perlakuanColIndex === -1 || hasilColIndex === -1) {
-    console.error("Kolom 'Perlakuan' atau 'Hasil' (dengan data-setting) tidak ditemukan.");
-    const plotContainer = document.getElementById('plotContainer');
-    plotContainer.innerHTML = '<p class="plot-placeholder">Gagal membuat boxplot: Pastikan kolom "Perlakuan" dan setidaknya satu kolom "Hasil" memiliki atribut data-setting yang sesuai.</p>';
-    return;
-  }
-
-  const dataByPerlakuan = {};
-
-  const rows = table.querySelectorAll('tbody tr');
-  rows.forEach(row => {
-    const cells = row.querySelectorAll('td');
-    if (cells.length > Math.max(perlakuanColIndex, hasilColIndex)) {
-      const perlakuanValue = cells[perlakuanColIndex].innerText.trim();
-      const hasilValue = parseFloat(cells[hasilColIndex].innerText);
-
-      if (!isNaN(hasilValue)) {
-        if (!dataByPerlakuan[perlakuanValue]) {
-          dataByPerlakuan[perlakuanValue] = [];
-        }
-        dataByPerlakuan[perlakuanValue].push(hasilValue);
-      }
-    }
-  });
-
-  const plotData = [];
-  for (const perlakuanGroup in dataByPerlakuan) {
-    if (dataByPerlakuan.hasOwnProperty(perlakuanGroup)) {
-      plotData.push({
-        y: dataByPerlakuan[perlakuanGroup],
-        name: perlakuanGroup,
-        type: 'box',
-        boxpoints: 'all',
-        jitter: 0.3,
-        pointpos: -1.8
-      });
-    }
-  }
-
-  const layout = {
-    title: '',
-    yaxis: {
-      title: hasilColName,
-      zeroline: false
-    },
-    xaxis: {
-      title: 'Perlakuan'
-    },
-    boxmode: 'group',
-    margin: { t: 25, b: 85, l: 75, r: 45 },
-    plot_bgcolor: '#fcfcfc',
-    paper_bgcolor: '#ffffff',
-    font: {
-      family: 'Inter, sans-serif',
-      size: 14,
-      color: '#333'
-    }
-  };
-
-  const plotContainer = document.getElementById('plotContainer');
-  plotContainer.innerHTML = '';
-  Plotly.newPlot('plotContainer', plotData, layout, { responsive: true });
-}
 
 function renderBarChart() {
   const table = document.getElementById('letterTable');
