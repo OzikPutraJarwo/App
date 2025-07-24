@@ -166,6 +166,7 @@ window.dataAnalysis = {
   _grandTotalSquared: 0,
   _isDataReady: false,
 
+  // Mengambil jumlah perlakuan unik
   getPerlakuan: function () {
     if (!this._isDataReady) {
       console.warn("Data belum siap. Harap muat file dan pilih header terlebih dahulu.");
@@ -173,6 +174,7 @@ window.dataAnalysis = {
     }
     return this._uniquePerlakuanCount;
   },
+  // Mengambil jumlah ulangan unik
   getUlangan: function () {
     if (!this._isDataReady) {
       console.warn("Data belum siap. Harap muat file dan pilih header terlebih dahulu.");
@@ -228,6 +230,27 @@ window.dataAnalysis = {
         count++;
       }
       return count > 0 ? parseFloat((totalAvg / count).toFixed(2)) : 0;
+    }
+  },
+  getTotalUlangan: function (squared = false) {
+    if (!this._isDataReady) {
+      console.warn("Data belum siap. Harap muat file dan pilih header terlebih dahulu.");
+      return 0;
+    }
+    if (squared) {
+      let sumOfSquaredUlanganTotals = 0;
+      for (const ulangan in this._ulanganResults) {
+        const rawSum = this._ulanganResults[ulangan].sum;
+        sumOfSquaredUlanganTotals += (rawSum * rawSum);
+      }
+      return parseFloat(sumOfSquaredUlanganTotals.toFixed(2));
+    } else {
+      let sumOfSquaredUlanganTotals = 0;
+      for (const ulangan in this._ulanganResults) {
+        const rawSum = this._ulanganResults[ulangan].sum;
+        sumOfSquaredUlanganTotals += rawSum;
+      }
+      return parseFloat(sumOfSquaredUlanganTotals.toFixed(2));
     }
   },
   getGrandTotal: function (squared = false) {
@@ -445,16 +468,24 @@ function handleHeaderClick(event) {
       calculateCounts();
       calculateAveragesAndTotals();
       window.dataAnalysis._isDataReady = true;
-      countAnova();
+
+      const selectedDesign = document.getElementById('jenis-anova').value;
+      if (selectedDesign === "ral") {
+        countAnovaRAL();
+      } else if (selectedDesign === "rak") {
+        countAnovaRAK();
+      }
 
       const selectedPostHoc = document.getElementById('jenis-posthoc').value;
       const allTheads = document.querySelectorAll('#matrixSup > *');
-      const targetThead = document.querySelector(`#matrixSup > *.${selectedPostHoc}`);
+      const targetTheads = document.querySelectorAll(`#matrixSup > *.${selectedPostHoc}`);
       allTheads.forEach(thead => {
         thead.classList.add('none');
       });
-      if (targetThead) {
-        targetThead.classList.remove('none');
+      if (targetTheads.length > 0) {
+        targetTheads.forEach(thead => {
+          thead.classList.remove('none');
+        });
       };
       if (selectedPostHoc === "bnt") {
         hitungBNT(); processDataBNT();
@@ -632,7 +663,43 @@ function escapeHTML(str) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-function countAnova() {
+// ----- RAL -----
+function countAnovaRAL() {
+  document.querySelector('table#anovaTable').innerHTML = `
+              <thead>
+                <tr>
+                  <th>Sumber Keragaman</th>
+                  <th>Derajat Bebas</th>
+                  <th>Jumlah Kuadrat</th>
+                  <th>Kuadrat Tengah</th>
+                  <th>F Hitung</th>
+                  <th>F Tabel 5%</th>
+                  <th>Signifikansi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Perlakuan</td>
+                  <td class="Pdb"></td>
+                  <td class="Pjk"></td>
+                  <td class="Pkt"></td>
+                  <td class="Pfh"></td>
+                  <td class="Pft"></td>
+                  <td class="Psg"></td>
+                </tr>
+                <tr>
+                  <td>Galat</td>
+                  <td class="Gdb"></td>
+                  <td class="Gjk"></td>
+                  <td class="Gkt"></td>
+                </tr>
+                <tr>
+                  <td>Total</td>
+                  <td class="Tdb"></td>
+                  <td class="Tjk"></td>
+                </tr>
+              </tbody>
+  `;
   const [cellkk, cellfk, cellgt, cellPdb, cellPjk, cellPkt, cellPfh, cellPft, cellPsg, cellGdb, cellGjk, cellGkt, cellTdb, cellTjk]
     = ['kk', 'fk', 'gt', 'Pdb', 'Pjk', 'Pkt', 'Pfh', 'Pft', 'Psg', 'Gdb', 'Gjk', 'Gkt', 'Tdb', 'Tjk']
       .map(cls => document.querySelector(`.${cls}`));
@@ -669,6 +736,112 @@ function countAnova() {
     cellPsg.innerHTML = "*"
   } else {
     cellPsg.innerHTML = "tn"
+  }
+
+  const kk = Math.sqrt(Gkt) / (dataAnalysis.getGrandTotal() / (dataAnalysis.getPerlakuan() * dataAnalysis.getUlangan())) * 100;
+  cellkk.innerHTML = kk.toFixed(0) + "%";
+
+  document.getElementById('input-data').value = dataAnalysis.getPerlakuanAveragesFormatted();
+  document.querySelector('#input-perlakuan').value = dataAnalysis.getPerlakuan();
+  document.querySelector('#input-ulangan').value = dataAnalysis.getUlangan();
+  document.querySelector('#input-ktg').value = Gkt;
+}
+
+// ----- RAK -----
+function countAnovaRAK() {
+  document.querySelector('table#anovaTable').innerHTML = `
+              <thead>
+                <tr>
+                  <th>Sumber Keragaman</th>
+                  <th>Derajat Bebas</th>
+                  <th>Jumlah Kuadrat</th>
+                  <th>Kuadrat Tengah</th>
+                  <th>F Hitung</th>
+                  <th>F Tabel 5%</th>
+                  <th>Signifikansi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Perlakuan</td>
+                  <td class="Pdb"></td>
+                  <td class="Pjk"></td>
+                  <td class="Pkt"></td>
+                  <td class="Pfh"></td>
+                  <td class="Pft" rowspan="2"></td>
+                  <td class="Psg"></td>
+                </tr>
+                <tr>
+                  <td>Kelompok</td>
+                  <td class="Udb"></td>
+                  <td class="Ujk"></td>
+                  <td class="Ukt"></td>
+                  <td class="Ufh"></td>
+                  <td class="Usg"></td>
+                </tr>
+                <tr>
+                  <td>Galat</td>
+                  <td class="Gdb"></td>
+                  <td class="Gjk"></td>
+                  <td class="Gkt"></td>
+                </tr>
+                <tr>
+                  <td>Total</td>
+                  <td class="Tdb"></td>
+                  <td class="Tjk"></td>
+                </tr>
+              </tbody>
+  `;
+  const [cellkk, cellfk, cellgt, cellPdb, cellPjk, cellPkt, cellPfh, cellPft, cellPsg, cellUdb, cellUjk, cellUkt, cellUfh, cellUft, cellUsg, cellGdb, cellGjk, cellGkt, cellTdb, cellTjk]
+    = ['kk', 'fk', 'gt', 'Pdb', 'Pjk', 'Pkt', 'Pfh', 'Pft', 'Psg', 'Udb', 'Ujk', 'Ukt', 'Ufh', 'Uft', 'Usg', 'Gdb', 'Gjk', 'Gkt', 'Tdb', 'Tjk']
+      .map(cls => document.querySelector(`.${cls}`));
+
+  const fk = dataAnalysis.getGrandTotal() * dataAnalysis.getGrandTotal() / (dataAnalysis.getPerlakuan() * dataAnalysis.getUlangan());
+  cellfk.innerHTML = fk;
+  cellgt.innerHTML = dataAnalysis.getGrandTotal();
+
+  const Pdb = dataAnalysis.getPerlakuan() - 1;
+  cellPdb.innerHTML = Pdb;
+  const Udb = dataAnalysis.getUlangan() - 1;
+  cellUdb.innerHTML = Udb;
+  const Gdb = (dataAnalysis.getPerlakuan() - 1) * (dataAnalysis.getUlangan() - 1);
+  cellGdb.innerHTML = Gdb;
+  const Tdb = dataAnalysis.getPerlakuan() * dataAnalysis.getUlangan() - 1;
+  cellTdb.innerHTML = Tdb;
+
+  const Pjk = dataAnalysis.getTotalPerlakuan(true) / dataAnalysis.getUlangan() - fk;
+  cellPjk.innerHTML = Pjk.toFixed(2);
+  const Ujk = dataAnalysis.getTotalUlangan(true) / dataAnalysis.getPerlakuan() - fk;
+  cellUjk.innerHTML = Ujk;
+  const Tjk = dataAnalysis.getGrandTotal(true) - fk;
+  cellTjk.innerHTML = Tjk.toFixed(2);
+  const Gjk = Tjk - Pjk - Ujk;
+  cellGjk.innerHTML = Gjk.toFixed(2);
+
+  const Pkt = Pjk / Pdb;
+  cellPkt.innerHTML = Pkt.toFixed(2);
+  const Ukt = Ujk / Udb;
+  cellUkt.innerHTML = Ukt.toFixed(2);
+  const Gkt = Gjk / Gdb;
+  cellGkt.innerHTML = Gkt.toFixed(2);
+
+  const Pfh = Pkt / Gkt;
+  cellPfh.innerHTML = Pfh.toFixed(2);
+  const Ufh = Ukt / Gkt;
+  cellUfh.innerHTML = Ufh.toFixed(2);
+  const ft = jStat.centralF.inv(0.95, Pdb, Gdb);
+  cellPft.innerHTML = ft.toFixed(2);
+
+  if (Pfh > ft) {
+    cellPsg.innerHTML = "*"
+  } else {
+    cellPsg.innerHTML = "tn"
+  }
+
+  if (Ufh > ft) {
+    cellUsg.innerHTML = "*"
+  } else {
+    cellUsg.innerHTML = "tn"
   }
 
   const kk = Math.sqrt(Gkt) / (dataAnalysis.getGrandTotal() / (dataAnalysis.getPerlakuan() * dataAnalysis.getUlangan())) * 100;
@@ -1159,7 +1332,6 @@ function renderHasil(data, homogeneityGroups) {
   html += '</tbody>';
   return html;
 }
-
 function processDataSK() {
   const raw = document.getElementById('input-data').value;
   const alpha = "0.05";

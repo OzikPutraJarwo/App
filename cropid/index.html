@@ -88,7 +88,8 @@
             <div class="jenis-anova">
               <label for="jenis-anova">Analisis Varians (Anova)</label>
               <select name="jenis-anova" id="jenis-anova">
-                <option value="ral">Rancangan Acak Lengkap (RAL)</option>
+                <option value="ral" selected>Rancangan Acak Lengkap (RAL)</option>
+                <option value="rak">Rancangan Acak Kelompok (RAK)</option>
               </select>
             </div>
             <div class="jenis-posthoc">
@@ -152,39 +153,7 @@
           <div class="hasil-section" id="hasil">
             <h3>Analisis Varians (Anova)</h3>
             <table id="anovaTable">
-              <thead>
-                <tr>
-                  <th>Sumber Keragaman</th>
-                  <th>Derajat Bebas</th>
-                  <th>Jumlah Kuadrat</th>
-                  <th>Kuadrat Tengah</th>
-                  <th>F Hitung</th>
-                  <th>F Tabel 5%</th>
-                  <th>Signifikansi</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Perlakuan</td>
-                  <td class="Pdb"></td>
-                  <td class="Pjk"></td>
-                  <td class="Pkt"></td>
-                  <td class="Pfh"></td>
-                  <td class="Pft"></td>
-                  <td class="Psg"></td>
-                </tr>
-                <tr>
-                  <td>Galat</td>
-                  <td class="Gdb"></td>
-                  <td class="Gjk"></td>
-                  <td class="Gkt"></td>
-                </tr>
-                <tr>
-                  <td>Total</td>
-                  <td class="Tdb"></td>
-                  <td class="Tjk"></td>
-                </tr>
-              </tbody>
+              
             </table>
             <table id="anovaSup">
               <thead>
