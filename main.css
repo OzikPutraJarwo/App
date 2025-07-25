@@ -1,4 +1,5 @@
 :root {
+  --bg-color: #e7e9eb;
   --box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
   --green: mediumseagreen;
   --green-hover: seagreen;
@@ -164,7 +165,7 @@ button:disabled {
 
 input,
 select {
-  background: #f5f7f6;
+  background: var(--bg-color);
   outline: 0;
   border: none;
   padding: .7rem 1rem;
@@ -181,11 +182,11 @@ input[type="color"] {
 
 select {
   cursor: pointer;
-  border-right: 0.4rem solid #f5f7f6;
+  border-right: 0.4rem solid var(--bg-color);
 }
 
 body {
-  background-color: #f5f7f6;
+  background-color: var(--bg-color);
   padding-top: 61px;
 }
 
