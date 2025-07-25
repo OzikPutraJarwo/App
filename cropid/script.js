@@ -125,6 +125,10 @@ function smoothScroll(target, offset = 0) {
   }, 100);
 };
 
+document.querySelector('.sk-graph').addEventListener('input', (e) => {
+  initializeChart;drawHistogram();
+});
+
 function getFileName() {
   const x = document.getElementById('fileInput')
   x.style.visibility = 'collapse'
@@ -495,8 +499,13 @@ function handleHeaderClick(event) {
         processDataSK();
       }
 
+      document.querySelector('.sk-graph').classList.remove('none');
       initializeInterpretationApp();
       renderBarChart();
+      initializeChart;drawHistogram();
+      window.addEventListener('resize', () => {
+        drawHistogram();
+      });
       document.querySelector('.graph').classList.remove('none');
       document.querySelector('.download').classList.remove('none');
       document.querySelector('#chartContainer').innerHTML += `<div class="download-svg" onclick="downloadSvgAsPng(this)"><img src="../icon/download.png"></div>`;
@@ -646,6 +655,7 @@ function resetSettings() {
   document.querySelector('.graph').classList.add('none');
   document.querySelector('.download').classList.add('none');
   document.querySelectorAll('.output').forEach(el => el.classList.remove('show'));
+  document.querySelector('.sk-graph').classList.add('none');
   window.dataAnalysis._uniquePerlakuanCount = 0;
   window.dataAnalysis._uniqueUlanganCount = 0;
   window.dataAnalysis._perlakuanResults = {};
@@ -1754,4 +1764,463 @@ function renderBarChart() {
 
   chartContainer.innerHTML = '';
   chartContainer.appendChild(svg);
+}
+
+/////////////////////////////////////////////
+
+// Global object to store custom colors for notations
+let notationColors = {};
+// A set of default colors to cycle through for new notations
+const defaultColors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#06b6d4']; // Blue, Red, Green, Yellow, Indigo, Pink, Cyan
+
+// Function to display a message
+function showMessage(message, type = 'success') {
+  const messageBox = document.getElementById('messageBox');
+  messageBox.textContent = message;
+  messageBox.className = 'message-box show'; // Reset class and show
+  if (type === 'error') {
+    messageBox.style.backgroundColor = '#f44336'; // Red for error
+  } else {
+    messageBox.style.backgroundColor = '#4CAF50'; // Green for success
+  }
+  setTimeout(() => {
+    messageBox.classList.remove('show');
+  }, 3000); // Hide after 3 seconds
+}
+
+// Function to parse the main data table
+function parseDataTable() {
+  const tableContainer = document.getElementById('tableContainer');
+  const table = tableContainer.querySelector('table'); // Find the table inside the container
+  const data = {}; // { P_key: [N_value1, N_value2, ...], ... }
+  const rows = table.querySelectorAll('tbody tr');
+  const headerCells = table.querySelector('thead tr') ? table.querySelector('thead tr').querySelectorAll('th') : rows[0].querySelectorAll('th');
+
+  let pColIndex = -1;
+  let nColIndex = -1;
+
+  // Identify column indices based on data-setting attribute
+  headerCells.forEach((th, index) => {
+    if (th.getAttribute('data-setting') === 'Perlakuan') {
+      pColIndex = index;
+    } else if (th.getAttribute('data-setting') === 'Hasil') {
+      nColIndex = index;
+    }
+  });
+
+  if (pColIndex === -1 || nColIndex === -1) {
+    console.error("Kolom dengan data-setting='Perlakuan' atau data-setting='Hasil' tidak ditemukan di header tabel data.");
+    return {};
+  }
+
+  // Iterate through data rows (skipping header row if it's in tbody, otherwise start from 0)
+  const startRow = table.querySelector('thead') ? 0 : 1; // If there's a thead, start from first tbody row (index 0)
+  // If no thead, assume first row in tbody is header, start from index 1
+
+  for (let i = startRow; i < rows.length; i++) {
+    const cells = rows[i].querySelectorAll('td');
+    if (cells.length > Math.max(pColIndex, nColIndex)) { // Ensure cells exist for the identified columns
+      const pValue = cells[pColIndex].textContent.trim();
+      const nValue = parseFloat(cells[nColIndex].textContent.trim());
+
+      if (!isNaN(nValue)) {
+        if (!data[pValue]) {
+          data[pValue] = [];
+        }
+        data[pValue].push(nValue);
+      }
+    }
+  }
+  return data;
+}
+
+// Function to parse the letter table for notations
+function parseLetterTable() {
+  const table = document.getElementById('letterTable');
+  const notationMap = {}; // { P_key: 'Notation', ... }
+  const rows = table.querySelectorAll('tbody tr');
+
+  let pColIndex = -1;
+  let notationColIndex = -1;
+  const headerCells = table.querySelector('thead tr').querySelectorAll('th');
+  headerCells.forEach((th, index) => {
+    if (th.textContent.trim().toUpperCase() === 'PERLAKUAN') { // Assuming 'Perlakuan' is the P column
+      pColIndex = index;
+    } else if (th.textContent.trim().toUpperCase() === 'NOTASI') {
+      notationColIndex = index;
+    }
+  });
+
+  if (pColIndex === -1 || notationColIndex === -1) {
+    console.error("Kolom 'Perlakuan' atau 'Notasi' tidak ditemukan di header tabel notasi.");
+    return {};
+  }
+
+  for (let i = 0; i < rows.length; i++) { // Start from 0 as there's no header row in tbody
+    const cells = rows[i].querySelectorAll('td');
+    const pValue = cells[pColIndex].textContent.trim();
+    const notationValue = cells[notationColIndex].textContent.trim();
+    notationMap[pValue] = notationValue;
+  }
+  return notationMap;
+}
+
+// Function to render/update color setting inputs
+function renderColorSettings(uniqueNotations) {
+  const container = document.getElementById('colorSettingsContainer');
+  container.innerHTML = ''; // Clear previous inputs
+
+  uniqueNotations.forEach((notation, index) => {
+    // Assign a default color if not already set by user
+    if (!notationColors[notation]) {
+      notationColors[notation] = defaultColors[index % defaultColors.length];
+    }
+
+    const div = document.createElement('div');
+    div.className = 'color-input-group';
+
+    const label = document.createElement('label');
+    label.setAttribute('for', `color-${notation}`);
+    label.textContent = `Warna Notasi '${notation.toUpperCase()}':`;
+
+    const input = document.createElement('input');
+    input.type = 'color';
+    input.id = `color-${notation}`;
+    input.value = notationColors[notation];
+
+    input.addEventListener('input', (event) => {
+      notationColors[notation] = event.target.value;
+      drawHistogram(); // Redraw chart when color changes
+    });
+
+    div.appendChild(label);
+    div.appendChild(input);
+    container.appendChild(div);
+  });
+}
+
+// Main function to create and draw the histogram
+function drawHistogram() {
+  const svg = document.getElementById('histogramSvg');
+  const svgNS = "http://www.w3.org/2000/svg"; // SVG Namespace
+
+  // Get axis titles from input fields
+  const xAxisTitle = document.getElementById('xAxisTitleInput').value;
+  const yAxisTitle = document.getElementById('yAxisTitleInput').value;
+
+  // Get margin values from input fields, parse as integers, default to 0 if invalid
+  const marginTop = parseInt(document.getElementById('marginTopInput').value) || 0;
+  const marginRight = parseInt(document.getElementById('marginRightInput').value) || 0;
+  const marginBottom = parseInt(document.getElementById('marginBottomInput').value) || 0;
+  const marginLeft = parseInt(document.getElementById('marginLeftInput').value) || 0;
+
+  // Get sorting option
+  const sortOrder = document.getElementById('sortOrderSelect').value;
+
+  // Get font settings
+  const xAxisTitleFontSize = document.getElementById('xAxisTitleFontSizeInput').value + 'px';
+  const xAxisTitleFontFamily = document.getElementById('xAxisTitleFontFamilyInput').value;
+  const xAxisTickFontSize = document.getElementById('xAxisTickFontSizeInput').value + 'px';
+  const xAxisTickFontFamily = document.getElementById('xAxisTickFontFamilyInput').value;
+
+  const yAxisTitleFontSize = document.getElementById('yAxisTitleFontSizeInput').value + 'px';
+  const yAxisTitleFontFamily = document.getElementById('yAxisTitleFontFamilyInput').value;
+  const yAxisTickFontSize = document.getElementById('yAxisTickFontSizeInput').value + 'px';
+  const yAxisTickFontFamily = document.getElementById('yAxisTickFontFamilyInput').value;
+
+
+  // Set SVG viewbox and dimensions for responsiveness
+  const chartWidth = 700; // Internal chart width for calculations
+  const chartHeight = 300; // Internal chart height for calculations
+  const svgTotalWidth = chartWidth + marginLeft + marginRight; // Total SVG canvas width
+  const svgTotalHeight = chartHeight + marginTop + marginBottom; // Total SVG canvas height
+
+  svg.setAttribute('viewBox', `0 0 ${svgTotalWidth} ${svgTotalHeight}`);
+  svg.setAttribute('width', '100%'); // Make it responsive
+  svg.setAttribute('height', '100%');
+
+  // Clear previous SVG content
+  while (svg.firstChild) {
+    svg.removeChild(svg.firstChild);
+  }
+
+  // --- 1. Parse Data and Merge Notations ---
+  const mainData = parseDataTable();
+  const notationData = parseLetterTable();
+
+  let processedData = []; // Array to store { P: 'P1', min: X, max: Y, avg: Z, notation: 'a' }
+  let globalMinN = Infinity;
+  let globalMaxN = -Infinity;
+  const uniqueNotations = new Set();
+
+  for (const pKey in mainData) {
+    if (mainData.hasOwnProperty(pKey)) {
+      const nValues = mainData[pKey];
+      const minN = Math.min(...nValues);
+      const maxN = Math.max(...nValues);
+      const sumN = nValues.reduce((sum, val) => sum + val, 0);
+      const avgN = sumN / nValues.length;
+      const notation = notationData[pKey] || 'unknown'; // Get notation, default to 'unknown'
+
+      processedData.push({
+        P: pKey,
+        min: minN,
+        max: maxN,
+        avg: avgN,
+        notation: notation
+      });
+      uniqueNotations.add(notation); // Collect unique notations
+
+      // Update global min/max for scaling the Y-axis
+      if (minN < globalMinN) globalMinN = minN;
+      if (maxN > globalMaxN) globalMaxN = maxN;
+    }
+  }
+
+  // --- Apply Sorting ---
+  if (sortOrder === 'default') {
+    processedData.sort((a, b) => {
+      const numA = parseInt(a.P.substring(1));
+      const numB = parseInt(b.P.substring(1));
+      return numA - numB;
+    });
+  } else if (sortOrder === 'notation-asc') {
+    processedData.sort((a, b) => {
+      return a.notation.localeCompare(b.notation);
+    });
+  } else if (sortOrder === 'notation-desc') {
+    processedData.sort((a, b) => {
+      return b.notation.localeCompare(a.notation);
+    });
+  }
+
+  // Render color settings UI based on unique notations
+  renderColorSettings(Array.from(uniqueNotations).sort()); // Convert set to array and sort for consistent order
+
+  // Add some padding to global min/max for better visualization on the Y-axis
+  const yAxisPadding = (globalMaxN - globalMinN) * 0.1; // 10% padding
+  const displayMinN = globalMinN - yAxisPadding;
+  const displayMaxN = globalMaxN + yAxisPadding;
+
+  // --- 3. Draw Histogram on SVG ---
+
+  // Define margins and chart area (now dynamic)
+  const chartMargin = { top: marginTop, right: marginRight, bottom: marginBottom, left: marginLeft };
+  const effectiveChartWidth = chartWidth; // Fixed internal chart width
+  const effectiveChartHeight = chartHeight; // Fixed internal chart height
+
+  // Function to map a value from data range to SVG Y coordinate
+  // Y-axis is inverted: higher values are lower on the SVG
+  const mapY = (value) => {
+    return chartMargin.top + effectiveChartHeight - ((value - displayMinN) / (displayMaxN - displayMinN)) * effectiveChartHeight;
+  };
+
+  // Create a group for chart elements to apply transformations if needed
+  const chartGroup = document.createElementNS(svgNS, 'g');
+  svg.appendChild(chartGroup);
+
+  // Draw X-axis line
+  const xAxisLine = document.createElementNS(svgNS, 'line');
+  xAxisLine.setAttribute('x1', chartMargin.left);
+  xAxisLine.setAttribute('y1', chartMargin.top + effectiveChartHeight);
+  xAxisLine.setAttribute('x2', chartMargin.left + effectiveChartWidth);
+  xAxisLine.setAttribute('y2', chartMargin.top + effectiveChartHeight);
+  xAxisLine.setAttribute('stroke', '#64748b');
+  xAxisLine.setAttribute('stroke-width', 2);
+  chartGroup.appendChild(xAxisLine);
+
+  // Draw Y-axis line
+  const yAxisLine = document.createElementNS(svgNS, 'line');
+  yAxisLine.setAttribute('x1', chartMargin.left);
+  yAxisLine.setAttribute('y1', chartMargin.top);
+  yAxisLine.setAttribute('x2', chartMargin.left);
+  yAxisLine.setAttribute('y2', chartMargin.top + effectiveChartHeight);
+  yAxisLine.setAttribute('stroke', '#64748b');
+  yAxisLine.setAttribute('stroke-width', 2);
+  chartGroup.appendChild(yAxisLine);
+
+  // Draw Y-axis labels, grid lines, and ticks
+  const numYLabels = 5;
+  const tickLength = 5; // Length of the tick marks
+  for (let i = 0; i <= numYLabels; i++) {
+    const yValue = displayMinN + (i / numYLabels) * (displayMaxN - displayMinN);
+    const yCoord = mapY(yValue);
+
+    // Draw grid line
+    const gridLine = document.createElementNS(svgNS, 'line');
+    gridLine.setAttribute('x1', chartMargin.left);
+    gridLine.setAttribute('y1', yCoord);
+    gridLine.setAttribute('x2', chartMargin.left + effectiveChartWidth);
+    gridLine.setAttribute('y2', yCoord);
+    gridLine.setAttribute('stroke', '#e2e8f0');
+    gridLine.setAttribute('stroke-width', 1);
+    chartGroup.appendChild(gridLine);
+
+    // Draw tick mark on Y-axis
+    const yTick = document.createElementNS(svgNS, 'line');
+    yTick.setAttribute('x1', chartMargin.left - tickLength);
+    yTick.setAttribute('y1', yCoord);
+    yTick.setAttribute('x2', chartMargin.left);
+    yTick.setAttribute('y2', yCoord);
+    yTick.setAttribute('stroke', '#64748b');
+    yTick.setAttribute('stroke-width', 1);
+    chartGroup.appendChild(yTick);
+
+    // Draw label
+    const yLabel = document.createElementNS(svgNS, 'text');
+    yLabel.setAttribute('x', chartMargin.left - 10); // Adjusted to be closer to the tick
+    yLabel.setAttribute('y', yCoord + 4);
+    yLabel.setAttribute('font-family', yAxisTickFontFamily); // Apply font family
+    yLabel.setAttribute('font-size', yAxisTickFontSize);   // Apply font size
+    yLabel.setAttribute('fill', '#475569');
+    yLabel.setAttribute('text-anchor', 'end'); // Align text to the end (right)
+    yLabel.textContent = yValue.toFixed(0);
+    chartGroup.appendChild(yLabel);
+  }
+
+  // Draw Y-axis title
+  const yAxisTitleText = document.createElementNS(svgNS, 'text');
+  const yAxisTitleXPos = 30; // Fixed X position from SVG left edge
+  yAxisTitleText.setAttribute('x', yAxisTitleXPos);
+  yAxisTitleText.setAttribute('y', chartMargin.top + effectiveChartHeight / 2);
+  yAxisTitleText.setAttribute('font-family', yAxisTitleFontFamily); // Apply font family
+  yAxisTitleText.setAttribute('font-size', yAxisTitleFontSize);   // Apply font size
+  yAxisTitleText.setAttribute('fill', '#475569');
+  yAxisTitleText.setAttribute('text-anchor', 'middle');
+  yAxisTitleText.setAttribute('transform', `rotate(-90 ${yAxisTitleXPos},${chartMargin.top + effectiveChartHeight / 2})`);
+  yAxisTitleText.textContent = yAxisTitle;
+  chartGroup.appendChild(yAxisTitleText);
+
+  // Draw X-axis labels (P categories) and ticks
+  const barSpacing = effectiveChartWidth / processedData.length;
+
+  processedData.forEach((item, index) => {
+    const xPos = chartMargin.left + (index * barSpacing) + (barSpacing / 2); // Center of the bar's allocated space
+
+    // Draw X-axis label
+    const xLabel = document.createElementNS(svgNS, 'text');
+    xLabel.setAttribute('x', xPos);
+    xLabel.setAttribute('y', chartMargin.top + effectiveChartHeight + 20); // Adjust position
+    xLabel.setAttribute('font-family', xAxisTickFontFamily); // Apply font family
+    xLabel.setAttribute('font-size', xAxisTickFontSize);   // Apply font size
+    xLabel.setAttribute('fill', '#475569');
+    xLabel.setAttribute('text-anchor', 'middle');
+    xLabel.textContent = item.P;
+    chartGroup.appendChild(xLabel);
+
+    // Draw tick mark on X-axis
+    const xTick = document.createElementNS(svgNS, 'line');
+    xTick.setAttribute('x1', xPos);
+    xTick.setAttribute('y1', chartMargin.top + effectiveChartHeight);
+    xTick.setAttribute('x2', xPos);
+    xTick.setAttribute('y2', chartMargin.top + effectiveChartHeight + tickLength);
+    xTick.setAttribute('stroke', '#64748b');
+    xTick.setAttribute('stroke-width', 1);
+    chartGroup.appendChild(xTick);
+
+    // Draw the 1px wide bar (as a line in SVG)
+    const minY = mapY(item.min);
+    const maxY = mapY(item.max);
+    const barColor = notationColors[item.notation] || '#3b82f6'; // Get bar color
+
+    const bar = document.createElementNS(svgNS, 'line');
+    bar.setAttribute('x1', xPos);
+    bar.setAttribute('y1', minY);
+    bar.setAttribute('x2', xPos);
+    bar.setAttribute('y2', maxY);
+    bar.setAttribute('stroke', barColor); // Use the custom color for the bar
+    bar.setAttribute('stroke-width', 1); // 1px width as requested
+    chartGroup.appendChild(bar);
+
+    // Draw the dot for average
+    const avgDot = document.createElementNS(svgNS, 'circle');
+    const avgY = mapY(item.avg);
+    avgDot.setAttribute('cx', xPos);
+    avgDot.setAttribute('cy', avgY);
+    avgDot.setAttribute('r', 3); // Radius 3px
+    avgDot.setAttribute('fill', barColor); // Use the same color as the bar for the dot
+    chartGroup.appendChild(avgDot);
+  });
+
+  // Draw X-axis title
+  const xAxisTitleText = document.createElementNS(svgNS, 'text');
+  xAxisTitleText.setAttribute('x', chartMargin.left + effectiveChartWidth / 2);
+  xAxisTitleText.setAttribute('y', svgTotalHeight - 10); // Position below x-axis labels
+  xAxisTitleText.setAttribute('font-family', xAxisTitleFontFamily); // Apply font family
+  xAxisTitleText.setAttribute('font-size', xAxisTitleFontSize);   // Apply font size
+  xAxisTitleText.setAttribute('fill', '#475569');
+  xAxisTitleText.setAttribute('text-anchor', 'middle');
+  xAxisTitleText.textContent = xAxisTitle;
+  chartGroup.appendChild(xAxisTitleText);
+}
+
+// Function to copy SVG content to clipboard
+function copySvgToClipboard() {
+  const svgElement = document.getElementById('histogramSvg');
+  const svgString = new XMLSerializer().serializeToString(svgElement);
+
+  // Create a temporary textarea to hold the SVG string
+  const tempTextArea = document.createElement('textarea');
+  tempTextArea.value = svgString;
+  document.body.appendChild(tempTextArea);
+  tempTextArea.select();
+
+  try {
+    const successful = document.execCommand('copy');
+    if (successful) {
+      showMessage('SVG berhasil disalin ke clipboard!');
+    } else {
+      showMessage('Gagal menyalin SVG. Silakan coba lagi.', 'error');
+    }
+  } catch (err) {
+    console.error('Gagal menyalin SVG:', err);
+    showMessage('Gagal menyalin SVG. Browser Anda mungkin tidak mendukung fitur ini.', 'error');
+  } finally {
+    document.body.removeChild(tempTextArea);
+  }
+}
+
+// Function to download SVG content as a file
+function downloadSvg() {
+  const svgElement = document.getElementById('histogramSvg');
+  const svgString = new XMLSerializer().serializeToString(svgElement);
+  const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'histogram_chart.svg'; // Default filename
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url); // Clean up the URL object
+
+  showMessage('SVG berhasil diunduh!');
+}
+
+// Initialization function to set up event listeners and draw the initial chart
+function initializeChart() {
+  drawHistogram(); // Initial draw
+
+  // Add event listeners to input fields for real-time updates
+  document.getElementById('xAxisTitleInput').addEventListener('input', drawHistogram);
+  document.getElementById('yAxisTitleInput').addEventListener('input', drawHistogram);
+  document.getElementById('marginTopInput').addEventListener('input', drawHistogram);
+  document.getElementById('marginRightInput').addEventListener('input', drawHistogram);
+  document.getElementById('marginBottomInput').addEventListener('input', drawHistogram);
+  document.getElementById('marginLeftInput').addEventListener('input', drawHistogram);
+  document.getElementById('sortOrderSelect').addEventListener('change', drawHistogram);
+
+  // Font setting event listeners
+  document.getElementById('xAxisTitleFontSizeInput').addEventListener('input', drawHistogram);
+  document.getElementById('xAxisTitleFontFamilyInput').addEventListener('change', drawHistogram);
+  document.getElementById('xAxisTickFontSizeInput').addEventListener('input', drawHistogram);
+  document.getElementById('xAxisTickFontFamilyInput').addEventListener('change', drawHistogram);
+  document.getElementById('yAxisTitleFontSizeInput').addEventListener('input', drawHistogram);
+  document.getElementById('yAxisTitleFontFamilyInput').addEventListener('change', drawHistogram);
+  document.getElementById('yAxisTickFontSizeInput').addEventListener('input', drawHistogram);
+  document.getElementById('yAxisTickFontFamilyInput').addEventListener('change', drawHistogram);
+
+  document.getElementById('copySvgButton').addEventListener('click', copySvgToClipboard);
+  document.getElementById('downloadSvgButton').addEventListener('click', downloadSvg);
 }

@@ -277,7 +277,6 @@ P5   13.26"></textarea>
 
         <div class="graph none">
           <div class="item" id="chartContainer"></div>
-
           <div class="item output sum">
             <div class="hasil-section" id="hasil">
               <h3>Interpretasi</h3>
@@ -306,6 +305,131 @@ P5   13.26"></textarea>
               <div id="errorMessage" style="display: none;">
                 <h3>Terjadi Kesalahan:</h3>
                 <p id="errorContent"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="item sk-graph none">
+          <svg id="histogramSvg"></svg>
+            <div class="button-group">
+              <button id="copySvgButton" class="action-button">Salin SVG ke Clipboard</button>
+              <button id="downloadSvgButton" class="action-button">Unduh SVG</button>
+            </div>
+          <div class="settings-panel">
+            <h2 class="text-xl font-semibold text-gray-700 mb-3">Pengaturan Real-time</h2>
+            <div class="mb-4">
+              <label for="xAxisTitleInput">Judul Sumbu X:</label>
+              <input type="text" id="xAxisTitleInput" value="Perlakuan (P)">
+            </div>
+            <div class="mb-4">
+              <label for="yAxisTitleInput">Judul Sumbu Y:</label>
+              <input type="text" id="yAxisTitleInput" value="Nilai N">
+            </div>
+            <h3 class="text-lg font-medium text-gray-700 mb-2">Margin Grafik (px)</h3>
+            <div class="margin-inputs">
+              <div>
+                <label for="marginTopInput">Atas:</label>
+                <input type="number" id="marginTopInput" value="40" min="0">
+              </div>
+              <div>
+                <label for="marginRightInput">Kanan:</label>
+                <input type="number" id="marginRightInput" value="40" min="0">
+              </div>
+              <div>
+                <label for="marginBottomInput">Bawah:</label>
+                <input type="number" id="marginBottomInput" value="60" min="0">
+              </div>
+              <div>
+                <label for="marginLeftInput">Kiri:</label>
+                <input type="number" id="marginLeftInput" value="60" min="0">
+              </div>
+            </div>
+            <h3 class="text-lg font-medium text-gray-700 mb-2">Pengaturan Warna Notasi</h3>
+            <div id="colorSettingsContainer" class="color-inputs">
+              <!-- Color inputs will be dynamically generated here -->
+            </div>
+            <h3 class="text-lg font-medium text-gray-700 mb-2">Pengurutan Perlakuan</h3>
+            <div class="mb-4">
+              <label for="sortOrderSelect">Urutkan Berdasarkan:</label>
+              <select id="sortOrderSelect">
+                <option value="default">Default (P1, P2, ...)</option>
+                <option value="notation-asc">Notasi (A-Z)</option>
+                <option value="notation-desc">Notasi (Z-A)</option>
+              </select>
+            </div>
+            <h3 class="text-lg font-medium text-gray-700 mb-2">Pengaturan Font Sumbu X</h3>
+            <div class="font-settings-group">
+              <div class="input-pair">
+                <label for="xAxisTitleFontSizeInput">Judul X Ukuran Font:</label>
+                <input type="number" id="xAxisTitleFontSizeInput" value="14" min="8">
+              </div>
+              <div class="input-pair">
+                <label for="xAxisTitleFontFamilyInput">Judul X Font Family:</label>
+                <select id="xAxisTitleFontFamilyInput">
+                  <option value="Inter, sans-serif">Inter</option>
+                  <option value="Arial, sans-serif">Arial</option>
+                  <option value="Verdana, sans-serif">Verdana</option>
+                  <option value="Helvetica, sans-serif">Helvetica</option>
+                  <option value="Tahoma, sans-serif">Tahoma</option>
+                  <option value="Georgia, serif">Georgia</option>
+                  <option value="Times New Roman, serif">Times New Roman</option>
+                  <option value="Courier New, monospace">Courier New</option>
+                </select>
+              </div>
+              <div class="input-pair">
+                <label for="xAxisTickFontSizeInput">Tick X Ukuran Font:</label>
+                <input type="number" id="xAxisTickFontSizeInput" value="12" min="8">
+              </div>
+              <div class="input-pair">
+                <label for="xAxisTickFontFamilyInput">Tick X Font Family:</label>
+                <select id="xAxisTickFontFamilyInput">
+                  <option value="Inter, sans-serif">Inter</option>
+                  <option value="Arial, sans-serif">Arial</option>
+                  <option value="Verdana, sans-serif">Verdana</option>
+                  <option value="Helvetica, sans-serif">Helvetica</option>
+                  <option value="Tahoma, sans-serif">Tahoma</option>
+                  <option value="Georgia, serif">Georgia</option>
+                  <option value="Times New Roman, serif">Times New Roman</option>
+                  <option value="Courier New, monospace">Courier New</option>
+                </select>
+              </div>
+            </div>
+            <h3 class="text-lg font-medium text-gray-700 mb-2">Pengaturan Font Sumbu Y</h3>
+            <div class="font-settings-group">
+              <div class="input-pair">
+                <label for="yAxisTitleFontSizeInput">Judul Y Ukuran Font:</label>
+                <input type="number" id="yAxisTitleFontSizeInput" value="14" min="8">
+              </div>
+              <div class="input-pair">
+                <label for="yAxisTitleFontFamilyInput">Judul Y Font Family:</label>
+                <select id="yAxisTitleFontFamilyInput">
+                  <option value="Inter, sans-serif">Inter</option>
+                  <option value="Arial, sans-serif">Arial</option>
+                  <option value="Verdana, sans-serif">Verdana</option>
+                  <option value="Helvetica, sans-serif">Helvetica</option>
+                  <option value="Tahoma, sans-serif">Tahoma</option>
+                  <option value="Georgia, serif">Georgia</option>
+                  <option value="Times New Roman, serif">Times New Roman</option>
+                  <option value="Courier New, monospace">Courier New</option>
+                </select>
+              </div>
+              <div class="input-pair">
+                <label for="yAxisTickFontSizeInput">Tick Y Ukuran Font:</label>
+                <input type="number" id="yAxisTickFontSizeInput" value="12" min="8">
+              </div>
+              <div class="input-pair">
+                <label for="yAxisTickFontFamilyInput">Tick Y Font Family:</label>
+                <select id="yAxisTickFontFamilyInput">
+                  <option value="Inter, sans-serif">Inter</option>
+                  <option value="Arial, sans-serif">Arial</option>
+                  <option value="Verdana, sans-serif">Verdana</option>
+                  <option value="Helvetica, sans-serif">Helvetica</option>
+                  <option value="Tahoma, sans-serif">Tahoma</option>
+                  <option value="Georgia, serif">Georgia</option>
+                  <option value="Times New Roman, serif">Times New Roman</option>
+                  <option value="Courier New, monospace">Courier New</option>
+                </select>
               </div>
             </div>
           </div>
