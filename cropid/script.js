@@ -129,6 +129,10 @@ document.querySelector('.sk-graph').addEventListener('input', (e) => {
   initializeChart;drawHistogram();
 });
 
+const toggleShow = (selector) => {
+  document.querySelector(selector).classList.toggle('show');
+};
+
 function getFileName() {
   const x = document.getElementById('fileInput')
   x.style.visibility = 'collapse'
@@ -509,6 +513,7 @@ function handleHeaderClick(event) {
       document.querySelector('.graph').classList.remove('none');
       document.querySelector('.download').classList.remove('none');
       document.querySelector('#chartContainer').innerHTML += `<div class="download-svg" onclick="downloadSvgAsPng(this)"><img src="../icon/download.png"></div>`;
+      document.querySelector('#chart2Container').innerHTML += `<div class="download-svg" onclick="downloadSvgAsPng(this)"><img src="../icon/download.png"></div>`;
     });
   } else {
     window.dataAnalysis._isDataReady = false;
@@ -1768,25 +1773,8 @@ function renderBarChart() {
 
 /////////////////////////////////////////////
 
-// Global object to store custom colors for notations
 let notationColors = {};
-// A set of default colors to cycle through for new notations
-const defaultColors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#06b6d4']; // Blue, Red, Green, Yellow, Indigo, Pink, Cyan
-
-// Function to display a message
-function showMessage(message, type = 'success') {
-  const messageBox = document.getElementById('messageBox');
-  messageBox.textContent = message;
-  messageBox.className = 'message-box show'; // Reset class and show
-  if (type === 'error') {
-    messageBox.style.backgroundColor = '#f44336'; // Red for error
-  } else {
-    messageBox.style.backgroundColor = '#4CAF50'; // Green for success
-  }
-  setTimeout(() => {
-    messageBox.classList.remove('show');
-  }, 3000); // Hide after 3 seconds
-}
+const defaultColors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#06b6d4'];
 
 // Function to parse the main data table
 function parseDataTable() {
@@ -1881,7 +1869,7 @@ function renderColorSettings(uniqueNotations) {
 
     const label = document.createElement('label');
     label.setAttribute('for', `color-${notation}`);
-    label.textContent = `Warna Notasi '${notation.toUpperCase()}':`;
+    label.textContent = `${notation}:`;
 
     const input = document.createElement('input');
     input.type = 'color';
@@ -1902,7 +1890,11 @@ function renderColorSettings(uniqueNotations) {
 // Main function to create and draw the histogram
 function drawHistogram() {
   const svg = document.getElementById('histogramSvg');
-  const svgNS = "http://www.w3.org/2000/svg"; // SVG Namespace
+  const svgNS = "http://www.w3.org/2000/svg";
+
+  // Get graph ratio
+  const graphWidth = document.getElementById('graphWidthInput').value || 0;
+  const graphHeight = document.getElementById('graphHeightInput').value || 0;
 
   // Get axis titles from input fields
   const xAxisTitle = document.getElementById('xAxisTitleInput').value;
@@ -1930,8 +1922,8 @@ function drawHistogram() {
 
 
   // Set SVG viewbox and dimensions for responsiveness
-  const chartWidth = 700; // Internal chart width for calculations
-  const chartHeight = 300; // Internal chart height for calculations
+  const chartWidth = graphWidth * 150; // Internal chart width for calculations
+  const chartHeight = graphHeight * 150; // Internal chart height for calculations
   const svgTotalWidth = chartWidth + marginLeft + marginRight; // Total SVG canvas width
   const svgTotalHeight = chartHeight + marginTop + marginBottom; // Total SVG canvas height
 
@@ -2005,7 +1997,7 @@ function drawHistogram() {
   // --- 3. Draw Histogram on SVG ---
 
   // Define margins and chart area (now dynamic)
-  const chartMargin = { top: marginTop, right: marginRight, bottom: marginBottom, left: marginLeft };
+  const chartMargin = { top: marginTop + 10, right: marginRight, bottom: marginBottom, left: marginLeft };
   const effectiveChartWidth = chartWidth; // Fixed internal chart width
   const effectiveChartHeight = chartHeight; // Fixed internal chart height
 
@@ -2025,8 +2017,8 @@ function drawHistogram() {
   xAxisLine.setAttribute('y1', chartMargin.top + effectiveChartHeight);
   xAxisLine.setAttribute('x2', chartMargin.left + effectiveChartWidth);
   xAxisLine.setAttribute('y2', chartMargin.top + effectiveChartHeight);
-  xAxisLine.setAttribute('stroke', '#64748b');
-  xAxisLine.setAttribute('stroke-width', 2);
+  xAxisLine.setAttribute('stroke', '#000000ff');
+  xAxisLine.setAttribute('stroke-width', 1);
   chartGroup.appendChild(xAxisLine);
 
   // Draw Y-axis line
@@ -2035,8 +2027,8 @@ function drawHistogram() {
   yAxisLine.setAttribute('y1', chartMargin.top);
   yAxisLine.setAttribute('x2', chartMargin.left);
   yAxisLine.setAttribute('y2', chartMargin.top + effectiveChartHeight);
-  yAxisLine.setAttribute('stroke', '#64748b');
-  yAxisLine.setAttribute('stroke-width', 2);
+  yAxisLine.setAttribute('stroke', '#000000ff');
+  yAxisLine.setAttribute('stroke-width', 1);
   chartGroup.appendChild(yAxisLine);
 
   // Draw Y-axis labels, grid lines, and ticks
@@ -2062,7 +2054,7 @@ function drawHistogram() {
     yTick.setAttribute('y1', yCoord);
     yTick.setAttribute('x2', chartMargin.left);
     yTick.setAttribute('y2', yCoord);
-    yTick.setAttribute('stroke', '#64748b');
+    yTick.setAttribute('stroke', '#000000ff');
     yTick.setAttribute('stroke-width', 1);
     chartGroup.appendChild(yTick);
 
@@ -2072,7 +2064,7 @@ function drawHistogram() {
     yLabel.setAttribute('y', yCoord + 4);
     yLabel.setAttribute('font-family', yAxisTickFontFamily); // Apply font family
     yLabel.setAttribute('font-size', yAxisTickFontSize);   // Apply font size
-    yLabel.setAttribute('fill', '#475569');
+    yLabel.setAttribute('fill', '#000000ff');
     yLabel.setAttribute('text-anchor', 'end'); // Align text to the end (right)
     yLabel.textContent = yValue.toFixed(0);
     chartGroup.appendChild(yLabel);
@@ -2082,10 +2074,10 @@ function drawHistogram() {
   const yAxisTitleText = document.createElementNS(svgNS, 'text');
   const yAxisTitleXPos = 30; // Fixed X position from SVG left edge
   yAxisTitleText.setAttribute('x', yAxisTitleXPos);
-  yAxisTitleText.setAttribute('y', chartMargin.top + effectiveChartHeight / 2);
+  yAxisTitleText.setAttribute('y', chartMargin.top + effectiveChartHeight / 2 - 10);
   yAxisTitleText.setAttribute('font-family', yAxisTitleFontFamily); // Apply font family
   yAxisTitleText.setAttribute('font-size', yAxisTitleFontSize);   // Apply font size
-  yAxisTitleText.setAttribute('fill', '#475569');
+  yAxisTitleText.setAttribute('fill', '#000000ff');
   yAxisTitleText.setAttribute('text-anchor', 'middle');
   yAxisTitleText.setAttribute('transform', `rotate(-90 ${yAxisTitleXPos},${chartMargin.top + effectiveChartHeight / 2})`);
   yAxisTitleText.textContent = yAxisTitle;
@@ -2103,7 +2095,7 @@ function drawHistogram() {
     xLabel.setAttribute('y', chartMargin.top + effectiveChartHeight + 20); // Adjust position
     xLabel.setAttribute('font-family', xAxisTickFontFamily); // Apply font family
     xLabel.setAttribute('font-size', xAxisTickFontSize);   // Apply font size
-    xLabel.setAttribute('fill', '#475569');
+    xLabel.setAttribute('fill', '#000000ff');
     xLabel.setAttribute('text-anchor', 'middle');
     xLabel.textContent = item.P;
     chartGroup.appendChild(xLabel);
@@ -2114,7 +2106,7 @@ function drawHistogram() {
     xTick.setAttribute('y1', chartMargin.top + effectiveChartHeight);
     xTick.setAttribute('x2', xPos);
     xTick.setAttribute('y2', chartMargin.top + effectiveChartHeight + tickLength);
-    xTick.setAttribute('stroke', '#64748b');
+    xTick.setAttribute('stroke', '#000000ff');
     xTick.setAttribute('stroke-width', 1);
     chartGroup.appendChild(xTick);
 
@@ -2148,54 +2140,10 @@ function drawHistogram() {
   xAxisTitleText.setAttribute('y', svgTotalHeight - 10); // Position below x-axis labels
   xAxisTitleText.setAttribute('font-family', xAxisTitleFontFamily); // Apply font family
   xAxisTitleText.setAttribute('font-size', xAxisTitleFontSize);   // Apply font size
-  xAxisTitleText.setAttribute('fill', '#475569');
+  xAxisTitleText.setAttribute('fill', '#000000ff');
   xAxisTitleText.setAttribute('text-anchor', 'middle');
   xAxisTitleText.textContent = xAxisTitle;
   chartGroup.appendChild(xAxisTitleText);
-}
-
-// Function to copy SVG content to clipboard
-function copySvgToClipboard() {
-  const svgElement = document.getElementById('histogramSvg');
-  const svgString = new XMLSerializer().serializeToString(svgElement);
-
-  // Create a temporary textarea to hold the SVG string
-  const tempTextArea = document.createElement('textarea');
-  tempTextArea.value = svgString;
-  document.body.appendChild(tempTextArea);
-  tempTextArea.select();
-
-  try {
-    const successful = document.execCommand('copy');
-    if (successful) {
-      showMessage('SVG berhasil disalin ke clipboard!');
-    } else {
-      showMessage('Gagal menyalin SVG. Silakan coba lagi.', 'error');
-    }
-  } catch (err) {
-    console.error('Gagal menyalin SVG:', err);
-    showMessage('Gagal menyalin SVG. Browser Anda mungkin tidak mendukung fitur ini.', 'error');
-  } finally {
-    document.body.removeChild(tempTextArea);
-  }
-}
-
-// Function to download SVG content as a file
-function downloadSvg() {
-  const svgElement = document.getElementById('histogramSvg');
-  const svgString = new XMLSerializer().serializeToString(svgElement);
-  const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'histogram_chart.svg'; // Default filename
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url); // Clean up the URL object
-
-  showMessage('SVG berhasil diunduh!');
 }
 
 // Initialization function to set up event listeners and draw the initial chart
@@ -2220,7 +2168,4 @@ function initializeChart() {
   document.getElementById('yAxisTitleFontFamilyInput').addEventListener('change', drawHistogram);
   document.getElementById('yAxisTickFontSizeInput').addEventListener('input', drawHistogram);
   document.getElementById('yAxisTickFontFamilyInput').addEventListener('change', drawHistogram);
-
-  document.getElementById('copySvgButton').addEventListener('click', copySvgToClipboard);
-  document.getElementById('downloadSvgButton').addEventListener('click', downloadSvg);
 }

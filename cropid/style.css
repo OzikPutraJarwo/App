@@ -1,3 +1,19 @@
+input[type="color"] {
+  -webkit-appearance: none;
+  border: none;
+  outline: none;
+  border-radius: .5rem;
+  overflow: hidden !important;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+	padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+	border: none;
+}
+
 .main.wrap {
   display: flex;
   flex-direction: column;
@@ -67,7 +83,8 @@ td {
 }
 
 th {
-  background: #18abea50;
+  background: linear-gradient(45deg, #266bac 0%, #266bac8a 100%);
+  color: white;
 }
 
 .grayth {
@@ -75,12 +92,13 @@ th {
 }
 
 .green {
-  background-color: #18ea2850;
+  background: linear-gradient(45deg, #21631fde 0%, #21631f9c 100%);
+  color: white;
 }
 
 .gray {
   background-color: #b9b9b950;
-  color: transparent;
+  color: #00000040;
 }
 
 #letterTable tr th {
@@ -89,7 +107,7 @@ th {
 }
 
 #letterTable tr th svg {
-  width: 15px;
+  width: 20px;
   position: absolute;
   top: 50%;
   right: 1rem;
@@ -97,16 +115,16 @@ th {
 }
 
 #letterTable tr th.opacity svg {
-  opacity: .1;
+  opacity: .5;
 }
 
 #letterTable tr th.rev svg {
-  margin-top: -15px;
+  margin-top: -20px;
   transform: rotate(180deg) translateY(-50%);
 }
 
 #letterTable tr th.rev svg {
-  margin-top: -15px;
+  margin-top: -20px;
   transform: rotate(180deg) translateY(-50%);
 }
 
@@ -127,8 +145,8 @@ th#renderbyMerged:hover {
   color: #fff
 }
 
-th#renderbyData:hover svg,
-th#renderbyMerged:hover svg {
+th#renderbyData svg,
+th#renderbyMerged svg {
   filter: invert(1)
 }
 
@@ -165,7 +183,9 @@ th#renderbyMerged:hover svg {
 }
 
 .show-set,
-.uncollapse {
+.uncollapse,
+.set-graph {
+  background: #fff;
   position: absolute;
   top: 1.5rem;
   right: 1.5rem;
@@ -182,12 +202,14 @@ th#renderbyMerged:hover svg {
 }
 
 .show-set:hover,
-.uncollapse:hover {
+.uncollapse:hover,
+.set-graph:hover {
   box-shadow: rgba(67, 71, 85, 0) 0px 0px 0.25em, rgba(90, 125, 188, 0) 0px 0.25em 1em, rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
 }
 
 .show-set img,
-.uncollapse img {
+.uncollapse img,
+.set-graph img {
   width: 22.5px;
   height: 22.5px;
 }
@@ -270,13 +292,13 @@ th#renderbyMerged:hover svg {
 
 #buttonContainer button {
   padding: .75rem;
-  background-color: var(--green);
+  background: var(--green);
   display: grid;
 }
 
 #buttonContainer button:hover,
 #buttonContainer button.active {
-  background-color: var(--blue-hover);
+  background: var(--blue-hover);
 }
 
 #buttonContainer button span:first-child {
@@ -316,7 +338,7 @@ th#renderbyMerged:hover svg {
 
 #tableContainer th:hover,
 #tableContainer .selected-header {
-  background-color: var(--green);
+  background: linear-gradient(45deg, #21631fde 0%, #21631f9c 100%);
   color: #fff;
 }
 
@@ -361,12 +383,66 @@ th#renderbyMerged:hover svg {
 
 .graph {
   display: grid;
-  grid-template-columns: 1fr 1.5fr;
+  grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
+}
+
+.show #chartContainer {
+  display: none;
 }
 
 #chartContainer {
   position: relative;
+}
+
+.show .graph-set, .graph-set .item-set {
+  display: flex;
+  flex-direction: column;
+}
+
+.graph-set {
+  display: none;
+  gap: 1rem;
+}
+
+.graph-set .title {
+  font-weight: 600;
+  font-size: 1.3rem;
+}
+
+.graph-set .item-set {
+  gap: .5rem;
+  flex: 50%;
+}
+
+.graph-set .content-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.content-grid.grid-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.content-grid.grid-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.content-grid.grid-4 {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+.content-grid.grid-5 {
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+}
+
+.content-grid.grid-6 {
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+.graph-set label {
+  margin-bottom: .5rem;
+  display: block;
 }
 
 .download-svg {
