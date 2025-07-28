@@ -2070,6 +2070,8 @@ function drawHistogram() {
     chartGroup.appendChild(yLabel);
   }
 
+  document.querySelector('#histogramSvg g line:nth-child(3)').remove();
+
   // Draw Y-axis title
   const yAxisTitleText = document.createElementNS(svgNS, 'text');
   const yAxisTitleXPos = 30; // Fixed X position from SVG left edge
