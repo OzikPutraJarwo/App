@@ -154,9 +154,13 @@ const sheetSelectorContainer = document.getElementById('sheetSelectorContainer')
 const sheetSelect = document.getElementById('sheetSelect');
 const settingsContainer = document.getElementById('settingsContainer');
 const perlakuanBtn = document.getElementById('perlakuanBtn');
+const faktorABtn = document.getElementById('faktoraBtn');
+const faktorBBtn = document.getElementById('faktorbBtn');
 const ulanganBtn = document.getElementById('ulanganBtn');
 const hasilBtn = document.getElementById('hasilBtn');
 const selectedPerlakuanHeaderDisplay = document.getElementById('selectedPerlakuanHeader');
+const selectedFaktorAHeaderDisplay = document.getElementById('selectedFaktorAHeader');
+const selectedFaktorBHeaderDisplay = document.getElementById('selectedFaktorBHeader');
 const selectedUlanganHeaderDisplay = document.getElementById('selectedUlanganHeader');
 const selectedHasilHeaderDisplay = document.getElementById('selectedHasilHeader');
 
@@ -287,6 +291,8 @@ window.dataAnalysis = {
 };
 
 perlakuanBtn.addEventListener('click', () => activateSetting('Perlakuan'));
+faktorABtn.addEventListener('click', () => activateSetting('FaktorA'));
+faktorBBtn.addEventListener('click', () => activateSetting('FaktorB'));
 ulanganBtn.addEventListener('click', () => activateSetting('Ulangan'));
 hasilBtn.addEventListener('click', () => activateSetting('Hasil'));
 
@@ -460,6 +466,10 @@ function handleHeaderClick(event) {
     selectedUlanganHeaderDisplay.textContent = headerText;
   } else if (selectedSettingType === 'Hasil') {
     selectedHasilHeaderDisplay.textContent = headerText;
+  } else if (selectedSettingType === 'FaktorA') {
+    selectedFaktorAHeaderDisplay.textContent = headerText;
+  } else if (selectedSettingType === 'FaktorB') {
+    selectedFaktorBHeaderDisplay.textContent = headerText;
   }
 
   document.querySelectorAll('.setting-button').forEach(btn => {
@@ -499,6 +509,10 @@ function handleHeaderClick(event) {
         hitungBNT(); processDataBNT();
       } else if (selectedPostHoc === "bnj") {
         hitungBNJ(); processDataBNJ();
+      } else if (selectedPostHoc === "dmrt") {
+        hitungDMRT(); processDataDMRT();
+      } else if (selectedPostHoc === "snk") {
+        hitungSNK(); processDataSNK(); 
       } else if (selectedPostHoc === "sk") {
         processDataSK();
       }
@@ -513,6 +527,10 @@ function handleHeaderClick(event) {
       document.querySelector('.graph').classList.remove('none');
       document.querySelector('.download').classList.remove('none');
       document.querySelector('#chartContainer').innerHTML += `<div class="download-svg" onclick="downloadSvgAsPng(this)"><img src="../icon/download.png"></div>`;
+      const chart2ContainerDownload = document.querySelector('#chart2Container .download-svg');
+      if (chart2ContainerDownload) {
+        chart2ContainerDownload.remove();
+      };
       document.querySelector('#chart2Container').innerHTML += `<div class="download-svg" onclick="downloadSvgAsPng(this)"><img src="../icon/download.png"></div>`;
     });
   } else {
@@ -1227,6 +1245,454 @@ function processDataBNJ() {
   document.querySelectorAll('.output').forEach(el => el.classList.add('show'));
 
 };
+
+// ----- Posthoc : DMRT / Duncan's Multiple Range Test -----
+let dataMapDMRT;
+function hitungDMRT() {
+  const inputPerlakuan = document.querySelector('#input-perlakuan').value;
+  const inputUlangan = document.querySelector('#input-ulangan').value;
+  const inputKTG = document.querySelector('#input-ktg').value;
+  const inputSig = (document.querySelector('#input-sig').value * 0.01);
+
+  const valueDBG = (inputPerlakuan - 1) * (inputUlangan - 1);
+  const valueSD = Math.sqrt(inputKTG / inputUlangan);
+
+  const outputSD = document.querySelector('.dmrt-output-sd');
+
+  outputSD.innerHTML = valueSD.toFixed(2);
+  outputSD.setAttribute("colspan", inputPerlakuan - 1);
+
+  const elementDMRTP = document.querySelector('.dmrt-p');
+  elementDMRTP.innerHTML = `<th>P</th>`;
+  const elementDMRTT = document.querySelector('.dmrt-table');
+  elementDMRTT.innerHTML = `<th>Tabel DMRT</th>`;
+  const elementDMRTC = document.querySelector('.dmrt-calc');
+  elementDMRTC.innerHTML = `<th>DMRT Hitung</th>`;
+  for (let i = 2; i <= inputPerlakuan; i++) {
+    elementDMRTP.innerHTML += `<td>${i}</td>`;
+    elementDMRTT.innerHTML += `<td>${jrStat.studentq.inv(inputSig, i, valueDBG).toFixed(2)}</td>`;
+    elementDMRTC.innerHTML += `<td data-p="${i}">${(valueSD * jrStat.studentq.inv(inputSig, i, valueDBG)).toFixed(2)}</td>`;
+  }
+}
+function processDataDMRT() {
+  const input = document.getElementById('input-data').value.trim();
+  const lines = input.split('\n');
+  dataMapDMRT = {};
+
+  lines.forEach(line => {
+    const [perlakuan, nilai] = line.trim().split(/\s+/);
+    const nilaiFloat = parseFloat(nilai);
+    dataMapDMRT[perlakuan] = nilaiFloat;
+  });
+
+  const sortedEntries = Object.entries(dataMapDMRT).sort((a, b) => a[1] - b[1]);
+
+  const jsonOutput = JSON.stringify(sortedEntries, null, 2);
+
+  const matrixTableBody = document.querySelector('#matrixTable tbody');
+  const headerRow = document.createElement('tr');
+  headerRow.innerHTML = '<th></th>' + sortedEntries.map(entry => `<th>${entry[0]}</th>`).join('');
+  matrixTableBody.innerHTML = '';
+  matrixTableBody.appendChild(headerRow);
+
+  sortedEntries.forEach(([perlakuanA, nilaiA]) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `<th>${perlakuanA}</th>`;
+
+    sortedEntries.forEach(([perlakuanB, nilaiB]) => {
+      const difference = (nilaiA - nilaiB).toFixed(2);
+      if (difference < 0) {
+        row.innerHTML += `<td class="gray">${difference}</td>`;
+      } else {
+        row.innerHTML += `<td>${difference}</td>`;
+      }
+    });
+
+    matrixTableBody.appendChild(row);
+  });
+
+    const rowtr = document.querySelectorAll("#matrixTable tbody tr");
+  rowtr.forEach((row) => {
+    const cells = row.querySelectorAll("td");
+    let zeroIndex = -1;
+    cells.forEach((cell, idx) => {
+      if (cell.textContent.trim() === "0.00") {
+        zeroIndex = idx;
+      }
+    });
+    if (zeroIndex === -1) return;
+    let p = 2;
+    for (let i = zeroIndex - 1; i >= 0; i--) {
+      const cell = cells[i];
+        cell.setAttribute("data-p", p);
+        p++;
+    }
+  });
+
+  function checkGreen() {
+    const matrixTds = document.querySelectorAll('#matrixTable td');
+
+    matrixTds.forEach(matrixTd => {
+      const rawMatrixValue = matrixTd.textContent.trim();
+      const matrixValue = parseFloat(rawMatrixValue);
+      if (!isNaN(matrixValue) && matrixValue === 0) {
+        matrixTd.classList.add('green');
+        return;
+      }
+      const dataP = matrixTd.getAttribute('data-p');
+      if (!dataP) return;
+      const dmrtTd = document.querySelector(`tr.dmrt-calc td[data-p="${dataP}"]`);
+      if (!dmrtTd) return;
+      const rawDmrtValue = dmrtTd.textContent.trim();
+      const dmrtValue = parseFloat(rawDmrtValue);
+      if (!isNaN(matrixValue) && !isNaN(dmrtValue) && matrixValue <= dmrtValue) {
+        matrixTd.classList.add('green');
+      }
+    });
+  }
+  checkGreen();
+
+  const table = document.getElementById('matrixTable');
+  const rows = table.querySelectorAll('tbody tr');
+
+  const results = {};
+
+  rows.forEach((row, rowIndex) => {
+    if (rowIndex === 0) return;
+
+    const treatmentName = row.querySelector('th').textContent.trim();
+
+    const greenColumns = [];
+
+    const cells = row.querySelectorAll('td');
+    cells.forEach((cell, cellIndex) => {
+      if (cell.classList.contains('green')) {
+        greenColumns.push(cellIndex + 1);
+      }
+    });
+
+    results[treatmentName] = greenColumns.join(',');
+  });
+
+  const labelMap = {};
+  const assigned = {};
+  let currentLabelCode = 'a'.charCodeAt(0);
+
+  function keysWithNumber(num) {
+    return Object.keys(results).filter(key =>
+      results[key].split(',').includes(String(num))
+    );
+  }
+
+  for (const key of Object.keys(results)) {
+    const nums = results[key].split(',');
+    const first = nums[0];
+
+    if (!labelMap[first]) {
+      const label = String.fromCharCode(currentLabelCode++);
+      labelMap[first] = label;
+
+      const relatedKeys = keysWithNumber(first);
+      for (const rk of relatedKeys) {
+        assigned[rk] = (assigned[rk] || '') + label;
+      }
+    }
+  }
+
+  const merged = {};
+
+  for (const key in assigned) {
+    merged[key] = {
+      label: assigned[key],
+      value: dataMapDMRT[key]
+    };
+  }
+
+  const dataMapDMRTKeyOrder = Object.keys(dataMapDMRT);
+  const mergedCustomOrder = Object.keys(merged);
+
+  function renderTable(orderBy = 'dataMapDMRTKey', reverse = false) {
+    const tbody = document.querySelector("#letterTable tbody");
+    tbody.innerHTML = "";
+
+    let sortedKeys;
+
+    if (orderBy === 'merged') {
+      sortedKeys = [...mergedCustomOrder];
+    } else if (orderBy === 'dataMapDMRTKey') {
+      sortedKeys = dataMapDMRTKeyOrder.filter(k => merged[k]);
+    }
+
+    if (reverse) sortedKeys.reverse();
+
+    sortedKeys.forEach(key => {
+      const row = document.createElement("tr");
+
+      const tdKey = document.createElement("td");
+      tdKey.textContent = key;
+
+      const tdValue = document.createElement("td");
+      tdValue.textContent = merged[key].value;
+
+      const tdLabel = document.createElement("td");
+      tdLabel.textContent = merged[key].label;
+
+      row.appendChild(tdKey);
+      row.appendChild(tdValue);
+      row.appendChild(tdLabel);
+
+      tbody.appendChild(row);
+    });
+  }
+
+  renderTable('merged', false);
+
+  let isMergedReversed = false;
+  let isDataReversed = false;
+
+  document.getElementById('renderbyMerged').onclick = function () {
+    renderTable('merged', !isMergedReversed);
+    isMergedReversed = !isMergedReversed;
+    this.classList.toggle('rev');
+    this.classList.remove('opacity');
+    document.getElementById('renderbyData').classList.add('opacity');
+  };
+
+  document.getElementById('renderbyData').onclick = function () {
+    renderTable('dataMapDMRTKey', isDataReversed);
+    isDataReversed = !isDataReversed;
+    this.classList.toggle('rev');
+    this.classList.remove('opacity');
+    document.getElementById('renderbyMerged').classList.add('opacity');
+  };
+
+  document.querySelectorAll('.output').forEach(el => el.classList.add('show'));
+
+}
+
+// ----- Posthoc : Student-Newman-Keuls -----
+let dataMapSNK;
+function hitungSNK() {
+  const inputPerlakuan = document.querySelector('#input-perlakuan').value;
+  const inputUlangan = document.querySelector('#input-ulangan').value;
+  const inputKTG = document.querySelector('#input-ktg').value;
+  const inputSig = 1 - (document.querySelector('#input-sig').value * 0.01);
+
+  const valueDBG = (inputPerlakuan - 1) * (inputUlangan - 1);
+  const valueSD = Math.sqrt(inputKTG / inputUlangan);
+
+  const outputSD = document.querySelector('.snk-output-sd');
+
+  outputSD.innerHTML = valueSD.toFixed(2);
+  outputSD.setAttribute("colspan", inputPerlakuan - 1);
+
+  const elementSNKP = document.querySelector('.snk-p');
+  elementSNKP.innerHTML = `<th>P</th>`;
+  const elementSNKT = document.querySelector('.snk-table');
+  elementSNKT.innerHTML = `<th>Tabel SNK</th>`;
+  const elementSNKC = document.querySelector('.snk-calc');
+  elementSNKC.innerHTML = `<th>SNK Hitung</th>`;
+  for (let i = 2; i <= inputPerlakuan; i++) {
+    elementSNKP.innerHTML += `<td>${i}</td>`;
+    elementSNKT.innerHTML += `<td>${jStat.tukey.inv(inputSig, i, valueDBG).toFixed(2)}</td>`;
+    elementSNKC.innerHTML += `<td data-p="${i}">${(valueSD * jStat.tukey.inv(inputSig, i, valueDBG)).toFixed(2)}</td>`;
+  }
+}
+function processDataSNK() {
+  const input = document.getElementById('input-data').value.trim();
+  const lines = input.split('\n');
+  dataMapSNK = {};
+
+  lines.forEach(line => {
+    const [perlakuan, nilai] = line.trim().split(/\s+/);
+    const nilaiFloat = parseFloat(nilai);
+    dataMapSNK[perlakuan] = nilaiFloat;
+  });
+
+  const sortedEntries = Object.entries(dataMapSNK).sort((a, b) => a[1] - b[1]);
+
+  const jsonOutput = JSON.stringify(sortedEntries, null, 2);
+
+  const matrixTableBody = document.querySelector('#matrixTable tbody');
+  const headerRow = document.createElement('tr');
+  headerRow.innerHTML = '<th></th>' + sortedEntries.map(entry => `<th>${entry[0]}</th>`).join('');
+  matrixTableBody.innerHTML = '';
+  matrixTableBody.appendChild(headerRow);
+
+  sortedEntries.forEach(([perlakuanA, nilaiA]) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `<th>${perlakuanA}</th>`;
+
+    sortedEntries.forEach(([perlakuanB, nilaiB]) => {
+      const difference = (nilaiA - nilaiB).toFixed(2);
+      if (difference < 0) {
+        row.innerHTML += `<td class="gray">${difference}</td>`;
+      } else {
+        row.innerHTML += `<td>${difference}</td>`;
+      }
+    });
+
+    matrixTableBody.appendChild(row);
+  });
+
+    const rowtr = document.querySelectorAll("#matrixTable tbody tr");
+  rowtr.forEach((row) => {
+    const cells = row.querySelectorAll("td");
+    let zeroIndex = -1;
+    cells.forEach((cell, idx) => {
+      if (cell.textContent.trim() === "0.00") {
+        zeroIndex = idx;
+      }
+    });
+    if (zeroIndex === -1) return;
+    let p = 2;
+    for (let i = zeroIndex - 1; i >= 0; i--) {
+      const cell = cells[i];
+        cell.setAttribute("data-p", p);
+        p++;
+    }
+  });
+
+  function checkGreen() {
+    const matrixTds = document.querySelectorAll('#matrixTable td');
+
+    matrixTds.forEach(matrixTd => {
+      const rawMatrixValue = matrixTd.textContent.trim();
+      const matrixValue = parseFloat(rawMatrixValue);
+      if (!isNaN(matrixValue) && matrixValue === 0) {
+        matrixTd.classList.add('green');
+        return;
+      }
+      const dataP = matrixTd.getAttribute('data-p');
+      if (!dataP) return;
+      const snkTd = document.querySelector(`tr.snk-calc td[data-p="${dataP}"]`);
+      if (!snkTd) return;
+      const rawSnkValue = snkTd.textContent.trim();
+      const snkValue = parseFloat(rawSnkValue);
+      if (!isNaN(matrixValue) && !isNaN(snkValue) && matrixValue <= snkValue) {
+        matrixTd.classList.add('green');
+      }
+    });
+  }
+  checkGreen();
+
+  const table = document.getElementById('matrixTable');
+  const rows = table.querySelectorAll('tbody tr');
+
+  const results = {};
+
+  rows.forEach((row, rowIndex) => {
+    if (rowIndex === 0) return;
+
+    const treatmentName = row.querySelector('th').textContent.trim();
+
+    const greenColumns = [];
+
+    const cells = row.querySelectorAll('td');
+    cells.forEach((cell, cellIndex) => {
+      if (cell.classList.contains('green')) {
+        greenColumns.push(cellIndex + 1);
+      }
+    });
+
+    results[treatmentName] = greenColumns.join(',');
+  });
+
+  const labelMap = {};
+  const assigned = {};
+  let currentLabelCode = 'a'.charCodeAt(0);
+
+  function keysWithNumber(num) {
+    return Object.keys(results).filter(key =>
+      results[key].split(',').includes(String(num))
+    );
+  }
+
+  for (const key of Object.keys(results)) {
+    const nums = results[key].split(',');
+    const first = nums[0];
+
+    if (!labelMap[first]) {
+      const label = String.fromCharCode(currentLabelCode++);
+      labelMap[first] = label;
+
+      const relatedKeys = keysWithNumber(first);
+      for (const rk of relatedKeys) {
+        assigned[rk] = (assigned[rk] || '') + label;
+      }
+    }
+  }
+
+  const merged = {};
+
+  for (const key in assigned) {
+    merged[key] = {
+      label: assigned[key],
+      value: dataMapSNK[key]
+    };
+  }
+
+  const dataMapSNKKeyOrder = Object.keys(dataMapSNK);
+  const mergedCustomOrder = Object.keys(merged);
+
+  function renderTable(orderBy = 'dataMapSNKKey', reverse = false) {
+    const tbody = document.querySelector("#letterTable tbody");
+    tbody.innerHTML = "";
+
+    let sortedKeys;
+
+    if (orderBy === 'merged') {
+      sortedKeys = [...mergedCustomOrder];
+    } else if (orderBy === 'dataMapSNKKey') {
+      sortedKeys = dataMapSNKKeyOrder.filter(k => merged[k]);
+    }
+
+    if (reverse) sortedKeys.reverse();
+
+    sortedKeys.forEach(key => {
+      const row = document.createElement("tr");
+
+      const tdKey = document.createElement("td");
+      tdKey.textContent = key;
+
+      const tdValue = document.createElement("td");
+      tdValue.textContent = merged[key].value;
+
+      const tdLabel = document.createElement("td");
+      tdLabel.textContent = merged[key].label;
+
+      row.appendChild(tdKey);
+      row.appendChild(tdValue);
+      row.appendChild(tdLabel);
+
+      tbody.appendChild(row);
+    });
+  }
+
+  renderTable('merged', false);
+
+  let isMergedReversed = false;
+  let isDataReversed = false;
+
+  document.getElementById('renderbyMerged').onclick = function () {
+    renderTable('merged', !isMergedReversed);
+    isMergedReversed = !isMergedReversed;
+    this.classList.toggle('rev');
+    this.classList.remove('opacity');
+    document.getElementById('renderbyData').classList.add('opacity');
+  };
+
+  document.getElementById('renderbyData').onclick = function () {
+    renderTable('dataMapSNKKey', isDataReversed);
+    isDataReversed = !isDataReversed;
+    this.classList.toggle('rev');
+    this.classList.remove('opacity');
+    document.getElementById('renderbyMerged').classList.add('opacity');
+  };
+
+  document.querySelectorAll('.output').forEach(el => el.classList.add('show'));
+
+}
 
 // ----- Posthoc : Scott Knott -----
 const chi2table = {

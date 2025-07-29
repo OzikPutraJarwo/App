@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="../main.css">
     <script src="../assets/xlsx-0.18.5.js"></script>
     <script src="../assets/jstat-latest.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/OzikPutraJarwo/jrStat.js@latest/dist/jrstat.min.js"></script>
   </head>
 
   <body>
@@ -89,7 +90,13 @@
               <label for="jenis-anova">Analisis Varians (Anova)</label>
               <select name="jenis-anova" id="jenis-anova">
                 <option value="ral" selected>Rancangan Acak Lengkap (RAL)</option>
+                <option value="ralf" disabled>Rancangan Acak Lengkap Faktorial (RAL-F)</option>
                 <option value="rak">Rancangan Acak Kelompok (RAK)</option>
+                <option value="rakf" disabled>Rancangan Acak Kelompok Faktorial (RAK-F)</option>
+                <option value="rpt" disabled>Rancangan Petak Terbagi (RPT)</option>
+                <option value="rptf" disabled>Rancangan Petak Terbagi Faktorial (RPT-F)</option>
+                <option value="rbsl" disabled>Rancangan Bujur Sangkar Latin (RBSL)</option>
+                <option value="ra" disabled>Rancangan Beralih (Cross-over)</option>
               </select>
             </div>
             <div class="jenis-posthoc">
@@ -97,6 +104,8 @@
               <select name="jenis-posthoc" id="jenis-posthoc">
                 <option value="bnt" selected>Beda Nyata Terkecil (BNT / Fisher's LSD)</option>
                 <option value="bnj">Beda Nyata Jujur (BNJ / Tukey's HSD)</option>
+                <option value="dmrt">Duncan's Multiple Range Test (DMRT)</option>
+                <option value="snk">Student-Newman-Keuls (SNK)</option>
                 <option value="sk">Scott-Knott (SK)</option>
               </select>
             </div>
@@ -131,15 +140,23 @@
             <select id="sheetSelect"></select>
           </div>
           <div class="column" id="settingsContainer" style="display: none;">
-            <!-- <h3>Pengaturan Kolom</h3> -->
             <span>Klik pada tombol berikut lalu pilih header kolom pada excel di bawahnya untuk memilih</span>
             <div id="buttonContainer">
-              <button class="setting-button" id="perlakuanBtn" data-setting="Perlakuan"><span>Perlakuan</span><span
-                  id="selectedPerlakuanHeader">Belum dipilih</span></button>
-              <button class="setting-button" id="ulanganBtn" data-setting="Ulangan"><span>Ulangan</span><span
-                  id="selectedUlanganHeader">Belum dipilih</span></button>
-              <button class="setting-button" id="hasilBtn" data-setting="Hasil"><span>Hasil</span><span
-                  id="selectedHasilHeader">Belum dipilih</span></button>
+              <button class="setting-button" id="perlakuanBtn" data-setting="Perlakuan">
+                <span>Perlakuan</span><span id="selectedPerlakuanHeader">Belum dipilih</span>
+              </button>
+              <button class="setting-button faktorial" id="faktoraBtn" data-setting="FaktorA" style="display: none !important;">
+                <span>Faktor A</span><span id="selectedFaktorAHeader">Belum dipilih</span>
+              </button>
+              <button class="setting-button faktorial" id="faktorbBtn" data-setting="FaktorB" style="display: none !important;">
+                <span>Faktor B</span><span id="selectedFaktorBHeader">Belum dipilih</span>
+              </button>
+              <button class="setting-button" id="ulanganBtn" data-setting="Ulangan">
+                <span>Ulangan</span><span id="selectedUlanganHeader">Belum dipilih</span>
+              </button>
+              <button class="setting-button" id="hasilBtn" data-setting="Hasil">
+                <span>Hasil</span><span id="selectedHasilHeader">Belum dipilih</span>
+              </button>
             </div>
             <div id="tableContainer"></div>
           </div>
@@ -236,6 +253,36 @@ P5   13.26"></textarea>
                   <td class="output-bnjsd"></td>
                   <td class="output-bnjt"></td>
                   <td class="output-bnjh"></td>
+                </tr>
+              </tbody>
+              <tbody class="dmrt none">
+                <tr class="dmrt-sd">
+                  <th>Standar Deviasi</th>
+                  <td class="dmrt-output-sd"></td>
+                </tr>
+                <tr class="dmrt-p">
+                  <th>P</th>
+                </tr>
+                <tr class="dmrt-table">
+                  <th>Tabel DMRT</th>
+                </tr>
+                <tr class="dmrt-calc">
+                  <th>DMRT Hitung</th>
+                </tr>
+              </tbody>
+              <tbody class="snk none">
+                <tr class="snk-sd">
+                  <th>Standar Deviasi</th>
+                  <td class="snk-output-sd"></td>
+                </tr>
+                <tr class="snk-p">
+                  <th>P</th>
+                </tr>
+                <tr class="snk-table">
+                  <th>Tabel SNK</th>
+                </tr>
+                <tr class="snk-calc">
+                  <th>SNK Hitung</th>
                 </tr>
               </tbody>
               <tbody class="sk none"></tbody>

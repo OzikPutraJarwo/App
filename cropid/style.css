@@ -103,6 +103,18 @@ th {
   color: #00000040;
 }
 
+td[data-p] {
+  position: relative;
+}
+
+td[data-p]:after {
+    content: "(" attr(data-p) ")";
+    position: absolute;
+    top: .25rem;
+    right: .25rem;
+    font-size: 0.6rem;
+}
+
 #letterTable tr th {
   position: relative;
   user-select: none;
