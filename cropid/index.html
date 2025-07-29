@@ -285,8 +285,28 @@ P5   13.26"></textarea>
               <img src="../icon/gear.png" alt="Settings">
             </div>
           </div>
-          <div class="item sk-graph graph-set none">
+          <div class="item sk-graph graph-set">
             <h3>Pengaturan Grafik</h3>
+            <div class="item-set">
+              <div class="content">
+                <label for="background">Warna Background:</label>
+                <input type="color" id="graphBackground" value="#ffffff">
+              </div>
+              <div class="content">
+                <label for="sortOrderSelect">Urutkan Berdasarkan:</label>
+                <select id="sortOrderSelect">
+                  <option value="default">Default (P1, P2, ...)</option>
+                  <option value="notation-asc">Notasi (A-Z)</option>
+                  <option value="notation-desc">Notasi (Z-A)</option>
+                </select>
+              </div>
+              <div id="colorSettingsContainer" class="color-inputs content-grid grid-6">
+                <div class="color-input-group"><label for="color-a">a:</label><input type="color" id="color-a"></div>
+                <div class="color-input-group"><label for="color-ab">ab:</label><input type="color" id="color-ab"></div>
+                <div class="color-input-group"><label for="color-b">b:</label><input type="color" id="color-b"></div>
+                <div class="color-input-group"><label for="color-c">c:</label><input type="color" id="color-c"></div>
+              </div>
+            </div>
             <div class="item-set">
               <div class="title">Rasio</div>
               <div class="content-grid grid-2">
@@ -318,37 +338,20 @@ P5   13.26"></textarea>
               <div class="content-grid grid-4">
                 <div class="content">
                   <label for="marginTopInput">Atas:</label>
-                  <input type="number" id="marginTopInput" value="0" min="0">
+                  <input type="number" id="marginTopInput" value="0">
                 </div>
                 <div class="content">
                   <label for="marginRightInput">Kanan:</label>
-                  <input type="number" id="marginRightInput" value="0" min="0">
+                  <input type="number" id="marginRightInput" value="0">
                 </div>
                 <div class="content">
                   <label for="marginBottomInput">Bawah:</label>
-                  <input type="number" id="marginBottomInput" value="60" min="0">
+                  <input type="number" id="marginBottomInput" value="0">
                 </div>
                 <div class="content">
                   <label for="marginLeftInput">Kiri:</label>
-                  <input type="number" id="marginLeftInput" value="60" min="0">
+                  <input type="number" id="marginLeftInput" value="0">
                 </div>
-              </div>
-            </div>
-            <div class="item-set">
-              <div class="title">Notasi</div>
-              <div class="content">
-                <label for="sortOrderSelect">Urutkan Berdasarkan:</label>
-                <select id="sortOrderSelect">
-                  <option value="default">Default (P1, P2, ...)</option>
-                  <option value="notation-asc">Notasi (A-Z)</option>
-                  <option value="notation-desc">Notasi (Z-A)</option>
-                </select>
-              </div>
-              <div id="colorSettingsContainer" class="color-inputs content-grid grid-6">
-                <div class="color-input-group"><label for="color-a">a:</label><input type="color" id="color-a"></div>
-                <div class="color-input-group"><label for="color-ab">ab:</label><input type="color" id="color-ab"></div>
-                <div class="color-input-group"><label for="color-b">b:</label><input type="color" id="color-b"></div>
-                <div class="color-input-group"><label for="color-c">c:</label><input type="color" id="color-c"></div>
               </div>
             </div>
             <div class="item-set">

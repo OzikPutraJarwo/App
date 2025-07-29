@@ -1,9 +1,11 @@
 input[type="color"] {
-  -webkit-appearance: none;
+  appearance: none;
   border: none;
   outline: none;
   border-radius: .5rem;
   overflow: hidden !important;
+  -webkit-appearance: none;
+  box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em, rgb(204, 219, 232, 0) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0) -3px -3px 6px 1px inset
 }
 
 input[type="color"]::-webkit-color-swatch-wrapper {
@@ -67,8 +69,8 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  overflow: auto;
 }
-
 
 table {
   border-collapse: collapse;
@@ -187,18 +189,25 @@ th#renderbyMerged svg {
 .set-graph {
   background: #fff;
   position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
+  top: 1rem;
+  right: 1rem;
   line-height: 0;
   box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em, rgb(204, 219, 232, 0) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0) -3px -3px 6px 1px inset;
   padding: .5rem;
   border-radius: .5rem;
   transition: .2s;
   cursor: pointer;
+  width: 35px;
+  height: 35px;
 }
 
 .uncollapse {
-  padding: .25rem
+  top: 1.4rem;
+  right: 1.4rem;
+}
+
+.uncollapse img {
+  scale: 1.5;
 }
 
 .show-set:hover,
@@ -210,8 +219,8 @@ th#renderbyMerged svg {
 .show-set img,
 .uncollapse img,
 .set-graph img {
-  width: 22.5px;
-  height: 22.5px;
+  width: 20px;
+  height: auto;
 }
 
 .collapse {
@@ -412,12 +421,25 @@ th#renderbyMerged svg {
 
 .graph-set .item-set {
   gap: .5rem;
-  flex: 50%;
 }
 
 .graph-set .content-grid {
   display: grid;
   gap: 1rem;
+}
+
+#chart2Container  {
+  padding: 0;
+  border-radius: unset;
+  box-shadow: unset;
+  background: unset;
+}
+
+#chart2Container svg {
+  width: auto;
+  height: auto;
+  border-radius: 1rem;
+  box-shadow: var(--box-shadow);
 }
 
 .content-grid.grid-2 {
@@ -448,8 +470,8 @@ th#renderbyMerged svg {
 .download-svg {
   background-color: #fff;;
   position: absolute;
-  bottom: 1rem;
-  right: 1rem;
+  top: 1rem;
+  right: calc(35px + 1rem + 1rem);
   width: 35px;
   height: 35px;
   box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em, rgb(204, 219, 232, 0) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0) -3px -3px 6px 1px inset;
@@ -458,6 +480,10 @@ th#renderbyMerged svg {
   border-radius: .5rem;
   cursor: pointer;
   transition: .2s;
+}
+
+#chartContainer .download-svg {
+  right: 1rem;
 }
 
 .download-svg:hover {

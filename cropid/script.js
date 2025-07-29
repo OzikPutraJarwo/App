@@ -84,7 +84,7 @@ function downloadSvgAsPng(buttonElement) {
 
 document.querySelectorAll('.collapse').forEach(collapse => {
   const setMaxHeight = () => {
-    collapse.style.maxHeight = window.innerWidth >= 1440 ? '85px' : '75px';
+    collapse.style.maxHeight = window.innerWidth >= 1440 ? '85px' : '70px';
     collapse.style.overflow = 'hidden';
     collapse.style.transition = 'max-height 0.2s';
   };
@@ -1892,6 +1892,8 @@ function drawHistogram() {
   const svg = document.getElementById('histogramSvg');
   const svgNS = "http://www.w3.org/2000/svg";
 
+  const graphBackground = document.getElementById('graphBackground').value || '#ffffff';
+
   // Get graph ratio
   const graphWidth = document.getElementById('graphWidthInput').value || 0;
   const graphHeight = document.getElementById('graphHeightInput').value || 0;
@@ -1901,10 +1903,10 @@ function drawHistogram() {
   const yAxisTitle = document.getElementById('yAxisTitleInput').value;
 
   // Get margin values from input fields, parse as integers, default to 0 if invalid
-  const marginTop = parseInt(document.getElementById('marginTopInput').value) || 0;
-  const marginRight = parseInt(document.getElementById('marginRightInput').value) || 0;
-  const marginBottom = parseInt(document.getElementById('marginBottomInput').value) || 0;
-  const marginLeft = parseInt(document.getElementById('marginLeftInput').value) || 0;
+  const marginTop = parseInt(document.getElementById('marginTopInput').value) + 10 || 10;
+  const marginRight = parseInt(document.getElementById('marginRightInput').value) + 10 || 10;
+  const marginBottom = parseInt(document.getElementById('marginBottomInput').value) + 50 || 50;
+  const marginLeft = parseInt(document.getElementById('marginLeftInput').value) + 60 || 60;
 
   // Get sorting option
   const sortOrder = document.getElementById('sortOrderSelect').value;
@@ -1928,8 +1930,9 @@ function drawHistogram() {
   const svgTotalHeight = chartHeight + marginTop + marginBottom; // Total SVG canvas height
 
   svg.setAttribute('viewBox', `0 0 ${svgTotalWidth} ${svgTotalHeight}`);
-  svg.setAttribute('width', '100%'); // Make it responsive
+  svg.setAttribute('width', '100%'); 
   svg.setAttribute('height', '100%');
+  svg.setAttribute('style', `background-color: ${graphBackground};`); 
 
   // Clear previous SVG content
   while (svg.firstChild) {
@@ -1997,7 +2000,7 @@ function drawHistogram() {
   // --- 3. Draw Histogram on SVG ---
 
   // Define margins and chart area (now dynamic)
-  const chartMargin = { top: marginTop + 10, right: marginRight, bottom: marginBottom, left: marginLeft };
+  const chartMargin = { top: marginTop, right: marginRight, bottom: marginBottom, left: marginLeft };
   const effectiveChartWidth = chartWidth; // Fixed internal chart width
   const effectiveChartHeight = chartHeight; // Fixed internal chart height
 
