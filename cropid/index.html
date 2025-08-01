@@ -92,7 +92,7 @@
                 <option value="ral" selected>Rancangan Acak Lengkap (RAL)</option>
                 <option value="ralf" disabled>Rancangan Acak Lengkap Faktorial (RAL-F)</option>
                 <option value="rak">Rancangan Acak Kelompok (RAK)</option>
-                <option value="rakf" disabled>Rancangan Acak Kelompok Faktorial (RAK-F)</option>
+                <option value="rakf">Rancangan Acak Kelompok Faktorial (RAK-F)</option>
                 <option value="rpt" disabled>Rancangan Petak Terbagi (RPT)</option>
                 <option value="rptf" disabled>Rancangan Petak Terbagi Faktorial (RPT-F)</option>
                 <option value="rbsl" disabled>Rancangan Bujur Sangkar Latin (RBSL)</option>
@@ -114,9 +114,7 @@
 
         <div class="item excel">
           <h3>Input Data</h3>
-          <span class="contoh-data">Unduh contoh format data <a target="_blank"
-              href="https://github.com/OzikPutraJarwo/App/raw/refs/heads/main/cropid/contoh-data.xlsx">di
-              sini</a></span>
+          <span class="contoh-data">Unduh contoh format data <a target="_blank" href="https://github.com/OzikPutraJarwo/App/raw/refs/heads/main/cropid/contoh-data.xlsx">di sini</a></span>
           <div class="input-files">
             <label for="fileInput">
               <span>
@@ -143,12 +141,12 @@
             <span>Klik pada tombol berikut lalu pilih header kolom pada excel di bawahnya untuk memilih</span>
             <div id="buttonContainer">
               <button class="setting-button" id="perlakuanBtn" data-setting="Perlakuan">
-                <span>Perlakuan</span><span id="selectedPerlakuanHeader">Belum dipilih</span>
+                <span>Perlakuan</span><span id="selectedPerlakuanHeader">P</span>
               </button>
-              <button class="setting-button faktorial" id="faktoraBtn" data-setting="FaktorA" style="display: none !important;">
+              <button class="setting-button faktorial" id="faktoraBtn" data-setting="FaktorA">
                 <span>Faktor A</span><span id="selectedFaktorAHeader">Belum dipilih</span>
               </button>
-              <button class="setting-button faktorial" id="faktorbBtn" data-setting="FaktorB" style="display: none !important;">
+              <button class="setting-button faktorial" id="faktorbBtn" data-setting="FaktorB">
                 <span>Faktor B</span><span id="selectedFaktorBHeader">Belum dipilih</span>
               </button>
               <button class="setting-button" id="ulanganBtn" data-setting="Ulangan">

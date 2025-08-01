@@ -9,11 +9,11 @@ input[type="color"] {
 }
 
 input[type="color"]::-webkit-color-swatch-wrapper {
-	padding: 0;
+  padding: 0;
 }
 
 input[type="color"]::-webkit-color-swatch {
-	border: none;
+  border: none;
 }
 
 .main.wrap {
@@ -108,11 +108,11 @@ td[data-p] {
 }
 
 td[data-p]:after {
-    content: "(" attr(data-p) ")";
-    position: absolute;
-    top: .25rem;
-    right: .25rem;
-    font-size: 0.6rem;
+  content: "(" attr(data-p) ")";
+  position: absolute;
+  top: .25rem;
+  right: .25rem;
+  font-size: 0.6rem;
 }
 
 #letterTable tr th {
@@ -165,6 +165,7 @@ th#renderbyMerged svg {
 }
 
 @media (max-width: 600px) {
+
   th#renderbyData,
   th#renderbyMerged {
     padding-right: 2.5rem;
@@ -194,6 +195,14 @@ th#renderbyMerged svg {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
+}
+
+.type .content.factorial {
+  grid-template-columns: 1fr;
+}
+
+.type .content.factorial .jenis-posthoc {
+  display: none;
 }
 
 .show-set,
@@ -311,6 +320,22 @@ th#renderbyMerged svg {
   gap: 1rem;
 }
 
+#buttonContainer .faktorial {
+  display: none;
+}
+
+#buttonContainer.factorial {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+}
+
+#buttonContainer.factorial #perlakuanBtn {
+  display: none;
+}
+
+#buttonContainer.factorial .faktorial {
+  display: grid;
+}
+
 #buttonContainer button {
   padding: .75rem;
   background: var(--green);
@@ -416,7 +441,8 @@ th#renderbyMerged svg {
   position: relative;
 }
 
-.show .graph-set, .graph-set .item-set {
+.show .graph-set,
+.graph-set .item-set {
   display: flex;
   flex-direction: column;
 }
@@ -440,7 +466,7 @@ th#renderbyMerged svg {
   gap: 1rem;
 }
 
-#chart2Container  {
+#chart2Container {
   padding: 0;
   border-radius: unset;
   box-shadow: unset;
@@ -480,7 +506,8 @@ th#renderbyMerged svg {
 }
 
 .download-svg {
-  background-color: #fff;;
+  background-color: #fff;
+  ;
   position: absolute;
   top: 1rem;
   right: calc(35px + 1rem + 1rem);
@@ -516,18 +543,23 @@ th#renderbyMerged svg {
   .type .content {
     grid-template-columns: 1fr;
   }
+
   .excel .input-files label>span:first-child {
     grid-template-columns: 1fr;
     gap: .75rem;
     justify-items: center;
   }
+
   .input-files label span {
     order: 1;
   }
+
   #buttonContainer button span:first-child {
     font-size: 1rem
   }
-  #customNameUnit>div, #customNameInputsContainer>div {
+
+  #customNameUnit>div,
+  #customNameInputsContainer>div {
     grid-template-columns: 75px 1fr;
   }
 }

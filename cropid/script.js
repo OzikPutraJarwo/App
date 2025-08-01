@@ -1,3 +1,153 @@
+// Get Data from Excel
+
+const getData = {
+  _getColumnIndex: function (settingName) {
+    const table = document.querySelector('#tableContainer table');
+    if (!table) return -1;
+
+    const headers = table.querySelectorAll('th');
+    for (let i = 0; i < headers.length; i++) {
+      if (headers[i].getAttribute('data-setting') === settingName) {
+        return i;
+      }
+    }
+    return -1;
+  },
+
+  count: function (settingName) {
+    const columnIndex = this._getColumnIndex(settingName);
+    if (columnIndex === -1) return -1;
+
+    const uniqueValues = new Set();
+    const rows = document.querySelectorAll('#tableContainer tbody tr');
+
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length > columnIndex) {
+        uniqueValues.add(cells[columnIndex].textContent.trim());
+      }
+    });
+    return uniqueValues.size;
+  },
+
+  sum: function (settingName) {
+    const columnIndex = this._getColumnIndex(settingName);
+    if (columnIndex === -1) return -1;
+
+    let totalSum = 0;
+    const rows = document.querySelectorAll('#tableContainer tbody tr');
+
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length > columnIndex) {
+        const value = parseFloat(cells[columnIndex].textContent.trim());
+        if (!isNaN(value)) {
+          totalSum += value;
+        }
+      }
+    });
+    return totalSum;
+  },
+
+  sumSquared: function (settingName) {
+    const columnIndex = this._getColumnIndex(settingName);
+    if (columnIndex === -1) return -1;
+
+    let totalSumSquared = 0;
+    const rows = document.querySelectorAll('#tableContainer tbody tr');
+
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length > columnIndex) {
+        const value = parseFloat(cells[columnIndex].textContent.trim());
+        if (!isNaN(value)) {
+          totalSumSquared += (value * value);
+        }
+      }
+    });
+    return totalSumSquared;
+  },
+
+  sumOfGroupedSquares: function () {
+    const args = Array.from(arguments);
+    let valueSettingName = args.pop();
+    const groupingSettingNames = args;
+
+    if (groupingSettingNames.length === 0) return -1;
+
+    const valueColIndex = this._getColumnIndex(valueSettingName);
+    if (valueColIndex === -1) return -1;
+
+    const groupingColIndices = groupingSettingNames.map(name => this._getColumnIndex(name));
+    if (groupingColIndices.some(index => index === -1)) return -1;
+
+    const groupedSums = {};
+    const rows = document.querySelectorAll('#tableContainer tbody tr');
+
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length > valueColIndex) {
+        const groupKeyParts = groupingColIndices.map(index => cells[index].textContent.trim());
+        const groupKey = groupKeyParts.join('');
+
+        const value = parseFloat(cells[valueColIndex].textContent.trim());
+
+        if (!isNaN(value)) {
+          if (!groupedSums[groupKey]) {
+            groupedSums[groupKey] = 0;
+          }
+          groupedSums[groupKey] += value;
+        }
+      }
+    });
+
+    let totalSumOfSquaredGroups = 0;
+    for (const key in groupedSums) {
+      totalSumOfSquaredGroups += (groupedSums[key] * groupedSums[key]);
+    }
+    return totalSumOfSquaredGroups;
+  },
+
+  info: function (groupingSettingName, valueSettingName) {
+    const groupingColIndex = this._getColumnIndex(groupingSettingName);
+    const valueColIndex = this._getColumnIndex(valueSettingName);
+
+    if (groupingColIndex === -1 || valueColIndex === -1) return null;
+
+    const groupedData = {}; // Stores { groupKey: { sum: 0, count: 0 } }
+    const rows = document.querySelectorAll('#tableContainer tbody tr');
+
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length > groupingColIndex && cells.length > valueColIndex) {
+        const groupKey = cells[groupingColIndex].textContent.trim();
+        const value = parseFloat(cells[valueColIndex].textContent.trim());
+
+        if (!isNaN(value)) {
+          if (!groupedData[groupKey]) {
+            groupedData[groupKey] = { sum: 0, count: 0 };
+          }
+          groupedData[groupKey].sum += value;
+          groupedData[key].count++;
+        }
+      }
+    });
+
+    const results = [];
+    // Sort keys to ensure consistent output order
+    const sortedKeys = Object.keys(groupedData).sort();
+
+    sortedKeys.forEach(key => {
+      if (groupedData[key].count > 0) {
+        const average = groupedData[key].sum / groupedData[key].count;
+        results.push(`${key} ${average.toFixed(2)}`); // Format to two decimal places
+      }
+    });
+
+    return results.join('\n');
+  }
+};
+
 function downloadMainAsExcel() {
 
   const selectedPostHoc = document.getElementById('jenis-posthoc').value;
@@ -125,10 +275,6 @@ function smoothScroll(target, offset = 0) {
   }, 100);
 };
 
-document.querySelector('.sk-graph').addEventListener('input', (e) => {
-  initializeChart;drawHistogram();
-});
-
 const toggleShow = (selector) => {
   document.querySelector(selector).classList.toggle('show');
 };
@@ -168,127 +314,6 @@ let currentWorkbook = null;
 let currentTableData = [];
 let selectedSettingType = null;
 let selectedHeaders = { Perlakuan: null, Ulangan: null, Hasil: null };
-
-window.dataAnalysis = {
-  _uniquePerlakuanCount: 0,
-  _uniqueUlanganCount: 0,
-  _perlakuanResults: {},
-  _ulanganResults: {},
-  _grandTotal: 0,
-  _grandTotalSquared: 0,
-  _isDataReady: false,
-
-  // Mengambil jumlah perlakuan unik
-  getPerlakuan: function () {
-    if (!this._isDataReady) {
-      console.warn("Data belum siap. Harap muat file dan pilih header terlebih dahulu.");
-      return 0;
-    }
-    return this._uniquePerlakuanCount;
-  },
-  // Mengambil jumlah ulangan unik
-  getUlangan: function () {
-    if (!this._isDataReady) {
-      console.warn("Data belum siap. Harap muat file dan pilih header terlebih dahulu.");
-      return 0;
-    }
-    return this._uniqueUlanganCount;
-  },
-  getAveragePerlakuan: function (perlakuanValue = null) {
-    if (!this._isDataReady) {
-      console.warn("Data belum siap. Harap muat file dan pilih header terlebih dahulu.");
-      return 0;
-    }
-    if (perlakuanValue !== null) {
-      return this._perlakuanResults[perlakuanValue] ? parseFloat(this._perlakuanResults[perlakuanValue].average) : 0;
-    } else {
-      let totalAvg = 0;
-      let count = 0;
-      for (const key in this._perlakuanResults) {
-        totalAvg += parseFloat(this._perlakuanResults[key].average);
-        count++;
-      }
-      return count > 0 ? parseFloat((totalAvg / count).toFixed(2)) : 0;
-    }
-  },
-  getTotalPerlakuan: function (squared = false) {
-    if (!this._isDataReady) {
-      console.warn("Data belum siap. Harap muat file dan pilih header terlebih dahulu.");
-      return 0;
-    }
-    if (squared) {
-      let sumOfSquaredPerlakuanTotals = 0;
-      for (const perlakuan in this._perlakuanResults) {
-        const rawSum = this._perlakuanResults[perlakuan].rawSum;
-        sumOfSquaredPerlakuanTotals += (rawSum * rawSum);
-      }
-      return parseFloat(sumOfSquaredPerlakuanTotals.toFixed(2));
-    } else {
-      return parseFloat(this._grandTotal.toFixed(2));
-    }
-  },
-  getAverageUlangan: function (ulanganValue = null) {
-    if (!this._isDataReady) {
-      console.warn("Data belum siap. Harap muat file dan pilih header terlebih dahulu.");
-      return 0;
-    }
-    if (ulanganValue !== null) {
-      return this._ulanganResults[ulanganValue] ? parseFloat(this._ulanganResults[ulanganValue].average) : 0;
-    } else {
-      let totalAvg = 0;
-      let count = 0;
-      for (const key in this._ulanganResults) {
-        totalAvg += parseFloat(this._ulanganResults[key].average);
-        count++;
-      }
-      return count > 0 ? parseFloat((totalAvg / count).toFixed(2)) : 0;
-    }
-  },
-  getTotalUlangan: function (squared = false) {
-    if (!this._isDataReady) {
-      console.warn("Data belum siap. Harap muat file dan pilih header terlebih dahulu.");
-      return 0;
-    }
-    if (squared) {
-      let sumOfSquaredUlanganTotals = 0;
-      for (const ulangan in this._ulanganResults) {
-        const rawSum = this._ulanganResults[ulangan].sum;
-        sumOfSquaredUlanganTotals += (rawSum * rawSum);
-      }
-      return parseFloat(sumOfSquaredUlanganTotals.toFixed(2));
-    } else {
-      let sumOfSquaredUlanganTotals = 0;
-      for (const ulangan in this._ulanganResults) {
-        const rawSum = this._ulanganResults[ulangan].sum;
-        sumOfSquaredUlanganTotals += rawSum;
-      }
-      return parseFloat(sumOfSquaredUlanganTotals.toFixed(2));
-    }
-  },
-  getGrandTotal: function (squared = false) {
-    if (!this._isDataReady) {
-      console.warn("Data belum siap. Harap muat file dan pilih header terlebih dahulu.");
-      return 0;
-    }
-    if (squared) {
-      return parseFloat(this._grandTotalSquared.toFixed(2));
-    } else {
-      return parseFloat(this._grandTotal.toFixed(2));
-    }
-  },
-  getPerlakuanAveragesFormatted: function () {
-    if (!this._isDataReady) {
-      console.warn("Data belum siap. Harap muat file dan pilih header terlebih dahulu.");
-      return "";
-    }
-    let output = "";
-    for (const perlakuan in this._perlakuanResults) {
-      const data = this._perlakuanResults[perlakuan];
-      output += `${perlakuan} ${data.average}\n`;
-    }
-    return output.trim();
-  }
-};
 
 perlakuanBtn.addEventListener('click', () => activateSetting('Perlakuan'));
 faktorABtn.addEventListener('click', () => activateSetting('FaktorA'));
@@ -442,6 +467,19 @@ function activateSetting(settingType) {
   document.getElementById(`${settingType.toLowerCase()}Btn`).classList.add('active');
 }
 
+let selectedDesign = document.getElementById('jenis-anova').value;
+document.getElementById('jenis-anova').addEventListener('change', function (event) {
+  selectedDesign = event.target.value;
+  if (selectedDesign === "ral" || selectedDesign === "rak") {
+    document.getElementById('buttonContainer').classList.remove('factorial');
+    document.querySelector('.type .content').classList.remove('factorial');
+  } else if (selectedDesign === "rakf") {
+    document.getElementById('buttonContainer').classList.add('factorial');
+    document.querySelector('.type .content').classList.add('factorial');
+  }
+});
+
+
 function handleHeaderClick(event) {
   if (!selectedSettingType) {
     return;
@@ -460,16 +498,16 @@ function handleHeaderClick(event) {
   clickedHeader.classList.add('selected-header');
   clickedHeader.setAttribute('data-setting', selectedSettingType);
 
-  if (selectedSettingType === 'Perlakuan') {
-    selectedPerlakuanHeaderDisplay.textContent = headerText;
-  } else if (selectedSettingType === 'Ulangan') {
-    selectedUlanganHeaderDisplay.textContent = headerText;
-  } else if (selectedSettingType === 'Hasil') {
-    selectedHasilHeaderDisplay.textContent = headerText;
-  } else if (selectedSettingType === 'FaktorA') {
-    selectedFaktorAHeaderDisplay.textContent = headerText;
-  } else if (selectedSettingType === 'FaktorB') {
-    selectedFaktorBHeaderDisplay.textContent = headerText;
+  const headerMap = {
+    Perlakuan: selectedPerlakuanHeaderDisplay,
+    Ulangan: selectedUlanganHeaderDisplay,
+    Hasil: selectedHasilHeaderDisplay,
+    FaktorA: selectedFaktorAHeaderDisplay,
+    FaktorB: selectedFaktorBHeaderDisplay,
+  };
+
+  if (headerMap[selectedSettingType]) {
+    headerMap[selectedSettingType].textContent = headerText;
   }
 
   document.querySelectorAll('.setting-button').forEach(btn => {
@@ -477,187 +515,72 @@ function handleHeaderClick(event) {
   });
   selectedSettingType = null;
 
-  if (selectedHeaders.Perlakuan && selectedHeaders.Ulangan && selectedHeaders.Hasil) {
+  if (selectedDesign === "ral" || selectedDesign === "rak") {
+    if (selectedHeaders.Perlakuan && selectedHeaders.Ulangan && selectedHeaders.Hasil) {
+      document.querySelector('.run').classList.remove('none');
+      smoothScroll('.run', top = 70);
+    }
+  } else if (selectedDesign === "rakf") {
     document.querySelector('.run').classList.remove('none');
     smoothScroll('.run', top = 70);
-    document.querySelector('.run').addEventListener('click', () => {
-      document.querySelector('.separator').classList.remove('none');
-      document.querySelector('.anova').classList.add('show');
-      calculateCounts();
-      calculateAveragesAndTotals();
-      window.dataAnalysis._isDataReady = true;
+  }
 
-      const selectedDesign = document.getElementById('jenis-anova').value;
-      if (selectedDesign === "ral") {
-        countAnovaRAL();
-      } else if (selectedDesign === "rak") {
-        countAnovaRAK();
-      }
+  // if (selectedHeaders.Perlakuan && selectedHeaders.Ulangan && selectedHeaders.Hasil) {
+  document.querySelector('.run').addEventListener('click', () => {
+    document.querySelector('.separator').classList.remove('none');
+    document.querySelector('.anova').classList.add('show');
 
-      const selectedPostHoc = document.getElementById('jenis-posthoc').value;
-      const allTheads = document.querySelectorAll('#matrixSup > *');
-      const targetTheads = document.querySelectorAll(`#matrixSup > *.${selectedPostHoc}`);
-      allTheads.forEach(thead => {
-        thead.classList.add('none');
+    if (selectedDesign === "ral") {
+      countAnovaRAL();
+    } else if (selectedDesign === "rak") {
+      countAnovaRAK();
+    } else if (selectedDesign === "rakf") {
+      countAnovaRAKF();
+    }
+
+    const selectedPostHoc = document.getElementById('jenis-posthoc').value;
+    const allTheads = document.querySelectorAll('#matrixSup > *');
+    const targetTheads = document.querySelectorAll(`#matrixSup > *.${selectedPostHoc}`);
+    allTheads.forEach(thead => {
+      thead.classList.add('none');
+    });
+    if (targetTheads.length > 0) {
+      targetTheads.forEach(thead => {
+        thead.classList.remove('none');
       });
-      if (targetTheads.length > 0) {
-        targetTheads.forEach(thead => {
-          thead.classList.remove('none');
-        });
-      };
-      if (selectedPostHoc === "bnt") {
-        hitungBNT(); processDataBNT();
-      } else if (selectedPostHoc === "bnj") {
-        hitungBNJ(); processDataBNJ();
-      } else if (selectedPostHoc === "dmrt") {
-        hitungDMRT(); processDataDMRT();
-      } else if (selectedPostHoc === "snk") {
-        hitungSNK(); processDataSNK(); 
-      } else if (selectedPostHoc === "sk") {
-        processDataSK();
-      }
+    };
+    if (selectedPostHoc === "bnt") {
+      hitungBNT(); processDataBNT();
+    } else if (selectedPostHoc === "bnj") {
+      hitungBNJ(); processDataBNJ();
+    } else if (selectedPostHoc === "dmrt") {
+      hitungDMRT(); processDataDMRT();
+    } else if (selectedPostHoc === "snk") {
+      hitungSNK(); processDataSNK();
+    } else if (selectedPostHoc === "sk") {
+      processDataSK();
+    }
 
+    if (selectedDesign === "ral" || selectedDesign === "rak") {
       document.querySelector('.sk-graph').classList.remove('none');
       initializeInterpretationApp();
       renderBarChart();
-      initializeChart;drawHistogram();
-      window.addEventListener('resize', () => {
-        drawHistogram();
-      });
-      document.querySelector('.graph').classList.remove('none');
-      document.querySelector('.download').classList.remove('none');
-      document.querySelector('#chartContainer').innerHTML += `<div class="download-svg" onclick="downloadSvgAsPng(this)"><img src="../icon/download.png"></div>`;
-      const chart2ContainerDownload = document.querySelector('#chart2Container .download-svg');
-      if (chart2ContainerDownload) {
-        chart2ContainerDownload.remove();
-      };
-      document.querySelector('#chart2Container').innerHTML += `<div class="download-svg" onclick="downloadSvgAsPng(this)"><img src="../icon/download.png"></div>`;
+      initializeChart(); drawHistogram();
+    } else if (selectedDesign === "rakf") {
+    }
+
+    window.addEventListener('resize', () => {
+      drawHistogram();
     });
-  } else {
-    window.dataAnalysis._isDataReady = false;
-  }
-}
-
-function calculateCounts() {
-  if (!currentTableData || currentTableData.length < 2 || !selectedHeaders.Perlakuan || !selectedHeaders.Ulangan) {
-    window.dataAnalysis._uniquePerlakuanCount = 0;
-    window.dataAnalysis._uniqueUlanganCount = 0;
-    return;
-  }
-
-  const headers = currentTableData[0];
-  const perlakuanColIndex = headers.indexOf(selectedHeaders.Perlakuan);
-  const ulanganColIndex = headers.indexOf(selectedHeaders.Ulangan);
-
-  if (perlakuanColIndex === -1 || ulanganColIndex === -1) {
-    console.error("Kolom 'Perlakuan' atau 'Ulangan' tidak ditemukan.");
-    window.dataAnalysis._uniquePerlakuanCount = 0;
-    window.dataAnalysis._uniqueUlanganCount = 0;
-    return;
-  }
-
-  const uniquePerlakuan = new Set();
-  const uniqueUlangan = new Set();
-
-  for (let i = 1; i < currentTableData.length; i++) {
-    const row = currentTableData[i];
-    if (row[perlakuanColIndex] !== undefined) {
-      uniquePerlakuan.add(row[perlakuanColIndex]);
-    }
-    if (row[ulanganColIndex] !== undefined) {
-      uniqueUlangan.add(row[ulanganColIndex]);
-    }
-  }
-
-  window.dataAnalysis._uniquePerlakuanCount = uniquePerlakuan.size;
-  window.dataAnalysis._uniqueUlanganCount = uniqueUlangan.size;
-}
-
-function calculateAveragesAndTotals() {
-  if (!currentTableData || currentTableData.length < 2 || !selectedHeaders.Perlakuan || !selectedHeaders.Ulangan || !selectedHeaders.Hasil) {
-    window.dataAnalysis._perlakuanResults = {};
-    window.dataAnalysis._ulanganResults = {};
-    window.dataAnalysis._grandTotal = 0;
-    window.dataAnalysis._grandTotalSquared = 0;
-    window.dataAnalysis._isDataReady = false;
-    return;
-  }
-
-  const headers = currentTableData[0];
-  const perlakuanColIndex = headers.indexOf(selectedHeaders.Perlakuan);
-  const ulanganColIndex = headers.indexOf(selectedHeaders.Ulangan);
-  const hasilColIndex = headers.indexOf(selectedHeaders.Hasil);
-
-  if (perlakuanColIndex === -1 || ulanganColIndex === -1 || hasilColIndex === -1) {
-    console.error("Kolom 'Perlakuan', 'Ulangan', atau 'Hasil' tidak ditemukan.");
-    window.dataAnalysis._perlakuanResults = {};
-    window.dataAnalysis._ulanganResults = {};
-    window.dataAnalysis._grandTotal = 0;
-    window.dataAnalysis._grandTotalSquared = 0;
-    window.dataAnalysis._isDataReady = false;
-    return;
-  }
-
-  const perlakuanData = {};
-  const ulanganData = {};
-  let grandTotal = 0;
-  let grandTotalSquared = 0;
-
-  for (let i = 1; i < currentTableData.length; i++) {
-    const row = currentTableData[i];
-    const perlakuanValue = row[perlakuanColIndex];
-    const ulanganValue = row[ulanganColIndex];
-    const hasilValue = parseFloat(row[hasilColIndex]);
-
-    if (isNaN(hasilValue)) {
-      continue;
-    }
-
-    if (perlakuanValue !== undefined) {
-      if (!perlakuanData[perlakuanValue]) {
-        perlakuanData[perlakuanValue] = { sum: 0, count: 0 };
-      }
-      perlakuanData[perlakuanValue].sum += hasilValue;
-      perlakuanData[perlakuanValue].count++;
-    }
-
-    if (ulanganValue !== undefined) {
-      if (!ulanganData[ulanganValue]) {
-        ulanganData[ulanganValue] = { sum: 0, count: 0 };
-      }
-      ulanganData[ulanganValue].sum += hasilValue;
-      ulanganData[ulanganValue].count++;
-    }
-
-    grandTotal += hasilValue;
-    grandTotalSquared += (hasilValue * hasilValue);
-  }
-
-  window.dataAnalysis._perlakuanResults = {};
-  for (const perlakuan in perlakuanData) {
-    const data = perlakuanData[perlakuan];
-    const average = data.count > 0 ? (data.sum / data.count).toFixed(2) : 0;
-    window.dataAnalysis._perlakuanResults[perlakuan] = {
-      rawSum: data.sum,
-      count: data.count,
-      average: average,
-      formattedSum: data.sum.toFixed(2)
+    document.querySelector('.graph').classList.remove('none');
+    document.querySelector('.download').classList.remove('none');
+    document.querySelector('#chartContainer').innerHTML += `<div class="download-svg" onclick="downloadSvgAsPng(this)"><img src="../icon/download.png"></div>`;
+    const chart2ContainerDownload = document.querySelector('#chart2Container .download-svg');
+    if (chart2ContainerDownload) {
+      chart2ContainerDownload.remove();
     };
-  }
-
-  window.dataAnalysis._ulanganResults = {};
-  for (const ulangan in ulanganData) {
-    const data = ulanganData[ulangan];
-    const average = data.count > 0 ? (data.sum / data.count).toFixed(2) : 0;
-    window.dataAnalysis._ulanganResults[ulangan] = {
-      sum: data.sum.toFixed(2),
-      count: data.count,
-      average: average
-    };
-  }
-
-  window.dataAnalysis._grandTotal = grandTotal;
-  window.dataAnalysis._grandTotalSquared = grandTotalSquared;
+    document.querySelector('#chart2Container').innerHTML += `<div class="download-svg" onclick="downloadSvgAsPng(this)"><img src="../icon/download.png"></div>`;
+  })
 }
 
 function resetSettings() {
@@ -679,13 +602,6 @@ function resetSettings() {
   document.querySelector('.download').classList.add('none');
   document.querySelectorAll('.output').forEach(el => el.classList.remove('show'));
   document.querySelector('.sk-graph').classList.add('none');
-  window.dataAnalysis._uniquePerlakuanCount = 0;
-  window.dataAnalysis._uniqueUlanganCount = 0;
-  window.dataAnalysis._perlakuanResults = {};
-  window.dataAnalysis._ulanganResults = {};
-  window.dataAnalysis._grandTotal = 0;
-  window.dataAnalysis._grandTotalSquared = 0;
-  window.dataAnalysis._isDataReady = false;
 }
 
 function escapeHTML(str) {
@@ -737,20 +653,20 @@ function countAnovaRAL() {
     = ['kk', 'fk', 'gt', 'Pdb', 'Pjk', 'Pkt', 'Pfh', 'Pft', 'Psg', 'Gdb', 'Gjk', 'Gkt', 'Tdb', 'Tjk']
       .map(cls => document.querySelector(`.${cls}`));
 
-  const fk = dataAnalysis.getGrandTotal() * dataAnalysis.getGrandTotal() / (dataAnalysis.getPerlakuan() * dataAnalysis.getUlangan());
+  const fk = getData.sum("Hasil") * getData.sum("Hasil") / (getData.count("Perlakuan") * getData.count("Ulangan"));
   cellfk.innerHTML = fk;
-  cellgt.innerHTML = dataAnalysis.getGrandTotal();
+  cellgt.innerHTML = getData.sum("Hasil");
 
-  const Pdb = dataAnalysis.getPerlakuan() - 1;
+  const Pdb = getData.count("Perlakuan") - 1;
   cellPdb.innerHTML = Pdb;
-  const Gdb = dataAnalysis.getPerlakuan() * (dataAnalysis.getUlangan() - 1);
+  const Gdb = getData.count("Perlakuan") * (getData.count("Ulangan") - 1);
   cellGdb.innerHTML = Gdb;
-  const Tdb = dataAnalysis.getPerlakuan() * dataAnalysis.getUlangan() - 1;
+  const Tdb = getData.count("Perlakuan") * getData.count("Ulangan") - 1;
   cellTdb.innerHTML = Tdb;
 
-  const Pjk = dataAnalysis.getTotalPerlakuan(true) / dataAnalysis.getUlangan() - fk;
+  const Pjk = getData.sumOfGroupedSquares("Perlakuan", "Hasil") / getData.count("Ulangan") - fk;
   cellPjk.innerHTML = Pjk.toFixed(2);
-  const Tjk = dataAnalysis.getGrandTotal(true) - fk;
+  const Tjk = getData.sumSquared("Hasil") - fk;
   cellTjk.innerHTML = Tjk.toFixed(2);
   const Gjk = Tjk - Pjk;
   cellGjk.innerHTML = Gjk.toFixed(2);
@@ -771,12 +687,12 @@ function countAnovaRAL() {
     cellPsg.innerHTML = "tn"
   }
 
-  const kk = Math.sqrt(Gkt) / (dataAnalysis.getGrandTotal() / (dataAnalysis.getPerlakuan() * dataAnalysis.getUlangan())) * 100;
+  const kk = Math.sqrt(Gkt) / (getData.sum("Hasil") / (getData.count("Perlakuan") * getData.count("Ulangan"))) * 100;
   cellkk.innerHTML = kk.toFixed(0) + "%";
 
-  document.getElementById('input-data').value = dataAnalysis.getPerlakuanAveragesFormatted();
-  document.querySelector('#input-perlakuan').value = dataAnalysis.getPerlakuan();
-  document.querySelector('#input-ulangan').value = dataAnalysis.getUlangan();
+  document.getElementById('input-data').value = getData.info("Perlakuan", "Hasil");
+  document.querySelector('#input-perlakuan').value = getData.count("Perlakuan");
+  document.querySelector('#input-ulangan').value = getData.count("Ulangan");
   document.querySelector('#input-ktg').value = Gkt;
 }
 
@@ -791,26 +707,28 @@ function countAnovaRAK() {
                   <th>Kuadrat Tengah</th>
                   <th>F Hitung</th>
                   <th>F Tabel 5%</th>
+                  <th>F Tabel 1%</th>
                   <th>Signifikansi</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>Perlakuan</td>
-                  <td class="Pdb"></td>
-                  <td class="Pjk"></td>
-                  <td class="Pkt"></td>
-                  <td class="Pfh"></td>
-                  <td class="Pft" rowspan="2"></td>
-                  <td class="Psg"></td>
-                </tr>
                 <tr>
                   <td>Kelompok</td>
                   <td class="Udb"></td>
                   <td class="Ujk"></td>
                   <td class="Ukt"></td>
                   <td class="Ufh"></td>
+                  <td class="Ft5" rowspan="2"></td>
+                  <td class="Ft1" rowspan="2"></td>
                   <td class="Usg"></td>
+                </tr>
+                <tr>
+                  <td>Perlakuan</td>
+                  <td class="Pdb"></td>
+                  <td class="Pjk"></td>
+                  <td class="Pkt"></td>
+                  <td class="Pfh"></td>
+                  <td class="Psg"></td>
                 </tr>
                 <tr>
                   <td>Galat</td>
@@ -825,28 +743,28 @@ function countAnovaRAK() {
                 </tr>
               </tbody>
   `;
-  const [cellkk, cellfk, cellgt, cellPdb, cellPjk, cellPkt, cellPfh, cellPft, cellPsg, cellUdb, cellUjk, cellUkt, cellUfh, cellUft, cellUsg, cellGdb, cellGjk, cellGkt, cellTdb, cellTjk]
-    = ['kk', 'fk', 'gt', 'Pdb', 'Pjk', 'Pkt', 'Pfh', 'Pft', 'Psg', 'Udb', 'Ujk', 'Ukt', 'Ufh', 'Uft', 'Usg', 'Gdb', 'Gjk', 'Gkt', 'Tdb', 'Tjk']
+  const [cellkk, cellfk, cellgt, cellPdb, cellPjk, cellPkt, cellPfh, cellFt5, cellFt1, cellPsg, cellUdb, cellUjk, cellUkt, cellUfh, cellUft, cellUsg, cellGdb, cellGjk, cellGkt, cellTdb, cellTjk]
+    = ['kk', 'fk', 'gt', 'Pdb', 'Pjk', 'Pkt', 'Pfh', 'Ft5', 'Ft1', 'Psg', 'Udb', 'Ujk', 'Ukt', 'Ufh', 'Uft', 'Usg', 'Gdb', 'Gjk', 'Gkt', 'Tdb', 'Tjk']
       .map(cls => document.querySelector(`.${cls}`));
 
-  const fk = dataAnalysis.getGrandTotal() * dataAnalysis.getGrandTotal() / (dataAnalysis.getPerlakuan() * dataAnalysis.getUlangan());
+  const fk = getData.sum("Hasil") * getData.sum("Hasil") / (getData.count("Perlakuan") * getData.count("Ulangan"));
   cellfk.innerHTML = fk;
-  cellgt.innerHTML = dataAnalysis.getGrandTotal();
+  cellgt.innerHTML = getData.sum("Hasil");
 
-  const Pdb = dataAnalysis.getPerlakuan() - 1;
+  const Pdb = getData.count("Perlakuan") - 1;
   cellPdb.innerHTML = Pdb;
-  const Udb = dataAnalysis.getUlangan() - 1;
+  const Udb = getData.count("Ulangan") - 1;
   cellUdb.innerHTML = Udb;
-  const Gdb = (dataAnalysis.getPerlakuan() - 1) * (dataAnalysis.getUlangan() - 1);
+  const Gdb = (getData.count("Perlakuan") - 1) * (getData.count("Ulangan") - 1);
   cellGdb.innerHTML = Gdb;
-  const Tdb = dataAnalysis.getPerlakuan() * dataAnalysis.getUlangan() - 1;
+  const Tdb = getData.count("Perlakuan") * getData.count("Ulangan") - 1;
   cellTdb.innerHTML = Tdb;
 
-  const Pjk = dataAnalysis.getTotalPerlakuan(true) / dataAnalysis.getUlangan() - fk;
+  const Pjk = getData.sumOfGroupedSquares("Perlakuan", "Hasil") / getData.count("Ulangan") - fk;
   cellPjk.innerHTML = Pjk.toFixed(2);
-  const Ujk = dataAnalysis.getTotalUlangan(true) / dataAnalysis.getPerlakuan() - fk;
+  const Ujk = getData.sumOfGroupedSquares("Ulangan", "Hasil") / getData.count("Perlakuan") - fk;
   cellUjk.innerHTML = Ujk;
-  const Tjk = dataAnalysis.getGrandTotal(true) - fk;
+  const Tjk = getData.sumSquared("Hasil") - fk;
   cellTjk.innerHTML = Tjk.toFixed(2);
   const Gjk = Tjk - Pjk - Ujk;
   cellGjk.innerHTML = Gjk.toFixed(2);
@@ -862,28 +780,230 @@ function countAnovaRAK() {
   cellPfh.innerHTML = Pfh.toFixed(2);
   const Ufh = Ukt / Gkt;
   cellUfh.innerHTML = Ufh.toFixed(2);
-  const ft = jStat.centralF.inv(0.95, Pdb, Gdb);
-  cellPft.innerHTML = ft.toFixed(2);
 
-  if (Pfh > ft) {
+  const ft5 = jStat.centralF.inv(0.95, Pdb, Gdb);
+  cellFt5.innerHTML = ft5.toFixed(2);
+  const ft1 = jStat.centralF.inv(0.99, Pdb, Gdb);
+  cellFt1.innerHTML = ft1.toFixed(2);
+
+  if (Pfh > ft1) {
+    cellPsg.innerHTML = "**"
+  } else if (Pfh > ft5) {
     cellPsg.innerHTML = "*"
   } else {
     cellPsg.innerHTML = "tn"
   }
 
-  if (Ufh > ft) {
+  if (Ufh > ft1) {
+    cellPsg.innerHTML = "**"
+  } else if (Ufh > ft5) {
     cellUsg.innerHTML = "*"
   } else {
     cellUsg.innerHTML = "tn"
   }
 
-  const kk = Math.sqrt(Gkt) / (dataAnalysis.getGrandTotal() / (dataAnalysis.getPerlakuan() * dataAnalysis.getUlangan())) * 100;
+  const kk = Math.sqrt(Gkt) / (getData.sum("Hasil") / (getData.count("Perlakuan") * getData.count("Ulangan"))) * 100;
   cellkk.innerHTML = kk.toFixed(0) + "%";
 
-  document.getElementById('input-data').value = dataAnalysis.getPerlakuanAveragesFormatted();
-  document.querySelector('#input-perlakuan').value = dataAnalysis.getPerlakuan();
-  document.querySelector('#input-ulangan').value = dataAnalysis.getUlangan();
+  document.getElementById('input-data').value = getData.info("Perlakuan", "Hasil");
+  document.querySelector('#input-perlakuan').value = getData.count("Perlakuan");
+  document.querySelector('#input-ulangan').value = getData.count("Ulangan");
   document.querySelector('#input-ktg').value = Gkt;
+}
+
+// ----- RAK-F -----
+function countAnovaRAKF() {
+  document.querySelector('table#anovaTable').innerHTML = `
+              <thead>
+                <tr>
+                  <th>Sumber Keragaman</th>
+                  <th>Derajat Bebas</th>
+                  <th>Jumlah Kuadrat</th>
+                  <th>Kuadrat Tengah</th>
+                  <th>F Hitung</th>
+                  <th>F Tabel 5%</th>
+                  <th>F Tabel 1%</th>
+                  <th>Signifikansi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Kelompok</td>
+                  <td class="Udb"></td>
+                  <td class="Ujk"></td>
+                  <td class="Ukt"></td>
+                  <td class="Ufh"></td>
+                  <td class="Uft5"></td>
+                  <td class="Uft1"></td>
+                  <td class="Usg"></td>
+                </tr>
+                <tr>
+                  <td>Perlakuan</td>
+                  <td colspan="7"></td>
+                </tr>
+                <tr>
+                  <td>A</td>
+                  <td class="Adb"></td>
+                  <td class="Ajk"></td>
+                  <td class="Akt"></td>
+                  <td class="Afh"></td>
+                  <td class="Pft5" rowspan="3"></td>
+                  <td class="Pft1" rowspan="3"></td>
+                  <td class="Asg"></td>
+                </tr>
+                <tr>
+                  <td>B</td>
+                  <td class="Bdb"></td>
+                  <td class="Bjk"></td>
+                  <td class="Bkt"></td>
+                  <td class="Bfh"></td>
+                  <td class="Bsg"></td>
+                </tr>
+                <tr>
+                  <td>AB</td>
+                  <td class="ABdb"></td>
+                  <td class="ABjk"></td>
+                  <td class="ABkt"></td>
+                  <td class="ABfh"></td>
+                  <td class="ABsg"></td>
+                </tr>
+                <tr>
+                  <td>Galat</td>
+                  <td class="Gdb"></td>
+                  <td class="Gjk"></td>
+                  <td class="Gkt"></td>
+                </tr>
+                <tr>
+                  <td>Total</td>
+                  <td class="Tdb"></td>
+                  <td class="Tjk"></td>
+                </tr>
+              </tbody>
+  `;
+  const [
+    cellkk, cellfk, cellgt,
+    cellUdb, cellUjk, cellUkt, cellUfh, cellUft5, cellUft1, cellUsg,
+    cellPft5, cellPft1,
+    cellAdb, cellAjk, cellAkt, cellAfh, cellAsg,
+    cellBdb, cellBjk, cellBkt, cellBfh, cellBsg,
+    cellABdb, cellABjk, cellABkt, cellABfh, cellABsg,
+    cellGdb, cellGjk, cellGkt, cellTdb, cellTjk
+  ] = [
+    'kk', 'fk', 'gt',
+    'Udb', 'Ujk', 'Ukt', 'Ufh', 'Uft5', 'Uft1', 'Usg',
+    'Pft5', 'Pft1',
+    'Adb', 'Ajk', 'Akt', 'Afh', 'Asg',
+    'Bdb', 'Bjk', 'Bkt', 'Bfh', 'Bsg',
+    'ABdb', 'ABjk', 'ABkt', 'ABfh', 'ABsg',
+    'Gdb', 'Gjk', 'Gkt', 'Tdb', 'Tjk'
+  ]
+    .map(cls => document.querySelector(`.${cls}`));
+
+  const fk = (getData.sum("Hasil") * getData.sum("Hasil")) / (getData.count("Ulangan") * (getData.count("FaktorA") * getData.count("FaktorB")));
+  cellfk.innerHTML = fk;
+  cellgt.innerHTML = getData.sumSquared("Hasil");
+
+  const Udb = getData.count("Ulangan") - 1;
+  cellUdb.innerHTML = Udb;
+  const Adb = getData.count("FaktorA") - 1;
+  cellAdb.innerHTML = Adb;
+  const Bdb = getData.count("FaktorB") - 1;
+  cellBdb.innerHTML = Bdb;
+  const ABdb = (getData.count("FaktorA") - 1) * (getData.count("FaktorB") - 1);
+  cellABdb.innerHTML = ABdb;
+  const Gdb = (getData.count("FaktorA") * getData.count("FaktorB") - 1) * (getData.count("Ulangan") - 1);
+  cellGdb.innerHTML = Gdb;
+  const Tdb = getData.count("FaktorA") * getData.count("FaktorB") * getData.count("Ulangan") - 1;
+  cellTdb.innerHTML = Tdb;
+
+  const Ujk = getData.sumOfGroupedSquares("Ulangan", "Hasil") / (getData.count("FaktorA") * getData.count("FaktorB")) - fk;
+  cellUjk.innerHTML = Ujk;
+  const Ajk = getData.sumOfGroupedSquares("FaktorA", "Hasil") / (getData.count("Ulangan") * getData.count("FaktorB")) - fk;
+  cellAjk.innerHTML = Ajk;
+  const Bjk = getData.sumOfGroupedSquares("FaktorB", "Hasil") / (getData.count("Ulangan") * getData.count("FaktorA")) - fk;
+  cellBjk.innerHTML = Bjk;
+  const ABjk = (getData.sumOfGroupedSquares("FaktorA", "FaktorB", "Hasil") / getData.count("Ulangan")) - fk - Ajk - Bjk;
+  cellABjk.innerHTML = ABjk;
+  const Tjk = getData.sumSquared("Hasil") - fk;
+  cellTjk.innerHTML = Tjk;
+  const Gjk = Tjk - Ujk - Ajk - Bjk - ABjk;
+  cellGjk.innerHTML = Gjk;
+
+  const Ukt = Ujk / Udb;
+  cellUkt.innerHTML = Ukt;
+  const Akt = Ajk / Adb;
+  cellAkt.innerHTML = Akt;
+  const Bkt = Bjk / Bdb;
+  cellBkt.innerHTML = Bkt;
+  const ABkt = ABjk / ABdb;
+  cellABkt.innerHTML = ABkt;
+  const Gkt = Gjk / Gdb;
+  cellGkt.innerHTML = Gkt;
+
+  const Ufh = Ukt / Gkt;
+  cellUfh.innerHTML = Ufh;
+  const Afh = Akt / Gkt;
+  cellAfh.innerHTML = Afh;
+  const Bfh = Bkt / Gkt;
+  cellBfh.innerHTML = Bfh;
+  const ABfh = ABkt / Gkt;
+  cellABfh.innerHTML = ABfh;
+
+  const Uft5 = jStat.centralF.inv(0.95, Udb, Gdb);
+  cellUft5.innerHTML = Uft5;
+  const Uft1 = jStat.centralF.inv(0.99, Udb, Gdb);
+  cellUft1.innerHTML = Uft1;
+  const Pft5 = jStat.centralF.inv(0.95, Adb, Gdb);
+  cellPft5.innerHTML = Pft5;
+  const Pft1 = jStat.centralF.inv(0.99, Bdb, Gdb);
+  cellPft1.innerHTML = Pft1;
+
+  if (Ufh > Uft1) {
+    cellUsg.innerHTML = "**"
+  } else if (Ufh > Uft5) {
+    cellUsg.innerHTML = "*"
+  } else {
+    cellUsg.innerHTML = "tn"
+  }
+
+  if (Afh > Pft1) {
+    cellAsg.innerHTML = "**"
+  } else if (Afh > Pft5) {
+    cellAsg.innerHTML = "*"
+  } else {
+    cellAsg.innerHTML = "tn"
+  }
+
+  if (Bfh > Pft1) {
+    cellBsg.innerHTML = "**"
+  } else if (Bfh > Pft5) {
+    cellBsg.innerHTML = "*"
+  } else {
+    cellBsg.innerHTML = "tn"
+  }
+
+  if (ABfh > Pft1) {
+    cellABsg.innerHTML = "**"
+  } else if (ABfh > Pft5) {
+    cellABsg.innerHTML = "*"
+  } else {
+    cellABsg.innerHTML = "tn"
+  }
+
+  const kk = Math.sqrt(Gkt) / (getData.sum("Hasil") / (getData.count("FaktorA") * getData.count("FaktorB") * getData.count("Ulangan"))) * 100;
+  cellkk.innerHTML = kk.toFixed(0) + "%";
+
+  const target = document.querySelector('.item.input.none');
+  if (target) {
+    let next = target.nextElementSibling;
+    while (next) {
+      if (next.tagName === 'DIV') {
+        next.style.setProperty('display', 'none', 'important');
+      }
+      next = next.nextElementSibling;
+    }
+  }
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1311,7 +1431,7 @@ function processDataDMRT() {
     matrixTableBody.appendChild(row);
   });
 
-    const rowtr = document.querySelectorAll("#matrixTable tbody tr");
+  const rowtr = document.querySelectorAll("#matrixTable tbody tr");
   rowtr.forEach((row) => {
     const cells = row.querySelectorAll("td");
     let zeroIndex = -1;
@@ -1324,8 +1444,8 @@ function processDataDMRT() {
     let p = 2;
     for (let i = zeroIndex - 1; i >= 0; i--) {
       const cell = cells[i];
-        cell.setAttribute("data-p", p);
-        p++;
+      cell.setAttribute("data-p", p);
+      p++;
     }
   });
 
@@ -1535,7 +1655,7 @@ function processDataSNK() {
     matrixTableBody.appendChild(row);
   });
 
-    const rowtr = document.querySelectorAll("#matrixTable tbody tr");
+  const rowtr = document.querySelectorAll("#matrixTable tbody tr");
   rowtr.forEach((row) => {
     const cells = row.querySelectorAll("td");
     let zeroIndex = -1;
@@ -1548,8 +1668,8 @@ function processDataSNK() {
     let p = 2;
     for (let i = zeroIndex - 1; i >= 0; i--) {
       const cell = cells[i];
-        cell.setAttribute("data-p", p);
-        p++;
+      cell.setAttribute("data-p", p);
+      p++;
     }
   });
 
@@ -1789,10 +1909,11 @@ function renderResult(homogeneityGroups) {
     <th class="grayth">χ<sup>2</sup>(α, db=1)</th>
     <th class="grayth">${group.chi2.toFixed(4)}</th>
   </tr>
+  ` : ''} 
   <tr>
     <td colspan="2"></td>
   </tr>
-  ` : ''}`;
+  `;
     groupNum++;
   }
   return html;
@@ -1835,6 +1956,7 @@ function processDataSK() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
+// ----- Interpretation App -----
 function initializeInterpretationApp() {
   class InterpretationEngine {
     constructor() {
@@ -2396,9 +2518,9 @@ function drawHistogram() {
   const svgTotalHeight = chartHeight + marginTop + marginBottom; // Total SVG canvas height
 
   svg.setAttribute('viewBox', `0 0 ${svgTotalWidth} ${svgTotalHeight}`);
-  svg.setAttribute('width', '100%'); 
+  svg.setAttribute('width', '100%');
   svg.setAttribute('height', '100%');
-  svg.setAttribute('style', `background-color: ${graphBackground};`); 
+  svg.setAttribute('style', `background-color: ${graphBackground};`);
 
   // Clear previous SVG content
   while (svg.firstChild) {
