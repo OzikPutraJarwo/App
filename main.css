@@ -140,7 +140,7 @@ ol {
 }
 
 .none {
-  display: none
+  display: none !important
 }
 
 button {
@@ -374,6 +374,7 @@ header {
   transition: .2s;
   opacity: 0;
   display: none;
+  overflow: auto;
 }
 
 .popup {

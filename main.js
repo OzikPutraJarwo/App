@@ -112,7 +112,12 @@ function onLogout() {
 
 const popupElement = document.querySelector('#popup');
 
-function popup(e) {
+popupElement.setAttribute("onclick", "popupClose(this)");
+document.querySelector('.popup').addEventListener('click', (e) => {
+  e.stopPropagation();
+});
+
+function popupShow(e) {
   const p = document.querySelector(e);
   if (p.style.opacity !== "1") {
     p.classList.add('show');
