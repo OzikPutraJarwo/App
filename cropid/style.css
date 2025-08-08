@@ -366,6 +366,10 @@ th#renderbyMerged svg {
   overflow: auto;
 }
 
+#tableContainer table {
+  table-layout: fixed;
+}
+
 #tableContainer th {
   transition: .2s;
   cursor: pointer;
@@ -377,7 +381,21 @@ th#renderbyMerged svg {
   color: #fff;
 }
 
-/* Posthoc */
+/* ----- ANOVA ----- */
+
+table#anovaTable tbody tr td:first-child {
+  text-align: left;
+}
+
+table#anovaSup {
+  table-layout: fixed;
+}
+
+/* ----- Posthoc ----- */
+
+#posthoc table {
+  table-layout: fixed;
+}
 
 .posthoc-collapser {
   position: relative;
@@ -450,7 +468,6 @@ th#renderbyMerged svg {
   height: unset !important
 }
 
-
 #posthoc.tanpa-interaksi .interaksi {
   display: none;
 }
@@ -514,7 +531,7 @@ th#renderbyMerged svg {
 
 .popup-button img {
   width: 20px;
-  height: 20px;
+  height: 17px;
   transition: .2s all;
 }
 

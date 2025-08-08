@@ -207,8 +207,9 @@ function getFileName() {
   const x = document.getElementById('fileInput')
   x.style.visibility = 'collapse'
   document.getElementById('fileName').innerHTML = x.value.split('\\').pop();
-  document.getElementById('fileName').style.margin = ".5rem 0 0";
+  document.getElementById('fileName').style.margin = "0";
   document.getElementById('fileName').style.padding = ".5rem 1rem";
+  document.querySelector('.excel .input-files label span:first-child').style.display = 'none';
 };
 
 const fileInput = document.getElementById('fileInput');
@@ -731,19 +732,19 @@ function countAnovaRAKF() {
   document.querySelector('table#anovaTable').innerHTML = `
     <thead>
       <tr>
-        <th>Sumber Keragaman</th>
-        <th>Derajat Bebas</th>
-        <th>Jumlah Kuadrat</th>
-        <th>Kuadrat Tengah</th>
-        <th>F Hitung</th>
-        <th>F Tabel 5%</th>
-        <th>F Tabel 1%</th>
-        <th>Signifikansi</th>
+        <th>Source of Variation</th>
+        <th>Degrees of Freedom</th>
+        <th>Sum of Squares</th>
+        <th>Mean Square</th>
+        <th>F Stat</th>
+        <th>F Table 5%</th>
+        <th>F Table 1%</th>
+        <th>Significance</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td>Kelompok</td>
+        <td>Block</td>
         <td class="Udb"></td>
         <td class="Ujk"></td>
         <td class="Ukt"></td>
@@ -783,7 +784,7 @@ function countAnovaRAKF() {
         <td class="ABsg"></td>
       </tr>
       <tr>
-        <td>Galat</td>
+        <td>Residuals</td>
         <td class="Gdb"></td>
         <td class="Gjk"></td>
         <td class="Gkt"></td>
@@ -889,7 +890,7 @@ function countAnovaRAKF() {
   } else if (Ufh > Uft5) {
     cellUsg.innerHTML = "*"
   } else {
-    cellUsg.innerHTML = "tn"
+    cellUsg.innerHTML = "ns"
   }
 
   if (Afh > Aft1) {
@@ -897,7 +898,7 @@ function countAnovaRAKF() {
   } else if (Afh > Aft5) {
     cellAsg.innerHTML = "*"
   } else {
-    cellAsg.innerHTML = "tn"
+    cellAsg.innerHTML = "ns"
   }
 
   if (Bfh > Bft1) {
@@ -905,7 +906,7 @@ function countAnovaRAKF() {
   } else if (Bfh > Bft5) {
     cellBsg.innerHTML = "*"
   } else {
-    cellBsg.innerHTML = "tn"
+    cellBsg.innerHTML = "ns"
   }
 
   if (ABfh > ABft1) {

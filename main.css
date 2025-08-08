@@ -173,6 +173,16 @@ select {
   width: 100%;
 }
 
+input, select, textarea {
+  box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em, rgb(204, 219, 232, 0) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0) -3px -3px 6px 1px inset;
+  transition: .2s all;
+}
+
+input:focus, select:focus, textarea:focus {
+  box-shadow: rgba(67, 71, 85, 0) 0px 0px 0.25em, rgba(90, 125, 188, 0) 0px 0.25em 1em, rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
+  outline: unset;
+}
+
 input[type="color"] {
   height: 2rem;
   cursor: pointer;
@@ -369,7 +379,7 @@ header {
   width: 100%;
   height: 100%;
   z-index: 88;
-  background-color: #00000090;
+  background-color: #000000b8;
   padding: 2rem;
   transition: .2s;
   opacity: 0;
