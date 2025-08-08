@@ -222,27 +222,27 @@ header {
 }
 
 .header.wrap {
-  grid-template-columns: 31px 1fr 90px;
+  grid-template-columns: 31px 1fr 90px auto;
 }
 
 .logged-in .header.wrap {
-  grid-template-columns: 31px 1fr auto 31px
+  grid-template-columns: 31px 1fr auto 31px auto
 }
 
 .logged-in .header.wrap.cloud {
-  grid-template-columns: 31px 1fr 25px auto 31px
+  grid-template-columns: 31px 1fr 25px auto 31px auto
 }
 
 .home .header.wrap {
-  grid-template-columns: 1fr 90px;
+  grid-template-columns: 1fr 90px auto;
 }
 
 .home .logged-in .header.wrap {
-  grid-template-columns: 1fr auto 31px
+  grid-template-columns: 1fr auto 31px auto
 }
 
 .home .logged-in .header.wrap.cloud {
-  grid-template-columns: 1fr 25px auto 31px
+  grid-template-columns: 1fr 25px auto 31px auto
 }
 
 .header.wrap .site-cloud {
@@ -341,6 +341,26 @@ header {
   display: flex;
 }
 
+.site-lang {
+  padding: 0;
+}
+
+#site-lang {
+  padding: 0 10px;
+  background: unset;
+  border: none;
+  border-radius: 0;
+  box-shadow: unset;
+  font-size: 0.8rem;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  text-align: center;
+}
+
+#site-lang::-ms-expand {
+  display: none;
+}
 #notification {
   position: fixed;
   bottom: -5rem;
@@ -523,15 +543,15 @@ footer span {
   }
 
   .logged-in .header.wrap.cloud {
-    grid-template-columns: 31px 1fr 25px 31px 31px;
+    grid-template-columns: 31px 1fr 25px 31px 31px auto;
   }
 
   .home .logged-in .header.wrap {
-    grid-template-columns: 1fr 31px 31px
+    grid-template-columns: 1fr 31px 31px auto
   }
 
   .home .logged-in .header.wrap.cloud {
-    grid-template-columns: 1fr 25px 31px 31px
+    grid-template-columns: 1fr 25px 31px 31px auto
   }
 
   .site-title {
