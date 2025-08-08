@@ -1,2 +1,5 @@
 *.pem
 .archive
+*.txt
+*.drawio
+*.r

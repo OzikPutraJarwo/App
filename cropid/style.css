@@ -1,3 +1,24 @@
+body a {
+  color: var(--blue);
+  text-decoration: underline;
+  transition: .2s;
+}
+
+body a:hover {
+  color: var(--blue-hover);
+  text-decoration: none;
+}
+
+ul, ol {
+  display: grid;
+  gap: .5rem;
+}
+
+h4 {
+  font-size: 1.4rem;
+  font-weight: normal;
+}
+
 input[type="color"] {
   appearance: none;
   border: none;
@@ -14,6 +35,10 @@ input[type="color"]::-webkit-color-swatch-wrapper {
 
 input[type="color"]::-webkit-color-swatch {
   border: none;
+}
+
+.responsive-table {
+  overflow: auto;
 }
 
 .main.wrap {
@@ -65,11 +90,11 @@ textarea {
   cursor: pointer;
 }
 
-.output.show .hasil-section {
+.output.show .hasil-section,
+#posthoc {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  overflow: auto;
 }
 
 table {
@@ -238,36 +263,13 @@ th#renderbyMerged svg {
 }
 
 .show-set img,
-.uncollapse img,
-.set-graph img {
+.uncollapse img {
   width: 20px;
   height: auto;
 }
 
 .collapse {
   position: relative;
-}
-
-.show-settings {
-  transition: .2s;
-  overflow: hidden;
-}
-
-.show-settings.hide {
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  margin: 0 !important;
-}
-
-.excel .contoh-data a {
-  color: var(--blue);
-  text-decoration: underline;
-  transition: .2s;
-}
-
-.excel .contoh-data a:hover {
-  color: var(--blue-hover);
-  text-decoration: none;
 }
 
 .excel .input-files {
@@ -318,6 +320,7 @@ th#renderbyMerged svg {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 1rem;
+  overflow: auto;
 }
 
 #buttonContainer .faktorial {
@@ -352,28 +355,14 @@ th#renderbyMerged svg {
   font-size: 1.2rem;
 }
 
-.run,
-.download {
+.run {
   font-size: 1.1rem;
   font-weight: bold;
   text-transform: uppercase;
 }
 
-.download {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: .75rem
-}
-
-.download img {
-  filter: invert(1);
-  width: 25px;
-  height: 25px;
-}
-
 #tableContainer {
-  max-height: 210px;
+  max-height: 150px;
   overflow: auto;
 }
 
@@ -388,156 +377,93 @@ th#renderbyMerged svg {
   color: #fff;
 }
 
-.pengaturan {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  margin-top: 1.5rem;
-  box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em, rgb(204, 219, 232, 0) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0) -3px -3px 6px 1px inset;
-  padding: 1.5rem;
-  border-radius: .5rem;
-  background-color: #f5f7f6;
-}
+/* Posthoc */
 
-.pengaturan input {
-  background-color: #fff;
-}
-
-#customNameUnit>div,
-#customNameInputsContainer>div {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  align-items: center;
-  gap: 1rem;
-}
-
-.pengaturan h3 {
-  font-size: 1.3rem;
-}
-
-.pengaturan .title {
-  display: block;
-  font-weight: bold;
-  margin-bottom: .5rem;
-  font-size: 1.2rem;
-}
-
-#customNameInputsContainer {
-  display: grid;
-  gap: .5rem;
-}
-
-.graph {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-}
-
-.show #chartContainer {
-  display: none;
-}
-
-#chartContainer {
+.posthoc-collapser {
   position: relative;
 }
 
-.show .graph-set,
-.graph-set .item-set {
-  display: flex;
-  flex-direction: column;
+.posthoc-collapsed-item .posthoc-collapser {
+  margin-bottom: 1rem;
 }
 
-.graph-set {
-  display: none;
-  gap: 1rem;
+.posthoc-collapsed-item .posthoc-collapser:not(:first-child) {
+  margin-top: 1rem;
 }
 
-.graph-set .title {
-  font-weight: 600;
-  font-size: 1.3rem;
-}
-
-.graph-set .item-set {
-  gap: .5rem;
-}
-
-.graph-set .content-grid {
-  display: grid;
-  gap: 1rem;
-}
-
-#chart2Container {
-  padding: 0;
-  border-radius: unset;
-  box-shadow: unset;
-  background: unset;
-}
-
-#chart2Container svg {
-  width: auto;
-  height: auto;
-  border-radius: 1rem;
-  box-shadow: var(--box-shadow);
-}
-
-.content-grid.grid-2 {
-  grid-template-columns: 1fr 1fr;
-}
-
-.content-grid.grid-3 {
-  grid-template-columns: 1fr 1fr 1fr;
-}
-
-.content-grid.grid-4 {
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-}
-
-.content-grid.grid-5 {
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-}
-
-.content-grid.grid-6 {
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-}
-
-.graph-set label {
-  margin-bottom: .5rem;
-  display: block;
-}
-
-.download-svg {
-  background-color: #fff;
-  ;
-  position: absolute;
-  top: 1rem;
-  right: calc(35px + 1rem + 1rem);
-  width: 35px;
-  height: 35px;
-  box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em, rgb(204, 219, 232, 0) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0) -3px -3px 6px 1px inset;
-  line-height: 0;
-  padding: .45rem;
-  border-radius: .5rem;
+.posthoc-collapser-item {
   cursor: pointer;
-  transition: .2s;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em, rgb(204, 219, 232, 0) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0) -3px -3px 6px 1px inset;
+  justify-content: center;
+  align-items: center;
+  border-radius: .25rem;
+  transition: .2s all;
+  user-select: none;;
 }
 
-#chartContainer .download-svg {
-  right: 1rem;
+.posthoc-collapsed-item .posthoc-collapser .posthoc-collapser-item {
+  display: none;
 }
 
-.download-svg:hover {
+.posthoc-collapser-item img {
+  width: 20px;
+  height: 20px;
+  transition: .2s all;
+}
+
+.posthoc-collapser.show .posthoc-collapser-item img {
+  transform: rotate(-180deg);
+}
+
+.posthoc-collapser-item:hover, .posthoc-collapser.show .posthoc-collapser-item {
   box-shadow: rgba(67, 71, 85, 0) 0px 0px 0.25em, rgba(90, 125, 188, 0) 0px 0.25em 1em, rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
 }
 
-@media (max-width: 1100px) {
-  .graph {
-    grid-template-columns: 1fr;
-  }
-
-  #plotContainer {
-    height: 350px
-  }
+.posthoc-collapsed {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: .2s all;
+  gap: 0;
 }
+
+.posthoc-collapsed.show {
+  gap: 1rem;
+}
+
+.posthoc-collapsed-item .posthoc-collapsed {
+  gap: 1rem
+}
+
+.posthoc-collapsed-item {
+  transition: .2s all;
+}
+
+
+.posthoc-collapsed-item .posthoc-collapsed-item {
+  height: unset !important
+}
+
+
+#posthoc.tanpa-interaksi .interaksi {
+  display: none;
+}
+
+#posthoc.tanpa-interaksi .interaksi+* {
+  display: none;
+}
+
+#posthoc .x-besar {
+  text-transform: uppercase;
+}
+
+/* --- */
 
 @media (max-width: 600px) {
   .type .content {
@@ -562,4 +488,36 @@ th#renderbyMerged svg {
   #customNameInputsContainer>div {
     grid-template-columns: 75px 1fr;
   }
+}
+
+/* --- Popup --- */
+
+[data-popup] {
+  position: relative;
+}
+
+.popup-button {
+  cursor: pointer;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em, rgb(204, 219, 232, 0) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0) -3px -3px 6px 1px inset;
+  justify-content: center;
+  align-items: center;
+  border-radius: .25rem;
+  transition: .2s all;
+  user-select: none;
+}
+
+.popup-button img {
+  width: 20px;
+  height: 20px;
+  transition: .2s all;
+}
+
+.popup-button:hover {
+  box-shadow: rgba(67, 71, 85, 0) 0px 0px 0.25em, rgba(90, 125, 188, 0) 0px 0.25em 1em, rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
 }

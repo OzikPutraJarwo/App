@@ -108,19 +108,27 @@ const getData = {
     return totalSumOfSquaredGroups;
   },
 
-  info: function (groupingSettingName, valueSettingName) {
-    const groupingColIndex = this._getColumnIndex(groupingSettingName);
-    const valueColIndex = this._getColumnIndex(valueSettingName);
+  info: function () {
+    const args = Array.from(arguments);
+    let valueSettingName = args.pop();
+    const groupingSettingNames = args;
 
-    if (groupingColIndex === -1 || valueColIndex === -1) return null;
+    if (groupingSettingNames.length === 0) return null;
+
+    const valueColIndex = this._getColumnIndex(valueSettingName);
+    if (valueColIndex === -1) return null;
+
+    const groupingColIndices = groupingSettingNames.map(name => this._getColumnIndex(name));
+    if (groupingColIndices.some(index => index === -1)) return null;
 
     const groupedData = {}; // Stores { groupKey: { sum: 0, count: 0 } }
     const rows = document.querySelectorAll('#tableContainer tbody tr');
 
     rows.forEach(row => {
       const cells = row.querySelectorAll('td');
-      if (cells.length > groupingColIndex && cells.length > valueColIndex) {
-        const groupKey = cells[groupingColIndex].textContent.trim();
+      if (cells.length > valueColIndex) {
+        const groupKeyParts = groupingColIndices.map(index => cells[index].textContent.trim());
+        const groupKey = groupKeyParts.join('');
         const value = parseFloat(cells[valueColIndex].textContent.trim());
 
         if (!isNaN(value)) {
@@ -128,7 +136,7 @@ const getData = {
             groupedData[groupKey] = { sum: 0, count: 0 };
           }
           groupedData[groupKey].sum += value;
-          groupedData[key].count++;
+          groupedData[groupKey].count++;
         }
       }
     });
@@ -147,90 +155,6 @@ const getData = {
     return results.join('\n');
   }
 };
-
-function downloadMainAsExcel() {
-
-  const selectedPostHoc = document.getElementById('jenis-posthoc').value;
-  // const postHocSection = (selectedPostHoc === "bnt" || selectedPostHoc === "bnj") ? [["Uji Lanjut", "#matrixSup"]] : [];
-  const matrixSection = (selectedPostHoc === "bnt" || selectedPostHoc === "bnj") ? [["Matriks", "#matrixTable"]] : [];
-
-  const sections = [
-    ["Data", "#tableContainer table"],
-    ["ANOVA", "#anovaTable"],
-    ["KK, FK, GT", "#anovaSup"],
-    ["Uji Lanjut", "#matrixSup"], // ...postHocSection,
-    ...matrixSection,
-    ["Notasi", "#letterTable"],
-    ["Interpretasi", "#outputContent"]
-  ];
-
-  const wb = XLSX.utils.book_new();
-  let ws_data = [];
-
-  sections.forEach(([title, selector], index) => {
-    if (index > 0) {
-      ws_data.push([]);
-    }
-    ws_data.push([{ v: title, s: { font: { bold: true } } }]);
-    const element = document.querySelector(selector);
-    if (element) {
-      if (element.tagName === 'TABLE') {
-        const ws = XLSX.utils.table_to_sheet(element);
-        const json = XLSX.utils.sheet_to_json(ws, { header: 1 });
-        ws_data = ws_data.concat(json);
-      } else {
-        const text = element.innerText;
-        ws_data.push([text]);
-      }
-    }
-  });
-
-  const now = new Date();
-  const formattedTime = now.toLocaleString('en-EN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false
-  });
-
-  ws_data.push([]);
-  ws_data.push([`Diolah pada ${formattedTime} melalui https://app.kodejarwo.com/cropid`]);
-
-  const ws = XLSX.utils.aoa_to_sheet(ws_data);
-  XLSX.utils.book_append_sheet(wb, ws, "Data");
-  XLSX.writeFile(wb, "data-cropid.xlsx");
-};
-
-function downloadSvgAsPng(buttonElement) {
-  const parent = buttonElement.parentElement;
-  const svgElement = parent.querySelector('svg');
-
-  if (svgElement) {
-    const svgData = new XMLSerializer().serializeToString(svgElement);
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-
-    img.onload = () => {
-      const scale = 5;
-      canvas.width = img.width * scale;
-      canvas.height = img.height * scale;
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-      const pngUrl = canvas.toDataURL('image/png');
-      const a = document.createElement('a');
-      a.href = pngUrl;
-      a.download = 'chart.png';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    };
-    img.src = 'data:image/svg+xml;base64,' + btoa(svgData);
-  }
-}
 
 document.querySelectorAll('.collapse').forEach(collapse => {
   const setMaxHeight = () => {
@@ -287,13 +211,6 @@ function getFileName() {
   document.getElementById('fileName').style.padding = ".5rem 1rem";
 };
 
-const posthocInput = document.getElementById('jenis-posthoc');
-posthocInput.addEventListener('change', handlePosthoc);
-
-function handlePosthoc() {
-  resetSettings();
-}
-
 const fileInput = document.getElementById('fileInput');
 const tableContainer = document.getElementById('tableContainer');
 const sheetSelectorContainer = document.getElementById('sheetSelectorContainer');
@@ -304,16 +221,19 @@ const faktorABtn = document.getElementById('faktoraBtn');
 const faktorBBtn = document.getElementById('faktorbBtn');
 const ulanganBtn = document.getElementById('ulanganBtn');
 const hasilBtn = document.getElementById('hasilBtn');
-const selectedPerlakuanHeaderDisplay = document.getElementById('selectedPerlakuanHeader');
 const selectedFaktorAHeaderDisplay = document.getElementById('selectedFaktorAHeader');
 const selectedFaktorBHeaderDisplay = document.getElementById('selectedFaktorBHeader');
+const selectedPerlakuanHeaderDisplay = document.getElementById('selectedPerlakuanHeader');
+let selectedFaktorAText;
+let selectedFaktorBText;
+let selectedPerlakuanText;
 const selectedUlanganHeaderDisplay = document.getElementById('selectedUlanganHeader');
 const selectedHasilHeaderDisplay = document.getElementById('selectedHasilHeader');
 
 let currentWorkbook = null;
 let currentTableData = [];
 let selectedSettingType = null;
-let selectedHeaders = { Perlakuan: null, Ulangan: null, Hasil: null };
+let selectedHeaders = { FaktorA: null, FaktorB: null, Perlakuan: null, Ulangan: null, Hasil: null };
 
 perlakuanBtn.addEventListener('click', () => activateSetting('Perlakuan'));
 faktorABtn.addEventListener('click', () => activateSetting('FaktorA'));
@@ -325,6 +245,7 @@ fileInput.addEventListener('change', handleFile);
 
 function handleFile(event) {
   const file = event.target.files[0];
+  smoothScroll('#tableContainer', top = 75)
   if (!file) {
     return;
   }
@@ -472,13 +393,15 @@ document.getElementById('jenis-anova').addEventListener('change', function (even
   selectedDesign = event.target.value;
   if (selectedDesign === "ral" || selectedDesign === "rak") {
     document.getElementById('buttonContainer').classList.remove('factorial');
-    document.querySelector('.type .content').classList.remove('factorial');
   } else if (selectedDesign === "rakf") {
     document.getElementById('buttonContainer').classList.add('factorial');
-    document.querySelector('.type .content').classList.add('factorial');
   }
 });
 
+let selectedPosthoc = document.getElementById('jenis-posthoc').value;
+document.getElementById('jenis-posthoc').addEventListener('change', function (event) {
+  selectedPosthoc = event.target.value;
+});
 
 function handleHeaderClick(event) {
   if (!selectedSettingType) {
@@ -515,21 +438,29 @@ function handleHeaderClick(event) {
   });
   selectedSettingType = null;
 
+  // Menampilkan tombol analisis (.run) dan scroll ke tombolnya
   if (selectedDesign === "ral" || selectedDesign === "rak") {
+    // Scroll ketika perlakuan, ulangan, dan hasil telah dipilih (1 faktor)
     if (selectedHeaders.Perlakuan && selectedHeaders.Ulangan && selectedHeaders.Hasil) {
       document.querySelector('.run').classList.remove('none');
-      smoothScroll('.run', top = 70);
+      smoothScroll('.run', top = 75);
     }
   } else if (selectedDesign === "rakf") {
-    document.querySelector('.run').classList.remove('none');
-    smoothScroll('.run', top = 70);
+    // Scroll ketika faktor A, faktor B, ulangan, dan hasil telah dipilih (2 faktor)
+    if (selectedHeaders.FaktorA && selectedHeaders.FaktorB && selectedHeaders.Ulangan && selectedHeaders.Hasil) {
+      document.querySelector('.run').classList.remove('none');
+      smoothScroll('.run', top = 75);
+    }
   }
 
-  // if (selectedHeaders.Perlakuan && selectedHeaders.Ulangan && selectedHeaders.Hasil) {
   document.querySelector('.run').addEventListener('click', () => {
+    selectedFaktorAText = selectedFaktorAHeaderDisplay.textContent;
+    selectedFaktorBText = selectedFaktorBHeaderDisplay.textContent;
+    selectedPerlakuanText = selectedPerlakuanHeaderDisplay.textContent;
     document.querySelector('.separator').classList.remove('none');
     document.querySelector('.anova').classList.add('show');
-
+    document.querySelector('#posthoc').classList.remove('none');
+    document.querySelector('#posthoc').innerHTML = ``;
     if (selectedDesign === "ral") {
       countAnovaRAL();
     } else if (selectedDesign === "rak") {
@@ -537,58 +468,34 @@ function handleHeaderClick(event) {
     } else if (selectedDesign === "rakf") {
       countAnovaRAKF();
     }
-
-    const selectedPostHoc = document.getElementById('jenis-posthoc').value;
-    const allTheads = document.querySelectorAll('#matrixSup > *');
-    const targetTheads = document.querySelectorAll(`#matrixSup > *.${selectedPostHoc}`);
-    allTheads.forEach(thead => {
-      thead.classList.add('none');
+    document.querySelectorAll('.posthoc-collapser').forEach(c => {
+      c.innerHTML += `<div class='posthoc-collapser-item'><img src='../icon/arrow-down.png'></div>`;
     });
-    if (targetTheads.length > 0) {
-      targetTheads.forEach(thead => {
-        thead.classList.remove('none');
+    // Collapse and uncollapse on Posthoc
+    document.querySelectorAll('.posthoc-collapser').forEach(c => {
+      c.nextElementSibling.querySelector('.posthoc-collapsed-item').style.height = '0';
+      c.querySelector('.posthoc-collapser-item').addEventListener('click', () => {
+        c.classList.toggle('show');
+        const content = c.nextElementSibling;
+        const child = content.querySelector('.posthoc-collapsed-item');
+        if (content.classList.toggle('show')) {
+          child.style.height = child.scrollHeight + 'px';
+        } else {
+          child.style.height = '0';
+        }
       });
-    };
-    if (selectedPostHoc === "bnt") {
-      hitungBNT(); processDataBNT();
-    } else if (selectedPostHoc === "bnj") {
-      hitungBNJ(); processDataBNJ();
-    } else if (selectedPostHoc === "dmrt") {
-      hitungDMRT(); processDataDMRT();
-    } else if (selectedPostHoc === "snk") {
-      hitungSNK(); processDataSNK();
-    } else if (selectedPostHoc === "sk") {
-      processDataSK();
-    }
-
-    if (selectedDesign === "ral" || selectedDesign === "rak") {
-      document.querySelector('.sk-graph').classList.remove('none');
-      initializeInterpretationApp();
-      renderBarChart();
-      initializeChart(); drawHistogram();
-    } else if (selectedDesign === "rakf") {
-    }
-
-    window.addEventListener('resize', () => {
-      drawHistogram();
     });
-    document.querySelector('.graph').classList.remove('none');
-    document.querySelector('.download').classList.remove('none');
-    document.querySelector('#chartContainer').innerHTML += `<div class="download-svg" onclick="downloadSvgAsPng(this)"><img src="../icon/download.png"></div>`;
-    const chart2ContainerDownload = document.querySelector('#chart2Container .download-svg');
-    if (chart2ContainerDownload) {
-      chart2ContainerDownload.remove();
-    };
-    document.querySelector('#chart2Container').innerHTML += `<div class="download-svg" onclick="downloadSvgAsPng(this)"><img src="../icon/download.png"></div>`;
   })
 }
 
 function resetSettings() {
   selectedSettingType = null;
-  selectedHeaders = { Perlakuan: null, Ulangan: null, Hasil: null };
-  selectedPerlakuanHeaderDisplay.textContent = 'Belum dipilih';
-  selectedUlanganHeaderDisplay.textContent = 'Belum dipilih';
-  selectedHasilHeaderDisplay.textContent = 'Belum dipilih';
+  selectedHeaders = { FaktorA: null, FaktorB: null, Perlakuan: null, Ulangan: null, Hasil: null };
+  selectedFaktorAHeaderDisplay.textContent = 'Not yet selected';
+  selectedFaktorBHeaderDisplay.textContent = 'Not yet selected';
+  selectedPerlakuanHeaderDisplay.textContent = 'Not yet selected';
+  selectedUlanganHeaderDisplay.textContent = 'Not yet selected';
+  selectedHasilHeaderDisplay.textContent = 'Not yet selected';
   document.querySelectorAll('.setting-button').forEach(btn => {
     btn.classList.remove('active');
   });
@@ -596,13 +503,20 @@ function resetSettings() {
     e.removeAttribute('data-setting');
     e.classList.remove('selected-header');
   });
-  document.querySelector('.separator').classList.add('none');
   document.querySelector('.run').classList.add('none');
-  document.querySelector('.graph').classList.add('none');
-  document.querySelector('.download').classList.add('none');
-  document.querySelectorAll('.output').forEach(el => el.classList.remove('show'));
-  document.querySelector('.sk-graph').classList.add('none');
+  document.querySelector('.separator').classList.add('none');
+  document.querySelector('#anova').classList.remove('show');
+  document.querySelector('#posthoc').classList.add('none');
 }
+
+const inputs = [
+  { id: 'jenis-posthoc', handler: resetSettings },
+  { id: 'jenis-anova', handler: resetSettings }
+];
+
+inputs.forEach(({ id, handler }) => {
+  document.getElementById(id).addEventListener('change', handler);
+});
 
 function escapeHTML(str) {
   const div = document.createElement('div');
@@ -615,39 +529,39 @@ function escapeHTML(str) {
 // ----- RAL -----
 function countAnovaRAL() {
   document.querySelector('table#anovaTable').innerHTML = `
-              <thead>
-                <tr>
-                  <th>Sumber Keragaman</th>
-                  <th>Derajat Bebas</th>
-                  <th>Jumlah Kuadrat</th>
-                  <th>Kuadrat Tengah</th>
-                  <th>F Hitung</th>
-                  <th>F Tabel 5%</th>
-                  <th>Signifikansi</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Perlakuan</td>
-                  <td class="Pdb"></td>
-                  <td class="Pjk"></td>
-                  <td class="Pkt"></td>
-                  <td class="Pfh"></td>
-                  <td class="Pft"></td>
-                  <td class="Psg"></td>
-                </tr>
-                <tr>
-                  <td>Galat</td>
-                  <td class="Gdb"></td>
-                  <td class="Gjk"></td>
-                  <td class="Gkt"></td>
-                </tr>
-                <tr>
-                  <td>Total</td>
-                  <td class="Tdb"></td>
-                  <td class="Tjk"></td>
-                </tr>
-              </tbody>
+    <thead>
+      <tr>
+        <th>Sumber Keragaman</th>
+        <th>Derajat Bebas</th>
+        <th>Jumlah Kuadrat</th>
+        <th>Kuadrat Tengah</th>
+        <th>F Hitung</th>
+        <th>F Tabel 5%</th>
+        <th>Signifikansi</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Perlakuan</td>
+        <td class="Pdb"></td>
+        <td class="Pjk"></td>
+        <td class="Pkt"></td>
+        <td class="Pfh"></td>
+        <td class="Pft"></td>
+        <td class="Psg"></td>
+      </tr>
+      <tr>
+        <td>Galat</td>
+        <td class="Gdb"></td>
+        <td class="Gjk"></td>
+        <td class="Gkt"></td>
+      </tr>
+      <tr>
+        <td>Total</td>
+        <td class="Tdb"></td>
+        <td class="Tjk"></td>
+      </tr>
+    </tbody>
   `;
   const [cellkk, cellfk, cellgt, cellPdb, cellPjk, cellPkt, cellPfh, cellPft, cellPsg, cellGdb, cellGjk, cellGkt, cellTdb, cellTjk]
     = ['kk', 'fk', 'gt', 'Pdb', 'Pjk', 'Pkt', 'Pfh', 'Pft', 'Psg', 'Gdb', 'Gjk', 'Gkt', 'Tdb', 'Tjk']
@@ -699,57 +613,57 @@ function countAnovaRAL() {
 // ----- RAK -----
 function countAnovaRAK() {
   document.querySelector('table#anovaTable').innerHTML = `
-              <thead>
-                <tr>
-                  <th>Sumber Keragaman</th>
-                  <th>Derajat Bebas</th>
-                  <th>Jumlah Kuadrat</th>
-                  <th>Kuadrat Tengah</th>
-                  <th>F Hitung</th>
-                  <th>F Tabel 5%</th>
-                  <th>F Tabel 1%</th>
-                  <th>Signifikansi</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Kelompok</td>
-                  <td class="Udb"></td>
-                  <td class="Ujk"></td>
-                  <td class="Ukt"></td>
-                  <td class="Ufh"></td>
-                  <td class="Ft5" rowspan="2"></td>
-                  <td class="Ft1" rowspan="2"></td>
-                  <td class="Usg"></td>
-                </tr>
-                <tr>
-                  <td>Perlakuan</td>
-                  <td class="Pdb"></td>
-                  <td class="Pjk"></td>
-                  <td class="Pkt"></td>
-                  <td class="Pfh"></td>
-                  <td class="Psg"></td>
-                </tr>
-                <tr>
-                  <td>Galat</td>
-                  <td class="Gdb"></td>
-                  <td class="Gjk"></td>
-                  <td class="Gkt"></td>
-                </tr>
-                <tr>
-                  <td>Total</td>
-                  <td class="Tdb"></td>
-                  <td class="Tjk"></td>
-                </tr>
-              </tbody>
+    <thead>
+      <tr>
+        <th>Sumber Keragaman</th>
+        <th>Derajat Bebas</th>
+        <th>Jumlah Kuadrat</th>
+        <th>Kuadrat Tengah</th>
+        <th>F Hitung</th>
+        <th>F Tabel 5%</th>
+        <th>F Tabel 1%</th>
+        <th>Signifikansi</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Kelompok</td>
+        <td class="Udb"></td>
+        <td class="Ujk"></td>
+        <td class="Ukt"></td>
+        <td class="Ufh"></td>
+        <td class="Ft5" rowspan="2"></td>
+        <td class="Ft1" rowspan="2"></td>
+        <td class="Usg"></td>
+      </tr>
+      <tr>
+        <td>Perlakuan</td>
+        <td class="Pdb"></td>
+        <td class="Pjk"></td>
+        <td class="Pkt"></td>
+        <td class="Pfh"></td>
+        <td class="Psg"></td>
+      </tr>
+      <tr>
+        <td>Galat</td>
+        <td class="Gdb"></td>
+        <td class="Gjk"></td>
+        <td class="Gkt"></td>
+      </tr>
+      <tr>
+        <td>Total</td>
+        <td class="Tdb"></td>
+        <td class="Tjk"></td>
+      </tr>
+    </tbody>
   `;
   const [cellkk, cellfk, cellgt, cellPdb, cellPjk, cellPkt, cellPfh, cellFt5, cellFt1, cellPsg, cellUdb, cellUjk, cellUkt, cellUfh, cellUft, cellUsg, cellGdb, cellGjk, cellGkt, cellTdb, cellTjk]
     = ['kk', 'fk', 'gt', 'Pdb', 'Pjk', 'Pkt', 'Pfh', 'Ft5', 'Ft1', 'Psg', 'Udb', 'Ujk', 'Ukt', 'Ufh', 'Uft', 'Usg', 'Gdb', 'Gjk', 'Gkt', 'Tdb', 'Tjk']
       .map(cls => document.querySelector(`.${cls}`));
 
   const fk = getData.sum("Hasil") * getData.sum("Hasil") / (getData.count("Perlakuan") * getData.count("Ulangan"));
-  cellfk.innerHTML = fk;
-  cellgt.innerHTML = getData.sum("Hasil");
+  cellfk.innerHTML = fk.toFixed(2);
+  cellgt.innerHTML = getData.sum("Hasil").toFixed(2);
 
   const Pdb = getData.count("Perlakuan") - 1;
   cellPdb.innerHTML = Pdb;
@@ -763,7 +677,7 @@ function countAnovaRAK() {
   const Pjk = getData.sumOfGroupedSquares("Perlakuan", "Hasil") / getData.count("Ulangan") - fk;
   cellPjk.innerHTML = Pjk.toFixed(2);
   const Ujk = getData.sumOfGroupedSquares("Ulangan", "Hasil") / getData.count("Perlakuan") - fk;
-  cellUjk.innerHTML = Ujk;
+  cellUjk.innerHTML = Ujk.toFixed(2);
   const Tjk = getData.sumSquared("Hasil") - fk;
   cellTjk.innerHTML = Tjk.toFixed(2);
   const Gjk = Tjk - Pjk - Ujk;
@@ -813,77 +727,78 @@ function countAnovaRAK() {
 
 // ----- RAK-F -----
 function countAnovaRAKF() {
+  document.querySelector("#anova h3").innerHTML = `ANOVA: Randomized Block Design (2 Factors)`;
   document.querySelector('table#anovaTable').innerHTML = `
-              <thead>
-                <tr>
-                  <th>Sumber Keragaman</th>
-                  <th>Derajat Bebas</th>
-                  <th>Jumlah Kuadrat</th>
-                  <th>Kuadrat Tengah</th>
-                  <th>F Hitung</th>
-                  <th>F Tabel 5%</th>
-                  <th>F Tabel 1%</th>
-                  <th>Signifikansi</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Kelompok</td>
-                  <td class="Udb"></td>
-                  <td class="Ujk"></td>
-                  <td class="Ukt"></td>
-                  <td class="Ufh"></td>
-                  <td class="Uft5"></td>
-                  <td class="Uft1"></td>
-                  <td class="Usg"></td>
-                </tr>
-                <tr>
-                  <td>Perlakuan</td>
-                  <td colspan="7"></td>
-                </tr>
-                <tr>
-                  <td>A</td>
-                  <td class="Adb"></td>
-                  <td class="Ajk"></td>
-                  <td class="Akt"></td>
-                  <td class="Afh"></td>
-                  <td class="Pft5" rowspan="3"></td>
-                  <td class="Pft1" rowspan="3"></td>
-                  <td class="Asg"></td>
-                </tr>
-                <tr>
-                  <td>B</td>
-                  <td class="Bdb"></td>
-                  <td class="Bjk"></td>
-                  <td class="Bkt"></td>
-                  <td class="Bfh"></td>
-                  <td class="Bsg"></td>
-                </tr>
-                <tr>
-                  <td>AB</td>
-                  <td class="ABdb"></td>
-                  <td class="ABjk"></td>
-                  <td class="ABkt"></td>
-                  <td class="ABfh"></td>
-                  <td class="ABsg"></td>
-                </tr>
-                <tr>
-                  <td>Galat</td>
-                  <td class="Gdb"></td>
-                  <td class="Gjk"></td>
-                  <td class="Gkt"></td>
-                </tr>
-                <tr>
-                  <td>Total</td>
-                  <td class="Tdb"></td>
-                  <td class="Tjk"></td>
-                </tr>
-              </tbody>
+    <thead>
+      <tr>
+        <th>Sumber Keragaman</th>
+        <th>Derajat Bebas</th>
+        <th>Jumlah Kuadrat</th>
+        <th>Kuadrat Tengah</th>
+        <th>F Hitung</th>
+        <th>F Tabel 5%</th>
+        <th>F Tabel 1%</th>
+        <th>Signifikansi</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Kelompok</td>
+        <td class="Udb"></td>
+        <td class="Ujk"></td>
+        <td class="Ukt"></td>
+        <td class="Ufh"></td>
+        <td class="Uft5"></td>
+        <td class="Uft1"></td>
+        <td class="Usg"></td>
+      </tr>
+      <tr>
+        <td>${selectedFaktorAText}</td>
+        <td class="Adb"></td>
+        <td class="Ajk"></td>
+        <td class="Akt"></td>
+        <td class="Afh"></td>
+        <td class="Aft5"></td>
+        <td class="Aft1"></td>
+        <td class="Asg"></td>
+      </tr>
+      <tr>
+        <td>${selectedFaktorBText}</td>
+        <td class="Bdb"></td>
+        <td class="Bjk"></td>
+        <td class="Bkt"></td>
+        <td class="Bfh"></td>
+        <td class="Bft5"></td>
+        <td class="Bft1"></td>
+        <td class="Bsg"></td>
+      </tr>
+      <tr>
+        <td>${selectedFaktorAText} × ${selectedFaktorBText}</td>
+        <td class="ABdb"></td>
+        <td class="ABjk"></td>
+        <td class="ABkt"></td>
+        <td class="ABfh"></td>
+        <td class="ABft5"></td>
+        <td class="ABft1"></td>
+        <td class="ABsg"></td>
+      </tr>
+      <tr>
+        <td>Galat</td>
+        <td class="Gdb"></td>
+        <td class="Gjk"></td>
+        <td class="Gkt"></td>
+      </tr>
+      <tr>
+        <td>Total</td>
+        <td class="Tdb"></td>
+        <td class="Tjk"></td>
+      </tr>
+    </tbody>
   `;
   const [
     cellkk, cellfk, cellgt,
     cellUdb, cellUjk, cellUkt, cellUfh, cellUft5, cellUft1, cellUsg,
-    cellPft5, cellPft1,
+    cellAft5, cellAft1, cellBft5, cellBft1, cellABft5, cellABft1,
     cellAdb, cellAjk, cellAkt, cellAfh, cellAsg,
     cellBdb, cellBjk, cellBkt, cellBfh, cellBsg,
     cellABdb, cellABjk, cellABkt, cellABfh, cellABsg,
@@ -891,7 +806,7 @@ function countAnovaRAKF() {
   ] = [
     'kk', 'fk', 'gt',
     'Udb', 'Ujk', 'Ukt', 'Ufh', 'Uft5', 'Uft1', 'Usg',
-    'Pft5', 'Pft1',
+    'Aft5', 'Aft1', 'Bft5', 'Bft1', 'ABft5', 'ABft1',
     'Adb', 'Ajk', 'Akt', 'Afh', 'Asg',
     'Bdb', 'Bjk', 'Bkt', 'Bfh', 'Bsg',
     'ABdb', 'ABjk', 'ABkt', 'ABfh', 'ABsg',
@@ -900,8 +815,8 @@ function countAnovaRAKF() {
     .map(cls => document.querySelector(`.${cls}`));
 
   const fk = (getData.sum("Hasil") * getData.sum("Hasil")) / (getData.count("Ulangan") * (getData.count("FaktorA") * getData.count("FaktorB")));
-  cellfk.innerHTML = fk;
-  cellgt.innerHTML = getData.sumSquared("Hasil");
+  cellfk.innerHTML = fk.toFixed(2);
+  cellgt.innerHTML = getData.sumSquared("Hasil").toFixed(2);
 
   const Udb = getData.count("Ulangan") - 1;
   cellUdb.innerHTML = Udb;
@@ -911,52 +826,63 @@ function countAnovaRAKF() {
   cellBdb.innerHTML = Bdb;
   const ABdb = (getData.count("FaktorA") - 1) * (getData.count("FaktorB") - 1);
   cellABdb.innerHTML = ABdb;
-  const Gdb = (getData.count("FaktorA") * getData.count("FaktorB") - 1) * (getData.count("Ulangan") - 1);
+  const Gdb = (getData.count("FaktorA") * getData.count("FaktorB") * getData.count("Ulangan") - 1) - (Adb + Bdb + ABdb + Udb);
   cellGdb.innerHTML = Gdb;
   const Tdb = getData.count("FaktorA") * getData.count("FaktorB") * getData.count("Ulangan") - 1;
   cellTdb.innerHTML = Tdb;
 
   const Ujk = getData.sumOfGroupedSquares("Ulangan", "Hasil") / (getData.count("FaktorA") * getData.count("FaktorB")) - fk;
-  cellUjk.innerHTML = Ujk;
+  cellUjk.innerHTML = Ujk.toFixed(2);
   const Ajk = getData.sumOfGroupedSquares("FaktorA", "Hasil") / (getData.count("Ulangan") * getData.count("FaktorB")) - fk;
-  cellAjk.innerHTML = Ajk;
+  cellAjk.innerHTML = Ajk.toFixed(2);
   const Bjk = getData.sumOfGroupedSquares("FaktorB", "Hasil") / (getData.count("Ulangan") * getData.count("FaktorA")) - fk;
-  cellBjk.innerHTML = Bjk;
+  cellBjk.innerHTML = Bjk.toFixed(2);
   const ABjk = (getData.sumOfGroupedSquares("FaktorA", "FaktorB", "Hasil") / getData.count("Ulangan")) - fk - Ajk - Bjk;
-  cellABjk.innerHTML = ABjk;
+  cellABjk.innerHTML = ABjk.toFixed(2);
   const Tjk = getData.sumSquared("Hasil") - fk;
-  cellTjk.innerHTML = Tjk;
+  cellTjk.innerHTML = Tjk.toFixed(2);
   const Gjk = Tjk - Ujk - Ajk - Bjk - ABjk;
-  cellGjk.innerHTML = Gjk;
+  cellGjk.innerHTML = Gjk.toFixed(2);
 
   const Ukt = Ujk / Udb;
-  cellUkt.innerHTML = Ukt;
+  cellUkt.innerHTML = Ukt.toFixed(2);
   const Akt = Ajk / Adb;
-  cellAkt.innerHTML = Akt;
+  cellAkt.innerHTML = Akt.toFixed(2);
   const Bkt = Bjk / Bdb;
-  cellBkt.innerHTML = Bkt;
+  cellBkt.innerHTML = Bkt.toFixed(2);
   const ABkt = ABjk / ABdb;
-  cellABkt.innerHTML = ABkt;
+  cellABkt.innerHTML = ABkt.toFixed(2);
   const Gkt = Gjk / Gdb;
-  cellGkt.innerHTML = Gkt;
+  cellGkt.innerHTML = Gkt.toFixed(2);
 
   const Ufh = Ukt / Gkt;
-  cellUfh.innerHTML = Ufh;
+  cellUfh.innerHTML = Ufh.toFixed(2);
   const Afh = Akt / Gkt;
-  cellAfh.innerHTML = Afh;
+  cellAfh.innerHTML = Afh.toFixed(2);
   const Bfh = Bkt / Gkt;
-  cellBfh.innerHTML = Bfh;
+  cellBfh.innerHTML = Bfh.toFixed(2);
   const ABfh = ABkt / Gkt;
-  cellABfh.innerHTML = ABfh;
+  cellABfh.innerHTML = ABfh.toFixed(2);
 
   const Uft5 = jStat.centralF.inv(0.95, Udb, Gdb);
-  cellUft5.innerHTML = Uft5;
+  cellUft5.innerHTML = Uft5.toFixed(2);
   const Uft1 = jStat.centralF.inv(0.99, Udb, Gdb);
-  cellUft1.innerHTML = Uft1;
-  const Pft5 = jStat.centralF.inv(0.95, Adb, Gdb);
-  cellPft5.innerHTML = Pft5;
-  const Pft1 = jStat.centralF.inv(0.99, Bdb, Gdb);
-  cellPft1.innerHTML = Pft1;
+  cellUft1.innerHTML = Uft1.toFixed(2);
+
+  const Aft5 = jStat.centralF.inv(0.95, Adb, Gdb);
+  cellAft5.innerHTML = Aft5.toFixed(2);
+  const Aft1 = jStat.centralF.inv(0.99, Adb, Gdb);
+  cellAft1.innerHTML = Aft1.toFixed(2);
+
+  const Bft5 = jStat.centralF.inv(0.95, Bdb, Gdb);
+  cellBft5.innerHTML = Bft5.toFixed(2);
+  const Bft1 = jStat.centralF.inv(0.99, Bdb, Gdb);
+  cellBft1.innerHTML = Bft1.toFixed(2);
+
+  const ABft5 = jStat.centralF.inv(0.95, ABdb, Gdb);
+  cellABft5.innerHTML = ABft5.toFixed(2);
+  const ABft1 = jStat.centralF.inv(0.99, ABdb, Gdb);
+  cellABft1.innerHTML = ABft1.toFixed(2);
 
   if (Ufh > Uft1) {
     cellUsg.innerHTML = "**"
@@ -966,42 +892,325 @@ function countAnovaRAKF() {
     cellUsg.innerHTML = "tn"
   }
 
-  if (Afh > Pft1) {
+  if (Afh > Aft1) {
     cellAsg.innerHTML = "**"
-  } else if (Afh > Pft5) {
+  } else if (Afh > Aft5) {
     cellAsg.innerHTML = "*"
   } else {
     cellAsg.innerHTML = "tn"
   }
 
-  if (Bfh > Pft1) {
+  if (Bfh > Bft1) {
     cellBsg.innerHTML = "**"
-  } else if (Bfh > Pft5) {
+  } else if (Bfh > Bft5) {
     cellBsg.innerHTML = "*"
   } else {
     cellBsg.innerHTML = "tn"
   }
 
-  if (ABfh > Pft1) {
-    cellABsg.innerHTML = "**"
-  } else if (ABfh > Pft5) {
-    cellABsg.innerHTML = "*"
+  if (ABfh > ABft1) {
+    cellABsg.innerHTML = "**";
+    document.querySelector('#posthoc').classList.remove('tanpa-interaksi')
+  } else if (ABfh > ABft5) {
+    cellABsg.innerHTML = "*";
+    document.querySelector('#posthoc').classList.remove('tanpa-interaksi')
   } else {
-    cellABsg.innerHTML = "tn"
+    cellABsg.innerHTML = "tn";
+    document.querySelector('#posthoc').classList.add('tanpa-interaksi')
   }
 
   const kk = Math.sqrt(Gkt) / (getData.sum("Hasil") / (getData.count("FaktorA") * getData.count("FaktorB") * getData.count("Ulangan"))) * 100;
   cellkk.innerHTML = kk.toFixed(0) + "%";
 
-  const target = document.querySelector('.item.input.none');
-  if (target) {
-    let next = target.nextElementSibling;
-    while (next) {
-      if (next.tagName === 'DIV') {
-        next.style.setProperty('display', 'none', 'important');
+  document.getElementById('posthoc').innerHTML = `<h3 id="posthoc-title"></h3>`;
+
+  // BNT
+  if (selectedPosthoc === "bnt") {
+    // Perhitungan StudentT & LSD
+    table = (jStat.studentt.inv(1 - 0.05 / 2, Gdb));
+    thitA = (table * Math.sqrt((2 * Gkt) / (getData.count("Ulangan") * getData.count("FaktorB"))));
+    thitB = (table * Math.sqrt((2 * Gkt) / (getData.count("Ulangan") * getData.count("FaktorA"))));
+    thitAB = (table * Math.sqrt((2 * Gkt) / getData.count("Ulangan")));
+    // Faktor A, Faktor B, dan Kombinasi AB
+    processFLSD(selectedFaktorAText, 'factorA', getData.info("FaktorA", "Hasil"), thitA);
+    processFLSD(selectedFaktorBText, 'factorB', getData.info("FaktorB", "Hasil"), thitB);
+    processFLSD('Combination: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, 'factorAB', getData.info("FaktorA", "FaktorB", "Hasil"), thitAB);
+    // Interaksi AB
+    document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'>Interaction: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
+    const uniqueFaktorA = new Set();
+    const uniqueFaktorB = new Set();
+    const rows = document.querySelectorAll('#tableContainer tbody tr');
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 2) {
+        uniqueFaktorA.add(cells[0].textContent.trim());
+        uniqueFaktorB.add(cells[1].textContent.trim());
       }
-      next = next.nextElementSibling;
-    }
+    });
+    uniqueFaktorA.forEach(faktorA => {
+      const info = getData.info("FaktorA", "FaktorB", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorA));
+      if (info.length > 0) {
+        processFLSD(faktorA, `leading_${faktorA}`, info.join('\n'), thitA);
+      }
+    });
+    uniqueFaktorB.forEach(faktorB => {
+      const info = getData.info("FaktorB", "FaktorA", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorB));
+      if (info.length > 0) {
+        processFLSD(faktorB, `leading_${faktorB}`, info.join('\n'), thitB);
+      }
+    });
+    // Tabel Interaksi 
+    (function () {
+      const table = document.querySelector('#tableContainer table');
+      if (!table) return;
+      const rows = Array.from(table.querySelectorAll('tbody tr')).slice(1);
+      const headers = Array.from(table.querySelectorAll('th'));
+      const colIndex = {};
+      headers.forEach((th, i) => {
+        if (th.dataset.setting) {
+          colIndex[th.dataset.setting] = i;
+        }
+      });
+      const dataMap = {};
+      rows.forEach(tr => {
+        const cells = tr.querySelectorAll('td');
+        if (!cells.length) return;
+        const faktorA = cells[colIndex['FaktorA']].textContent.trim();
+        const faktorB = cells[colIndex['FaktorB']].textContent.trim();
+        const nilai = parseFloat(cells[colIndex['Hasil']].textContent.trim());
+        if (!dataMap[faktorB]) dataMap[faktorB] = {};
+        if (!dataMap[faktorB][faktorA]) dataMap[faktorB][faktorA] = [];
+        dataMap[faktorB][faktorA].push(nilai);
+      });
+      const faktorAList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorA']]?.textContent.trim()).filter(Boolean))];
+      const faktorBList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorB']]?.textContent.trim()).filter(Boolean))];
+      const newTable = document.createElement('table');
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      headRow.appendChild(document.createElement('th')).textContent = '×';
+      faktorAList.forEach(fa => {
+        const th = document.createElement('th');
+        th.colSpan = 2;
+        th.textContent = fa;
+        headRow.appendChild(th);
+      });
+      thead.appendChild(headRow);
+      newTable.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      faktorBList.forEach(fb => {
+        const avgRow = document.createElement('tr');
+        const fbCell = document.createElement('th');
+        fbCell.rowSpan = 2;
+        fbCell.textContent = fb;
+        avgRow.appendChild(fbCell);
+        faktorAList.forEach(fa => {
+          const avg = dataMap[fb]?.[fa] ? (dataMap[fb][fa].reduce((a, b) => a + b, 0) / dataMap[fb][fa].length) : 0;
+          const td1 = document.createElement('td');
+          td1.textContent = avg.toFixed(2);
+          const td2 = document.createElement('td');
+          td2.classList.add('x-kecil');
+          td2.dataset.pair = `${fb}${fa}`;
+          td2.textContent = 'x';
+          avgRow.appendChild(td1);
+          avgRow.appendChild(td2);
+        });
+        tbody.appendChild(avgRow);
+        const xRow = document.createElement('tr');
+        faktorAList.forEach(fa => {
+          const td = document.createElement('td');
+          td.colSpan = 2;
+          td.classList.add('x-besar');
+          td.dataset.pair = `${fa}${fb}`;
+          td.textContent = 'X';
+          xRow.appendChild(td);
+        });
+        tbody.appendChild(xRow);
+      });
+      newTable.appendChild(tbody);
+      const container = document.getElementById('interaction-table');
+      container.innerHTML = '';
+      container.appendChild(newTable);
+      const perFaktorContainer = document.createElement('div');
+      perFaktorContainer.classList.add('posthoc-collapsed-item');
+      container.appendChild(perFaktorContainer);
+      const posthocTables = document.querySelectorAll('#posthoc table[id^="leading_"][id$="-LETTER"]');
+      const notasiMap = {};
+      posthocTables.forEach(tbl => {
+        const trs = tbl.querySelectorAll('tbody tr');
+        trs.forEach(tr => {
+          const perlakuan = tr.cells[0].textContent.trim();
+          const notasi = tr.cells[2].textContent.trim();
+          notasiMap[perlakuan] = notasi;
+        });
+      });
+      document.querySelectorAll('#interaction-table .x-kecil').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      document.querySelectorAll('#interaction-table .x-besar').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      const target = container.querySelector('.posthoc-collapsed-item');
+      let nextSibling = container.nextElementSibling;
+      while (nextSibling) {
+        const temp = nextSibling;
+        nextSibling = nextSibling.nextElementSibling;
+        target.appendChild(temp);
+      }
+    })();
+  }
+  // BNJ
+  else if (selectedPosthoc === "bnj") {
+    // Perhitungan StudentT & LSD
+    table = (jStat.studentt.inv(1 - 0.05 / 2, Gdb));
+    thitA = (table * Math.sqrt((2 * Gkt) / (getData.count("Ulangan") * getData.count("FaktorB"))));
+    thitB = (table * Math.sqrt((2 * Gkt) / (getData.count("Ulangan") * getData.count("FaktorA"))));
+    thitAB = (table * Math.sqrt((2 * Gkt) / getData.count("Ulangan")));
+    // Faktor A, Faktor B, dan Kombinasi AB
+    processFLSD('Faktor A', 'factorA', getData.info("FaktorA", "Hasil"), thitA);
+    processFLSD('Faktor B', 'factorB', getData.info("FaktorB", "Hasil"), thitB);
+    processFLSD('Kombinasi AB', 'factorAB', getData.info("FaktorA", "FaktorB", "Hasil"), thitAB);
+    // Interaksi AB
+    document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'>Interaksi AB</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
+    const uniqueFaktorA = new Set();
+    const uniqueFaktorB = new Set();
+    const rows = document.querySelectorAll('#tableContainer tbody tr');
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 2) {
+        uniqueFaktorA.add(cells[0].textContent.trim());
+        uniqueFaktorB.add(cells[1].textContent.trim());
+      }
+    });
+    uniqueFaktorA.forEach(faktorA => {
+      const info = getData.info("FaktorA", "FaktorB", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorA));
+      if (info.length > 0) {
+        processFLSD(faktorA, `leading_${faktorA}`, info.join('\n'), thitA);
+      }
+    });
+    uniqueFaktorB.forEach(faktorB => {
+      const info = getData.info("FaktorB", "FaktorA", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorB));
+      if (info.length > 0) {
+        processFLSD(faktorB, `leading_${faktorB}`, info.join('\n'), thitB);
+      }
+    });
+    // Tabel Interaksi 
+    (function () {
+      const table = document.querySelector('#tableContainer table');
+      if (!table) return;
+      const rows = Array.from(table.querySelectorAll('tbody tr')).slice(1);
+      const headers = Array.from(table.querySelectorAll('th'));
+      const colIndex = {};
+      headers.forEach((th, i) => {
+        if (th.dataset.setting) {
+          colIndex[th.dataset.setting] = i;
+        }
+      });
+      const dataMap = {};
+      rows.forEach(tr => {
+        const cells = tr.querySelectorAll('td');
+        if (!cells.length) return;
+        const faktorA = cells[colIndex['FaktorA']].textContent.trim();
+        const faktorB = cells[colIndex['FaktorB']].textContent.trim();
+        const nilai = parseFloat(cells[colIndex['Hasil']].textContent.trim());
+        if (!dataMap[faktorB]) dataMap[faktorB] = {};
+        if (!dataMap[faktorB][faktorA]) dataMap[faktorB][faktorA] = [];
+        dataMap[faktorB][faktorA].push(nilai);
+      });
+      const faktorAList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorA']]?.textContent.trim()).filter(Boolean))];
+      const faktorBList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorB']]?.textContent.trim()).filter(Boolean))];
+      const newTable = document.createElement('table');
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      headRow.appendChild(document.createElement('th')).textContent = 'Interaksi';
+      faktorAList.forEach(fa => {
+        const th = document.createElement('th');
+        th.colSpan = 2;
+        th.textContent = fa;
+        headRow.appendChild(th);
+      });
+      thead.appendChild(headRow);
+      newTable.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      faktorBList.forEach(fb => {
+        const avgRow = document.createElement('tr');
+        const fbCell = document.createElement('th');
+        fbCell.rowSpan = 2;
+        fbCell.textContent = fb;
+        avgRow.appendChild(fbCell);
+        faktorAList.forEach(fa => {
+          const avg = dataMap[fb]?.[fa] ? (dataMap[fb][fa].reduce((a, b) => a + b, 0) / dataMap[fb][fa].length) : 0;
+          const td1 = document.createElement('td');
+          td1.textContent = avg.toFixed(2);
+          const td2 = document.createElement('td');
+          td2.classList.add('x-kecil');
+          td2.dataset.pair = `${fb}${fa}`;
+          td2.textContent = 'x';
+          avgRow.appendChild(td1);
+          avgRow.appendChild(td2);
+        });
+        tbody.appendChild(avgRow);
+        const xRow = document.createElement('tr');
+        faktorAList.forEach(fa => {
+          const td = document.createElement('td');
+          td.colSpan = 2;
+          td.classList.add('x-besar');
+          td.dataset.pair = `${fa}${fb}`;
+          td.textContent = 'X';
+          xRow.appendChild(td);
+        });
+        tbody.appendChild(xRow);
+      });
+      newTable.appendChild(tbody);
+      const container = document.getElementById('interaction-table');
+      container.innerHTML = '';
+      container.appendChild(newTable);
+      const perFaktorContainer = document.createElement('div');
+      perFaktorContainer.classList.add('posthoc-collapsed-item');
+      container.appendChild(perFaktorContainer);
+      const posthocTables = document.querySelectorAll('#posthoc table[id^="leading_"][id$="-LETTER"]');
+      const notasiMap = {};
+      posthocTables.forEach(tbl => {
+        const trs = tbl.querySelectorAll('tbody tr');
+        trs.forEach(tr => {
+          const perlakuan = tr.cells[0].textContent.trim();
+          const notasi = tr.cells[2].textContent.trim();
+          notasiMap[perlakuan] = notasi;
+        });
+      });
+      document.querySelectorAll('#interaction-table .x-kecil').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      document.querySelectorAll('#interaction-table .x-besar').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      const target = container.querySelector('.posthoc-collapsed-item');
+      let nextSibling = container.nextElementSibling;
+      while (nextSibling) {
+        const temp = nextSibling;
+        nextSibling = nextSibling.nextElementSibling;
+        target.appendChild(temp);
+      }
+    })();
   }
 
 }
@@ -1009,6 +1218,120 @@ function countAnovaRAKF() {
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 // ----- Posthoc : BNT / Fisher's LSD -----
+function processFLSD(title, factorKey, info, thit) {
+  // Title
+  document.getElementById('posthoc-title').innerText = "Post Hoc: Fisher's LSD";
+  // Container Dummy
+  const container = document.querySelector('#posthoc');
+  container.innerHTML += `
+    <h4 class='posthoc-collapser'>${title}</h4>
+    <div class='posthoc-collapsed'>
+      <table id="${factorKey}-LETTER">
+        <thead>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+      <div class='posthoc-collapsed-item'>
+        <table id="${factorKey}-MATRIX">
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+  // Mengambil data mentah
+  const input = info.trim();
+  const lines = input.split('\n');
+  let dataMapFLSD = {};
+  lines.forEach(line => {
+    const [perlakuan, nilai] = line.trim().split(/\s+/);
+    const nilaiFloat = parseFloat(nilai);
+    dataMapFLSD[perlakuan] = nilaiFloat;
+  });
+  const sortedEntries = Object.entries(dataMapFLSD).sort((a, b) => a[1] - b[1]);
+  // Matrix
+  const matrixTableBody = document.querySelector(`#${factorKey}-MATRIX tbody`);
+  const headerRow = document.createElement('tr');
+  headerRow.innerHTML = `<th>${thit.toFixed(2)}</th>` + sortedEntries.map(entry => `<th>${entry[0]}</th>`).join('');
+  matrixTableBody.innerHTML = '';
+  matrixTableBody.appendChild(headerRow);
+  sortedEntries.forEach(([perlakuanA, nilaiA]) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `<th>${perlakuanA}</th>`;
+    sortedEntries.forEach(([perlakuanB, nilaiB]) => {
+      const difference = (nilaiA - nilaiB).toFixed(2);
+      if (difference <= thit && difference >= 0) {
+        row.innerHTML += `<td class="green">${difference}</td>`;
+      } else if (difference < 0) {
+        row.innerHTML += `<td class="gray">${difference}</td>`;
+      } else {
+        row.innerHTML += `<td>${difference}</td>`;
+      }
+    });
+    matrixTableBody.appendChild(row);
+  });
+  // Mengambil nilai rata-rata dari info
+  const infoString = info;
+  const infoData = {};
+  infoString.trim().split('\n').forEach(line => {
+    const [key, value] = line.trim().split(' ');
+    infoData[key] = parseFloat(value);
+  });
+  // Membuat tabel letter
+  function generateLetterTable(matrixTableSelector, resultSelector) {
+    const matrixTable = document.querySelector(matrixTableSelector);
+    const resultDiv = document.querySelector(resultSelector);
+    const firstGreenCols = new Set();
+    const treatments = [];
+    const treatmentNotations = {};
+    const rows = matrixTable.querySelectorAll('tbody tr');
+    for (let i = 1; i < rows.length; i++) {
+      const th = rows[i].querySelector('th');
+      const treatment = th.textContent;
+      treatments.push(treatment);
+      const cells = rows[i].querySelectorAll('td');
+      const greens = [];
+      for (let j = 0; j < cells.length; j++) {
+        if (cells[j].classList.contains('green')) {
+          greens.push(j);
+          if (greens.length === 1) firstGreenCols.add(j);
+        }
+      }
+      treatmentNotations[treatment] = greens;
+    }
+    const sortedCols = Array.from(firstGreenCols).sort((a, b) => a - b);
+    const colLetters = {};
+    sortedCols.forEach((col, i) => colLetters[col] = String.fromCharCode(97 + i));
+    let html = `
+      <table id="letterTable">
+        <thead>
+          <tr>
+            <th><span>${title}</span></th>
+            <th><span>Value</span></th>
+            <th><span>Letter</span></th>
+        </tr>
+        </thead>
+        <tbody>`;
+    treatments.forEach(treatment => {
+      const greens = treatmentNotations[treatment];
+      const letters = sortedCols.filter(col => greens.includes(col))
+        .map(col => colLetters[col])
+        .join('');
+      html += `
+        <tr>
+          <td>${treatment}</td>
+          <td>${infoData[treatment]}</td>
+          <td>${letters}</td>
+        </tr>`;
+    });
+    resultDiv.innerHTML = html + `
+        </tbody>
+      </table>`;
+  }
+  generateLetterTable(`#${factorKey}-MATRIX`, `#${factorKey}-LETTER`);
+}
+
 let valueBNTH;
 let dataMapBNT;
 function hitungBNT() {
@@ -1042,7 +1365,6 @@ function processDataBNT() {
   });
 
   const sortedEntries = Object.entries(dataMapBNT).sort((a, b) => a[1] - b[1]);
-
   const jsonOutput = JSON.stringify(sortedEntries, null, 2);
 
   const matrixTableBody = document.querySelector('#matrixTable tbody');
@@ -1188,6 +1510,9 @@ function processDataBNT() {
 };
 
 // ----- Posthoc : BNJ / Tukey's HSD -----
+
+
+
 let valueBNJH;
 let dataMapBNJ;
 function hitungBNJ() {
@@ -1954,811 +2279,19 @@ function processDataSK() {
   document.querySelector('#letterTable tbody').innerHTML = renderHasil(data, result);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////
-
-// ----- Interpretation App -----
-function initializeInterpretationApp() {
-  class InterpretationEngine {
-    constructor() {
-      this.customTreatmentNames = {};
-    }
-
-    areNotationsSimilar(notation1, notation2) {
-      if (!notation1 || !notation2) return false;
-      for (let char1 of notation1) {
-        if (notation2.includes(char1)) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    getTreatmentString(treatment, unit = '') {
-      const noSpaceUnits = ['%', '°C', '°F', '°K'];
-      const needsSpace = !noSpaceUnits.some(s => unit.endsWith(s));
-      const unitSuffix = unit ? (needsSpace ? ` ${unit}` : unit) : '';
-      const displayedName = this.customTreatmentNames[treatment.perlakuan] || treatment.perlakuan;
-      return `${displayedName} (${treatment.value}${unitSuffix})`;
-    }
-
-    interpretData(data, unit = '') {
-      const sortedData = [...data].sort((a, b) => b.value - a.value);
-      let interpretationSentences = [];
-      let visitedTreatments = new Set();
-
-      for (let i = 0; i < sortedData.length; i++) {
-        const currentTreatment = sortedData[i];
-        if (visitedTreatments.has(currentTreatment.perlakuan)) {
-          continue;
-        }
-
-        let currentComponent = [];
-        let queue = [currentTreatment];
-        let componentVisited = new Set([currentTreatment.perlakuan]);
-
-        currentComponent.push(currentTreatment);
-        visitedTreatments.add(currentTreatment.perlakuan);
-
-        let head = 0;
-        while (head < queue.length) {
-          const u = queue[head++];
-          for (let j = 0; j < sortedData.length; j++) {
-            const v = sortedData[j];
-            if (!componentVisited.has(v.perlakuan) && this.areNotationsSimilar(u.notasi, v.notasi)) {
-              componentVisited.add(v.perlakuan);
-              visitedTreatments.add(v.perlakuan);
-              currentComponent.push(v);
-              queue.push(v);
-            }
-          }
-        }
-
-        // if (visitedTreatments.size === sortedData.length && sortedData.length > 1) {
-        //   return "Semua perlakuan tidak saling berbeda nyata.";
-        // }
-
-        currentComponent.sort((a, b) => b.value - a.value);
-        let sentence = "";
-
-        const hasA = currentComponent.some(t => t.notasi === 'a');
-        const hasAB = currentComponent.some(t => t.notasi === 'ab');
-        const hasB = currentComponent.filter(t => t.notasi === 'b').length > 0;
-        const isA_BN_B = !this.areNotationsSimilar('a', 'b');
-
-        const isSpecificComplexComponent = currentComponent.length >= 3 && hasA && hasAB && hasB && isA_BN_B;
-
-        if (isSpecificComplexComponent) {
-          const m0 = currentComponent.find(t => t.notasi === 'a');
-          const m6 = currentComponent.find(t => t.notasi === 'ab');
-          const m1m2 = currentComponent.filter(t => t.notasi === 'b').sort((a, b) => b.value - a.value);
-
-          if (m0 && m6 && m1m2.length > 0) {
-            const m1m2Names = m1m2.map(t => this.getTreatmentString(t, unit));
-            const m1m2Phrase = m1m2Names.length > 1 ? `${m1m2Names.join(' dan ')}` : m1m2Names[0];
-
-            sentence = `Perlakuan ${this.getTreatmentString(m6, unit)}, ${m1m2Phrase} tidak saling berbeda nyata, tetapi perlakuan ${this.getTreatmentString(m6, unit)} tidak berbeda nyata dengan perlakuan ${this.getTreatmentString(m0, unit)} dan perlakuan ${m1m2Phrase} berbeda nyata dengan perlakuan lainnya.`;
-            interpretationSentences.push(sentence);
-            continue;
-          }
-        }
-
-        const componentNames = currentComponent.map(t => this.getTreatmentString(t, unit));
-        if (currentComponent.length === 1) {
-          sentence += `Perlakuan ${this.getTreatmentString(currentComponent[0], unit)}`;
-        } else {
-          const lastItem = componentNames.pop();
-          const groupPhrase = componentNames.length > 0 ? `${componentNames.join(' dan ')} dan ${lastItem}` : lastItem;
-          sentence += `Perlakuan ${groupPhrase} tidak saling berbeda nyata`;
-        }
-
-        const treatmentsOutsideComponent = sortedData.filter(t => !currentComponent.includes(t));
-
-        if (treatmentsOutsideComponent.length > 0) {
-          let allDifferentFromOthers = true;
-          let anySimilarToOthers = false;
-
-          for (const compMember of currentComponent) {
-            for (const externalT of treatmentsOutsideComponent) {
-              if (this.areNotationsSimilar(compMember.notasi, externalT.notasi)) {
-                anySimilarToOthers = true;
-                allDifferentFromOthers = false;
-                break;
-              }
-            }
-            if (anySimilarToOthers) break;
-          }
-
-          if (allDifferentFromOthers) {
-            if (currentComponent.length === 1) {
-              sentence += ` berbeda nyata dengan semua perlakuan lainnya.`;
-            } else {
-              sentence += `, tetapi berbeda nyata dengan perlakuan lainnya.`;
-            }
-          } else if (anySimilarToOthers) {
-            let similarExternalTreatments = new Set();
-            let differentExternalTreatments = new Set();
-
-            for (const compMember of currentComponent) {
-              for (const externalT of treatmentsOutsideComponent) {
-                if (this.areNotationsSimilar(compMember.notasi, externalT.notasi)) {
-                  similarExternalTreatments.add(externalT);
-                } else {
-                  differentExternalTreatments.add(externalT);
-                }
-              }
-            }
-
-            const similarExtArr = Array.from(similarExternalTreatments).sort((a, b) => b.value - a.value);
-            const trulyDifferentExtArr = Array.from(differentExternalTreatments).filter(diffT => {
-              return !similarExternalTreatments.has(diffT);
-            }).sort((a, b) => b.value - a.value);
-
-            let externalParts = [];
-            if (similarExtArr.length > 0) {
-              externalParts.push(`tidak berbeda nyata dengan ${similarExtArr.map(t => this.getTreatmentString(t, unit)).join(' dan ')}`);
-            }
-            if (trulyDifferentExtArr.length > 0) {
-              externalParts.push(`berbeda nyata dengan ${trulyDifferentExtArr.map(t => this.getTreatmentString(t, unit)).join(' dan ')}`);
-            }
-
-            if (currentComponent.length === 1) {
-              sentence += ` ${externalParts.join(' dan ')}.`;
-            } else {
-              sentence += `, tetapi ${externalParts.join(' dan ')}.`;
-            }
-          } else {
-            sentence += `.`;
-          }
-        } else {
-          sentence += `.`;
-        }
-        interpretationSentences.push(sentence);
-      }
-
-      return interpretationSentences.join(' ');
-    }
-  }
-
-  const interpretationEngine = new InterpretationEngine();
-  let isAppInitialized = false;
-
-  function parseTableDataToJson() {
-    const table = document.getElementById('letterTable');
-    const tbody = table.querySelector('tbody');
-    const rows = tbody.querySelectorAll('tr');
-    const jsonData = [];
-
-    rows.forEach(row => {
-      const cells = row.querySelectorAll('td');
-      if (cells.length === 3) {
-        const perlakuan = cells[0].textContent.trim();
-        const value = parseFloat(cells[1].textContent.trim());
-        const notasi = cells[2].textContent.trim();
-        if (perlakuan && !isNaN(value) && notasi) {
-          jsonData.push({ perlakuan, value, notasi });
-        } else {
-          console.warn("Skipping malformed row:", row.textContent);
-        }
-      }
-    });
-    return jsonData;
-  }
-
-  function renderCustomNameInputs(data) {
-    const container = document.getElementById('customNameInputsContainer');
-    container.innerHTML = '';
-
-    data.forEach(treatment => {
-      const rowDiv = document.createElement('div');
-      rowDiv.id = `custom-name-row-${treatment.perlakuan}`;
-      rowDiv.innerHTML = `
-                        <span>${treatment.perlakuan}</span>
-                        <input type="text" id="custom-${treatment.perlakuan}" placeholder="Nama kustom untuk ${treatment.perlakuan}">
-                    `;
-      container.appendChild(rowDiv);
-
-      const customInput = document.getElementById(`custom-${treatment.perlakuan}`);
-      customInput.value = interpretationEngine.customTreatmentNames[treatment.perlakuan] || '';
-      customInput.addEventListener('input', (event) => {
-        interpretationEngine.customTreatmentNames[treatment.perlakuan] = event.target.value.trim();
-        performInterpretation(false);
-      });
-    });
-  }
-
-  function performInterpretation(shouldRenderCustomInputs = true) {
-    const data = parseTableDataToJson();
-    const outputDiv = document.getElementById('interpretationOutput');
-    const outputContent = document.getElementById('outputContent');
-    const errorDiv = document.getElementById('errorMessage');
-    const errorContent = document.getElementById('errorContent');
-
-    outputDiv.style.display = 'none';
-    errorDiv.style.display = 'none';
-    outputContent.textContent = '';
-    errorContent.textContent = '';
-
-    try {
-      if (!Array.isArray(data) || data.length === 0 || data.some(item => typeof item !== 'object' || !item.perlakuan || typeof item.value === 'undefined' || !item.notasi)) {
-        throw new Error("Data tabel tidak valid atau kosong. Pastikan tabel memiliki baris dengan 'Perlakuan', 'Nilai', dan 'Notasi' yang benar.");
-      }
-
-      const currentUnit = document.getElementById('unitInput').value.trim();
-      const interpretation = interpretationEngine.interpretData(data, currentUnit);
-      outputContent.textContent = interpretation;
-      outputDiv.style.display = 'block';
-
-      if (shouldRenderCustomInputs) {
-        renderCustomNameInputs(data);
-      }
-
-    } catch (error) {
-      errorContent.textContent = `Kesalahan: ${error.message}`;
-      errorDiv.style.display = 'block';
-      console.error("Error interpreting data:", error);
-    }
-  }
-
-  if (!isAppInitialized) {
-    document.getElementById('unitInput').addEventListener('input', () => {
-      if (document.getElementById('interpretationOutput').style.display !== 'none') {
-        performInterpretation(false);
-      }
-    });
-    isAppInitialized = true;
-  }
-
-  performInterpretation(true);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////
-
-function renderBarChart() {
-  const table = document.getElementById('letterTable');
-  const tbody = table.querySelector('tbody');
-  const chartContainer = document.getElementById('chartContainer');
-
-
-  const data = [];
-  const rows = tbody.querySelectorAll('tr');
-  rows.forEach(row => {
-    const cells = row.querySelectorAll('td');
-    if (cells.length >= 3) {
-      const perlakuan = cells[0].textContent.trim();
-      const nilai = parseFloat(cells[1].textContent.trim());
-      const notasi = cells[2].textContent.trim();
-      if (!isNaN(nilai)) {
-        data.push({ perlakuan, nilai, notasi });
-      }
-    }
+// Responsive Table
+const wrapTables = () => {
+  document.querySelectorAll('table:not(.responsive-table table)').forEach(t => {
+    const w = document.createElement('div');
+    w.classList.add('responsive-table');
+    t.parentNode.insertBefore(w, t);
+    w.appendChild(t);
   });
-
-  if (data.length === 0) {
-    return;
-  }
-
-  const svgWidth = 600;
-  const svgHeight = 400;
-  const margin = { top: 10, right: 10, bottom: 60, left: 60 };
-  const chartWidth = svgWidth - margin.left - margin.right;
-  const chartHeight = svgHeight - margin.top - margin.bottom;
-
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  svg.setAttribute("viewBox", `0 0 ${svgWidth} ${svgHeight}`);
-  svg.setAttribute("width", "100%");
-  svg.setAttribute("height", "100%");
-  svg.classList.add("chart-svg");
-
-  const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  g.setAttribute("transform", `translate(${margin.left},${margin.top})`);
-  svg.appendChild(g);
-
-  const maxNilai = Math.max(...data.map(d => d.nilai));
-  const yScaleDomainMax = maxNilai * 1.15;
-
-  const yScale = (value) => chartHeight - (value / yScaleDomainMax) * chartHeight;
-
-  const barPadding = 0.2;
-  const barWidth = chartWidth / data.length * (1 - barPadding) - 5;
-  const xOffset = chartWidth / data.length * barPadding / 2;
-
-  data.forEach((d, i) => {
-    const x = i * (chartWidth / data.length) + xOffset;
-    const y = yScale(d.nilai);
-    const height = chartHeight - y;
-
-    const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    rect.setAttribute("x", x);
-    rect.setAttribute("y", y);
-    rect.setAttribute("width", barWidth);
-    rect.setAttribute("height", height);
-    rect.classList.add("chart-bar");
-    g.appendChild(rect);
-
-    const textLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    textLabel.setAttribute("x", x + barWidth / 2);
-    textLabel.setAttribute("y", y - 10);
-    textLabel.setAttribute("text-anchor", "middle");
-    textLabel.setAttribute("font-size", "14px");
-    textLabel.classList.add("chart-label");
-    textLabel.textContent = `${d.nilai} (${d.notasi})`;
-    g.appendChild(textLabel);
-
-    const xLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    xLabel.setAttribute("x", x + barWidth / 2);
-    xLabel.setAttribute("y", chartHeight + 25);
-    xLabel.setAttribute("text-anchor", "middle");
-    xLabel.setAttribute("font-size", "12px");
-    xLabel.classList.add("chart-axis-label");
-    xLabel.textContent = d.perlakuan;
-    g.appendChild(xLabel);
-  });
-
-  const yAxisLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-  yAxisLine.setAttribute("x1", 0);
-  yAxisLine.setAttribute("y1", 0);
-  yAxisLine.setAttribute("x2", 0);
-  yAxisLine.setAttribute("y2", chartHeight);
-  yAxisLine.setAttribute("stroke", "#d1d5db");
-  yAxisLine.setAttribute("stroke-width", "2");
-  g.appendChild(yAxisLine);
-
-  const numTicks = 5;
-  for (let i = 0; i <= numTicks; i++) {
-    const tickValue = (yScaleDomainMax / numTicks) * i;
-    const yPos = yScale(tickValue);
-
-    const tickLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-    tickLine.setAttribute("x1", -5);
-    tickLine.setAttribute("y1", yPos);
-    tickLine.setAttribute("x2", 0);
-    tickLine.setAttribute("y2", yPos);
-    tickLine.setAttribute("stroke", "#6b7280");
-    tickLine.setAttribute("stroke-width", "1");
-    g.appendChild(tickLine);
-
-    const tickText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    tickText.setAttribute("x", -10);
-    tickText.setAttribute("y", yPos + 4);
-    tickText.setAttribute("text-anchor", "end");
-    tickText.setAttribute("font-size", "10px");
-    tickText.classList.add("chart-axis-label");
-    tickText.textContent = tickValue.toFixed(1);
-    g.appendChild(tickText);
-  }
-
-  const xAxisLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-  xAxisLine.setAttribute("x1", 0);
-  xAxisLine.setAttribute("y1", chartHeight);
-  xAxisLine.setAttribute("x2", chartWidth);
-  xAxisLine.setAttribute("y2", chartHeight);
-  xAxisLine.setAttribute("stroke", "#d1d5db");
-  xAxisLine.setAttribute("stroke-width", "2");
-  g.appendChild(xAxisLine);
-
-  const yAxisTitle = document.createElementNS("http://www.w3.org/2000/svg", "text");
-  yAxisTitle.setAttribute("transform", `rotate(-90)`);
-  yAxisTitle.setAttribute("y", -margin.left + 15);
-  yAxisTitle.setAttribute("x", -chartHeight / 2);
-  yAxisTitle.setAttribute("text-anchor", "middle");
-  yAxisTitle.setAttribute("font-size", "14px");
-  yAxisTitle.classList.add("chart-axis-label");
-  yAxisTitle.textContent = "Nilai";
-  g.appendChild(yAxisTitle);
-
-  const xAxisTitle = document.createElementNS("http://www.w3.org/2000/svg", "text");
-  xAxisTitle.setAttribute("x", chartWidth / 2);
-  xAxisTitle.setAttribute("y", chartHeight + 60);
-  xAxisTitle.setAttribute("text-anchor", "middle");
-  xAxisTitle.setAttribute("font-size", "14px");
-  xAxisTitle.classList.add("chart-axis-label");
-  xAxisTitle.textContent = "Perlakuan";
-  g.appendChild(xAxisTitle);
-
-  chartContainer.innerHTML = '';
-  chartContainer.appendChild(svg);
-}
-
-/////////////////////////////////////////////
-
-let notationColors = {};
-const defaultColors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#6366f1', '#ec4899', '#06b6d4'];
-
-// Function to parse the main data table
-function parseDataTable() {
-  const tableContainer = document.getElementById('tableContainer');
-  const table = tableContainer.querySelector('table'); // Find the table inside the container
-  const data = {}; // { P_key: [N_value1, N_value2, ...], ... }
-  const rows = table.querySelectorAll('tbody tr');
-  const headerCells = table.querySelector('thead tr') ? table.querySelector('thead tr').querySelectorAll('th') : rows[0].querySelectorAll('th');
-
-  let pColIndex = -1;
-  let nColIndex = -1;
-
-  // Identify column indices based on data-setting attribute
-  headerCells.forEach((th, index) => {
-    if (th.getAttribute('data-setting') === 'Perlakuan') {
-      pColIndex = index;
-    } else if (th.getAttribute('data-setting') === 'Hasil') {
-      nColIndex = index;
-    }
-  });
-
-  if (pColIndex === -1 || nColIndex === -1) {
-    console.error("Kolom dengan data-setting='Perlakuan' atau data-setting='Hasil' tidak ditemukan di header tabel data.");
-    return {};
-  }
-
-  // Iterate through data rows (skipping header row if it's in tbody, otherwise start from 0)
-  const startRow = table.querySelector('thead') ? 0 : 1; // If there's a thead, start from first tbody row (index 0)
-  // If no thead, assume first row in tbody is header, start from index 1
-
-  for (let i = startRow; i < rows.length; i++) {
-    const cells = rows[i].querySelectorAll('td');
-    if (cells.length > Math.max(pColIndex, nColIndex)) { // Ensure cells exist for the identified columns
-      const pValue = cells[pColIndex].textContent.trim();
-      const nValue = parseFloat(cells[nColIndex].textContent.trim());
-
-      if (!isNaN(nValue)) {
-        if (!data[pValue]) {
-          data[pValue] = [];
-        }
-        data[pValue].push(nValue);
-      }
-    }
-  }
-  return data;
-}
-
-// Function to parse the letter table for notations
-function parseLetterTable() {
-  const table = document.getElementById('letterTable');
-  const notationMap = {}; // { P_key: 'Notation', ... }
-  const rows = table.querySelectorAll('tbody tr');
-
-  let pColIndex = -1;
-  let notationColIndex = -1;
-  const headerCells = table.querySelector('thead tr').querySelectorAll('th');
-  headerCells.forEach((th, index) => {
-    if (th.textContent.trim().toUpperCase() === 'PERLAKUAN') { // Assuming 'Perlakuan' is the P column
-      pColIndex = index;
-    } else if (th.textContent.trim().toUpperCase() === 'NOTASI') {
-      notationColIndex = index;
-    }
-  });
-
-  if (pColIndex === -1 || notationColIndex === -1) {
-    console.error("Kolom 'Perlakuan' atau 'Notasi' tidak ditemukan di header tabel notasi.");
-    return {};
-  }
-
-  for (let i = 0; i < rows.length; i++) { // Start from 0 as there's no header row in tbody
-    const cells = rows[i].querySelectorAll('td');
-    const pValue = cells[pColIndex].textContent.trim();
-    const notationValue = cells[notationColIndex].textContent.trim();
-    notationMap[pValue] = notationValue;
-  }
-  return notationMap;
-}
-
-// Function to render/update color setting inputs
-function renderColorSettings(uniqueNotations) {
-  const container = document.getElementById('colorSettingsContainer');
-  container.innerHTML = ''; // Clear previous inputs
-
-  uniqueNotations.forEach((notation, index) => {
-    // Assign a default color if not already set by user
-    if (!notationColors[notation]) {
-      notationColors[notation] = defaultColors[index % defaultColors.length];
-    }
-
-    const div = document.createElement('div');
-    div.className = 'color-input-group';
-
-    const label = document.createElement('label');
-    label.setAttribute('for', `color-${notation}`);
-    label.textContent = `${notation}:`;
-
-    const input = document.createElement('input');
-    input.type = 'color';
-    input.id = `color-${notation}`;
-    input.value = notationColors[notation];
-
-    input.addEventListener('input', (event) => {
-      notationColors[notation] = event.target.value;
-      drawHistogram(); // Redraw chart when color changes
-    });
-
-    div.appendChild(label);
-    div.appendChild(input);
-    container.appendChild(div);
-  });
-}
-
-// Main function to create and draw the histogram
-function drawHistogram() {
-  const svg = document.getElementById('histogramSvg');
-  const svgNS = "http://www.w3.org/2000/svg";
-
-  const graphBackground = document.getElementById('graphBackground').value || '#ffffff';
-
-  // Get graph ratio
-  const graphWidth = document.getElementById('graphWidthInput').value || 0;
-  const graphHeight = document.getElementById('graphHeightInput').value || 0;
-
-  // Get axis titles from input fields
-  const xAxisTitle = document.getElementById('xAxisTitleInput').value;
-  const yAxisTitle = document.getElementById('yAxisTitleInput').value;
-
-  // Get margin values from input fields, parse as integers, default to 0 if invalid
-  const marginTop = parseInt(document.getElementById('marginTopInput').value) + 10 || 10;
-  const marginRight = parseInt(document.getElementById('marginRightInput').value) + 10 || 10;
-  const marginBottom = parseInt(document.getElementById('marginBottomInput').value) + 50 || 50;
-  const marginLeft = parseInt(document.getElementById('marginLeftInput').value) + 60 || 60;
-
-  // Get sorting option
-  const sortOrder = document.getElementById('sortOrderSelect').value;
-
-  // Get font settings
-  const xAxisTitleFontSize = document.getElementById('xAxisTitleFontSizeInput').value + 'px';
-  const xAxisTitleFontFamily = document.getElementById('xAxisTitleFontFamilyInput').value;
-  const xAxisTickFontSize = document.getElementById('xAxisTickFontSizeInput').value + 'px';
-  const xAxisTickFontFamily = document.getElementById('xAxisTickFontFamilyInput').value;
-
-  const yAxisTitleFontSize = document.getElementById('yAxisTitleFontSizeInput').value + 'px';
-  const yAxisTitleFontFamily = document.getElementById('yAxisTitleFontFamilyInput').value;
-  const yAxisTickFontSize = document.getElementById('yAxisTickFontSizeInput').value + 'px';
-  const yAxisTickFontFamily = document.getElementById('yAxisTickFontFamilyInput').value;
-
-
-  // Set SVG viewbox and dimensions for responsiveness
-  const chartWidth = graphWidth * 150; // Internal chart width for calculations
-  const chartHeight = graphHeight * 150; // Internal chart height for calculations
-  const svgTotalWidth = chartWidth + marginLeft + marginRight; // Total SVG canvas width
-  const svgTotalHeight = chartHeight + marginTop + marginBottom; // Total SVG canvas height
-
-  svg.setAttribute('viewBox', `0 0 ${svgTotalWidth} ${svgTotalHeight}`);
-  svg.setAttribute('width', '100%');
-  svg.setAttribute('height', '100%');
-  svg.setAttribute('style', `background-color: ${graphBackground};`);
-
-  // Clear previous SVG content
-  while (svg.firstChild) {
-    svg.removeChild(svg.firstChild);
-  }
-
-  // --- 1. Parse Data and Merge Notations ---
-  const mainData = parseDataTable();
-  const notationData = parseLetterTable();
-
-  let processedData = []; // Array to store { P: 'P1', min: X, max: Y, avg: Z, notation: 'a' }
-  let globalMinN = Infinity;
-  let globalMaxN = -Infinity;
-  const uniqueNotations = new Set();
-
-  for (const pKey in mainData) {
-    if (mainData.hasOwnProperty(pKey)) {
-      const nValues = mainData[pKey];
-      const minN = Math.min(...nValues);
-      const maxN = Math.max(...nValues);
-      const sumN = nValues.reduce((sum, val) => sum + val, 0);
-      const avgN = sumN / nValues.length;
-      const notation = notationData[pKey] || 'unknown'; // Get notation, default to 'unknown'
-
-      processedData.push({
-        P: pKey,
-        min: minN,
-        max: maxN,
-        avg: avgN,
-        notation: notation
-      });
-      uniqueNotations.add(notation); // Collect unique notations
-
-      // Update global min/max for scaling the Y-axis
-      if (minN < globalMinN) globalMinN = minN;
-      if (maxN > globalMaxN) globalMaxN = maxN;
-    }
-  }
-
-  // --- Apply Sorting ---
-  if (sortOrder === 'default') {
-    processedData.sort((a, b) => {
-      const numA = parseInt(a.P.substring(1));
-      const numB = parseInt(b.P.substring(1));
-      return numA - numB;
-    });
-  } else if (sortOrder === 'notation-asc') {
-    processedData.sort((a, b) => {
-      return a.notation.localeCompare(b.notation);
-    });
-  } else if (sortOrder === 'notation-desc') {
-    processedData.sort((a, b) => {
-      return b.notation.localeCompare(a.notation);
-    });
-  }
-
-  // Render color settings UI based on unique notations
-  renderColorSettings(Array.from(uniqueNotations).sort()); // Convert set to array and sort for consistent order
-
-  // Add some padding to global min/max for better visualization on the Y-axis
-  const yAxisPadding = (globalMaxN - globalMinN) * 0.1; // 10% padding
-  const displayMinN = globalMinN - yAxisPadding;
-  const displayMaxN = globalMaxN + yAxisPadding;
-
-  // --- 3. Draw Histogram on SVG ---
-
-  // Define margins and chart area (now dynamic)
-  const chartMargin = { top: marginTop, right: marginRight, bottom: marginBottom, left: marginLeft };
-  const effectiveChartWidth = chartWidth; // Fixed internal chart width
-  const effectiveChartHeight = chartHeight; // Fixed internal chart height
-
-  // Function to map a value from data range to SVG Y coordinate
-  // Y-axis is inverted: higher values are lower on the SVG
-  const mapY = (value) => {
-    return chartMargin.top + effectiveChartHeight - ((value - displayMinN) / (displayMaxN - displayMinN)) * effectiveChartHeight;
-  };
-
-  // Create a group for chart elements to apply transformations if needed
-  const chartGroup = document.createElementNS(svgNS, 'g');
-  svg.appendChild(chartGroup);
-
-  // Draw X-axis line
-  const xAxisLine = document.createElementNS(svgNS, 'line');
-  xAxisLine.setAttribute('x1', chartMargin.left);
-  xAxisLine.setAttribute('y1', chartMargin.top + effectiveChartHeight);
-  xAxisLine.setAttribute('x2', chartMargin.left + effectiveChartWidth);
-  xAxisLine.setAttribute('y2', chartMargin.top + effectiveChartHeight);
-  xAxisLine.setAttribute('stroke', '#000000ff');
-  xAxisLine.setAttribute('stroke-width', 1);
-  chartGroup.appendChild(xAxisLine);
-
-  // Draw Y-axis line
-  const yAxisLine = document.createElementNS(svgNS, 'line');
-  yAxisLine.setAttribute('x1', chartMargin.left);
-  yAxisLine.setAttribute('y1', chartMargin.top);
-  yAxisLine.setAttribute('x2', chartMargin.left);
-  yAxisLine.setAttribute('y2', chartMargin.top + effectiveChartHeight);
-  yAxisLine.setAttribute('stroke', '#000000ff');
-  yAxisLine.setAttribute('stroke-width', 1);
-  chartGroup.appendChild(yAxisLine);
-
-  // Draw Y-axis labels, grid lines, and ticks
-  const numYLabels = 5;
-  const tickLength = 5; // Length of the tick marks
-  for (let i = 0; i <= numYLabels; i++) {
-    const yValue = displayMinN + (i / numYLabels) * (displayMaxN - displayMinN);
-    const yCoord = mapY(yValue);
-
-    // Draw grid line
-    const gridLine = document.createElementNS(svgNS, 'line');
-    gridLine.setAttribute('x1', chartMargin.left);
-    gridLine.setAttribute('y1', yCoord);
-    gridLine.setAttribute('x2', chartMargin.left + effectiveChartWidth);
-    gridLine.setAttribute('y2', yCoord);
-    gridLine.setAttribute('stroke', '#e2e8f0');
-    gridLine.setAttribute('stroke-width', 1);
-    chartGroup.appendChild(gridLine);
-
-    // Draw tick mark on Y-axis
-    const yTick = document.createElementNS(svgNS, 'line');
-    yTick.setAttribute('x1', chartMargin.left - tickLength);
-    yTick.setAttribute('y1', yCoord);
-    yTick.setAttribute('x2', chartMargin.left);
-    yTick.setAttribute('y2', yCoord);
-    yTick.setAttribute('stroke', '#000000ff');
-    yTick.setAttribute('stroke-width', 1);
-    chartGroup.appendChild(yTick);
-
-    // Draw label
-    const yLabel = document.createElementNS(svgNS, 'text');
-    yLabel.setAttribute('x', chartMargin.left - 10); // Adjusted to be closer to the tick
-    yLabel.setAttribute('y', yCoord + 4);
-    yLabel.setAttribute('font-family', yAxisTickFontFamily); // Apply font family
-    yLabel.setAttribute('font-size', yAxisTickFontSize);   // Apply font size
-    yLabel.setAttribute('fill', '#000000ff');
-    yLabel.setAttribute('text-anchor', 'end'); // Align text to the end (right)
-    yLabel.textContent = yValue.toFixed(0);
-    chartGroup.appendChild(yLabel);
-  }
-
-  document.querySelector('#histogramSvg g line:nth-child(3)').remove();
-
-  // Draw Y-axis title
-  const yAxisTitleText = document.createElementNS(svgNS, 'text');
-  const yAxisTitleXPos = 30; // Fixed X position from SVG left edge
-  yAxisTitleText.setAttribute('x', yAxisTitleXPos);
-  yAxisTitleText.setAttribute('y', chartMargin.top + effectiveChartHeight / 2 - 10);
-  yAxisTitleText.setAttribute('font-family', yAxisTitleFontFamily); // Apply font family
-  yAxisTitleText.setAttribute('font-size', yAxisTitleFontSize);   // Apply font size
-  yAxisTitleText.setAttribute('fill', '#000000ff');
-  yAxisTitleText.setAttribute('text-anchor', 'middle');
-  yAxisTitleText.setAttribute('transform', `rotate(-90 ${yAxisTitleXPos},${chartMargin.top + effectiveChartHeight / 2})`);
-  yAxisTitleText.textContent = yAxisTitle;
-  chartGroup.appendChild(yAxisTitleText);
-
-  // Draw X-axis labels (P categories) and ticks
-  const barSpacing = effectiveChartWidth / processedData.length;
-
-  processedData.forEach((item, index) => {
-    const xPos = chartMargin.left + (index * barSpacing) + (barSpacing / 2); // Center of the bar's allocated space
-
-    // Draw X-axis label
-    const xLabel = document.createElementNS(svgNS, 'text');
-    xLabel.setAttribute('x', xPos);
-    xLabel.setAttribute('y', chartMargin.top + effectiveChartHeight + 20); // Adjust position
-    xLabel.setAttribute('font-family', xAxisTickFontFamily); // Apply font family
-    xLabel.setAttribute('font-size', xAxisTickFontSize);   // Apply font size
-    xLabel.setAttribute('fill', '#000000ff');
-    xLabel.setAttribute('text-anchor', 'middle');
-    xLabel.textContent = item.P;
-    chartGroup.appendChild(xLabel);
-
-    // Draw tick mark on X-axis
-    const xTick = document.createElementNS(svgNS, 'line');
-    xTick.setAttribute('x1', xPos);
-    xTick.setAttribute('y1', chartMargin.top + effectiveChartHeight);
-    xTick.setAttribute('x2', xPos);
-    xTick.setAttribute('y2', chartMargin.top + effectiveChartHeight + tickLength);
-    xTick.setAttribute('stroke', '#000000ff');
-    xTick.setAttribute('stroke-width', 1);
-    chartGroup.appendChild(xTick);
-
-    // Draw the 1px wide bar (as a line in SVG)
-    const minY = mapY(item.min);
-    const maxY = mapY(item.max);
-    const barColor = notationColors[item.notation] || '#3b82f6'; // Get bar color
-
-    const bar = document.createElementNS(svgNS, 'line');
-    bar.setAttribute('x1', xPos);
-    bar.setAttribute('y1', minY);
-    bar.setAttribute('x2', xPos);
-    bar.setAttribute('y2', maxY);
-    bar.setAttribute('stroke', barColor); // Use the custom color for the bar
-    bar.setAttribute('stroke-width', 1); // 1px width as requested
-    chartGroup.appendChild(bar);
-
-    // Draw the dot for average
-    const avgDot = document.createElementNS(svgNS, 'circle');
-    const avgY = mapY(item.avg);
-    avgDot.setAttribute('cx', xPos);
-    avgDot.setAttribute('cy', avgY);
-    avgDot.setAttribute('r', 3); // Radius 3px
-    avgDot.setAttribute('fill', barColor); // Use the same color as the bar for the dot
-    chartGroup.appendChild(avgDot);
-  });
-
-  // Draw X-axis title
-  const xAxisTitleText = document.createElementNS(svgNS, 'text');
-  xAxisTitleText.setAttribute('x', chartMargin.left + effectiveChartWidth / 2);
-  xAxisTitleText.setAttribute('y', svgTotalHeight - 10); // Position below x-axis labels
-  xAxisTitleText.setAttribute('font-family', xAxisTitleFontFamily); // Apply font family
-  xAxisTitleText.setAttribute('font-size', xAxisTitleFontSize);   // Apply font size
-  xAxisTitleText.setAttribute('fill', '#000000ff');
-  xAxisTitleText.setAttribute('text-anchor', 'middle');
-  xAxisTitleText.textContent = xAxisTitle;
-  chartGroup.appendChild(xAxisTitleText);
-}
-
-// Initialization function to set up event listeners and draw the initial chart
-function initializeChart() {
-  drawHistogram(); // Initial draw
-
-  // Add event listeners to input fields for real-time updates
-  document.getElementById('xAxisTitleInput').addEventListener('input', drawHistogram);
-  document.getElementById('yAxisTitleInput').addEventListener('input', drawHistogram);
-  document.getElementById('marginTopInput').addEventListener('input', drawHistogram);
-  document.getElementById('marginRightInput').addEventListener('input', drawHistogram);
-  document.getElementById('marginBottomInput').addEventListener('input', drawHistogram);
-  document.getElementById('marginLeftInput').addEventListener('input', drawHistogram);
-  document.getElementById('sortOrderSelect').addEventListener('change', drawHistogram);
-
-  // Font setting event listeners
-  document.getElementById('xAxisTitleFontSizeInput').addEventListener('input', drawHistogram);
-  document.getElementById('xAxisTitleFontFamilyInput').addEventListener('change', drawHistogram);
-  document.getElementById('xAxisTickFontSizeInput').addEventListener('input', drawHistogram);
-  document.getElementById('xAxisTickFontFamilyInput').addEventListener('change', drawHistogram);
-  document.getElementById('yAxisTitleFontSizeInput').addEventListener('input', drawHistogram);
-  document.getElementById('yAxisTitleFontFamilyInput').addEventListener('change', drawHistogram);
-  document.getElementById('yAxisTickFontSizeInput').addEventListener('input', drawHistogram);
-  document.getElementById('yAxisTickFontFamilyInput').addEventListener('change', drawHistogram);
-}
+};
+new MutationObserver(wrapTables).observe(document.body, { childList: true, subtree: true });
+wrapTables();
+
+// Help popup button
+document.querySelectorAll('[data-popup]').forEach(el => {
+    el.innerHTML += `<div class='popup-button' onclick='popupShow("${el.dataset.popup}")'><img src='../icon/help.png'></div>`;
+});

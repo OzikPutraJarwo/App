@@ -84,10 +84,10 @@
       <div class="main wrap">
 
         <div class="item type">
-          <h3>Jenis Analisis</h3>
+          <h3>Analysis Design</h3>
           <div class="content">
             <div class="jenis-anova">
-              <label for="jenis-anova">Analisis Varians (Anova)</label>
+              <label for="jenis-anova">ANOVA Design</label>
               <select name="jenis-anova" id="jenis-anova">
                 <option value="ral" selected>Rancangan Acak Lengkap (RAL)</option>
                 <option value="ralf" disabled>Rancangan Acak Lengkap Faktorial (RAL-F)</option>
@@ -100,7 +100,7 @@
               </select>
             </div>
             <div class="jenis-posthoc">
-              <label for="jenis-posthoc">Uji Lanjut (Post hoc)</label>
+              <label for="jenis-posthoc">Post Hoc</label>
               <select name="jenis-posthoc" id="jenis-posthoc">
                 <option value="bnt" selected>Beda Nyata Terkecil (BNT / Fisher's LSD)</option>
                 <option value="bnj">Beda Nyata Jujur (BNJ / Tukey's HSD)</option>
@@ -113,12 +113,11 @@
         </div>
 
         <div class="item excel">
-          <h3>Input Data</h3>
-          <span class="contoh-data">Unduh contoh format data <a target="_blank" href="https://github.com/OzikPutraJarwo/App/raw/refs/heads/main/cropid/contoh-data.xlsx">di sini</a></span>
+          <h3 data-popup=".data-input">Data Input</h3>
           <div class="input-files">
             <label for="fileInput">
               <span>
-                <span>Klik untuk menambahkan file data (excel / csv)</span>
+                <span>Click to add data file (excel / csv)</span>
                 <div>
                   <svg fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path clip-rule="evenodd"
@@ -134,45 +133,42 @@
               id="fileInput" hidden multiple type="file" onchange="getFileName()" placeholder="">
           </div>
           <div id="sheetSelectorContainer" style="display: none;">
-            <label for="sheetSelect">Pilih Sheet:</label>
+            <label for="sheetSelect">Select sheet:</label>
             <select id="sheetSelect"></select>
           </div>
           <div class="column" id="settingsContainer" style="display: none;">
-            <span>Klik pada tombol berikut lalu pilih header kolom pada excel di bawahnya untuk memilih</span>
             <div id="buttonContainer">
               <button class="setting-button" id="perlakuanBtn" data-setting="Perlakuan">
-                <span>Perlakuan</span><span id="selectedPerlakuanHeader">P</span>
+                <span>Treatment</span><span id="selectedPerlakuanHeader">Not yet selected</span>
               </button>
               <button class="setting-button faktorial" id="faktoraBtn" data-setting="FaktorA">
-                <span>Faktor A</span><span id="selectedFaktorAHeader">Belum dipilih</span>
+                <span>Factor A</span><span id="selectedFaktorAHeader">Not yet selected</span>
               </button>
               <button class="setting-button faktorial" id="faktorbBtn" data-setting="FaktorB">
-                <span>Faktor B</span><span id="selectedFaktorBHeader">Belum dipilih</span>
+                <span>Factor B</span><span id="selectedFaktorBHeader">Not yet selected</span>
               </button>
               <button class="setting-button" id="ulanganBtn" data-setting="Ulangan">
-                <span>Ulangan</span><span id="selectedUlanganHeader">Belum dipilih</span>
+                <span>Block</span><span id="selectedUlanganHeader">Not yet selected</span>
               </button>
               <button class="setting-button" id="hasilBtn" data-setting="Hasil">
-                <span>Hasil</span><span id="selectedHasilHeader">Belum dipilih</span>
+                <span>Value</span><span id="selectedHasilHeader">Not yet selected</span>
               </button>
             </div>
             <div id="tableContainer"></div>
           </div>
         </div>
 
-        <button class="run none" onclick="smoothScroll('.anova', top = 70)">Analisis</button>
+        <button class="run none" onclick="smoothScroll('#anova', top = 75)">Run Analysis</button>
 
         <div class="separator none">
           <br>
           <hr><br>
         </div>
 
-        <div class="item output anova">
+        <div id="anova" class="item output anova">
           <div class="hasil-section" id="hasil">
-            <h3>Analisis Varians (Anova)</h3>
-            <table id="anovaTable">
-
-            </table>
+            <h3></h3>
+            <table id="anovaTable"></table>
             <table id="anovaSup">
               <thead>
                 <tr>
@@ -192,340 +188,36 @@
           </div>
         </div>
 
-        <div class="item input none">
-          <textarea id="input-data" placeholder="Masukkan data, pisahkan dengan spasi/tab, contoh:
-P1   28.82
-P2   23.98
-P3   14.64
-P4   19.92
-P5   13.26"></textarea>
-          <div class="set">
-            <label for="input-perlakuan">Perlakuan:</label>
-            <input type="number" name="input-perlakuan" id="input-perlakuan">
-          </div>
-          <div class="set">
-            <label for="input-ulangan">Ulangan:</label>
-            <input type="number" name="input-ulangan" id="input-ulangan">
-          </div>
-          <div class="set">
-            <label for="input-ktg">KT Galat:</label>
-            <input type="number" name="input-ktg" id="input-ktg">
-          </div>
-          <div class="set">
-            <label for="input-sig">Signifikansi (%):</label>
-            <input type="number" name="input-sig" id="input-sig" value="5" min="0" max="100">
-          </div>
-          <button onclick="hitungBNT();processData();initializeInterpretationApp()">Proses Uji Lanjut</button>
+        <div id="posthoc" class="item none">
         </div>
-
-        <div class="item output collapse">
-          <div class="uncollapse">
-            <img src="../icon/arrow-down.png" alt="Show">
-          </div>
-          <div class="hasil-section" id="hasil">
-            <h3>Matriks</h3>
-            <table id="matrixSup">
-              <thead class="bnt">
-                <tr>
-                  <th>Standar Deviasi</th>
-                  <th>Tabel T</th>
-                  <th>T Hitung</th>
-                </tr>
-              </thead>
-              <tbody class="bnt">
-                <tr>
-                  <td class="output-bntsd"></td>
-                  <td class="output-bntt"></td>
-                  <td class="output-bnth"></td>
-                </tr>
-              </tbody>
-              <thead class="bnj none">
-                <tr>
-                  <th>Standar Deviasi</th>
-                  <th>Tabel Tukey</th>
-                  <th>Tukey Hitung</th>
-                </tr>
-              </thead>
-              <tbody class="bnj none">
-                <tr>
-                  <td class="output-bnjsd"></td>
-                  <td class="output-bnjt"></td>
-                  <td class="output-bnjh"></td>
-                </tr>
-              </tbody>
-              <tbody class="dmrt none">
-                <tr class="dmrt-sd">
-                  <th>Standar Deviasi</th>
-                  <td class="dmrt-output-sd"></td>
-                </tr>
-                <tr class="dmrt-p">
-                  <th>P</th>
-                </tr>
-                <tr class="dmrt-table">
-                  <th>Tabel DMRT</th>
-                </tr>
-                <tr class="dmrt-calc">
-                  <th>DMRT Hitung</th>
-                </tr>
-              </tbody>
-              <tbody class="snk none">
-                <tr class="snk-sd">
-                  <th>Standar Deviasi</th>
-                  <td class="snk-output-sd"></td>
-                </tr>
-                <tr class="snk-p">
-                  <th>P</th>
-                </tr>
-                <tr class="snk-table">
-                  <th>Tabel SNK</th>
-                </tr>
-                <tr class="snk-calc">
-                  <th>SNK Hitung</th>
-                </tr>
-              </tbody>
-              <tbody class="sk none"></tbody>
-            </table>
-            <table id="matrixTable">
-              <tbody>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="item output">
-          <div class="hasil-section" id="hasil">
-            <h3>Notasi</h3>
-            <table id="letterTable">
-              <thead>
-                <tr>
-                  <th id="renderbyData" class="rev opacity"><span>Perlakuan</span>
-                    <svg viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                      xmlns:xlink="http://www.w3.org/1999/xlink">
-                      <rect width="16" height="16" id="icon-bound" fill="none" />
-                      <path
-                        d="M11.292,8.878L11.139,9h0.275L11.292,8.878z M12.164,9.75h-1.966L9.886,10h2.531L12.164,9.75z M11.664,9.25h-0.837 L10.514,9.5h1.403L11.664,9.25z M8.627,11h3.181l0.319-0.25H8.939L8.627,11z M7.998,14l0.319-0.25H7.683L7.998,14z M6.73,13H9.27 l0.319-0.25H6.411L6.73,13z M6.095,12.5h3.809l0.319-0.25H5.777L6.095,12.5z M7.364,13.5h1.269l0.319-0.25H7.048L7.364,13.5z M5.458,12h5.078l0.319-0.25H5.142L5.458,12z M4.508,11.25l0.319,0.25h3.172l-0.312-0.25H4.508z M9.567,10.25L9.255,10.5h3.188 l0.262-0.206l-0.044-0.044H9.567z M7.998,11.5h3.175l0.319-0.25H8.311L7.998,11.5z M4.705,8.878L4.583,9h0.275L4.705,8.878z M5.173,9.25H4.336L4.086,9.5h1.403L5.173,9.25z M7.058,10.75H3.87L4.189,11H7.37L7.058,10.75z M6.43,10.25H3.336l-0.044,0.044 L3.555,10.5h3.188L6.43,10.25z M5.802,9.75H3.836L3.586,10h2.531L5.802,9.75z M7.998,4.5l3.294,2.622l1.416-1.416L7.998,2 L3.292,5.706l1.416,1.416L7.998,4.5z" />
-                    </svg>
-                  </th>
-                  <th><span>Nilai</span></th>
-                  <th id="renderbyMerged"><span>Notasi</span>
-                    <svg viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                      xmlns:xlink="http://www.w3.org/1999/xlink">
-                      <rect width="16" height="16" id="icon-bound" fill="none" />
-                      <path
-                        d="M11.292,8.878L11.139,9h0.275L11.292,8.878z M12.164,9.75h-1.966L9.886,10h2.531L12.164,9.75z M11.664,9.25h-0.837 L10.514,9.5h1.403L11.664,9.25z M8.627,11h3.181l0.319-0.25H8.939L8.627,11z M7.998,14l0.319-0.25H7.683L7.998,14z M6.73,13H9.27 l0.319-0.25H6.411L6.73,13z M6.095,12.5h3.809l0.319-0.25H5.777L6.095,12.5z M7.364,13.5h1.269l0.319-0.25H7.048L7.364,13.5z M5.458,12h5.078l0.319-0.25H5.142L5.458,12z M4.508,11.25l0.319,0.25h3.172l-0.312-0.25H4.508z M9.567,10.25L9.255,10.5h3.188 l0.262-0.206l-0.044-0.044H9.567z M7.998,11.5h3.175l0.319-0.25H8.311L7.998,11.5z M4.705,8.878L4.583,9h0.275L4.705,8.878z M5.173,9.25H4.336L4.086,9.5h1.403L5.173,9.25z M7.058,10.75H3.87L4.189,11H7.37L7.058,10.75z M6.43,10.25H3.336l-0.044,0.044 L3.555,10.5h3.188L6.43,10.25z M5.802,9.75H3.836L3.586,10h2.531L5.802,9.75z M7.998,4.5l3.294,2.622l1.416-1.416L7.998,2 L3.292,5.706l1.416,1.416L7.998,4.5z" />
-                    </svg>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="graph none">
-          <div class="item" id="chart2Container">
-            <svg id="histogramSvg"></svg>
-            <div class="set-graph" onclick="toggleShow('.graph')">
-              <img src="../icon/gear.png" alt="Settings">
-            </div>
-          </div>
-          <div class="item sk-graph graph-set">
-            <h3>Pengaturan Grafik</h3>
-            <div class="item-set">
-              <div class="content">
-                <label for="background">Warna Background:</label>
-                <input type="color" id="graphBackground" value="#ffffff">
-              </div>
-              <div class="content">
-                <label for="sortOrderSelect">Urutkan Berdasarkan:</label>
-                <select id="sortOrderSelect">
-                  <option value="default">Default (P1, P2, ...)</option>
-                  <option value="notation-asc">Notasi (A-Z)</option>
-                  <option value="notation-desc">Notasi (Z-A)</option>
-                </select>
-              </div>
-              <div id="colorSettingsContainer" class="color-inputs content-grid grid-6">
-                <div class="color-input-group"><label for="color-a">a:</label><input type="color" id="color-a"></div>
-                <div class="color-input-group"><label for="color-ab">ab:</label><input type="color" id="color-ab"></div>
-                <div class="color-input-group"><label for="color-b">b:</label><input type="color" id="color-b"></div>
-                <div class="color-input-group"><label for="color-c">c:</label><input type="color" id="color-c"></div>
-              </div>
-            </div>
-            <div class="item-set">
-              <div class="title">Rasio</div>
-              <div class="content-grid grid-2">
-                <div class="content">
-                  <label for="graphWidthInput">Lebar:</label>
-                  <input type="number" id="graphWidthInput" value="3" min="0.1" step="0.1">
-                </div>
-                <div class="content">
-                  <label for="graphHeightInput">Tinggi:</label>
-                  <input type="number" id="graphHeightInput" value="2" min="0.1" step="0.1">
-                </div>
-              </div>
-            </div>
-            <div class="item-set">
-              <div class="title">Judul Sumbu</div>
-              <div class="content-grid grid-2">
-                <div class="content">
-                  <label for="xAxisTitleInput">X:</label>
-                  <input type="text" id="xAxisTitleInput" value="Perlakuan">
-                </div>
-                <div class="content">
-                  <label for="yAxisTitleInput">Y:</label>
-                  <input type="text" id="yAxisTitleInput" value="Nilai">
-                </div>
-              </div>
-            </div>
-            <div class="item-set">
-              <div class="title">Margin</div>
-              <div class="content-grid grid-4">
-                <div class="content">
-                  <label for="marginTopInput">Atas:</label>
-                  <input type="number" id="marginTopInput" value="0">
-                </div>
-                <div class="content">
-                  <label for="marginRightInput">Kanan:</label>
-                  <input type="number" id="marginRightInput" value="0">
-                </div>
-                <div class="content">
-                  <label for="marginBottomInput">Bawah:</label>
-                  <input type="number" id="marginBottomInput" value="0">
-                </div>
-                <div class="content">
-                  <label for="marginLeftInput">Kiri:</label>
-                  <input type="number" id="marginLeftInput" value="0">
-                </div>
-              </div>
-            </div>
-            <div class="item-set">
-              <div class="title">Sumbu X</div>
-              <div class="content-grid grid-2">
-                <div class="content">
-                  <label for="xAxisTitleFontSizeInput">Font title:</label>
-                  <div class="content-grid grid-2">
-                    <select id="xAxisTitleFontFamilyInput">
-                      <option value="Inter, sans-serif">Inter</option>
-                      <option value="Arial, sans-serif">Arial</option>
-                      <option value="Verdana, sans-serif">Verdana</option>
-                      <option value="Helvetica, sans-serif">Helvetica</option>
-                      <option value="Tahoma, sans-serif">Tahoma</option>
-                      <option value="Georgia, serif">Georgia</option>
-                      <option value="Times New Roman, serif">Times New Roman</option>
-                      <option value="Courier New, monospace">Courier New</option>
-                    </select>
-                    <input type="number" id="xAxisTitleFontSizeInput" value="14" min="8">
-                  </div>
-                </div>
-                <div class="content">
-                  <label for="xAxisTickFontSizeInput">Font tick:</label>
-                  <div class="content-grid grid-2">
-                    <select id="xAxisTickFontFamilyInput">
-                      <option value="Inter, sans-serif">Inter</option>
-                      <option value="Arial, sans-serif">Arial</option>
-                      <option value="Verdana, sans-serif">Verdana</option>
-                      <option value="Helvetica, sans-serif">Helvetica</option>
-                      <option value="Tahoma, sans-serif">Tahoma</option>
-                      <option value="Georgia, serif">Georgia</option>
-                      <option value="Times New Roman, serif">Times New Roman</option>
-                      <option value="Courier New, monospace">Courier New</option>
-                    </select>
-                    <input type="number" id="xAxisTickFontSizeInput" value="12" min="8">
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="item-set">
-              <div class="title">Sumbu Y</div>
-              <div class="content-grid grid-2">
-                <div class="content">
-                  <label for="yAxisTitleFontSizeInput">Font title:</label>
-                  <div class="content-grid grid-2">
-                    <select id="yAxisTitleFontFamilyInput">
-                      <option value="Inter, sans-serif">Inter</option>
-                      <option value="Arial, sans-serif">Arial</option>
-                      <option value="Verdana, sans-serif">Verdana</option>
-                      <option value="Helvetica, sans-serif">Helvetica</option>
-                      <option value="Tahoma, sans-serif">Tahoma</option>
-                      <option value="Georgia, serif">Georgia</option>
-                      <option value="Times New Roman, serif">Times New Roman</option>
-                      <option value="Courier New, monospace">Courier New</option>
-                    </select>
-                    <input type="number" id="yAxisTitleFontSizeInput" value="14" min="8">
-                  </div>
-                </div>
-                <div class="content">
-                  <label for="yAxisTickFontSizeInput">Font tick:</label>
-                  <div class="content-grid grid-2">
-                    <select id="yAxisTickFontFamilyInput">
-                      <option value="Inter, sans-serif">Inter</option>
-                      <option value="Arial, sans-serif">Arial</option>
-                      <option value="Verdana, sans-serif">Verdana</option>
-                      <option value="Helvetica, sans-serif">Helvetica</option>
-                      <option value="Tahoma, sans-serif">Tahoma</option>
-                      <option value="Georgia, serif">Georgia</option>
-                      <option value="Times New Roman, serif">Times New Roman</option>
-                      <option value="Courier New, monospace">Courier New</option>
-                    </select>
-                    <input type="number" id="yAxisTickFontSizeInput" value="12" min="8">
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="item" id="chartContainer"></div>
-        </div>
-
-        <div class="item output sum">
-          <div class="hasil-section" id="hasil">
-            <h3>Interpretasi <span style="font-size: small;">(beta)</span></h3>
-            <div id="interpretationOutput" style="display: none;">
-              <p id="outputContent"></p>
-              <div class="show-set" data-element=".pengaturan">
-                <img src="../icon/gear.png" alt="Settings">
-              </div>
-              <div class="pengaturan show-settings hide">
-                <h3>Pengaturan Interpretasi</h3>
-                <div id="customNameUnit">
-                  <span class="title">Unit</span>
-                  <div>
-                    <label for="unitInput">Satuan:</label>
-                    <input type="text" id="unitInput" placeholder="misal: cm, kg, %">
-                  </div>
-                </div>
-
-                <div>
-                  <span class="title">Nama Perlakuan</span>
-                  <div id="customNameInputsContainer">
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div id="errorMessage" style="display: none;">
-              <h3>Terjadi Kesalahan:</h3>
-              <p id="errorContent"></p>
-            </div>
-          </div>
-        </div>
-
-        <button class="download none" onclick="downloadMainAsExcel()">
-          <span>Download</span>
-          <img src="../icon/download.png" alt="Download">
-        </button>
 
       </div>
 
     </main>
 
+    <div id="popup" class="data-input">
+      <div class="popup">
+        <div class="popup-wrap">
+          <div class="popup-title">Data Input</div>
+          <div class="popup-content">
+            <ul>
+              <li>Download sample data format <a target="_blank" href="https://github.com/OzikPutraJarwo/App/raw/refs/heads/main/cropid/contoh-data.xlsx">here</a>.</li>
+              <li>Click on the input data button (Factor, Treatment, Block, or Value) and then select the appropriate column header in the data table below.</li>
+              <li>After all data input buttons are filled in, the "Run Analysis" button will appear.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="./script.js"></script>
-
+    
     <div id="notification"></div>
-
+    
     <script src="../main.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
     <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
-
+    
   </body>
 
 </html>
