@@ -272,6 +272,15 @@ th#renderbyMerged svg {
   position: relative;
 }
 
+.excel .file-container {
+  display: grid;
+}
+
+.excel .file-container.show-sheet {
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem
+}
+
 .excel .input-files {
   padding: 0;
 }
@@ -280,7 +289,12 @@ th#renderbyMerged svg {
   padding: 1rem;
   align-items: center;
   gap: 0;
-  box-shadow: unset
+  box-shadow: unset;
+  transition: 0s all;
+}
+
+.excel .show-sheet .input-files label {
+  padding: 0;
 }
 
 .excel .input-files label>span:first-child {
@@ -304,8 +318,17 @@ th#renderbyMerged svg {
   text-align: center;
   background: #f5f7f6;
   box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em, rgb(204, 219, 232, 0) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0) -3px -3px 6px 1px inset;
-  font-size: .9rem;
   border-radius: .5rem;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: .2s all;
+}
+
+.excel #fileName:hover {
+  box-shadow: rgba(67, 71, 85, 0) 0px 0px 0.25em, rgba(90, 125, 188, 0) 0px 0.25em 1em, rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
 }
 
 #sheetSelect {
@@ -359,6 +382,7 @@ th#renderbyMerged svg {
   font-size: 1.1rem;
   font-weight: bold;
   text-transform: uppercase;
+  background: linear-gradient(45deg, #ac2626 0%, #ac26268a 100%);
 }
 
 #tableContainer {

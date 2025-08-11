@@ -76,6 +76,12 @@
             </g>
           </svg>
         </div>
+        <div class="site-lang site-button">
+          <select name="site-lang" id="site-lang">
+            <option value="en" selected>🇬🇧 EN</option>
+            <option value="id">🇮🇩 ID</option>
+          </select>
+        </div>
       </div>
     </header>
 
@@ -84,81 +90,83 @@
       <div class="main wrap">
 
         <div class="item type">
-          <h3>Analysis Design</h3>
+          <h3 data-id="Desain Analisis">Analysis Design</h3>
           <div class="content">
             <div class="jenis-anova">
-              <label for="jenis-anova">ANOVA Design</label>
+              <label for="jenis-anova" data-id="Rancangan Percobaan (Anova)">Experimental Design (Anova)</label>
               <select name="jenis-anova" id="jenis-anova">
-                <option value="ral" selected>Rancangan Acak Lengkap (RAL)</option>
-                <option value="ralf" disabled>Rancangan Acak Lengkap Faktorial (RAL-F)</option>
-                <option value="rak">Rancangan Acak Kelompok (RAK)</option>
-                <option value="rakf">Rancangan Acak Kelompok Faktorial (RAK-F)</option>
-                <option value="rpt" disabled>Rancangan Petak Terbagi (RPT)</option>
-                <option value="rptf" disabled>Rancangan Petak Terbagi Faktorial (RPT-F)</option>
-                <option value="rbsl" disabled>Rancangan Bujur Sangkar Latin (RBSL)</option>
-                <option value="ra" disabled>Rancangan Beralih (Cross-over)</option>
+                <option value="ral" selected data-id="Rancangan Acak Lengkap (RAL)">Completely Randomized Design (CRD)</option>
+                <option value="ralf" disabled data-id="Rancangan Acak Lengkap Faktorial (RAL-F)">Factorial Completely Randomized Design (FCRD)</option>
+                <option value="rak" data-id="Rancangan Acak Kelompok (RAK)">Randomized Group Design (RGD)</option>
+                <option value="rakf" data-id="Rancangan Acak Kelompok Faktorial (RAK-F)">Factorial Randomized Group Design (FRGD)</option>
+                <option value="rpt" disabled data-id="Rancangan Petak Terbagi (RPT)">Split Plot Design (SPD)</option>
+                <option value="rptf" disabled data-id="Rancangan Petak Terbagi Faktorial (RPT-F)">Factorial Split Plot Design (FSPD)</option>
+                <option value="rbsl" disabled data-id="Rancangan Bujur Sangkar Latin (RBSL)">Latin Square Design (LSD)</option>
+                <option value="ra" disabled data-id="Rancangan Beralih (Cross-over)">Cross-over Design (COD)</option>
               </select>
             </div>
             <div class="jenis-posthoc">
-              <label for="jenis-posthoc">Post Hoc</label>
+              <label for="jenis-posthoc" data-id="Uji Lanjut">Post Hoc</label>
               <select name="jenis-posthoc" id="jenis-posthoc">
-                <option value="bnt" selected>Beda Nyata Terkecil (BNT / Fisher's LSD)</option>
-                <option value="bnj">Beda Nyata Jujur (BNJ / Tukey's HSD)</option>
-                <option value="dmrt">Duncan's Multiple Range Test (DMRT)</option>
-                <option value="snk">Student-Newman-Keuls (SNK)</option>
-                <option value="sk">Scott-Knott (SK)</option>
+                <option value="bnt" selected data-id="Beda Nyata Terkecil (BNT)">Fisher’s Least Significant Difference (LSD)</option>
+                <option value="bnj" data-id="Beda Nyata Jujur (BNJ)">Tukey’s Honest Significant Difference (HSD)</option>
+                <option value="dmrt" data-id="Uji Jarak Berganda Duncan (DMRT)">Duncan’s Multiple Range Test (DMRT)</option>
+                <option value="snk" data-id="Student-Newman-Keuls (SNK)">Student-Newman-Keuls Test (SNK)</option>
+                <option value="sk" data-id="Scott-Knott (SK)">Scott-Knott Test (SK)</option>
               </select>
             </div>
           </div>
         </div>
 
         <div class="item excel">
-          <h3 data-popup=".data-input">Data Input</h3>
-          <div class="input-files">
-            <label for="fileInput">
-              <span>
-                <span>Click to add data file (excel / csv)</span>
-                <div>
-                  <svg fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path clip-rule="evenodd"
-                      d="M11 17C11 17.5523 11.4477 18 12 18C12.5523 18 13 17.5523 13 17V13H17C17.5523 13 18 12.5523 18 12C18 11.4477 17.5523 11 17 11H13V7C13 6.44771 12.5523 6 12 6C11.4477 6 11 6.44771 11 7V11H7C6.44772 11 6 11.4477 6 12C6 12.5523 6.44772 13 7 13H11V17Z"
-                      fill-rule="evenodd"></path>
-                  </svg>
-                </div>
-              </span>
-              <span id="fileName"></span>
-            </label>
-            <input
-              accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-              id="fileInput" hidden multiple type="file" onchange="getFileName()" placeholder="">
-          </div>
-          <div id="sheetSelectorContainer" style="display: none;">
-            <label for="sheetSelect">Select sheet:</label>
-            <select id="sheetSelect"></select>
+          <h3 data-popup=".data-input"><span data-id="Input Data">Data Input</span></h3>
+          <div class="file-container">
+            <div class="input-files">
+              <label for="fileInput">
+                <span>
+                  <span data-id="Klik untuk menambahkan file data (excel / csv)">Click to add data file (excel / csv)</span>
+                  <div>
+                    <svg fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path clip-rule="evenodd"
+                        d="M11 17C11 17.5523 11.4477 18 12 18C12.5523 18 13 17.5523 13 17V13H17C17.5523 13 18 12.5523 18 12C18 11.4477 17.5523 11 17 11H13V7C13 6.44771 12.5523 6 12 6C11.4477 6 11 6.44771 11 7V11H7C6.44772 11 6 11.4477 6 12C6 12.5523 6.44772 13 7 13H11V17Z"
+                        fill-rule="evenodd"></path>
+                    </svg>
+                  </div>
+                </span>
+                <span id="fileName"></span>
+              </label>
+              <input
+                accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                id="fileInput" hidden multiple type="file" onchange="getFileName()" placeholder="">
+            </div>
+            <div id="sheetSelectorContainer" style="display: none;">
+              <label for="sheetSelect" data-id="Pilih lembar:">Select sheet:</label>
+              <select id="sheetSelect"></select>
+            </div>
           </div>
           <div class="column" id="settingsContainer" style="display: none;">
             <div id="buttonContainer">
               <button class="setting-button" id="perlakuanBtn" data-setting="Perlakuan">
-                <span>Treatment</span><span id="selectedPerlakuanHeader">Not yet selected</span>
+                <span data-id="Perlakuan">Treatment</span><span id="selectedPerlakuanHeader">-</span>
               </button>
               <button class="setting-button faktorial" id="faktoraBtn" data-setting="FaktorA">
-                <span>Factor A</span><span id="selectedFaktorAHeader">Not yet selected</span>
+                <span data-id="Faktor A">Factor A</span><span id="selectedFaktorAHeader">-</span>
               </button>
               <button class="setting-button faktorial" id="faktorbBtn" data-setting="FaktorB">
-                <span>Factor B</span><span id="selectedFaktorBHeader">Not yet selected</span>
+                <span data-id="Faktor B">Factor B</span><span id="selectedFaktorBHeader">-</span>
               </button>
               <button class="setting-button" id="ulanganBtn" data-setting="Ulangan">
-                <span>Block</span><span id="selectedUlanganHeader">Not yet selected</span>
+                <span data-id="Blok / Ulangan">Block</span><span id="selectedUlanganHeader">-</span>
               </button>
               <button class="setting-button" id="hasilBtn" data-setting="Hasil">
-                <span>Value</span><span id="selectedHasilHeader">Not yet selected</span>
+                <span data-id="Respon / Nilai">Value</span><span id="selectedHasilHeader">-</span>
               </button>
             </div>
             <div id="tableContainer"></div>
           </div>
         </div>
 
-        <button class="run none" onclick="smoothScroll('#anova', top = 75)">Run Analysis</button>
+        <button class="run none" onclick="smoothScroll('#anova', top = 75)" data-id="Jalankan Analisis">Run Analysis</button>
 
         <div class="separator none">
           <br>
@@ -172,9 +180,9 @@
             <table id="anovaSup">
               <thead>
                 <tr>
-                  <th>Coefficient of Variation</th>
-                  <th>Correction Factor</th>
-                  <th>Grand Total</th>
+                  <th data-id="Koefisien Keragaman">Coefficient of Variation</th>
+                  <th data-id="Faktor Koreksi">Correction Factor</th>
+                  <th data-id="Total Keseluruhan">Grand Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -198,12 +206,12 @@
     <div id="popup" class="data-input">
       <div class="popup">
         <div class="popup-wrap">
-          <div class="popup-title">Data Input</div>
+          <div class="popup-title" data-id="Input Data">Data Input</div>
           <div class="popup-content">
             <ul>
-              <li>Download sample data format <a target="_blank" href="https://github.com/OzikPutraJarwo/App/raw/refs/heads/main/cropid/contoh-data.xlsx">here</a>.</li>
-              <li>Click on the input data button (Factor, Treatment, Block, or Value) and then select the appropriate column header in the data table below.</li>
-              <li>After all data input buttons are filled in, the "Run Analysis" button will appear.</li>
+              <li data-id='Unduh contoh format data input <a target="_blank" href="https://github.com/OzikPutraJarwo/App/raw/refs/heads/main/cropid/contoh-data.xlsx">di sini</a>.'>Download sample data format <a target="_blank" href="https://github.com/OzikPutraJarwo/App/raw/refs/heads/main/cropid/contoh-data.xlsx">here</a>.</li>
+              <li data-id="Klik tombol input data (Faktor, Perlakuan, Blok, atau Nilai) lalu pilih tajuk kolom yang sesuai pada tabel data input di bawahnya.">Click on the input data button (Factor, Treatment, Block, or Value) and then select the appropriate column header in the data table below.</li>
+              <li data-id='Setelah semua tombol input data terisi, tombol "Jalankan Analisis" akan muncul.'>After all data input buttons are filled in, the "Run Analysis" button will appear.</li>
             </ul>
           </div>
         </div>

@@ -214,6 +214,7 @@ function getFileName() {
 
 const fileInput = document.getElementById('fileInput');
 const tableContainer = document.getElementById('tableContainer');
+const fileContainer = document.querySelector('.file-container');
 const sheetSelectorContainer = document.getElementById('sheetSelectorContainer');
 const sheetSelect = document.getElementById('sheetSelect');
 const settingsContainer = document.getElementById('settingsContainer');
@@ -270,6 +271,7 @@ function handleFile(event) {
       currentWorkbook = XLSX.read(data, { type: 'array' });
       populateSheetSelector(currentWorkbook.SheetNames);
       displaySheet(currentWorkbook, currentWorkbook.SheetNames[0]);
+      fileContainer.classList.add('show-sheet')
       sheetSelectorContainer.style.display = 'block';
       settingsContainer.style.display = 'grid';
       setupHeaderSelection();
@@ -486,17 +488,19 @@ function handleHeaderClick(event) {
         }
       });
     });
+    // Changed the lang
+    updateLanguage(siteLangSelect.value); 
   })
 }
 
 function resetSettings() {
   selectedSettingType = null;
   selectedHeaders = { FaktorA: null, FaktorB: null, Perlakuan: null, Ulangan: null, Hasil: null };
-  selectedFaktorAHeaderDisplay.textContent = 'Not yet selected';
-  selectedFaktorBHeaderDisplay.textContent = 'Not yet selected';
-  selectedPerlakuanHeaderDisplay.textContent = 'Not yet selected';
-  selectedUlanganHeaderDisplay.textContent = 'Not yet selected';
-  selectedHasilHeaderDisplay.textContent = 'Not yet selected';
+  selectedFaktorAHeaderDisplay.textContent = '-';
+  selectedFaktorBHeaderDisplay.textContent = '-';
+  selectedPerlakuanHeaderDisplay.textContent = '-';
+  selectedUlanganHeaderDisplay.textContent = '-';
+  selectedHasilHeaderDisplay.textContent = '-';
   document.querySelectorAll('.setting-button').forEach(btn => {
     btn.classList.remove('active');
   });
@@ -599,7 +603,7 @@ function countAnovaRAL() {
   if (Pfh > Pft) {
     cellPsg.innerHTML = "*"
   } else {
-    cellPsg.innerHTML = "tn"
+    cellPsg.innerHTML = "ns"
   }
 
   const kk = Math.sqrt(Gkt) / (getData.sum("Hasil") / (getData.count("Perlakuan") * getData.count("Ulangan"))) * 100;
@@ -706,7 +710,7 @@ function countAnovaRAK() {
   } else if (Pfh > ft5) {
     cellPsg.innerHTML = "*"
   } else {
-    cellPsg.innerHTML = "tn"
+    cellPsg.innerHTML = "ns"
   }
 
   if (Ufh > ft1) {
@@ -714,7 +718,7 @@ function countAnovaRAK() {
   } else if (Ufh > ft5) {
     cellUsg.innerHTML = "*"
   } else {
-    cellUsg.innerHTML = "tn"
+    cellUsg.innerHTML = "ns"
   }
 
   const kk = Math.sqrt(Gkt) / (getData.sum("Hasil") / (getData.count("Perlakuan") * getData.count("Ulangan"))) * 100;
@@ -728,23 +732,29 @@ function countAnovaRAK() {
 
 // ----- RAK-F -----
 function countAnovaRAKF() {
-  document.querySelector("#anova h3").innerHTML = `ANOVA: Randomized Block Design (2 Factors)`;
+  const anovaTitle = document.querySelector("#anova h3");
+  anovaTitle.innerHTML = `ANOVA: Randomized Block Design (2 Factors)`;
+  anovaTitle.setAttribute("data-id", "Anova: Rancangan Acak Lengkap (2 Faktor)")
+
   document.querySelector('table#anovaTable').innerHTML = `
     <thead>
       <tr>
-        <th>Source of Variation</th>
-        <th>Degrees of Freedom</th>
-        <th>Sum of Squares</th>
-        <th>Mean Square</th>
-        <th>F Stat</th>
-        <th>F Table 5%</th>
-        <th>F Table 1%</th>
-        <th>Significance</th>
+        <th rowspan='2' data-id='Sumber Keragaman'>Source of Variation</th>
+        <th rowspan='2' data-id='Derajat Bebas'>Degrees of Freedom</th>
+        <th rowspan='2' data-id='Jumlah Kuadrat'>Sum of Squares</th>
+        <th rowspan='2' data-id='Kuadrat Tengah'>Mean Square</th>
+        <th rowspan='2' data-id='F Hitung'>F Stat</th>
+        <th colspan='2' data-id='F Tabel'>F Table</th>
+        <th rowspan='2' data-id='Signifikansi'>Significance</th>
       </tr>
-    </thead>
+      <tr>
+        <th>5%</th>
+        <th>1%</th>
+      </tr>
+    </thead>  
     <tbody>
       <tr>
-        <td>Block</td>
+        <td data-id='Blok'>Block</td>
         <td class="Udb"></td>
         <td class="Ujk"></td>
         <td class="Ukt"></td>
@@ -784,7 +794,7 @@ function countAnovaRAKF() {
         <td class="ABsg"></td>
       </tr>
       <tr>
-        <td>Residuals</td>
+        <td data-id='Galat'>Residuals</td>
         <td class="Gdb"></td>
         <td class="Gjk"></td>
         <td class="Gkt"></td>
@@ -890,7 +900,7 @@ function countAnovaRAKF() {
   } else if (Ufh > Uft5) {
     cellUsg.innerHTML = "*"
   } else {
-    cellUsg.innerHTML = "ns"
+    cellUsg.innerHTML = "<span data-id='tn'>ns</span>"
   }
 
   if (Afh > Aft1) {
@@ -898,7 +908,7 @@ function countAnovaRAKF() {
   } else if (Afh > Aft5) {
     cellAsg.innerHTML = "*"
   } else {
-    cellAsg.innerHTML = "ns"
+    cellAsg.innerHTML = "<span data-id='tn'>ns</span>"
   }
 
   if (Bfh > Bft1) {
@@ -906,7 +916,7 @@ function countAnovaRAKF() {
   } else if (Bfh > Bft5) {
     cellBsg.innerHTML = "*"
   } else {
-    cellBsg.innerHTML = "ns"
+    cellBsg.innerHTML = "<span data-id='tn'>ns</span>"
   }
 
   if (ABfh > ABft1) {
@@ -916,7 +926,7 @@ function countAnovaRAKF() {
     cellABsg.innerHTML = "*";
     document.querySelector('#posthoc').classList.remove('tanpa-interaksi')
   } else {
-    cellABsg.innerHTML = "tn";
+    cellABsg.innerHTML = "ns";
     document.querySelector('#posthoc').classList.add('tanpa-interaksi')
   }
 
@@ -927,17 +937,18 @@ function countAnovaRAKF() {
 
   // BNT
   if (selectedPosthoc === "bnt") {
-    // Perhitungan StudentT & LSD
+    // Nilai Tabel
     table = (jStat.studentt.inv(1 - 0.05 / 2, Gdb));
+    // Nilai Hitung
     thitA = (table * Math.sqrt((2 * Gkt) / (getData.count("Ulangan") * getData.count("FaktorB"))));
     thitB = (table * Math.sqrt((2 * Gkt) / (getData.count("Ulangan") * getData.count("FaktorA"))));
     thitAB = (table * Math.sqrt((2 * Gkt) / getData.count("Ulangan")));
     // Faktor A, Faktor B, dan Kombinasi AB
     processFLSD(selectedFaktorAText, 'factorA', getData.info("FaktorA", "Hasil"), thitA);
     processFLSD(selectedFaktorBText, 'factorB', getData.info("FaktorB", "Hasil"), thitB);
-    processFLSD('Combination: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, 'factorAB', getData.info("FaktorA", "FaktorB", "Hasil"), thitAB);
+    processFLSD('<span data-id="Kombinasi">Combination</span>: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, 'factorAB', getData.info("FaktorA", "FaktorB", "Hasil"), thitAB);
     // Interaksi AB
-    document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'>Interaction: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
+    document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'><span data-id='Interaksi'>Interaction</span>: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
     const uniqueFaktorA = new Set();
     const uniqueFaktorB = new Set();
     const rows = document.querySelectorAll('#tableContainer tbody tr');
@@ -1071,17 +1082,20 @@ function countAnovaRAKF() {
   }
   // BNJ
   else if (selectedPosthoc === "bnj") {
-    // Perhitungan StudentT & LSD
-    table = (jStat.studentt.inv(1 - 0.05 / 2, Gdb));
-    thitA = (table * Math.sqrt((2 * Gkt) / (getData.count("Ulangan") * getData.count("FaktorB"))));
-    thitB = (table * Math.sqrt((2 * Gkt) / (getData.count("Ulangan") * getData.count("FaktorA"))));
-    thitAB = (table * Math.sqrt((2 * Gkt) / getData.count("Ulangan")));
+    // Nilai Tabel
+    tableA = (jStat.tukey.inv(0.95, getData.count("FaktorA"), Gdb));
+    tableB = (jStat.tukey.inv(0.95, getData.count("FaktorB"), Gdb));
+    tableAB = (jStat.tukey.inv(0.95, getData.count("FaktorA") * getData.count("FaktorB"), Gdb));
+    // Nilai Hitung
+    thitA = (tableA * Math.sqrt(Gkt / (getData.count("FaktorB") * getData.count("Ulangan"))));
+    thitB = (tableB * Math.sqrt(Gkt / (getData.count("FaktorA") * getData.count("Ulangan"))));
+    thitAB = (tableAB * Math.sqrt(Gkt / getData.count("Ulangan")));
     // Faktor A, Faktor B, dan Kombinasi AB
-    processFLSD('Faktor A', 'factorA', getData.info("FaktorA", "Hasil"), thitA);
-    processFLSD('Faktor B', 'factorB', getData.info("FaktorB", "Hasil"), thitB);
-    processFLSD('Kombinasi AB', 'factorAB', getData.info("FaktorA", "FaktorB", "Hasil"), thitAB);
+    processTHSD(selectedFaktorAText, 'factorA', getData.info("FaktorA", "Hasil"), thitA);
+    processTHSD(selectedFaktorBText, 'factorB', getData.info("FaktorB", "Hasil"), thitB);
+    processTHSD('<span data-id="Kombinasi">Combination</span>: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, 'factorAB', getData.info("FaktorA", "FaktorB", "Hasil"), thitAB);
     // Interaksi AB
-    document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'>Interaksi AB</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
+    document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'><span data-id='Interaksi'>Interaction</span>: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
     const uniqueFaktorA = new Set();
     const uniqueFaktorB = new Set();
     const rows = document.querySelectorAll('#tableContainer tbody tr');
@@ -1097,7 +1111,7 @@ function countAnovaRAKF() {
         .split('\n')
         .filter(line => line.startsWith(faktorA));
       if (info.length > 0) {
-        processFLSD(faktorA, `leading_${faktorA}`, info.join('\n'), thitA);
+        processTHSD(faktorA, `leading_${faktorA}`, info.join('\n'), thitA);
       }
     });
     uniqueFaktorB.forEach(faktorB => {
@@ -1105,7 +1119,7 @@ function countAnovaRAKF() {
         .split('\n')
         .filter(line => line.startsWith(faktorB));
       if (info.length > 0) {
-        processFLSD(faktorB, `leading_${faktorB}`, info.join('\n'), thitB);
+        processTHSD(faktorB, `leading_${faktorB}`, info.join('\n'), thitB);
       }
     });
     // Tabel Interaksi 
@@ -1136,7 +1150,7 @@ function countAnovaRAKF() {
       const newTable = document.createElement('table');
       const thead = document.createElement('thead');
       const headRow = document.createElement('tr');
-      headRow.appendChild(document.createElement('th')).textContent = 'Interaksi';
+      headRow.appendChild(document.createElement('th')).textContent = '×';
       faktorAList.forEach(fa => {
         const th = document.createElement('th');
         th.colSpan = 2;
@@ -1214,6 +1228,8 @@ function countAnovaRAKF() {
     })();
   }
 
+  console.log(selectedPosthoc);
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -1221,7 +1237,7 @@ function countAnovaRAKF() {
 // ----- Posthoc : BNT / Fisher's LSD -----
 function processFLSD(title, factorKey, info, thit) {
   // Title
-  document.getElementById('posthoc-title').innerText = "Post Hoc: Fisher's LSD";
+  document.getElementById('posthoc-title').innerHTML = "<span data-id='Uji Lanjut: Beda Nyata Terkecil (BNT)'>Post Hoc: Fisher's LSD</span>";
   // Container Dummy
   const container = document.querySelector('#posthoc');
   container.innerHTML += `
@@ -1309,8 +1325,8 @@ function processFLSD(title, factorKey, info, thit) {
         <thead>
           <tr>
             <th><span>${title}</span></th>
-            <th><span>Value</span></th>
-            <th><span>Letter</span></th>
+            <th><span data-id='Nilai'>Value</span></th>
+            <th><span data-id='Notasi'>Letter</span></th>
         </tr>
         </thead>
         <tbody>`;
@@ -1511,7 +1527,119 @@ function processDataBNT() {
 };
 
 // ----- Posthoc : BNJ / Tukey's HSD -----
-
+function processTHSD(title, factorKey, info, thit) {
+  // Title
+  document.getElementById('posthoc-title').innerHTML = "<span data-id='Uji Lanjut: Beda Nyata Jujur (BNJ)'>Post Hoc: Tukey's LSD</span>";
+  // Container Dummy
+  const container = document.querySelector('#posthoc');
+  container.innerHTML += `
+    <h4 class='posthoc-collapser'>${title}</h4>
+    <div class='posthoc-collapsed'>
+      <table id="${factorKey}-LETTER">
+        <thead>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+      <div class='posthoc-collapsed-item'>
+        <table id="${factorKey}-MATRIX">
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+  // Mengambil data mentah
+  const input = info.trim();
+  const lines = input.split('\n');
+  let dataMapTHSD = {};
+  lines.forEach(line => {
+    const [perlakuan, nilai] = line.trim().split(/\s+/);
+    const nilaiFloat = parseFloat(nilai);
+    dataMapTHSD[perlakuan] = nilaiFloat;
+  });
+  const sortedEntries = Object.entries(dataMapTHSD).sort((a, b) => a[1] - b[1]);
+  // Matrix
+  const matrixTableBody = document.querySelector(`#${factorKey}-MATRIX tbody`);
+  const headerRow = document.createElement('tr');
+  headerRow.innerHTML = `<th>${thit.toFixed(2)}</th>` + sortedEntries.map(entry => `<th>${entry[0]}</th>`).join('');
+  matrixTableBody.innerHTML = '';
+  matrixTableBody.appendChild(headerRow);
+  sortedEntries.forEach(([perlakuanA, nilaiA]) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `<th>${perlakuanA}</th>`;
+    sortedEntries.forEach(([perlakuanB, nilaiB]) => {
+      const difference = (nilaiA - nilaiB).toFixed(2);
+      if (difference <= thit && difference >= 0) {
+        row.innerHTML += `<td class="green">${difference}</td>`;
+      } else if (difference < 0) {
+        row.innerHTML += `<td class="gray">${difference}</td>`;
+      } else {
+        row.innerHTML += `<td>${difference}</td>`;
+      }
+    });
+    matrixTableBody.appendChild(row);
+  });
+  // Mengambil nilai rata-rata dari info
+  const infoString = info;
+  const infoData = {};
+  infoString.trim().split('\n').forEach(line => {
+    const [key, value] = line.trim().split(' ');
+    infoData[key] = parseFloat(value);
+  });
+  // Membuat tabel letter
+  function generateLetterTable(matrixTableSelector, resultSelector) {
+    const matrixTable = document.querySelector(matrixTableSelector);
+    const resultDiv = document.querySelector(resultSelector);
+    const firstGreenCols = new Set();
+    const treatments = [];
+    const treatmentNotations = {};
+    const rows = matrixTable.querySelectorAll('tbody tr');
+    for (let i = 1; i < rows.length; i++) {
+      const th = rows[i].querySelector('th');
+      const treatment = th.textContent;
+      treatments.push(treatment);
+      const cells = rows[i].querySelectorAll('td');
+      const greens = [];
+      for (let j = 0; j < cells.length; j++) {
+        if (cells[j].classList.contains('green')) {
+          greens.push(j);
+          if (greens.length === 1) firstGreenCols.add(j);
+        }
+      }
+      treatmentNotations[treatment] = greens;
+    }
+    const sortedCols = Array.from(firstGreenCols).sort((a, b) => a - b);
+    const colLetters = {};
+    sortedCols.forEach((col, i) => colLetters[col] = String.fromCharCode(97 + i));
+    let html = `
+      <table id="letterTable">
+        <thead>
+          <tr>
+            <th><span>${title}</span></th>
+            <th><span data-id='Nilai'>Value</span></th>
+            <th><span data-id='Notasi'>Letter</span></th>
+        </tr>
+        </thead>
+        <tbody>`;
+    treatments.forEach(treatment => {
+      const greens = treatmentNotations[treatment];
+      const letters = sortedCols.filter(col => greens.includes(col))
+        .map(col => colLetters[col])
+        .join('');
+      html += `
+        <tr>
+          <td>${treatment}</td>
+          <td>${infoData[treatment]}</td>
+          <td>${letters}</td>
+        </tr>`;
+    });
+    resultDiv.innerHTML = html + `
+        </tbody>
+      </table>`;
+  }
+  generateLetterTable(`#${factorKey}-MATRIX`, `#${factorKey}-LETTER`);
+}
 
 
 let valueBNJH;
