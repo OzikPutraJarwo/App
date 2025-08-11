@@ -205,6 +205,8 @@ body {
   margin: auto
 }
 
+/* ----- HEADER ----- */
+
 header {
   background-color: #ffffff;
   padding: 1rem 2rem;
@@ -271,7 +273,7 @@ header {
   display: flex;
   justify-content: center;
   height: 100%;
-  align-items: center;
+  align-items: stretch;
   padding: 8px;
   cursor: pointer;
   transition: .2s;
@@ -346,7 +348,7 @@ header {
 }
 
 #site-lang {
-  padding: 0 10px;
+  padding: 0 15px;
   background: unset;
   border: none;
   border-radius: 0;
@@ -356,6 +358,7 @@ header {
   -webkit-appearance: none;
   -moz-appearance: none;
   text-align: center;
+  user-select: none;
 }
 
 #site-lang::-ms-expand {

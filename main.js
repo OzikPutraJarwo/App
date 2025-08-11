@@ -141,3 +141,28 @@ if (popupElement) {
     </div>
   `;
 };
+
+// ----- Language Selector -----
+
+const siteLangSelect = document.getElementById('site-lang');
+const updateLanguage = lang => {
+  localStorage.setItem('site-lang', lang);
+  document.querySelectorAll('[data-id]').forEach(el => {
+    if (!el.dataset.en) el.dataset.en = el.innerHTML;
+    el.innerHTML = lang === 'id' ? el.dataset.id : el.dataset.en;
+  });
+};
+siteLangSelect.addEventListener('change', () => updateLanguage(siteLangSelect.value));
+// Save to localStorage
+const savedLang = localStorage.getItem('site-lang') || 'en';
+siteLangSelect.value = savedLang;
+updateLanguage(savedLang);
+// Click to change
+siteLangSelect.addEventListener('mousedown', e => {
+  e.preventDefault();
+  const options = [...siteLangSelect.options];
+  let nextIndex = siteLangSelect.selectedIndex + 1;
+  if (nextIndex >= options.length) nextIndex = 0;
+  siteLangSelect.selectedIndex = nextIndex;
+  siteLangSelect.dispatchEvent(new Event('change'));
+});
