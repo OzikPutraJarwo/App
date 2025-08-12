@@ -353,12 +353,13 @@ header {
   border: none;
   border-radius: 0;
   box-shadow: unset;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
   text-align: center;
   user-select: none;
+  font-weight: bold;
 }
 
 #site-lang::-ms-expand {
