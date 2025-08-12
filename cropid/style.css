@@ -421,6 +421,10 @@ table#anovaSup {
   table-layout: fixed;
 }
 
+#posthoc table[id*="CRITICAL"] {
+  table-layout: auto;
+}
+
 .posthoc-collapser {
   position: relative;
 }

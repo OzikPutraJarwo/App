@@ -935,7 +935,7 @@ function countAnovaRAKF() {
 
   document.getElementById('posthoc').innerHTML = `<h3 id="posthoc-title"></h3>`;
 
-  // BNT
+  // FLSD
   if (selectedPosthoc === "bnt") {
     // Nilai Tabel
     table = (jStat.studentt.inv(1 - 0.05 / 2, Gdb));
@@ -1080,7 +1080,7 @@ function countAnovaRAKF() {
       }
     })();
   }
-  // BNJ
+  // THSD
   else if (selectedPosthoc === "bnj") {
     // Nilai Tabel
     tableA = (jStat.tukey.inv(0.95, getData.count("FaktorA"), Gdb));
@@ -1227,8 +1227,145 @@ function countAnovaRAKF() {
       }
     })();
   }
-
-  console.log(selectedPosthoc);
+  // DMRT
+  else if (selectedPosthoc === "dmrt") {
+    // Faktor A, Faktor B, dan Kombinasi AB
+    processDMRT(selectedFaktorAText, 'factorA', getData.info("FaktorA", "Hasil"), getData.count("FaktorA"), Gdb, Gkt, getData.count("Ulangan"));
+    processDMRT(selectedFaktorBText, 'factorB', getData.info("FaktorB", "Hasil"), getData.count("FaktorB"), Gdb, Gkt, getData.count("Ulangan"));
+    processDMRT('<span data-id="Kombinasi">Combination</span>: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, 'factorAB', getData.info("FaktorA", "FaktorB", "Hasil"), getData.count("FaktorA") * getData.count("FaktorB"), Gdb, Gkt, getData.count("Ulangan"));
+    // Interaksi AB
+    document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'><span data-id='Interaksi'>Interaction</span>: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
+    const uniqueFaktorA = new Set();
+    const uniqueFaktorB = new Set();
+    const rows = document.querySelectorAll('#tableContainer tbody tr');
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 2) {
+        uniqueFaktorA.add(cells[0].textContent.trim());
+        uniqueFaktorB.add(cells[1].textContent.trim());
+      }
+    });
+    uniqueFaktorA.forEach(faktorA => {
+      const info = getData.info("FaktorA", "FaktorB", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorA));
+      if (info.length > 0) {
+        processDMRT(faktorA, `leading_${faktorA}`, info.join('\n'), getData.count("FaktorA"), Gdb, Gkt, getData.count("Ulangan"));
+      }
+    });
+    uniqueFaktorB.forEach(faktorB => {
+      const info = getData.info("FaktorB", "FaktorA", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorB));
+      if (info.length > 0) {
+        processDMRT(faktorB, `leading_${faktorB}`, info.join('\n'), getData.count("FaktorB"), Gdb, Gkt, getData.count("Ulangan"));
+      }
+    });
+    // Tabel Interaksi 
+    (function () {
+      const table = document.querySelector('#tableContainer table');
+      if (!table) return;
+      const rows = Array.from(table.querySelectorAll('tbody tr')).slice(1);
+      const headers = Array.from(table.querySelectorAll('th'));
+      const colIndex = {};
+      headers.forEach((th, i) => {
+        if (th.dataset.setting) {
+          colIndex[th.dataset.setting] = i;
+        }
+      });
+      const dataMap = {};
+      rows.forEach(tr => {
+        const cells = tr.querySelectorAll('td');
+        if (!cells.length) return;
+        const faktorA = cells[colIndex['FaktorA']].textContent.trim();
+        const faktorB = cells[colIndex['FaktorB']].textContent.trim();
+        const nilai = parseFloat(cells[colIndex['Hasil']].textContent.trim());
+        if (!dataMap[faktorB]) dataMap[faktorB] = {};
+        if (!dataMap[faktorB][faktorA]) dataMap[faktorB][faktorA] = [];
+        dataMap[faktorB][faktorA].push(nilai);
+      });
+      const faktorAList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorA']]?.textContent.trim()).filter(Boolean))];
+      const faktorBList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorB']]?.textContent.trim()).filter(Boolean))];
+      const newTable = document.createElement('table');
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      headRow.appendChild(document.createElement('th')).textContent = '×';
+      faktorAList.forEach(fa => {
+        const th = document.createElement('th');
+        th.colSpan = 2;
+        th.textContent = fa;
+        headRow.appendChild(th);
+      });
+      thead.appendChild(headRow);
+      newTable.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      faktorBList.forEach(fb => {
+        const avgRow = document.createElement('tr');
+        const fbCell = document.createElement('th');
+        fbCell.rowSpan = 2;
+        fbCell.textContent = fb;
+        avgRow.appendChild(fbCell);
+        faktorAList.forEach(fa => {
+          const avg = dataMap[fb]?.[fa] ? (dataMap[fb][fa].reduce((a, b) => a + b, 0) / dataMap[fb][fa].length) : 0;
+          const td1 = document.createElement('td');
+          td1.textContent = avg.toFixed(2);
+          const td2 = document.createElement('td');
+          td2.classList.add('x-kecil');
+          td2.dataset.pair = `${fb}${fa}`;
+          td2.textContent = 'x';
+          avgRow.appendChild(td1);
+          avgRow.appendChild(td2);
+        });
+        tbody.appendChild(avgRow);
+        const xRow = document.createElement('tr');
+        faktorAList.forEach(fa => {
+          const td = document.createElement('td');
+          td.colSpan = 2;
+          td.classList.add('x-besar');
+          td.dataset.pair = `${fa}${fb}`;
+          td.textContent = 'X';
+          xRow.appendChild(td);
+        });
+        tbody.appendChild(xRow);
+      });
+      newTable.appendChild(tbody);
+      const container = document.getElementById('interaction-table');
+      container.innerHTML = '';
+      container.appendChild(newTable);
+      const perFaktorContainer = document.createElement('div');
+      perFaktorContainer.classList.add('posthoc-collapsed-item');
+      container.appendChild(perFaktorContainer);
+      const posthocTables = document.querySelectorAll('#posthoc table[id^="leading_"][id$="-LETTER"]');
+      const notasiMap = {};
+      posthocTables.forEach(tbl => {
+        const trs = tbl.querySelectorAll('tbody tr');
+        trs.forEach(tr => {
+          const perlakuan = tr.cells[0].textContent.trim();
+          const notasi = tr.cells[2].textContent.trim();
+          notasiMap[perlakuan] = notasi;
+        });
+      });
+      document.querySelectorAll('#interaction-table .x-kecil').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      document.querySelectorAll('#interaction-table .x-besar').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      const target = container.querySelector('.posthoc-collapsed-item');
+      let nextSibling = container.nextElementSibling;
+      while (nextSibling) {
+        const temp = nextSibling;
+        nextSibling = nextSibling.nextElementSibling;
+        target.appendChild(temp);
+      }
+    })();
+  }
 
 }
 
@@ -1349,183 +1486,6 @@ function processFLSD(title, factorKey, info, thit) {
   generateLetterTable(`#${factorKey}-MATRIX`, `#${factorKey}-LETTER`);
 }
 
-let valueBNTH;
-let dataMapBNT;
-function hitungBNT() {
-  const inputPerlakuan = document.querySelector('#input-perlakuan').value;
-  const inputUlangan = document.querySelector('#input-ulangan').value;
-  const inputKTG = document.querySelector('#input-ktg').value;
-  const inputSig = 1 - (document.querySelector('#input-sig').value * 0.01);
-
-  const valueDBG = (inputPerlakuan - 1) * (inputUlangan - 1);
-  const valueSD = Math.sqrt((2 * inputKTG) / inputUlangan);
-  const valueBNTT = jStat.studentt.inv(inputSig, valueDBG);
-  valueBNTH = valueSD * valueBNTT;
-
-  const outputSD = document.querySelector('.output-bntsd');
-  const outputBNTT = document.querySelector('.output-bntt');
-  const outputBNTH = document.querySelector('.output-bnth');
-
-  outputSD.innerHTML = valueSD.toFixed(2);
-  outputBNTT.innerHTML = valueBNTT.toFixed(2);
-  outputBNTH.innerHTML = valueBNTH.toFixed(2);
-};
-function processDataBNT() {
-  const input = document.getElementById('input-data').value.trim();
-  const lines = input.split('\n');
-  dataMapBNT = {};
-
-  lines.forEach(line => {
-    const [perlakuan, nilai] = line.trim().split(/\s+/);
-    const nilaiFloat = parseFloat(nilai);
-    dataMapBNT[perlakuan] = nilaiFloat;
-  });
-
-  const sortedEntries = Object.entries(dataMapBNT).sort((a, b) => a[1] - b[1]);
-  const jsonOutput = JSON.stringify(sortedEntries, null, 2);
-
-  const matrixTableBody = document.querySelector('#matrixTable tbody');
-  const headerRow = document.createElement('tr');
-  headerRow.innerHTML = '<th></th>' + sortedEntries.map(entry => `<th>${entry[0]}</th>`).join('');
-  matrixTableBody.innerHTML = '';
-  matrixTableBody.appendChild(headerRow);
-
-  sortedEntries.forEach(([perlakuanA, nilaiA]) => {
-    const row = document.createElement('tr');
-    row.innerHTML = `<th>${perlakuanA}</th>`;
-
-    sortedEntries.forEach(([perlakuanB, nilaiB]) => {
-      const difference = (nilaiA - nilaiB).toFixed(2);
-      if (difference <= valueBNTH && difference >= 0) {
-        row.innerHTML += `<td class="green">${difference}</td>`;
-      } else if (difference < 0) {
-        row.innerHTML += `<td class="gray">${difference}</td>`;
-      } else {
-        row.innerHTML += `<td>${difference}</td>`;
-      }
-    });
-
-    matrixTableBody.appendChild(row);
-  });
-
-  const table = document.getElementById('matrixTable');
-  const rows = table.querySelectorAll('tbody tr');
-
-  const results = {};
-
-  rows.forEach((row, rowIndex) => {
-    if (rowIndex === 0) return;
-
-    const treatmentName = row.querySelector('th').textContent.trim();
-
-    const greenColumns = [];
-
-    const cells = row.querySelectorAll('td');
-    cells.forEach((cell, cellIndex) => {
-      if (cell.classList.contains('green')) {
-        greenColumns.push(cellIndex + 1);
-      }
-    });
-
-    results[treatmentName] = greenColumns.join(',');
-  });
-
-  const labelMap = {};
-  const assigned = {};
-  let currentLabelCode = 'a'.charCodeAt(0);
-
-  function keysWithNumber(num) {
-    return Object.keys(results).filter(key =>
-      results[key].split(',').includes(String(num))
-    );
-  }
-
-  for (const key of Object.keys(results)) {
-    const nums = results[key].split(',');
-    const first = nums[0];
-
-    if (!labelMap[first]) {
-      const label = String.fromCharCode(currentLabelCode++);
-      labelMap[first] = label;
-
-      const relatedKeys = keysWithNumber(first);
-      for (const rk of relatedKeys) {
-        assigned[rk] = (assigned[rk] || '') + label;
-      }
-    }
-  }
-
-  const merged = {};
-
-  for (const key in assigned) {
-    merged[key] = {
-      label: assigned[key],
-      value: dataMapBNT[key]
-    };
-  }
-
-  const dataMapBNTKeyOrder = Object.keys(dataMapBNT);
-  const mergedCustomOrder = Object.keys(merged);
-
-  function renderTable(orderBy = 'dataMapBNTKey', reverse = false) {
-    const tbody = document.querySelector("#letterTable tbody");
-    tbody.innerHTML = "";
-
-    let sortedKeys;
-
-    if (orderBy === 'merged') {
-      sortedKeys = [...mergedCustomOrder];
-    } else if (orderBy === 'dataMapBNTKey') {
-      sortedKeys = dataMapBNTKeyOrder.filter(k => merged[k]);
-    }
-
-    if (reverse) sortedKeys.reverse();
-
-    sortedKeys.forEach(key => {
-      const row = document.createElement("tr");
-
-      const tdKey = document.createElement("td");
-      tdKey.textContent = key;
-
-      const tdValue = document.createElement("td");
-      tdValue.textContent = merged[key].value;
-
-      const tdLabel = document.createElement("td");
-      tdLabel.textContent = merged[key].label;
-
-      row.appendChild(tdKey);
-      row.appendChild(tdValue);
-      row.appendChild(tdLabel);
-
-      tbody.appendChild(row);
-    });
-  }
-
-  renderTable('merged', false);
-
-  let isMergedReversed = false;
-  let isDataReversed = false;
-
-  document.getElementById('renderbyMerged').onclick = function () {
-    renderTable('merged', !isMergedReversed);
-    isMergedReversed = !isMergedReversed;
-    this.classList.toggle('rev');
-    this.classList.remove('opacity');
-    document.getElementById('renderbyData').classList.add('opacity');
-  };
-
-  document.getElementById('renderbyData').onclick = function () {
-    renderTable('dataMapBNTKey', isDataReversed);
-    isDataReversed = !isDataReversed;
-    this.classList.toggle('rev');
-    this.classList.remove('opacity');
-    document.getElementById('renderbyMerged').classList.add('opacity');
-  };
-
-  document.querySelectorAll('.output').forEach(el => el.classList.add('show'));
-
-};
-
 // ----- Posthoc : BNJ / Tukey's HSD -----
 function processTHSD(title, factorKey, info, thit) {
   // Title
@@ -1641,251 +1601,81 @@ function processTHSD(title, factorKey, info, thit) {
   generateLetterTable(`#${factorKey}-MATRIX`, `#${factorKey}-LETTER`);
 }
 
-
-let valueBNJH;
-let dataMapBNJ;
-function hitungBNJ() {
-  const inputPerlakuan = document.querySelector('#input-perlakuan').value;
-  const inputUlangan = document.querySelector('#input-ulangan').value;
-  const inputKTG = document.querySelector('#input-ktg').value;
-  const inputSig = 1 - (document.querySelector('#input-sig').value * 0.01);
-
-  const valueDBG = (inputPerlakuan - 1) * (inputUlangan - 1);
-  const valueSD = Math.sqrt(inputKTG / inputUlangan);
-  const valueBNJT = jStat.tukey.inv(inputSig, inputPerlakuan, valueDBG);
-  valueBNJH = valueSD * valueBNJT;
-
-  const outputSD = document.querySelector('.output-bnjsd');
-  const outputBNJT = document.querySelector('.output-bnjt');
-  const outputBNJH = document.querySelector('.output-bnjh');
-
-  outputSD.innerHTML = valueSD.toFixed(2);
-  outputBNJT.innerHTML = valueBNJT.toFixed(2);
-  outputBNJH.innerHTML = valueBNJH.toFixed(2);
-}
-function processDataBNJ() {
-  const input = document.getElementById('input-data').value.trim();
-  const lines = input.split('\n');
-  dataMapBNJ = {};
-
-  lines.forEach(line => {
-    const [perlakuan, nilai] = line.trim().split(/\s+/);
-    const nilaiFloat = parseFloat(nilai);
-    dataMapBNJ[perlakuan] = nilaiFloat;
-  });
-
-  const sortedEntries = Object.entries(dataMapBNJ).sort((a, b) => a[1] - b[1]);
-
-  const jsonOutput = JSON.stringify(sortedEntries, null, 2);
-
-  const matrixTableBody = document.querySelector('#matrixTable tbody');
-  const headerRow = document.createElement('tr');
-  headerRow.innerHTML = '<th></th>' + sortedEntries.map(entry => `<th>${entry[0]}</th>`).join('');
-  matrixTableBody.innerHTML = '';
-  matrixTableBody.appendChild(headerRow);
-
-  sortedEntries.forEach(([perlakuanA, nilaiA]) => {
-    const row = document.createElement('tr');
-    row.innerHTML = `<th>${perlakuanA}</th>`;
-
-    sortedEntries.forEach(([perlakuanB, nilaiB]) => {
-      const difference = (nilaiA - nilaiB).toFixed(2);
-      if (difference <= valueBNJH && difference >= 0) {
-        row.innerHTML += `<td class="green">${difference}</td>`;
-      } else if (difference < 0) {
-        row.innerHTML += `<td class="gray">${difference}</td>`;
-      } else {
-        row.innerHTML += `<td>${difference}</td>`;
-      }
-    });
-
-    matrixTableBody.appendChild(row);
-  });
-
-  const table = document.getElementById('matrixTable');
-  const rows = table.querySelectorAll('tbody tr');
-
-  const results = {};
-
-  rows.forEach((row, rowIndex) => {
-    if (rowIndex === 0) return;
-
-    const treatmentName = row.querySelector('th').textContent.trim();
-
-    const greenColumns = [];
-
-    const cells = row.querySelectorAll('td');
-    cells.forEach((cell, cellIndex) => {
-      if (cell.classList.contains('green')) {
-        greenColumns.push(cellIndex + 1);
-      }
-    });
-
-    results[treatmentName] = greenColumns.join(',');
-  });
-
-  const labelMap = {};
-  const assigned = {};
-  let currentLabelCode = 'a'.charCodeAt(0);
-
-  function keysWithNumber(num) {
-    return Object.keys(results).filter(key =>
-      results[key].split(',').includes(String(num))
-    );
-  }
-
-  for (const key of Object.keys(results)) {
-    const nums = results[key].split(',');
-    const first = nums[0];
-
-    if (!labelMap[first]) {
-      const label = String.fromCharCode(currentLabelCode++);
-      labelMap[first] = label;
-
-      const relatedKeys = keysWithNumber(first);
-      for (const rk of relatedKeys) {
-        assigned[rk] = (assigned[rk] || '') + label;
-      }
-    }
-  }
-
-  const merged = {};
-
-  for (const key in assigned) {
-    merged[key] = {
-      label: assigned[key],
-      value: dataMapBNJ[key]
-    };
-  }
-
-  const dataMapBNJKeyOrder = Object.keys(dataMapBNJ);
-  const mergedCustomOrder = Object.keys(merged);
-
-  function renderTable(orderBy = 'dataMapBNJKey', reverse = false) {
-    const tbody = document.querySelector("#letterTable tbody");
-    tbody.innerHTML = "";
-
-    let sortedKeys;
-
-    if (orderBy === 'merged') {
-      sortedKeys = [...mergedCustomOrder];
-    } else if (orderBy === 'dataMapBNJKey') {
-      sortedKeys = dataMapBNJKeyOrder.filter(k => merged[k]);
-    }
-
-    if (reverse) sortedKeys.reverse();
-
-    sortedKeys.forEach(key => {
-      const row = document.createElement("tr");
-
-      const tdKey = document.createElement("td");
-      tdKey.textContent = key;
-
-      const tdValue = document.createElement("td");
-      tdValue.textContent = merged[key].value;
-
-      const tdLabel = document.createElement("td");
-      tdLabel.textContent = merged[key].label;
-
-      row.appendChild(tdKey);
-      row.appendChild(tdValue);
-      row.appendChild(tdLabel);
-
-      tbody.appendChild(row);
-    });
-  }
-
-  renderTable('merged', false);
-
-  let isMergedReversed = false;
-  let isDataReversed = false;
-
-  document.getElementById('renderbyMerged').onclick = function () {
-    renderTable('merged', !isMergedReversed);
-    isMergedReversed = !isMergedReversed;
-    this.classList.toggle('rev');
-    this.classList.remove('opacity');
-    document.getElementById('renderbyData').classList.add('opacity');
-  };
-
-  document.getElementById('renderbyData').onclick = function () {
-    renderTable('dataMapBNJKey', isDataReversed);
-    isDataReversed = !isDataReversed;
-    this.classList.toggle('rev');
-    this.classList.remove('opacity');
-    document.getElementById('renderbyMerged').classList.add('opacity');
-  };
-
-  document.querySelectorAll('.output').forEach(el => el.classList.add('show'));
-
-};
-
 // ----- Posthoc : DMRT / Duncan's Multiple Range Test -----
-let dataMapDMRT;
-function hitungDMRT() {
-  const inputPerlakuan = document.querySelector('#input-perlakuan').value;
-  const inputUlangan = document.querySelector('#input-ulangan').value;
-  const inputKTG = document.querySelector('#input-ktg').value;
-  const inputSig = (document.querySelector('#input-sig').value * 0.01);
-
-  const valueDBG = (inputPerlakuan - 1) * (inputUlangan - 1);
-  const valueSD = Math.sqrt(inputKTG / inputUlangan);
-
-  const outputSD = document.querySelector('.dmrt-output-sd');
-
-  outputSD.innerHTML = valueSD.toFixed(2);
-  outputSD.setAttribute("colspan", inputPerlakuan - 1);
-
-  const elementDMRTP = document.querySelector('.dmrt-p');
-  elementDMRTP.innerHTML = `<th>P</th>`;
-  const elementDMRTT = document.querySelector('.dmrt-table');
-  elementDMRTT.innerHTML = `<th>Tabel DMRT</th>`;
-  const elementDMRTC = document.querySelector('.dmrt-calc');
-  elementDMRTC.innerHTML = `<th>DMRT Hitung</th>`;
-  for (let i = 2; i <= inputPerlakuan; i++) {
-    elementDMRTP.innerHTML += `<td>${i}</td>`;
-    elementDMRTT.innerHTML += `<td>${jrStat.studentq.inv(inputSig, i, valueDBG).toFixed(2)}</td>`;
-    elementDMRTC.innerHTML += `<td data-p="${i}">${(valueSD * jrStat.studentq.inv(inputSig, i, valueDBG)).toFixed(2)}</td>`;
+function processDMRT(title, factorKey, info, count, dbg, gkt, r) {
+  // Title
+  document.getElementById('posthoc-title').innerHTML = "<span data-id='Uji Lanjut: Uji Jarak Berganda Duncan'>Post Hoc: Duncan's Multiple Range Test (DMRT)</span>";
+  // Container Dummy
+  const container = document.querySelector('#posthoc');
+  container.innerHTML += `
+    <h4 class='posthoc-collapser'>${title}</h4>
+    <div class='posthoc-collapsed'>
+      <table id="${factorKey}-LETTER">
+        <thead>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+      <div class='posthoc-collapsed-item'>
+        <table id="${factorKey}-CRITICAL" data-count="${count}" class="${factorKey} check-dmrt">
+          <tbody>
+            <tr class="table">
+              <th>DMRT Table</th>
+            </tr>
+            <tr class="critical">
+              <th>Critical Range</th>
+            </tr>
+          </tbody>
+        </table>
+        <br>
+        <table id="${factorKey}-MATRIX" class="check-dmrt">
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+  // Menghitung Critical Range
+  const DMRTTable = document.querySelector(`#${factorKey}-CRITICAL .table`);
+  const criticalTable = document.querySelector(`#${factorKey}-CRITICAL .critical`);
+  for (let i = 2; i <= count; i++) {
+    // elementDMRTP.innerHTML += `<td>${i}</td>`;
+    DMRTTable.innerHTML += `<td>${jrStat.studentq.inv(0.05, i, dbg).toFixed(2)}</td>`;
+    criticalTable.innerHTML += `<td data-p="${i}">${(Math.sqrt(gkt / r) * jrStat.studentq.inv(0.05, i, dbg)).toFixed(2)}</td>`;
   }
-}
-function processDataDMRT() {
-  const input = document.getElementById('input-data').value.trim();
+  // Mengambil data mentah
+  const input = info.trim();
   const lines = input.split('\n');
-  dataMapDMRT = {};
-
+  let dataMapTHSD = {};
   lines.forEach(line => {
     const [perlakuan, nilai] = line.trim().split(/\s+/);
     const nilaiFloat = parseFloat(nilai);
-    dataMapDMRT[perlakuan] = nilaiFloat;
+    dataMapTHSD[perlakuan] = nilaiFloat;
   });
-
-  const sortedEntries = Object.entries(dataMapDMRT).sort((a, b) => a[1] - b[1]);
-
-  const jsonOutput = JSON.stringify(sortedEntries, null, 2);
-
-  const matrixTableBody = document.querySelector('#matrixTable tbody');
+  const sortedEntries = Object.entries(dataMapTHSD).sort((a, b) => a[1] - b[1]);
+  // Matrix
+  const matrixTableBody = document.querySelector(`#${factorKey}-MATRIX tbody`);
   const headerRow = document.createElement('tr');
-  headerRow.innerHTML = '<th></th>' + sortedEntries.map(entry => `<th>${entry[0]}</th>`).join('');
+  headerRow.innerHTML = `<th></th>` + sortedEntries.map(entry => `<th>${entry[0]}</th>`).join('');
   matrixTableBody.innerHTML = '';
   matrixTableBody.appendChild(headerRow);
-
   sortedEntries.forEach(([perlakuanA, nilaiA]) => {
     const row = document.createElement('tr');
     row.innerHTML = `<th>${perlakuanA}</th>`;
-
     sortedEntries.forEach(([perlakuanB, nilaiB]) => {
       const difference = (nilaiA - nilaiB).toFixed(2);
       if (difference < 0) {
         row.innerHTML += `<td class="gray">${difference}</td>`;
+      } else if (difference === "0.00") {
+        row.innerHTML += `<td class="green">${difference}</td>`;
       } else {
-        row.innerHTML += `<td>${difference}</td>`;
-      }
+        row.innerHTML += `<td data-matrix="${difference}">${difference}</td>`;
+      } 
     });
-
     matrixTableBody.appendChild(row);
   });
-
-  const rowtr = document.querySelectorAll("#matrixTable tbody tr");
+  // Memberi data-p dan data-value
+  const rowtr = document.querySelectorAll("[id*='-MATRIX'] tbody tr");
   rowtr.forEach((row) => {
     const cells = row.querySelectorAll("td");
     let zeroIndex = -1;
@@ -1899,149 +1689,72 @@ function processDataDMRT() {
     for (let i = zeroIndex - 1; i >= 0; i--) {
       const cell = cells[i];
       cell.setAttribute("data-p", p);
+      cell.setAttribute("data-value", Math.sqrt(gkt / r) * jrStat.studentq.inv(0.05, p, dbg));
+      if (Number(cell.getAttribute("data-matrix")) <= Number(cell.getAttribute("data-value"))) {
+        cell.classList.add("green");
+      }
       p++;
     }
   });
-
-  function checkGreen() {
-    const matrixTds = document.querySelectorAll('#matrixTable td');
-
-    matrixTds.forEach(matrixTd => {
-      const rawMatrixValue = matrixTd.textContent.trim();
-      const matrixValue = parseFloat(rawMatrixValue);
-      if (!isNaN(matrixValue) && matrixValue === 0) {
-        matrixTd.classList.add('green');
-        return;
-      }
-      const dataP = matrixTd.getAttribute('data-p');
-      if (!dataP) return;
-      const dmrtTd = document.querySelector(`tr.dmrt-calc td[data-p="${dataP}"]`);
-      if (!dmrtTd) return;
-      const rawDmrtValue = dmrtTd.textContent.trim();
-      const dmrtValue = parseFloat(rawDmrtValue);
-      if (!isNaN(matrixValue) && !isNaN(dmrtValue) && matrixValue <= dmrtValue) {
-        matrixTd.classList.add('green');
-      }
-    });
-  }
-  checkGreen();
-
-  const table = document.getElementById('matrixTable');
-  const rows = table.querySelectorAll('tbody tr');
-
-  const results = {};
-
-  rows.forEach((row, rowIndex) => {
-    if (rowIndex === 0) return;
-
-    const treatmentName = row.querySelector('th').textContent.trim();
-
-    const greenColumns = [];
-
-    const cells = row.querySelectorAll('td');
-    cells.forEach((cell, cellIndex) => {
-      if (cell.classList.contains('green')) {
-        greenColumns.push(cellIndex + 1);
-      }
-    });
-
-    results[treatmentName] = greenColumns.join(',');
+  // Mengambil nilai rata-rata dari info
+  const infoString = info;
+  const infoData = {};
+  infoString.trim().split('\n').forEach(line => {
+    const [key, value] = line.trim().split(' ');
+    infoData[key] = parseFloat(value);
   });
-
-  const labelMap = {};
-  const assigned = {};
-  let currentLabelCode = 'a'.charCodeAt(0);
-
-  function keysWithNumber(num) {
-    return Object.keys(results).filter(key =>
-      results[key].split(',').includes(String(num))
-    );
-  }
-
-  for (const key of Object.keys(results)) {
-    const nums = results[key].split(',');
-    const first = nums[0];
-
-    if (!labelMap[first]) {
-      const label = String.fromCharCode(currentLabelCode++);
-      labelMap[first] = label;
-
-      const relatedKeys = keysWithNumber(first);
-      for (const rk of relatedKeys) {
-        assigned[rk] = (assigned[rk] || '') + label;
+  // Membuat tabel letter
+  function generateLetterTable(matrixTableSelector, resultSelector) {
+    const matrixTable = document.querySelector(matrixTableSelector);
+    const resultDiv = document.querySelector(resultSelector);
+    const firstGreenCols = new Set();
+    const treatments = [];
+    const treatmentNotations = {};
+    const rows = matrixTable.querySelectorAll('tbody tr');
+    for (let i = 1; i < rows.length; i++) {
+      const th = rows[i].querySelector('th');
+      const treatment = th.textContent;
+      treatments.push(treatment);
+      const cells = rows[i].querySelectorAll('td');
+      const greens = [];
+      for (let j = 0; j < cells.length; j++) {
+        if (cells[j].classList.contains('green')) {
+          greens.push(j);
+          if (greens.length === 1) firstGreenCols.add(j);
+        }
       }
+      treatmentNotations[treatment] = greens;
     }
-  }
-
-  const merged = {};
-
-  for (const key in assigned) {
-    merged[key] = {
-      label: assigned[key],
-      value: dataMapDMRT[key]
-    };
-  }
-
-  const dataMapDMRTKeyOrder = Object.keys(dataMapDMRT);
-  const mergedCustomOrder = Object.keys(merged);
-
-  function renderTable(orderBy = 'dataMapDMRTKey', reverse = false) {
-    const tbody = document.querySelector("#letterTable tbody");
-    tbody.innerHTML = "";
-
-    let sortedKeys;
-
-    if (orderBy === 'merged') {
-      sortedKeys = [...mergedCustomOrder];
-    } else if (orderBy === 'dataMapDMRTKey') {
-      sortedKeys = dataMapDMRTKeyOrder.filter(k => merged[k]);
-    }
-
-    if (reverse) sortedKeys.reverse();
-
-    sortedKeys.forEach(key => {
-      const row = document.createElement("tr");
-
-      const tdKey = document.createElement("td");
-      tdKey.textContent = key;
-
-      const tdValue = document.createElement("td");
-      tdValue.textContent = merged[key].value;
-
-      const tdLabel = document.createElement("td");
-      tdLabel.textContent = merged[key].label;
-
-      row.appendChild(tdKey);
-      row.appendChild(tdValue);
-      row.appendChild(tdLabel);
-
-      tbody.appendChild(row);
+    const sortedCols = Array.from(firstGreenCols).sort((a, b) => a - b);
+    const colLetters = {};
+    sortedCols.forEach((col, i) => colLetters[col] = String.fromCharCode(97 + i));
+    let html = `
+      <table id="letterTable">
+        <thead>
+          <tr>
+            <th><span>${title}</span></th>
+            <th><span data-id='Nilai'>Value</span></th>
+            <th><span data-id='Notasi'>Letter</span></th>
+        </tr>
+        </thead>
+        <tbody>`;
+    treatments.forEach(treatment => {
+      const greens = treatmentNotations[treatment];
+      const letters = sortedCols.filter(col => greens.includes(col))
+        .map(col => colLetters[col])
+        .join('');
+      html += `
+        <tr>
+          <td>${treatment}</td>
+          <td>${infoData[treatment]}</td>
+          <td>${letters}</td>
+        </tr>`;
     });
+    resultDiv.innerHTML = html + `
+        </tbody>
+      </table>`;
   }
-
-  renderTable('merged', false);
-
-  let isMergedReversed = false;
-  let isDataReversed = false;
-
-  document.getElementById('renderbyMerged').onclick = function () {
-    renderTable('merged', !isMergedReversed);
-    isMergedReversed = !isMergedReversed;
-    this.classList.toggle('rev');
-    this.classList.remove('opacity');
-    document.getElementById('renderbyData').classList.add('opacity');
-  };
-
-  document.getElementById('renderbyData').onclick = function () {
-    renderTable('dataMapDMRTKey', isDataReversed);
-    isDataReversed = !isDataReversed;
-    this.classList.toggle('rev');
-    this.classList.remove('opacity');
-    document.getElementById('renderbyMerged').classList.add('opacity');
-  };
-
-  document.querySelectorAll('.output').forEach(el => el.classList.add('show'));
-
+  generateLetterTable(`#${factorKey}-MATRIX`, `#${factorKey}-LETTER`);
 }
 
 // ----- Posthoc : Student-Newman-Keuls -----
