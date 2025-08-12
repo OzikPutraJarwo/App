@@ -1507,7 +1507,142 @@ function countAnovaRAKF() {
   }
   // SK
   else if (selectedPosthoc === "sk") {
-    // in progress...
+    // Faktor A, Faktor B, dan Kombinasi AB
+    processSK('factorA', selectedFaktorAText, getData.info("FaktorA", "Hasil"));
+    processSK('factorB', selectedFaktorBText, getData.info("FaktorB", "Hasil"));
+    processSK('factorAB', '<span data-id="Kombinasi">Combination</span>: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, getData.info("FaktorA", "FaktorB", "Hasil"));
+    // Interaksi AB
+    document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'><span data-id='Interaksi'>Interaction</span>: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
+    const uniqueFaktorA = new Set();
+    const uniqueFaktorB = new Set();
+    const rows = document.querySelectorAll('#tableContainer tbody tr');
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 2) {
+        uniqueFaktorA.add(cells[0].textContent.trim());
+        uniqueFaktorB.add(cells[1].textContent.trim());
+      }
+    });
+    uniqueFaktorA.forEach(faktorA => {
+      const info = getData.info("FaktorA", "FaktorB", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorA));
+      if (info.length > 0) {
+        processSK(`leading_${faktorA}`, faktorA, info.join('\n'));
+      }
+    });
+    uniqueFaktorB.forEach(faktorB => {
+      const info = getData.info("FaktorB", "FaktorA", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorB));
+      if (info.length > 0) {
+        processSK(`leading_${faktorB}`, faktorB, info.join('\n'));
+      }
+    });
+    // Tabel Interaksi 
+    (function () {
+      const table = document.querySelector('#tableContainer table');
+      if (!table) return;
+      const rows = Array.from(table.querySelectorAll('tbody tr')).slice(1);
+      const headers = Array.from(table.querySelectorAll('th'));
+      const colIndex = {};
+      headers.forEach((th, i) => {
+        if (th.dataset.setting) {
+          colIndex[th.dataset.setting] = i;
+        }
+      });
+      const dataMap = {};
+      rows.forEach(tr => {
+        const cells = tr.querySelectorAll('td');
+        if (!cells.length) return;
+        const faktorA = cells[colIndex['FaktorA']].textContent.trim();
+        const faktorB = cells[colIndex['FaktorB']].textContent.trim();
+        const nilai = parseFloat(cells[colIndex['Hasil']].textContent.trim());
+        if (!dataMap[faktorB]) dataMap[faktorB] = {};
+        if (!dataMap[faktorB][faktorA]) dataMap[faktorB][faktorA] = [];
+        dataMap[faktorB][faktorA].push(nilai);
+      });
+      const faktorAList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorA']]?.textContent.trim()).filter(Boolean))];
+      const faktorBList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorB']]?.textContent.trim()).filter(Boolean))];
+      const newTable = document.createElement('table');
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      headRow.appendChild(document.createElement('th')).textContent = '×';
+      faktorAList.forEach(fa => {
+        const th = document.createElement('th');
+        th.colSpan = 2;
+        th.textContent = fa;
+        headRow.appendChild(th);
+      });
+      thead.appendChild(headRow);
+      newTable.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      faktorBList.forEach(fb => {
+        const avgRow = document.createElement('tr');
+        const fbCell = document.createElement('th');
+        fbCell.rowSpan = 2;
+        fbCell.textContent = fb;
+        avgRow.appendChild(fbCell);
+        faktorAList.forEach(fa => {
+          const avg = dataMap[fb]?.[fa] ? (dataMap[fb][fa].reduce((a, b) => a + b, 0) / dataMap[fb][fa].length) : 0;
+          const td1 = document.createElement('td');
+          td1.textContent = avg.toFixed(2);
+          const td2 = document.createElement('td');
+          td2.classList.add('x-kecil');
+          td2.dataset.pair = `${fb}${fa}`;
+          td2.textContent = 'x';
+          avgRow.appendChild(td1);
+          avgRow.appendChild(td2);
+        });
+        tbody.appendChild(avgRow);
+        const xRow = document.createElement('tr');
+        faktorAList.forEach(fa => {
+          const td = document.createElement('td');
+          td.colSpan = 2;
+          td.classList.add('x-besar');
+          td.dataset.pair = `${fa}${fb}`;
+          td.textContent = 'X';
+          xRow.appendChild(td);
+        });
+        tbody.appendChild(xRow);
+      });
+      newTable.appendChild(tbody);
+      const container = document.getElementById('interaction-table');
+      container.innerHTML = '';
+      container.appendChild(newTable);
+      const perFaktorContainer = document.createElement('div');
+      perFaktorContainer.classList.add('posthoc-collapsed-item');
+      container.appendChild(perFaktorContainer);
+      const posthocTables = document.querySelectorAll('#posthoc table[id^="leading_"][id$="-LETTER"]');
+      const notasiMap = {};
+      posthocTables.forEach(tbl => {
+        const trs = tbl.querySelectorAll('tbody tr');
+        trs.forEach(tr => {
+          const perlakuan = tr.cells[0].textContent.trim();
+          const notasi = tr.cells[2].textContent.trim();
+          notasiMap[perlakuan] = notasi;
+        });
+      });
+      document.querySelectorAll('#interaction-table .x-kecil').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      document.querySelectorAll('#interaction-table .x-besar').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      const target = container.querySelector('.posthoc-collapsed-item');
+      let nextSibling = container.nextElementSibling;
+      while (nextSibling) {
+        const temp = nextSibling;
+        nextSibling = nextSibling.nextElementSibling;
+        target.appendChild(temp);
+      }
+    })();
   }
 
 }
@@ -1607,7 +1742,7 @@ function processFLSD(title, factorKey, info, thit) {
             <th><span>${title}</span></th>
             <th><span data-id='Nilai'>Value</span></th>
             <th><span data-id='Notasi'>Letter</span></th>
-        </tr>
+          </tr>
         </thead>
         <tbody>`;
     treatments.forEach(treatment => {
@@ -2057,143 +2192,153 @@ function processSNK(title, factorKey, info, count, dbg, gkt, r) {
 }
 
 // ----- Posthoc : Scott Knott -----
-const chi2table = {
-  "0.05": [null, 3.84, 5.99, 7.81, 9.49, 11.07, 12.59, 14.07, 15.51, 16.92, 18.31],
-  "0.01": [null, 6.63, 9.21, 11.34, 13.28, 15.09, 16.81, 18.48, 20.09, 21.67, 23.21]
-}
-function getNotation(index) {
-  let label = '';
-  index++;
-  while (index > 0) {
-    let rem = (index - 1) % 26;
-    label = String.fromCharCode(97 + rem) + label; // 97 = 'a'
-    index = Math.floor((index - 1) / 26);
-  }
-  return label;
-}
-function parseInput(raw) {
-  const lines = raw.trim().split('\n');
-  const data = [];
-  for (let line of lines) {
-    let [nama, nilai] = line.trim().split(/\s+/);
-    if (nama && nilai && !isNaN(parseFloat(nilai))) {
-      data.push({ nama, nilai: parseFloat(nilai) });
+function processSK(factorKey, title, info){
+  const chi2table={
+    "0.05":[null,3.84,5.99,7.81,9.49,11.07,12.59,14.07,15.51,16.92,18.31],
+    "0.01":[null,6.63,9.21,11.34,13.28,15.09,16.81,18.48,20.09,21.67,23.21]
+  };
+  function getNotation(index){
+    let label='';
+    index++;
+    while(index>0){
+      let rem=(index-1)%26;
+      label=String.fromCharCode(97+rem)+label;
+      index=Math.floor((index-1)/26);
     }
+    return label;
   }
-  return data;
-}
-function mean(arr) {
-  if (arr.length === 0) return 0;
-  return arr.reduce((a, b) => a + b, 0) / arr.length;
-}
-function scottKnott(groups, alpha) {
-  let results = [];
-  for (let group of groups) {
-    if (group.length < 2) {
-      results.push({ homogen: true, group, lambda: null, chi2: null });
-      continue;
-    }
-
-    group = group.slice().sort((a, b) => a.nilai - b.nilai);
-
-    let n = group.length;
-    let totalMean = mean(group.map(x => x.nilai));
-
-    let bestSplit = null;
-    let maxLambda = -Infinity;
-    for (let i = 1; i < n; i++) {
-      let left = group.slice(0, i);
-      let right = group.slice(i);
-      let n1 = left.length, n2 = right.length;
-      let mean1 = mean(left.map(x => x.nilai));
-      let mean2 = mean(right.map(x => x.nilai));
-      // λ (lambda) = [n1*(mean1 - totalMean)^2 + n2*(mean2 - totalMean)^2]
-      let lambda = n1 * Math.pow(mean1 - totalMean, 2) + n2 * Math.pow(mean2 - totalMean, 2);
-      if (lambda > maxLambda) {
-        maxLambda = lambda;
-        bestSplit = { left, right, lambda };
+  function parseInput(raw){
+    const lines=raw.trim().split('\n');
+    const data=[];
+    for(let line of lines){
+      let [nama,nilai]=line.trim().split(/\s+/);
+      if(nama&&nilai&&!isNaN(parseFloat(nilai))){
+        data.push({nama,nilai:parseFloat(nilai)});
       }
     }
-
-    let db = 1;
-    let chi2 = chi2table[alpha][db];
-
-    if (maxLambda <= chi2) {
-      results.push({ homogen: true, group, lambda: maxLambda, chi2 });
-    } else {
-      let leftResults = scottKnott([bestSplit.left], alpha);
-      let rightResults = scottKnott([bestSplit.right], alpha);
-      results = results.concat(leftResults, rightResults);
-    }
+    return data;
   }
-  return results;
-}
-function renderResult(homogeneityGroups) {
-  let html;
-  let groupNum = 1;
-  for (let group of homogeneityGroups) {
-    html += `<tr><th colspan="2">Gugus ${groupNum}</th></tr>`;
-    for (let d of group.group) {
-      html += `<tr><td>${d.nama}</td><td>${d.nilai}</td></tr>`;
+  function mean(arr){
+    if(arr.length===0)return 0;
+    return arr.reduce((a,b)=>a+b,0)/arr.length;
+  }
+  function scottKnott(groups,alpha){
+    let results=[];
+    for(let group of groups){
+      if(group.length<2){
+        results.push({homogen:true,group,lambda:null,chi2:null});
+        continue;
+      }
+      group=group.slice().sort((a,b)=>a.nilai-b.nilai);
+      let n=group.length;
+      let totalMean=mean(group.map(x=>x.nilai));
+      let bestSplit=null;
+      let maxLambda=-Infinity;
+      for(let i=1;i<n;i++){
+        let left=group.slice(0,i);
+        let right=group.slice(i);
+        let n1=left.length,n2=right.length;
+        let mean1=mean(left.map(x=>x.nilai));
+        let mean2=mean(right.map(x=>x.nilai));
+        let lambda=n1*Math.pow(mean1-totalMean,2)+n2*Math.pow(mean2-totalMean,2);
+        if(lambda>maxLambda){
+          maxLambda=lambda;
+          bestSplit={left,right,lambda};
+        }
+      }
+      let db=1;
+      let chi2=chi2table[alpha][db];
+      if(maxLambda<=chi2){
+        results.push({homogen:true,group,lambda:maxLambda,chi2});
+      }else{
+        let leftResults=scottKnott([bestSplit.left],alpha);
+        let rightResults=scottKnott([bestSplit.right],alpha);
+        results=results.concat(leftResults,rightResults);
+      }
     }
-    let B0s = group.group.map(x => x.nilai);
-    html += `
-  <tr>
-    <th class="grayth">B<sub>0</sub></th>
-    <th class="grayth">${mean(B0s).toFixed(4)}</th>
-  </tr>
-  ${group.lambda !== null ? `
-  <tr>
-    <th class="grayth">λ</th>
-    <th class="grayth">${group.lambda.toFixed(4)}</th>
-  </tr>
-  <tr>
-    <th class="grayth">χ<sup>2</sup>(α, db=1)</th>
-    <th class="grayth">${group.chi2.toFixed(4)}</th>
-  </tr>
-  ` : ''} 
-  <tr>
-    <td colspan="2"></td>
-  </tr>
+    return results;
+  }
+  function renderResult(homogeneityGroups){
+    let html='';
+    let groupNum=1;
+    for(let group of homogeneityGroups){
+      html+=`<tr><th colspan="2">Gugus ${groupNum}</th></tr>`;
+      for(let d of group.group){
+        html+=`<tr><td>${d.nama}</td><td>${d.nilai}</td></tr>`;
+      }
+      let B0s=group.group.map(x=>x.nilai);
+      html+=`
+      <tr>
+        <th class="grayth">B<sub>0</sub></th>
+        <th class="grayth">${mean(B0s).toFixed(4)}</th>
+      </tr>
+      ${group.lambda!==null?`
+      <tr>
+        <th class="grayth">λ</th>
+        <th class="grayth">${group.lambda.toFixed(4)}</th>
+      </tr>
+      <tr>
+        <th class="grayth">χ<sup>2</sup>(α, db=1)</th>
+        <th class="grayth">${group.chi2.toFixed(4)}</th>
+      </tr>
+      `:''} 
+      <tr>
+        <td colspan="2"></td>
+      </tr>
+      `;
+      groupNum++;
+    }
+    return html;
+  }
+  function renderHasil(data,homogeneityGroups){
+    let notasiMap={};
+    let notasiIndex=0;
+    for(let group of homogeneityGroups){
+      for(let d of group.group){
+        notasiMap[d.nama]=getNotation(notasiIndex);
+      }
+      notasiIndex++;
+    }
+    let html='<tbody>';
+    for(let d of data){
+      html+=`<tr><td>${d.nama}</td><td>${d.nilai}</td><td>${notasiMap[d.nama]}</td></tr>`;
+    }
+    html+='</tbody>';
+    return html;
+  }
+  // Title
+  document.getElementById('posthoc-title').innerHTML="<span data-id='Uji Lanjut: Scott-Knott (SK)'>Post Hoc: Scott-Knott Test (SK)</span>";
+  // Container
+  const container=document.querySelector('#posthoc');
+  container.innerHTML+=`
+    <h4 class='posthoc-collapser'>${title}</h4>
+    <div class='posthoc-collapsed'>
+      <table id="${factorKey}-LETTER">
+        <thead>
+          <th><span>${title}</span></th>
+          <th><span data-id='Nilai'>Value</span></th>
+          <th><span data-id='Notasi'>Letter</span></th>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+      <div class='posthoc-collapsed-item'>
+        <table id="${factorKey}-MATRIX">
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
   `;
-    groupNum++;
-  }
-  return html;
-}
-function renderHasil(data, homogeneityGroups) {
-  let notasiMap = {};
-  let notasiIndex = 0;
-  for (let group of homogeneityGroups) {
-    for (let d of group.group) {
-      notasiMap[d.nama] = getNotation(notasiIndex);
-    }
-    notasiIndex++;
-  }
-  let html = '<tbody>';
-  for (let d of data) {
-    html += `<tr><td>${d.nama}</td><td>${d.nilai}</td><td>${notasiMap[d.nama]}</td></tr>`;
-  }
-  html += '</tbody>';
-  return html;
-}
-function processDataSK() {
-  const raw = document.getElementById('input-data').value;
   const alpha = "0.05";
-  const data = parseInput(raw);
-  if (data.length < 2) {
-    alert("Minimal 2 data diperlukan!");
-    return;
+  const data = parseInput(info);
+  const result = scottKnott([data],alpha);
+  document.querySelector(`#${factorKey}-MATRIX tbody`).innerHTML = renderResult(result);
+  const tbody = document.querySelector(`#${factorKey}-MATRIX tbody`);
+  if(tbody){
+    tbody.innerHTML = tbody.innerHTML.replace('undefined','');
   }
-  document.querySelectorAll('.output').forEach(el => {
-    el.classList.add('show');
-  });
-  const result = scottKnott([data], alpha);
-  document.querySelector('tbody.sk').innerHTML = renderResult(result);
-  const tbody = document.querySelector('tbody.sk');
-  if (tbody) {
-    tbody.innerHTML = tbody.innerHTML.replace('undefined', '');
-  }
-  document.querySelector('#letterTable tbody').innerHTML = renderHasil(data, result);
+  document.querySelector(`#${factorKey}-LETTER tbody`).innerHTML = renderHasil(data,result);
 }
 
 // Responsive Table
