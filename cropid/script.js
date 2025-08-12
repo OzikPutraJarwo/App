@@ -536,18 +536,26 @@ function escapeHTML(str) {
 
 // ----- RAL -----
 function countAnovaRAL() {
+  const anovaTitle = document.querySelector("#anova h3");
+  anovaTitle.innerHTML = `ANOVA: Completely Randomized Design (CRD)`;
+  anovaTitle.setAttribute("data-id", "Anova: Rancangan Acak Lengkap (RAL)")
+
   document.querySelector('table#anovaTable').innerHTML = `
     <thead>
       <tr>
-        <th>Sumber Keragaman</th>
-        <th>Derajat Bebas</th>
-        <th>Jumlah Kuadrat</th>
-        <th>Kuadrat Tengah</th>
-        <th>F Hitung</th>
-        <th>F Tabel 5%</th>
-        <th>Signifikansi</th>
+        <th rowspan='2' data-id='Sumber Keragaman'>Source of Variation</th>
+        <th rowspan='2' data-id='Derajat Bebas'>Degrees of Freedom</th>
+        <th rowspan='2' data-id='Jumlah Kuadrat'>Sum of Squares</th>
+        <th rowspan='2' data-id='Kuadrat Tengah'>Mean Square</th>
+        <th rowspan='2' data-id='F Hitung'>F Stat</th>
+        <th colspan='2' data-id='F Tabel'>F Table</th>
+        <th rowspan='2' data-id='Signifikansi'>Significance</th>
       </tr>
-    </thead>
+      <tr>
+        <th>5%</th>
+        <th>1%</th>
+      </tr>
+    </thead>  
     <tbody>
       <tr>
         <td>Perlakuan</td>
@@ -555,11 +563,12 @@ function countAnovaRAL() {
         <td class="Pjk"></td>
         <td class="Pkt"></td>
         <td class="Pfh"></td>
-        <td class="Pft"></td>
+        <td class="Pft5"></td>
+        <td class="Pft1"></td>
         <td class="Psg"></td>
       </tr>
       <tr>
-        <td>Galat</td>
+        <td data-id='Galat'>Residuals</td>
         <td class="Gdb"></td>
         <td class="Gjk"></td>
         <td class="Gkt"></td>
@@ -571,19 +580,28 @@ function countAnovaRAL() {
       </tr>
     </tbody>
   `;
-  const [cellkk, cellfk, cellgt, cellPdb, cellPjk, cellPkt, cellPfh, cellPft, cellPsg, cellGdb, cellGjk, cellGkt, cellTdb, cellTjk]
-    = ['kk', 'fk', 'gt', 'Pdb', 'Pjk', 'Pkt', 'Pfh', 'Pft', 'Psg', 'Gdb', 'Gjk', 'Gkt', 'Tdb', 'Tjk']
-      .map(cls => document.querySelector(`.${cls}`));
+  const [
+    cellkk, cellfk, cellgt,
+    cellPft5, cellPft1,
+    cellPdb, cellPjk, cellPkt, cellPfh, cellPsg,
+    cellGdb, cellGjk, cellGkt, cellTdb, cellTjk
+  ] = [
+    'kk', 'fk', 'gt',
+    'Pft5', 'Pft1',
+    'Pdb', 'Pjk', 'Pkt', 'Pfh', 'Psg',
+    'Gdb', 'Gjk', 'Gkt', 'Tdb', 'Tjk'
+  ]
+    .map(cls => document.querySelector(`.${cls}`));
 
-  const fk = getData.sum("Hasil") * getData.sum("Hasil") / (getData.count("Perlakuan") * getData.count("Ulangan"));
-  cellfk.innerHTML = fk;
-  cellgt.innerHTML = getData.sum("Hasil");
+  const fk = (getData.sum("Hasil") * getData.sum("Hasil")) / (getData.count("Ulangan") * (getData.count("Perlakuan")));
+  cellfk.innerHTML = fk.toFixed(2);
+  cellgt.innerHTML = getData.sumSquared("Hasil").toFixed(2);
 
   const Pdb = getData.count("Perlakuan") - 1;
   cellPdb.innerHTML = Pdb;
-  const Gdb = getData.count("Perlakuan") * (getData.count("Ulangan") - 1);
+  const Gdb = (getData.count("Ulangan") - 1) * getData.count("Perlakuan");
   cellGdb.innerHTML = Gdb;
-  const Tdb = getData.count("Perlakuan") * getData.count("Ulangan") - 1;
+  const Tdb = getData.count("Ulangan") * getData.count("Perlakuan") - 1;
   cellTdb.innerHTML = Tdb;
 
   const Pjk = getData.sumOfGroupedSquares("Perlakuan", "Hasil") / getData.count("Ulangan") - fk;
@@ -600,30 +618,64 @@ function countAnovaRAL() {
 
   const Pfh = Pkt / Gkt;
   cellPfh.innerHTML = Pfh.toFixed(2);
-  const Pft = jStat.centralF.inv(0.95, Pdb, Gdb);
-  cellPft.innerHTML = Pft.toFixed(2);
 
-  if (Pfh > Pft) {
+  const Pft5 = jStat.centralF.inv(0.95, Pdb, Gdb);
+  cellPft5.innerHTML = Pft5.toFixed(2);
+  const Pft1 = jStat.centralF.inv(0.99, Pdb, Gdb);
+  cellPft1.innerHTML = Pft1.toFixed(2);
+
+  if (Pfh > Pft1) {
+    cellPsg.innerHTML = "**"
+  } else if (Pfh > Pft5) {
     cellPsg.innerHTML = "*"
   } else {
-    cellPsg.innerHTML = "ns"
+    cellPsg.innerHTML = "<span data-id='tn'>ns</span>"
   }
 
   const kk = Math.sqrt(Gkt) / (getData.sum("Hasil") / (getData.count("Perlakuan") * getData.count("Ulangan"))) * 100;
   cellkk.innerHTML = kk.toFixed(0) + "%";
 
-  document.getElementById('input-data').value = getData.info("Perlakuan", "Hasil");
-  document.querySelector('#input-perlakuan').value = getData.count("Perlakuan");
-  document.querySelector('#input-ulangan').value = getData.count("Ulangan");
-  document.querySelector('#input-ktg').value = Gkt;
+  document.getElementById('posthoc').innerHTML = `<h3 id="posthoc-title"></h3>`;
+
+  // FLSD
+  if (selectedPosthoc === "bnt") {
+    // Nilai Tabel
+    table = (jStat.studentt.inv(1 - 0.05 / 2, Gdb));
+    // Nilai Hitung
+    thitP = (table * Math.sqrt((2 * Gkt) / getData.count("Ulangan")));
+    // Perlakuan
+    processFLSD(selectedPerlakuanText, 'Perlakuan', getData.info("Perlakuan", "Hasil"), thitP);
+  }
+  // THSD
+  else if (selectedPosthoc === "bnj") {
+    // Nilai Tabel
+    tableP = (jStat.tukey.inv(0.95, getData.count("Perlakuan"), Gdb));
+    // Nilai Hitung
+    thitP = (tableP * Math.sqrt(Gkt / getData.count("Ulangan")));
+    // Faktor A, Faktor B, dan Kombinasi AB
+    processTHSD(selectedPerlakuanText, 'Perlakuan', getData.info("Perlakuan", "Hasil"), thitP);
+  }
+  // DMRT
+  else if (selectedPosthoc === "dmrt") {
+    processDMRT(selectedPerlakuanText, 'Perlakuan', getData.info("Perlakuan", "Hasil"), getData.count("Perlakuan"), Gdb, Gkt, getData.count("Ulangan"));
+  }
+  // SNK
+  else if (selectedPosthoc === "snk") {
+    processSNK(selectedPerlakuanText, 'Perlakuan', getData.info("Perlakuan", "Hasil"), getData.count("Perlakuan"), Gdb, Gkt, getData.count("Ulangan"));
+  }
+  // SK
+  else if (selectedPosthoc === "sk") {
+    processSK('Perlakuan', selectedPerlakuanText, getData.info("Perlakuan", "Hasil"));
+  }
+
 }
 
 // ----- RAK -----
 
 function countAnovaRAK() {
   const anovaTitle = document.querySelector("#anova h3");
-  anovaTitle.innerHTML = `ANOVA: Randomized Block Design`;
-  anovaTitle.setAttribute("data-id", "Anova: Rancangan Acak Kelompok")
+  anovaTitle.innerHTML = `ANOVA: Randomized Block Design (RBD)`;
+  anovaTitle.setAttribute("data-id", "Anova: Rancangan Acak Kelompok (RAK)")
 
   document.querySelector('table#anovaTable').innerHTML = `
     <thead>
