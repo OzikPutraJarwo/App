@@ -255,7 +255,7 @@ function handleFile(event) {
   tableContainer.innerHTML = '';
   sheetSelectorContainer.style.display = 'none';
   settingsContainer.style.display = 'none';
-  resetSettings();
+  resetSettings();resetHeaders();
 
   const reader = new FileReader();
 
@@ -304,7 +304,7 @@ function displaySelectedSheet() {
   if (currentWorkbook) {
     const selectedSheetName = sheetSelect.value;
     displaySheet(currentWorkbook, selectedSheetName);
-    resetSettings();
+    resetSettings();resetHeaders();
     setupHeaderSelection();
   }
 }
@@ -494,6 +494,12 @@ function handleHeaderClick(event) {
 }
 
 function resetSettings() {
+  document.querySelector('.separator').classList.add('none');
+  document.querySelector('#anova').classList.remove('show');
+  document.querySelector('#posthoc').classList.add('none');
+}
+
+function resetHeaders() {
   selectedSettingType = null;
   selectedHeaders = { FaktorA: null, FaktorB: null, Perlakuan: null, Ulangan: null, Hasil: null };
   selectedFaktorAHeaderDisplay.textContent = '-';
@@ -509,9 +515,6 @@ function resetSettings() {
     e.classList.remove('selected-header');
   });
   document.querySelector('.run').classList.add('none');
-  document.querySelector('.separator').classList.add('none');
-  document.querySelector('#anova').classList.remove('show');
-  document.querySelector('#posthoc').classList.add('none');
 }
 
 const inputs = [
@@ -616,29 +619,37 @@ function countAnovaRAL() {
 }
 
 // ----- RAK -----
+
 function countAnovaRAK() {
+  const anovaTitle = document.querySelector("#anova h3");
+  anovaTitle.innerHTML = `ANOVA: Randomized Block Design`;
+  anovaTitle.setAttribute("data-id", "Anova: Rancangan Acak Kelompok")
+
   document.querySelector('table#anovaTable').innerHTML = `
     <thead>
       <tr>
-        <th>Sumber Keragaman</th>
-        <th>Derajat Bebas</th>
-        <th>Jumlah Kuadrat</th>
-        <th>Kuadrat Tengah</th>
-        <th>F Hitung</th>
-        <th>F Tabel 5%</th>
-        <th>F Tabel 1%</th>
-        <th>Signifikansi</th>
+        <th rowspan='2' data-id='Sumber Keragaman'>Source of Variation</th>
+        <th rowspan='2' data-id='Derajat Bebas'>Degrees of Freedom</th>
+        <th rowspan='2' data-id='Jumlah Kuadrat'>Sum of Squares</th>
+        <th rowspan='2' data-id='Kuadrat Tengah'>Mean Square</th>
+        <th rowspan='2' data-id='F Hitung'>F Stat</th>
+        <th colspan='2' data-id='F Tabel'>F Table</th>
+        <th rowspan='2' data-id='Signifikansi'>Significance</th>
       </tr>
-    </thead>
+      <tr>
+        <th>5%</th>
+        <th>1%</th>
+      </tr>
+    </thead>  
     <tbody>
       <tr>
-        <td>Kelompok</td>
+        <td data-id='Blok'>Block</td>
         <td class="Udb"></td>
         <td class="Ujk"></td>
         <td class="Ukt"></td>
         <td class="Ufh"></td>
-        <td class="Ft5" rowspan="2"></td>
-        <td class="Ft1" rowspan="2"></td>
+        <td class="Uft5"></td>
+        <td class="Uft1"></td>
         <td class="Usg"></td>
       </tr>
       <tr>
@@ -647,10 +658,12 @@ function countAnovaRAK() {
         <td class="Pjk"></td>
         <td class="Pkt"></td>
         <td class="Pfh"></td>
+        <td class="Pft5"></td>
+        <td class="Pft1"></td>
         <td class="Psg"></td>
       </tr>
       <tr>
-        <td>Galat</td>
+        <td data-id='Galat'>Residuals</td>
         <td class="Gdb"></td>
         <td class="Gjk"></td>
         <td class="Gkt"></td>
@@ -662,79 +675,124 @@ function countAnovaRAK() {
       </tr>
     </tbody>
   `;
-  const [cellkk, cellfk, cellgt, cellPdb, cellPjk, cellPkt, cellPfh, cellFt5, cellFt1, cellPsg, cellUdb, cellUjk, cellUkt, cellUfh, cellUft, cellUsg, cellGdb, cellGjk, cellGkt, cellTdb, cellTjk]
-    = ['kk', 'fk', 'gt', 'Pdb', 'Pjk', 'Pkt', 'Pfh', 'Ft5', 'Ft1', 'Psg', 'Udb', 'Ujk', 'Ukt', 'Ufh', 'Uft', 'Usg', 'Gdb', 'Gjk', 'Gkt', 'Tdb', 'Tjk']
-      .map(cls => document.querySelector(`.${cls}`));
+  const [
+    cellkk, cellfk, cellgt,
+    cellUdb, cellUjk, cellUkt, cellUfh, cellUft5, cellUft1, cellUsg,
+    cellPft5, cellPft1,
+    cellPdb, cellPjk, cellPkt, cellPfh, cellPsg,
+    cellGdb, cellGjk, cellGkt, cellTdb, cellTjk
+  ] = [
+    'kk', 'fk', 'gt',
+    'Udb', 'Ujk', 'Ukt', 'Ufh', 'Uft5', 'Uft1', 'Usg',
+    'Pft5', 'Pft1',
+    'Pdb', 'Pjk', 'Pkt', 'Pfh', 'Psg',
+    'Gdb', 'Gjk', 'Gkt', 'Tdb', 'Tjk'
+  ]
+    .map(cls => document.querySelector(`.${cls}`));
 
-  const fk = getData.sum("Hasil") * getData.sum("Hasil") / (getData.count("Perlakuan") * getData.count("Ulangan"));
+  const fk = (getData.sum("Hasil") * getData.sum("Hasil")) / (getData.count("Ulangan") * (getData.count("Perlakuan")));
   cellfk.innerHTML = fk.toFixed(2);
-  cellgt.innerHTML = getData.sum("Hasil").toFixed(2);
+  cellgt.innerHTML = getData.sumSquared("Hasil").toFixed(2);
 
-  const Pdb = getData.count("Perlakuan") - 1;
-  cellPdb.innerHTML = Pdb;
   const Udb = getData.count("Ulangan") - 1;
   cellUdb.innerHTML = Udb;
-  const Gdb = (getData.count("Perlakuan") - 1) * (getData.count("Ulangan") - 1);
+  const Pdb = getData.count("Perlakuan") - 1;
+  cellPdb.innerHTML = Pdb;
+  const Gdb = (getData.count("Ulangan") - 1) * (getData.count("Perlakuan") - 1);
   cellGdb.innerHTML = Gdb;
-  const Tdb = getData.count("Perlakuan") * getData.count("Ulangan") - 1;
+  const Tdb = getData.count("Ulangan") * getData.count("Perlakuan") - 1;
   cellTdb.innerHTML = Tdb;
 
-  const Pjk = getData.sumOfGroupedSquares("Perlakuan", "Hasil") / getData.count("Ulangan") - fk;
-  cellPjk.innerHTML = Pjk.toFixed(2);
   const Ujk = getData.sumOfGroupedSquares("Ulangan", "Hasil") / getData.count("Perlakuan") - fk;
   cellUjk.innerHTML = Ujk.toFixed(2);
+  const Pjk = getData.sumOfGroupedSquares("Perlakuan", "Hasil") / getData.count("Ulangan") - fk;
+  cellPjk.innerHTML = Pjk.toFixed(2);
   const Tjk = getData.sumSquared("Hasil") - fk;
   cellTjk.innerHTML = Tjk.toFixed(2);
-  const Gjk = Tjk - Pjk - Ujk;
+  const Gjk = Tjk - Ujk - Pjk;
   cellGjk.innerHTML = Gjk.toFixed(2);
 
-  const Pkt = Pjk / Pdb;
-  cellPkt.innerHTML = Pkt.toFixed(2);
   const Ukt = Ujk / Udb;
   cellUkt.innerHTML = Ukt.toFixed(2);
+  const Pkt = Pjk / Pdb;
+  cellPkt.innerHTML = Pkt.toFixed(2);
   const Gkt = Gjk / Gdb;
   cellGkt.innerHTML = Gkt.toFixed(2);
 
-  const Pfh = Pkt / Gkt;
-  cellPfh.innerHTML = Pfh.toFixed(2);
   const Ufh = Ukt / Gkt;
   cellUfh.innerHTML = Ufh.toFixed(2);
+  const Pfh = Pkt / Gkt;
+  cellPfh.innerHTML = Pfh.toFixed(2);
 
-  const ft5 = jStat.centralF.inv(0.95, Pdb, Gdb);
-  cellFt5.innerHTML = ft5.toFixed(2);
-  const ft1 = jStat.centralF.inv(0.99, Pdb, Gdb);
-  cellFt1.innerHTML = ft1.toFixed(2);
+  const Uft5 = jStat.centralF.inv(0.95, Udb, Gdb);
+  cellUft5.innerHTML = Uft5.toFixed(2);
+  const Uft1 = jStat.centralF.inv(0.99, Udb, Gdb);
+  cellUft1.innerHTML = Uft1.toFixed(2);
 
-  if (Pfh > ft1) {
-    cellPsg.innerHTML = "**"
-  } else if (Pfh > ft5) {
-    cellPsg.innerHTML = "*"
-  } else {
-    cellPsg.innerHTML = "ns"
-  }
+  const Pft5 = jStat.centralF.inv(0.95, Pdb, Gdb);
+  cellPft5.innerHTML = Pft5.toFixed(2);
+  const Pft1 = jStat.centralF.inv(0.99, Pdb, Gdb);
+  cellPft1.innerHTML = Pft1.toFixed(2);
 
-  if (Ufh > ft1) {
-    cellPsg.innerHTML = "**"
-  } else if (Ufh > ft5) {
+  if (Ufh > Uft1) {
+    cellUsg.innerHTML = "**"
+  } else if (Ufh > Uft5) {
     cellUsg.innerHTML = "*"
   } else {
-    cellUsg.innerHTML = "ns"
+    cellUsg.innerHTML = "<span data-id='tn'>ns</span>"
+  }
+
+  if (Pfh > Pft1) {
+    cellPsg.innerHTML = "**"
+  } else if (Pfh > Pft5) {
+    cellPsg.innerHTML = "*"
+  } else {
+    cellPsg.innerHTML = "<span data-id='tn'>ns</span>"
   }
 
   const kk = Math.sqrt(Gkt) / (getData.sum("Hasil") / (getData.count("Perlakuan") * getData.count("Ulangan"))) * 100;
   cellkk.innerHTML = kk.toFixed(0) + "%";
 
-  document.getElementById('input-data').value = getData.info("Perlakuan", "Hasil");
-  document.querySelector('#input-perlakuan').value = getData.count("Perlakuan");
-  document.querySelector('#input-ulangan').value = getData.count("Ulangan");
-  document.querySelector('#input-ktg').value = Gkt;
+  document.getElementById('posthoc').innerHTML = `<h3 id="posthoc-title"></h3>`;
+
+  // FLSD
+  if (selectedPosthoc === "bnt") {
+    // Nilai Tabel
+    table = (jStat.studentt.inv(1 - 0.05 / 2, Gdb));
+    // Nilai Hitung
+    thitP = (table * Math.sqrt((2 * Gkt) / getData.count("Ulangan")));
+    // Perlakuan
+    processFLSD(selectedPerlakuanText, 'Perlakuan', getData.info("Perlakuan", "Hasil"), thitP);
+  }
+  // THSD
+  else if (selectedPosthoc === "bnj") {
+    // Nilai Tabel
+    tableP = (jStat.tukey.inv(0.95, getData.count("Perlakuan"), Gdb));
+    // Nilai Hitung
+    thitP = (tableP * Math.sqrt(Gkt / getData.count("Ulangan")));
+    // Faktor A, Faktor B, dan Kombinasi AB
+    processTHSD(selectedPerlakuanText, 'Perlakuan', getData.info("Perlakuan", "Hasil"), thitP);
+  }
+  // DMRT
+  else if (selectedPosthoc === "dmrt") {
+    processDMRT(selectedPerlakuanText, 'Perlakuan', getData.info("Perlakuan", "Hasil"), getData.count("Perlakuan"), Gdb, Gkt, getData.count("Ulangan"));
+  }
+  // SNK
+  else if (selectedPosthoc === "snk") {
+    processSNK(selectedPerlakuanText, 'Perlakuan', getData.info("Perlakuan", "Hasil"), getData.count("Perlakuan"), Gdb, Gkt, getData.count("Ulangan"));
+  }
+  // SK
+  else if (selectedPosthoc === "sk") {
+    processSK('Perlakuan', selectedPerlakuanText, getData.info("Perlakuan", "Hasil"));
+  }
+
 }
 
 // ----- RAK-F -----
 function countAnovaRAKF() {
   const anovaTitle = document.querySelector("#anova h3");
   anovaTitle.innerHTML = `ANOVA: Randomized Block Design (2 Factors)`;
-  anovaTitle.setAttribute("data-id", "Anova: Rancangan Acak Lengkap (2 Faktor)")
+  anovaTitle.setAttribute("data-id", "Anova: Rancangan Acak Kelompok (2 Faktor)")
 
   document.querySelector('table#anovaTable').innerHTML = `
     <thead>
