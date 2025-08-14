@@ -346,19 +346,19 @@ th#renderbyMerged svg {
   overflow: auto;
 }
 
-#buttonContainer .faktorial {
+#buttonContainer .faktorial, #buttonContainer .bujursangkar {
   display: none;
 }
 
-#buttonContainer.factorial {
+#buttonContainer.factorial, #buttonContainer.bujursangkar {
   grid-template-columns: 1fr 1fr 1fr 1fr;
 }
 
-#buttonContainer.factorial #perlakuanBtn {
+#buttonContainer.factorial #perlakuanBtn, #buttonContainer.bujursangkar #ulanganBtn {
   display: none;
 }
 
-#buttonContainer.factorial .faktorial {
+#buttonContainer.factorial .faktorial, #buttonContainer.bujursangkar .bujursangkar {
   display: grid;
 }
 

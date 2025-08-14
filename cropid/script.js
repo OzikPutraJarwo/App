@@ -218,28 +218,41 @@ const fileContainer = document.querySelector('.file-container');
 const sheetSelectorContainer = document.getElementById('sheetSelectorContainer');
 const sheetSelect = document.getElementById('sheetSelect');
 const settingsContainer = document.getElementById('settingsContainer');
+
 const perlakuanBtn = document.getElementById('perlakuanBtn');
 const faktorABtn = document.getElementById('faktoraBtn');
 const faktorBBtn = document.getElementById('faktorbBtn');
+const barisBtn = document.getElementById('barisBtn');
+const kolomBtn = document.getElementById('kolomBtn');
+
 const ulanganBtn = document.getElementById('ulanganBtn');
 const hasilBtn = document.getElementById('hasilBtn');
+
 const selectedFaktorAHeaderDisplay = document.getElementById('selectedFaktorAHeader');
 const selectedFaktorBHeaderDisplay = document.getElementById('selectedFaktorBHeader');
 const selectedPerlakuanHeaderDisplay = document.getElementById('selectedPerlakuanHeader');
+const selectedBarisHeaderDisplay = document.getElementById('selectedBarisHeader');
+const selectedKolomHeaderDisplay = document.getElementById('selectedKolomHeader');
+
 let selectedFaktorAText;
 let selectedFaktorBText;
 let selectedPerlakuanText;
+let selectedBarisText;
+let selectedKolomText;
+
 const selectedUlanganHeaderDisplay = document.getElementById('selectedUlanganHeader');
 const selectedHasilHeaderDisplay = document.getElementById('selectedHasilHeader');
 
 let currentWorkbook = null;
 let currentTableData = [];
 let selectedSettingType = null;
-let selectedHeaders = { FaktorA: null, FaktorB: null, Perlakuan: null, Ulangan: null, Hasil: null };
+let selectedHeaders = { FaktorA: null, FaktorB: null, Perlakuan: null, Baris: null, Kolom: null, Ulangan: null, Hasil: null };
 
 perlakuanBtn.addEventListener('click', () => activateSetting('Perlakuan'));
 faktorABtn.addEventListener('click', () => activateSetting('FaktorA'));
 faktorBBtn.addEventListener('click', () => activateSetting('FaktorB'));
+barisBtn.addEventListener('click', () => activateSetting('Baris'));
+kolomBtn.addEventListener('click', () => activateSetting('Kolom'));
 ulanganBtn.addEventListener('click', () => activateSetting('Ulangan'));
 hasilBtn.addEventListener('click', () => activateSetting('Hasil'));
 
@@ -396,8 +409,13 @@ document.getElementById('jenis-anova').addEventListener('change', function (even
   selectedDesign = event.target.value;
   if (selectedDesign === "ral" || selectedDesign === "rak") {
     document.getElementById('buttonContainer').classList.remove('factorial');
+    document.getElementById('buttonContainer').classList.remove('bujursangkar');
   } else if (selectedDesign === "rakf" || selectedDesign === "ralf") {
     document.getElementById('buttonContainer').classList.add('factorial');
+    document.getElementById('buttonContainer').classList.remove('bujursangkar');
+  } else if (selectedDesign === "rbsl") {
+    document.getElementById('buttonContainer').classList.remove('factorial');
+    document.getElementById('buttonContainer').classList.add('bujursangkar');
   }
 });
 
@@ -430,6 +448,8 @@ function handleHeaderClick(event) {
     Hasil: selectedHasilHeaderDisplay,
     FaktorA: selectedFaktorAHeaderDisplay,
     FaktorB: selectedFaktorBHeaderDisplay,
+    Baris: selectedBarisHeaderDisplay,
+    Kolom: selectedKolomHeaderDisplay,
   };
 
   if (headerMap[selectedSettingType]) {
@@ -454,12 +474,19 @@ function handleHeaderClick(event) {
       document.querySelector('.run').classList.remove('none');
       smoothScroll('.run', top = 75);
     }
+  } else if (selectedDesign === "rbsl") {
+    if (selectedHeaders.Perlakuan && selectedHeaders.Baris && selectedHeaders.Kolom && selectedHeaders.Hasil) {
+      document.querySelector('.run').classList.remove('none');
+      smoothScroll('.run', top = 75);
+    }
   }
 
   document.querySelector('.run').addEventListener('click', () => {
     selectedFaktorAText = selectedFaktorAHeaderDisplay.textContent;
     selectedFaktorBText = selectedFaktorBHeaderDisplay.textContent;
     selectedPerlakuanText = selectedPerlakuanHeaderDisplay.textContent;
+    selectedBarisText = selectedBarisHeaderDisplay.textContent;
+    selectedKolomText = selectedKolomHeaderDisplay.textContent;
     document.querySelector('.separator').classList.remove('none');
     document.querySelector('.anova').classList.add('show');
     document.querySelector('#posthoc').classList.remove('none');
@@ -472,6 +499,8 @@ function handleHeaderClick(event) {
       countAnovaRALF();
     } else if (selectedDesign === "rakf") {
       countAnovaRAKF();
+    } else if (selectedDesign === "rbsl") {
+      countAnovaRBSL();
     }
     document.querySelectorAll('.posthoc-collapser').forEach(c => {
       c.innerHTML += `<div class='posthoc-collapser-item'><img src='../icon/arrow-down.png'></div>`;
@@ -503,10 +532,12 @@ function resetSettings() {
 
 function resetHeaders() {
   selectedSettingType = null;
-  selectedHeaders = { FaktorA: null, FaktorB: null, Perlakuan: null, Ulangan: null, Hasil: null };
+  selectedHeaders = { FaktorA: null, FaktorB: null, Perlakuan: null, Baris: null, Kolom: null, Ulangan: null, Hasil: null };
   selectedFaktorAHeaderDisplay.textContent = '-';
   selectedFaktorBHeaderDisplay.textContent = '-';
   selectedPerlakuanHeaderDisplay.textContent = '-';
+  selectedBarisHeaderDisplay.textContent = '-';
+  selectedKolomHeaderDisplay.textContent = '-';
   selectedUlanganHeaderDisplay.textContent = '-';
   selectedHasilHeaderDisplay.textContent = '-';
   document.querySelectorAll('.setting-button').forEach(btn => {
@@ -2639,6 +2670,202 @@ function countAnovaRAKF() {
         target.appendChild(temp);
       }
     })();
+  }
+
+}
+
+// ----- RBSL -----
+function countAnovaRBSL() {
+  const anovaTitle = document.querySelector("#anova h3");
+  anovaTitle.innerHTML = `ANOVA: Latin Square Design (LSD)`;
+  anovaTitle.setAttribute("data-id", "Anova: Rancangan Bujur Sangkar Latin (RBSL)")
+
+  document.querySelector('table#anovaTable').innerHTML = `
+    <thead>
+      <tr>
+        <th rowspan='2' data-id='Sumber Keragaman'>Source of Variation</th>
+        <th rowspan='2' data-id='Derajat Bebas'>Degrees of Freedom</th>
+        <th rowspan='2' data-id='Jumlah Kuadrat'>Sum of Squares</th>
+        <th rowspan='2' data-id='Kuadrat Tengah'>Mean Square</th>
+        <th rowspan='2' data-id='F Hitung'>F Stat</th>
+        <th colspan='2' data-id='F Tabel'>F Table</th>
+        <th rowspan='2' data-id='Signifikansi'>Significance</th>
+      </tr>
+      <tr>
+        <th>5%</th>
+        <th>1%</th>
+      </tr>
+    </thead>  
+    <tbody>
+      <tr>
+        <td>${selectedBarisText}</td>
+        <td class="Barisdb"></td>
+        <td class="Barisjk"></td>
+        <td class="Bariskt"></td>
+        <td class="Barisfh"></td>
+        <td class="Barisft5"></td>
+        <td class="Barisft1"></td>
+        <td class="Barissg"></td>
+      </tr>
+      <tr>
+        <td>${selectedKolomText}</td>
+        <td class="Kolomdb"></td>
+        <td class="Kolomjk"></td>
+        <td class="Kolomkt"></td>
+        <td class="Kolomfh"></td>
+        <td class="Kolomft5"></td>
+        <td class="Kolomft1"></td>
+        <td class="Kolomsg"></td>
+      </tr>
+      <tr>
+        <td>${selectedPerlakuanText}</td>
+        <td class="Perlakuandb"></td>
+        <td class="Perlakuanjk"></td>
+        <td class="Perlakuankt"></td>
+        <td class="Perlakuanfh"></td>
+        <td class="Perlakuanft5"></td>
+        <td class="Perlakuanft1"></td>
+        <td class="Perlakuansg"></td>
+      </tr>
+      <tr>
+        <td data-id='Galat'>Residuals</td>
+        <td class="Gdb"></td>
+        <td class="Gjk"></td>
+        <td class="Gkt"></td>
+      </tr>
+      <tr>
+        <td>Total</td>
+        <td class="Tdb"></td>
+        <td class="Tjk"></td>
+      </tr>
+    </tbody>
+  `;
+  const [
+    cellkk, cellfk, cellgt,
+    cellBarisft5, cellBarisft1, cellKolomft5, cellKolomft1, cellPerlakuanft5, cellPerlakuanft1,
+    cellBarisdb, cellBarisjk, cellBariskt, cellBarisfh, cellBarissg,
+    cellKolomdb, cellKolomjk, cellKolomkt, cellKolomfh, cellKolomsg,
+    cellPerlakuandb, cellPerlakuanjk, cellPerlakuankt, cellPerlakuanfh, cellPerlakuansg,
+    cellGdb, cellGjk, cellGkt, cellTdb, cellTjk
+  ] = [
+    'kk', 'fk', 'gt',
+    'Barisft5', 'Barisft1', 'Kolomft5', 'Kolomft1', 'Perlakuanft5', 'Perlakuanft1',
+    'Barisdb', 'Barisjk', 'Bariskt', 'Barisfh', 'Barissg',
+    'Kolomdb', 'Kolomjk', 'Kolomkt', 'Kolomfh', 'Kolomsg',
+    'Perlakuandb', 'Perlakuanjk', 'Perlakuankt', 'Perlakuanfh', 'Perlakuansg',
+    'Gdb', 'Gjk', 'Gkt', 'Tdb', 'Tjk'
+  ]
+    .map(cls => document.querySelector(`.${cls}`));
+
+  const fk = (getData.sum("Hasil") * getData.sum("Hasil")) / ((getData.count("Baris") * getData.count("Kolom")));
+  cellfk.innerHTML = fk.toFixed(2);
+  cellgt.innerHTML = getData.sumSquared("Hasil").toFixed(2);
+
+  const Barisdb = getData.count("Baris") - 1;
+  cellBarisdb.innerHTML = Barisdb;
+  const Kolomdb = getData.count("Kolom") - 1;
+  cellKolomdb.innerHTML = Kolomdb;
+  const Perlakuandb = getData.count("Perlakuan") - 1;
+  cellPerlakuandb.innerHTML = Perlakuandb;
+  const Gdb = (getData.count("Baris") - 1) * (getData.count("Kolom") - 2);
+  cellGdb.innerHTML = Gdb;
+  const Tdb = getData.count("Baris") * getData.count("Kolom") - 1;
+  cellTdb.innerHTML = Tdb;
+
+  const Barisjk = getData.sumOfGroupedSquares("Baris", "Hasil") / getData.count("Baris") - fk;
+  cellBarisjk.innerHTML = Barisjk.toFixed(2);
+  const Kolomjk = getData.sumOfGroupedSquares("Kolom", "Hasil") / getData.count("Kolom") - fk;
+  cellKolomjk.innerHTML = Kolomjk.toFixed(2);
+  const Perlakuanjk = getData.sumOfGroupedSquares("Perlakuan", "Hasil") / getData.count("Perlakuan") - fk;
+  cellPerlakuanjk.innerHTML = Perlakuanjk.toFixed(2);
+  const Tjk = getData.sumSquared("Hasil") - fk;
+  cellTjk.innerHTML = Tjk.toFixed(2);
+  const Gjk = Tjk - Barisjk - Kolomjk - Perlakuanjk;
+  cellGjk.innerHTML = Gjk.toFixed(2);
+
+  const Bariskt = Barisjk / Barisdb;
+  cellBariskt.innerHTML = Bariskt.toFixed(2);
+  const Kolomkt = Kolomjk / Kolomdb;
+  cellKolomkt.innerHTML = Kolomkt.toFixed(2);
+  const Perlakuankt = Perlakuanjk / Perlakuandb;
+  cellPerlakuankt.innerHTML = Perlakuankt.toFixed(2);
+  const Gkt = Gjk / Gdb;
+  cellGkt.innerHTML = Gkt.toFixed(2);
+
+  const Barisfh = Bariskt / Gkt;
+  cellBarisfh.innerHTML = Barisfh.toFixed(2);
+  const Kolomfh = Kolomkt / Gkt;
+  cellKolomfh.innerHTML = Kolomfh.toFixed(2);
+  const Perlakuanfh = Perlakuankt / Gkt;
+  cellPerlakuanfh.innerHTML = Perlakuanfh.toFixed(2);
+
+  const Barisft5 = jStat.centralF.inv(0.95, Barisdb, Gdb);
+  cellBarisft5.innerHTML = Barisft5.toFixed(2);
+  const Barisft1 = jStat.centralF.inv(0.99, Barisdb, Gdb);
+  cellBarisft1.innerHTML = Barisft1.toFixed(2);
+
+  const Kolomft5 = jStat.centralF.inv(0.95, Kolomdb, Gdb);
+  cellKolomft5.innerHTML = Kolomft5.toFixed(2);
+  const Kolomft1 = jStat.centralF.inv(0.99, Kolomdb, Gdb);
+  cellKolomft1.innerHTML = Kolomft1.toFixed(2);
+
+  const Perlakuanft5 = jStat.centralF.inv(0.95, Perlakuandb, Gdb);
+  cellPerlakuanft5.innerHTML = Perlakuanft5.toFixed(2);
+  const Perlakuanft1 = jStat.centralF.inv(0.99, Perlakuandb, Gdb);
+  cellPerlakuanft1.innerHTML = Perlakuanft1.toFixed(2);
+
+  if (Barisfh > Barisft1) {
+    cellBarissg.innerHTML = "**"
+  } else if (Barisfh > Barisft5) {
+    cellBarissg.innerHTML = "*"
+  } else {
+    cellBarissg.innerHTML = "<span data-id='tn'>ns</span>"
+  }
+
+  if (Kolomfh > Kolomft1) {
+    cellKolomsg.innerHTML = "**"
+  } else if (Kolomfh > Kolomft5) {
+    cellKolomsg.innerHTML = "*"
+  } else {
+    cellKolomsg.innerHTML = "<span data-id='tn'>ns</span>"
+  }
+
+  if (Perlakuanfh > Perlakuanft1) {
+    cellPerlakuansg.innerHTML = "**"
+  } else if (Perlakuanfh > Perlakuanft5) {
+    cellPerlakuansg.innerHTML = "*"
+  } else {
+    cellPerlakuansg.innerHTML = "<span data-id='tn'>ns</span>"
+  }
+
+  const kk = Math.sqrt(Gkt) / (getData.sum("Hasil") / (getData.count("Baris") * getData.count("Kolom") * getData.count("Perlakuan"))) * 100;
+  cellkk.innerHTML = kk.toFixed(0) + "%";
+
+  document.getElementById('posthoc').innerHTML = `<h3 id="posthoc-title"></h3>`;
+
+  // FLSD
+  if (selectedPosthoc === "bnt") {
+    table = (jStat.studentt.inv(1 - 0.05 / 2, Gdb));
+    thit = (table * Math.sqrt((2 * Gkt) / getData.count("Perlakuan")));
+    processFLSD(selectedPerlakuanText, 'Perlakuan', getData.info("Perlakuan", "Hasil"), thit);
+  }
+  // THSD
+  else if (selectedPosthoc === "bnj") {
+    table = (jStat.tukey.inv(0.95, getData.count("Perlakuan"), Gdb));
+    thit = (table * Math.sqrt(Gkt / getData.count("Perlakuan")));
+    processTHSD(selectedPerlakuanText, 'Perlakuan', getData.info("Perlakuan", "Hasil"), thit);
+  }
+  // DMRT
+  else if (selectedPosthoc === "dmrt") {
+    processDMRT(selectedPerlakuanText, 'Perlakuan', getData.info("Perlakuan", "Hasil"), getData.count("Perlakuan"), Gdb, Gkt, getData.count("Perlakuan"));
+  }
+  // SNK
+  else if (selectedPosthoc === "snk") {
+    processSNK(selectedPerlakuanText, 'Perlakuan', getData.info("Perlakuan", "Hasil"), getData.count("Perlakuan"), Gdb, Gkt, getData.count("Perlakuan"));
+  }
+  // SK
+  else if (selectedPosthoc === "sk") {
+    processSK('Perlakuan', selectedPerlakuanText, getData.info("Perlakuan", "Hasil"));
   }
 
 }

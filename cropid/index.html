@@ -99,9 +99,9 @@
                 <option value="ralf" data-id="Rancangan Acak Lengkap Faktorial (RAL-F)">Factorial Completely Randomized Design (F-CRD)</option>
                 <option value="rak" data-id="Rancangan Acak Kelompok (RAK)">Randomized Block Design (RBD)</option>
                 <option value="rakf" data-id="Rancangan Acak Kelompok Faktorial (RAK-F)">Factorial Randomized Block Design (F-RBD)</option>
+                <option value="rbsl" data-id="Rancangan Bujur Sangkar Latin (RBSL)">Latin Square Design (LSD)</option>
                 <option value="rpt" disabled data-id="Rancangan Petak Terbagi (RPT)">Split Plot Design (SPD)</option>
                 <option value="rptf" disabled data-id="Rancangan Petak Terbagi Faktorial (RPT-F)">Factorial Split Plot Design (FSPD)</option>
-                <option value="rbsl" disabled data-id="Rancangan Bujur Sangkar Latin (RBSL)">Latin Square Design (LSD)</option>
                 <option value="ra" disabled data-id="Rancangan Beralih (Cross-over)">Cross-over Design (COD)</option>
               </select>
             </div>
@@ -146,6 +146,12 @@
           </div>
           <div class="column" id="settingsContainer" style="display: none;">
             <div id="buttonContainer">
+              <button class="setting-button bujursangkar" id="barisBtn" data-setting="Baris">
+                <span data-id="Baris">Row</span><span id="selectedBarisHeader">-</span>
+              </button>
+              <button class="setting-button bujursangkar" id="kolomBtn" data-setting="Kolom">
+                <span data-id="Kolom">Column</span><span id="selectedKolomHeader">-</span>
+              </button>
               <button class="setting-button" id="perlakuanBtn" data-setting="Perlakuan">
                 <span data-id="Perlakuan">Treatment</span><span id="selectedPerlakuanHeader">-</span>
               </button>
