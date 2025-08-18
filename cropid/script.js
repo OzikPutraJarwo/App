@@ -3272,570 +3272,570 @@ function countAnovaRPT_RAK() {
       }
     })();
   }
-  // // THSD
-  // else if (selectedPosthoc === "bnj") {
-  //   // Nilai Tabel
-  //   tableA = (jStat.tukey.inv(0.95, getData.count("FaktorA"), Gdb));
-  //   tableB = (jStat.tukey.inv(0.95, getData.count("FaktorB"), Gdb));
-  //   tableAB = (jStat.tukey.inv(0.95, getData.count("FaktorA") * getData.count("FaktorB"), Gdb));
-  //   // Nilai Hitung
-  //   thitA = (tableA * Math.sqrt(Gkt / (getData.count("FaktorB") * getData.count("Ulangan"))));
-  //   thitB = (tableB * Math.sqrt(Gkt / (getData.count("FaktorA") * getData.count("Ulangan"))));
-  //   thitAB = (tableAB * Math.sqrt(Gkt / getData.count("Ulangan")));
-  //   // Faktor A, Faktor B, dan Kombinasi AB
-  //   processTHSD(selectedFaktorAText, 'factorA', getData.info("FaktorA", "Hasil"), thitA);
-  //   processTHSD(selectedFaktorBText, 'factorB', getData.info("FaktorB", "Hasil"), thitB);
-  //   processTHSD('<span data-id="Kombinasi">Combination</span>: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, 'factorAB', getData.info("FaktorA", "FaktorB", "Hasil"), thitAB);
-  //   // Interaksi AB
-  //   document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'><span data-id='Interaksi'>Interaction</span>: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
-  //   const uniqueFaktorA = new Set();
-  //   const uniqueFaktorB = new Set();
-  //   const rows = document.querySelectorAll('#tableContainer tbody tr');
-  //   rows.forEach(row => {
-  //     const cells = row.querySelectorAll('td');
-  //     if (cells.length >= 2) {
-  //       uniqueFaktorA.add(cells[0].textContent.trim());
-  //       uniqueFaktorB.add(cells[1].textContent.trim());
-  //     }
-  //   });
-  //   uniqueFaktorA.forEach(faktorA => {
-  //     const info = getData.info("FaktorA", "FaktorB", "Hasil")
-  //       .split('\n')
-  //       .filter(line => line.startsWith(faktorA));
-  //     if (info.length > 0) {
-  //       processTHSD(faktorA, `leading_${faktorA}`, info.join('\n'), thitA);
-  //     }
-  //   });
-  //   uniqueFaktorB.forEach(faktorB => {
-  //     const info = getData.info("FaktorB", "FaktorA", "Hasil")
-  //       .split('\n')
-  //       .filter(line => line.startsWith(faktorB));
-  //     if (info.length > 0) {
-  //       processTHSD(faktorB, `leading_${faktorB}`, info.join('\n'), thitB);
-  //     }
-  //   });
-  //   // Tabel Interaksi 
-  //   (function () {
-  //     const table = document.querySelector('#tableContainer table');
-  //     if (!table) return;
-  //     const rows = Array.from(table.querySelectorAll('tbody tr')).slice(1);
-  //     const headers = Array.from(table.querySelectorAll('th'));
-  //     const colIndex = {};
-  //     headers.forEach((th, i) => {
-  //       if (th.dataset.setting) {
-  //         colIndex[th.dataset.setting] = i;
-  //       }
-  //     });
-  //     const dataMap = {};
-  //     rows.forEach(tr => {
-  //       const cells = tr.querySelectorAll('td');
-  //       if (!cells.length) return;
-  //       const faktorA = cells[colIndex['FaktorA']].textContent.trim();
-  //       const faktorB = cells[colIndex['FaktorB']].textContent.trim();
-  //       const nilai = parseFloat(cells[colIndex['Hasil']].textContent.trim());
-  //       if (!dataMap[faktorB]) dataMap[faktorB] = {};
-  //       if (!dataMap[faktorB][faktorA]) dataMap[faktorB][faktorA] = [];
-  //       dataMap[faktorB][faktorA].push(nilai);
-  //     });
-  //     const faktorAList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorA']]?.textContent.trim()).filter(Boolean))];
-  //     const faktorBList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorB']]?.textContent.trim()).filter(Boolean))];
-  //     const newTable = document.createElement('table');
-  //     const thead = document.createElement('thead');
-  //     const headRow = document.createElement('tr');
-  //     headRow.appendChild(document.createElement('th')).textContent = '×';
-  //     faktorAList.forEach(fa => {
-  //       const th = document.createElement('th');
-  //       th.colSpan = 2;
-  //       th.textContent = fa;
-  //       headRow.appendChild(th);
-  //     });
-  //     thead.appendChild(headRow);
-  //     newTable.appendChild(thead);
-  //     const tbody = document.createElement('tbody');
-  //     faktorBList.forEach(fb => {
-  //       const avgRow = document.createElement('tr');
-  //       const fbCell = document.createElement('th');
-  //       fbCell.rowSpan = 2;
-  //       fbCell.textContent = fb;
-  //       avgRow.appendChild(fbCell);
-  //       faktorAList.forEach(fa => {
-  //         const avg = dataMap[fb]?.[fa] ? (dataMap[fb][fa].reduce((a, b) => a + b, 0) / dataMap[fb][fa].length) : 0;
-  //         const td1 = document.createElement('td');
-  //         td1.textContent = avg.toFixed(2);
-  //         const td2 = document.createElement('td');
-  //         td2.classList.add('x-kecil');
-  //         td2.dataset.pair = `${fb}${fa}`;
-  //         td2.textContent = 'x';
-  //         avgRow.appendChild(td1);
-  //         avgRow.appendChild(td2);
-  //       });
-  //       tbody.appendChild(avgRow);
-  //       const xRow = document.createElement('tr');
-  //       faktorAList.forEach(fa => {
-  //         const td = document.createElement('td');
-  //         td.colSpan = 2;
-  //         td.classList.add('x-besar');
-  //         td.dataset.pair = `${fa}${fb}`;
-  //         td.textContent = 'X';
-  //         xRow.appendChild(td);
-  //       });
-  //       tbody.appendChild(xRow);
-  //     });
-  //     newTable.appendChild(tbody);
-  //     const container = document.getElementById('interaction-table');
-  //     container.innerHTML = '';
-  //     container.appendChild(newTable);
-  //     const perFaktorContainer = document.createElement('div');
-  //     perFaktorContainer.classList.add('posthoc-collapsed-item');
-  //     container.appendChild(perFaktorContainer);
-  //     const posthocTables = document.querySelectorAll('#posthoc table[id^="leading_"][id$="-LETTER"]');
-  //     const notasiMap = {};
-  //     posthocTables.forEach(tbl => {
-  //       const trs = tbl.querySelectorAll('tbody tr');
-  //       trs.forEach(tr => {
-  //         const perlakuan = tr.cells[0].textContent.trim();
-  //         const notasi = tr.cells[2].textContent.trim();
-  //         notasiMap[perlakuan] = notasi;
-  //       });
-  //     });
-  //     document.querySelectorAll('#interaction-table .x-kecil').forEach(td => {
-  //       const pair = td.dataset.pair;
-  //       if (notasiMap[pair]) {
-  //         td.textContent = notasiMap[pair];
-  //       }
-  //     });
-  //     document.querySelectorAll('#interaction-table .x-besar').forEach(td => {
-  //       const pair = td.dataset.pair;
-  //       if (notasiMap[pair]) {
-  //         td.textContent = notasiMap[pair];
-  //       }
-  //     });
-  //     const target = container.querySelector('.posthoc-collapsed-item');
-  //     let nextSibling = container.nextElementSibling;
-  //     while (nextSibling) {
-  //       const temp = nextSibling;
-  //       nextSibling = nextSibling.nextElementSibling;
-  //       target.appendChild(temp);
-  //     }
-  //   })();
-  // }
-  // // DMRT
-  // else if (selectedPosthoc === "dmrt") {
-  //   // Faktor A, Faktor B, dan Kombinasi AB
-  //   processDMRT(selectedFaktorAText, 'factorA', getData.info("FaktorA", "Hasil"), getData.count("FaktorA"), Gdb, Gkt, getData.count("Ulangan"));
-  //   processDMRT(selectedFaktorBText, 'factorB', getData.info("FaktorB", "Hasil"), getData.count("FaktorB"), Gdb, Gkt, getData.count("Ulangan"));
-  //   processDMRT('<span data-id="Kombinasi">Combination</span>: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, 'factorAB', getData.info("FaktorA", "FaktorB", "Hasil"), getData.count("FaktorA") * getData.count("FaktorB"), Gdb, Gkt, getData.count("Ulangan"));
-  //   // Interaksi AB
-  //   document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'><span data-id='Interaksi'>Interaction</span>: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
-  //   const uniqueFaktorA = new Set();
-  //   const uniqueFaktorB = new Set();
-  //   const rows = document.querySelectorAll('#tableContainer tbody tr');
-  //   rows.forEach(row => {
-  //     const cells = row.querySelectorAll('td');
-  //     if (cells.length >= 2) {
-  //       uniqueFaktorA.add(cells[0].textContent.trim());
-  //       uniqueFaktorB.add(cells[1].textContent.trim());
-  //     }
-  //   });
-  //   uniqueFaktorA.forEach(faktorA => {
-  //     const info = getData.info("FaktorA", "FaktorB", "Hasil")
-  //       .split('\n')
-  //       .filter(line => line.startsWith(faktorA));
-  //     if (info.length > 0) {
-  //       processDMRT(faktorA, `leading_${faktorA}`, info.join('\n'), getData.count("FaktorA"), Gdb, Gkt, getData.count("Ulangan"));
-  //     }
-  //   });
-  //   uniqueFaktorB.forEach(faktorB => {
-  //     const info = getData.info("FaktorB", "FaktorA", "Hasil")
-  //       .split('\n')
-  //       .filter(line => line.startsWith(faktorB));
-  //     if (info.length > 0) {
-  //       processDMRT(faktorB, `leading_${faktorB}`, info.join('\n'), getData.count("FaktorB"), Gdb, Gkt, getData.count("Ulangan"));
-  //     }
-  //   });
-  //   // Tabel Interaksi 
-  //   (function () {
-  //     const table = document.querySelector('#tableContainer table');
-  //     if (!table) return;
-  //     const rows = Array.from(table.querySelectorAll('tbody tr')).slice(1);
-  //     const headers = Array.from(table.querySelectorAll('th'));
-  //     const colIndex = {};
-  //     headers.forEach((th, i) => {
-  //       if (th.dataset.setting) {
-  //         colIndex[th.dataset.setting] = i;
-  //       }
-  //     });
-  //     const dataMap = {};
-  //     rows.forEach(tr => {
-  //       const cells = tr.querySelectorAll('td');
-  //       if (!cells.length) return;
-  //       const faktorA = cells[colIndex['FaktorA']].textContent.trim();
-  //       const faktorB = cells[colIndex['FaktorB']].textContent.trim();
-  //       const nilai = parseFloat(cells[colIndex['Hasil']].textContent.trim());
-  //       if (!dataMap[faktorB]) dataMap[faktorB] = {};
-  //       if (!dataMap[faktorB][faktorA]) dataMap[faktorB][faktorA] = [];
-  //       dataMap[faktorB][faktorA].push(nilai);
-  //     });
-  //     const faktorAList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorA']]?.textContent.trim()).filter(Boolean))];
-  //     const faktorBList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorB']]?.textContent.trim()).filter(Boolean))];
-  //     const newTable = document.createElement('table');
-  //     const thead = document.createElement('thead');
-  //     const headRow = document.createElement('tr');
-  //     headRow.appendChild(document.createElement('th')).textContent = '×';
-  //     faktorAList.forEach(fa => {
-  //       const th = document.createElement('th');
-  //       th.colSpan = 2;
-  //       th.textContent = fa;
-  //       headRow.appendChild(th);
-  //     });
-  //     thead.appendChild(headRow);
-  //     newTable.appendChild(thead);
-  //     const tbody = document.createElement('tbody');
-  //     faktorBList.forEach(fb => {
-  //       const avgRow = document.createElement('tr');
-  //       const fbCell = document.createElement('th');
-  //       fbCell.rowSpan = 2;
-  //       fbCell.textContent = fb;
-  //       avgRow.appendChild(fbCell);
-  //       faktorAList.forEach(fa => {
-  //         const avg = dataMap[fb]?.[fa] ? (dataMap[fb][fa].reduce((a, b) => a + b, 0) / dataMap[fb][fa].length) : 0;
-  //         const td1 = document.createElement('td');
-  //         td1.textContent = avg.toFixed(2);
-  //         const td2 = document.createElement('td');
-  //         td2.classList.add('x-kecil');
-  //         td2.dataset.pair = `${fb}${fa}`;
-  //         td2.textContent = 'x';
-  //         avgRow.appendChild(td1);
-  //         avgRow.appendChild(td2);
-  //       });
-  //       tbody.appendChild(avgRow);
-  //       const xRow = document.createElement('tr');
-  //       faktorAList.forEach(fa => {
-  //         const td = document.createElement('td');
-  //         td.colSpan = 2;
-  //         td.classList.add('x-besar');
-  //         td.dataset.pair = `${fa}${fb}`;
-  //         td.textContent = 'X';
-  //         xRow.appendChild(td);
-  //       });
-  //       tbody.appendChild(xRow);
-  //     });
-  //     newTable.appendChild(tbody);
-  //     const container = document.getElementById('interaction-table');
-  //     container.innerHTML = '';
-  //     container.appendChild(newTable);
-  //     const perFaktorContainer = document.createElement('div');
-  //     perFaktorContainer.classList.add('posthoc-collapsed-item');
-  //     container.appendChild(perFaktorContainer);
-  //     const posthocTables = document.querySelectorAll('#posthoc table[id^="leading_"][id$="-LETTER"]');
-  //     const notasiMap = {};
-  //     posthocTables.forEach(tbl => {
-  //       const trs = tbl.querySelectorAll('tbody tr');
-  //       trs.forEach(tr => {
-  //         const perlakuan = tr.cells[0].textContent.trim();
-  //         const notasi = tr.cells[2].textContent.trim();
-  //         notasiMap[perlakuan] = notasi;
-  //       });
-  //     });
-  //     document.querySelectorAll('#interaction-table .x-kecil').forEach(td => {
-  //       const pair = td.dataset.pair;
-  //       if (notasiMap[pair]) {
-  //         td.textContent = notasiMap[pair];
-  //       }
-  //     });
-  //     document.querySelectorAll('#interaction-table .x-besar').forEach(td => {
-  //       const pair = td.dataset.pair;
-  //       if (notasiMap[pair]) {
-  //         td.textContent = notasiMap[pair];
-  //       }
-  //     });
-  //     const target = container.querySelector('.posthoc-collapsed-item');
-  //     let nextSibling = container.nextElementSibling;
-  //     while (nextSibling) {
-  //       const temp = nextSibling;
-  //       nextSibling = nextSibling.nextElementSibling;
-  //       target.appendChild(temp);
-  //     }
-  //   })();
-  // }
-  // // SNK
-  // else if (selectedPosthoc === "snk") {
-  //   // Faktor A, Faktor B, dan Kombinasi AB
-  //   processSNK(selectedFaktorAText, 'factorA', getData.info("FaktorA", "Hasil"), getData.count("FaktorA"), Gdb, Gkt, getData.count("Ulangan"));
-  //   processSNK(selectedFaktorBText, 'factorB', getData.info("FaktorB", "Hasil"), getData.count("FaktorB"), Gdb, Gkt, getData.count("Ulangan"));
-  //   processSNK('<span data-id="Kombinasi">Combination</span>: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, 'factorAB', getData.info("FaktorA", "FaktorB", "Hasil"), getData.count("FaktorA") * getData.count("FaktorB"), Gdb, Gkt, getData.count("Ulangan"));
-  //   // Interaksi AB
-  //   document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'><span data-id='Interaksi'>Interaction</span>: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
-  //   const uniqueFaktorA = new Set();
-  //   const uniqueFaktorB = new Set();
-  //   const rows = document.querySelectorAll('#tableContainer tbody tr');
-  //   rows.forEach(row => {
-  //     const cells = row.querySelectorAll('td');
-  //     if (cells.length >= 2) {
-  //       uniqueFaktorA.add(cells[0].textContent.trim());
-  //       uniqueFaktorB.add(cells[1].textContent.trim());
-  //     }
-  //   });
-  //   uniqueFaktorA.forEach(faktorA => {
-  //     const info = getData.info("FaktorA", "FaktorB", "Hasil")
-  //       .split('\n')
-  //       .filter(line => line.startsWith(faktorA));
-  //     if (info.length > 0) {
-  //       processSNK(faktorA, `leading_${faktorA}`, info.join('\n'), getData.count("FaktorA"), Gdb, Gkt, getData.count("Ulangan"));
-  //     }
-  //   });
-  //   uniqueFaktorB.forEach(faktorB => {
-  //     const info = getData.info("FaktorB", "FaktorA", "Hasil")
-  //       .split('\n')
-  //       .filter(line => line.startsWith(faktorB));
-  //     if (info.length > 0) {
-  //       processSNK(faktorB, `leading_${faktorB}`, info.join('\n'), getData.count("FaktorB"), Gdb, Gkt, getData.count("Ulangan"));
-  //     }
-  //   });
-  //   // Tabel Interaksi 
-  //   (function () {
-  //     const table = document.querySelector('#tableContainer table');
-  //     if (!table) return;
-  //     const rows = Array.from(table.querySelectorAll('tbody tr')).slice(1);
-  //     const headers = Array.from(table.querySelectorAll('th'));
-  //     const colIndex = {};
-  //     headers.forEach((th, i) => {
-  //       if (th.dataset.setting) {
-  //         colIndex[th.dataset.setting] = i;
-  //       }
-  //     });
-  //     const dataMap = {};
-  //     rows.forEach(tr => {
-  //       const cells = tr.querySelectorAll('td');
-  //       if (!cells.length) return;
-  //       const faktorA = cells[colIndex['FaktorA']].textContent.trim();
-  //       const faktorB = cells[colIndex['FaktorB']].textContent.trim();
-  //       const nilai = parseFloat(cells[colIndex['Hasil']].textContent.trim());
-  //       if (!dataMap[faktorB]) dataMap[faktorB] = {};
-  //       if (!dataMap[faktorB][faktorA]) dataMap[faktorB][faktorA] = [];
-  //       dataMap[faktorB][faktorA].push(nilai);
-  //     });
-  //     const faktorAList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorA']]?.textContent.trim()).filter(Boolean))];
-  //     const faktorBList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorB']]?.textContent.trim()).filter(Boolean))];
-  //     const newTable = document.createElement('table');
-  //     const thead = document.createElement('thead');
-  //     const headRow = document.createElement('tr');
-  //     headRow.appendChild(document.createElement('th')).textContent = '×';
-  //     faktorAList.forEach(fa => {
-  //       const th = document.createElement('th');
-  //       th.colSpan = 2;
-  //       th.textContent = fa;
-  //       headRow.appendChild(th);
-  //     });
-  //     thead.appendChild(headRow);
-  //     newTable.appendChild(thead);
-  //     const tbody = document.createElement('tbody');
-  //     faktorBList.forEach(fb => {
-  //       const avgRow = document.createElement('tr');
-  //       const fbCell = document.createElement('th');
-  //       fbCell.rowSpan = 2;
-  //       fbCell.textContent = fb;
-  //       avgRow.appendChild(fbCell);
-  //       faktorAList.forEach(fa => {
-  //         const avg = dataMap[fb]?.[fa] ? (dataMap[fb][fa].reduce((a, b) => a + b, 0) / dataMap[fb][fa].length) : 0;
-  //         const td1 = document.createElement('td');
-  //         td1.textContent = avg.toFixed(2);
-  //         const td2 = document.createElement('td');
-  //         td2.classList.add('x-kecil');
-  //         td2.dataset.pair = `${fb}${fa}`;
-  //         td2.textContent = 'x';
-  //         avgRow.appendChild(td1);
-  //         avgRow.appendChild(td2);
-  //       });
-  //       tbody.appendChild(avgRow);
-  //       const xRow = document.createElement('tr');
-  //       faktorAList.forEach(fa => {
-  //         const td = document.createElement('td');
-  //         td.colSpan = 2;
-  //         td.classList.add('x-besar');
-  //         td.dataset.pair = `${fa}${fb}`;
-  //         td.textContent = 'X';
-  //         xRow.appendChild(td);
-  //       });
-  //       tbody.appendChild(xRow);
-  //     });
-  //     newTable.appendChild(tbody);
-  //     const container = document.getElementById('interaction-table');
-  //     container.innerHTML = '';
-  //     container.appendChild(newTable);
-  //     const perFaktorContainer = document.createElement('div');
-  //     perFaktorContainer.classList.add('posthoc-collapsed-item');
-  //     container.appendChild(perFaktorContainer);
-  //     const posthocTables = document.querySelectorAll('#posthoc table[id^="leading_"][id$="-LETTER"]');
-  //     const notasiMap = {};
-  //     posthocTables.forEach(tbl => {
-  //       const trs = tbl.querySelectorAll('tbody tr');
-  //       trs.forEach(tr => {
-  //         const perlakuan = tr.cells[0].textContent.trim();
-  //         const notasi = tr.cells[2].textContent.trim();
-  //         notasiMap[perlakuan] = notasi;
-  //       });
-  //     });
-  //     document.querySelectorAll('#interaction-table .x-kecil').forEach(td => {
-  //       const pair = td.dataset.pair;
-  //       if (notasiMap[pair]) {
-  //         td.textContent = notasiMap[pair];
-  //       }
-  //     });
-  //     document.querySelectorAll('#interaction-table .x-besar').forEach(td => {
-  //       const pair = td.dataset.pair;
-  //       if (notasiMap[pair]) {
-  //         td.textContent = notasiMap[pair];
-  //       }
-  //     });
-  //     const target = container.querySelector('.posthoc-collapsed-item');
-  //     let nextSibling = container.nextElementSibling;
-  //     while (nextSibling) {
-  //       const temp = nextSibling;
-  //       nextSibling = nextSibling.nextElementSibling;
-  //       target.appendChild(temp);
-  //     }
-  //   })();
-  // }
-  // // SK
-  // else if (selectedPosthoc === "sk") {
-  //   // Faktor A, Faktor B, dan Kombinasi AB
-  //   processSK('factorA', selectedFaktorAText, getData.info("FaktorA", "Hasil"));
-  //   processSK('factorB', selectedFaktorBText, getData.info("FaktorB", "Hasil"));
-  //   processSK('factorAB', '<span data-id="Kombinasi">Combination</span>: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, getData.info("FaktorA", "FaktorB", "Hasil"));
-  //   // Interaksi AB
-  //   document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'><span data-id='Interaksi'>Interaction</span>: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
-  //   const uniqueFaktorA = new Set();
-  //   const uniqueFaktorB = new Set();
-  //   const rows = document.querySelectorAll('#tableContainer tbody tr');
-  //   rows.forEach(row => {
-  //     const cells = row.querySelectorAll('td');
-  //     if (cells.length >= 2) {
-  //       uniqueFaktorA.add(cells[0].textContent.trim());
-  //       uniqueFaktorB.add(cells[1].textContent.trim());
-  //     }
-  //   });
-  //   uniqueFaktorA.forEach(faktorA => {
-  //     const info = getData.info("FaktorA", "FaktorB", "Hasil")
-  //       .split('\n')
-  //       .filter(line => line.startsWith(faktorA));
-  //     if (info.length > 0) {
-  //       processSK(`leading_${faktorA}`, faktorA, info.join('\n'));
-  //     }
-  //   });
-  //   uniqueFaktorB.forEach(faktorB => {
-  //     const info = getData.info("FaktorB", "FaktorA", "Hasil")
-  //       .split('\n')
-  //       .filter(line => line.startsWith(faktorB));
-  //     if (info.length > 0) {
-  //       processSK(`leading_${faktorB}`, faktorB, info.join('\n'));
-  //     }
-  //   });
-  //   // Tabel Interaksi 
-  //   (function () {
-  //     const table = document.querySelector('#tableContainer table');
-  //     if (!table) return;
-  //     const rows = Array.from(table.querySelectorAll('tbody tr')).slice(1);
-  //     const headers = Array.from(table.querySelectorAll('th'));
-  //     const colIndex = {};
-  //     headers.forEach((th, i) => {
-  //       if (th.dataset.setting) {
-  //         colIndex[th.dataset.setting] = i;
-  //       }
-  //     });
-  //     const dataMap = {};
-  //     rows.forEach(tr => {
-  //       const cells = tr.querySelectorAll('td');
-  //       if (!cells.length) return;
-  //       const faktorA = cells[colIndex['FaktorA']].textContent.trim();
-  //       const faktorB = cells[colIndex['FaktorB']].textContent.trim();
-  //       const nilai = parseFloat(cells[colIndex['Hasil']].textContent.trim());
-  //       if (!dataMap[faktorB]) dataMap[faktorB] = {};
-  //       if (!dataMap[faktorB][faktorA]) dataMap[faktorB][faktorA] = [];
-  //       dataMap[faktorB][faktorA].push(nilai);
-  //     });
-  //     const faktorAList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorA']]?.textContent.trim()).filter(Boolean))];
-  //     const faktorBList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorB']]?.textContent.trim()).filter(Boolean))];
-  //     const newTable = document.createElement('table');
-  //     const thead = document.createElement('thead');
-  //     const headRow = document.createElement('tr');
-  //     headRow.appendChild(document.createElement('th')).textContent = '×';
-  //     faktorAList.forEach(fa => {
-  //       const th = document.createElement('th');
-  //       th.colSpan = 2;
-  //       th.textContent = fa;
-  //       headRow.appendChild(th);
-  //     });
-  //     thead.appendChild(headRow);
-  //     newTable.appendChild(thead);
-  //     const tbody = document.createElement('tbody');
-  //     faktorBList.forEach(fb => {
-  //       const avgRow = document.createElement('tr');
-  //       const fbCell = document.createElement('th');
-  //       fbCell.rowSpan = 2;
-  //       fbCell.textContent = fb;
-  //       avgRow.appendChild(fbCell);
-  //       faktorAList.forEach(fa => {
-  //         const avg = dataMap[fb]?.[fa] ? (dataMap[fb][fa].reduce((a, b) => a + b, 0) / dataMap[fb][fa].length) : 0;
-  //         const td1 = document.createElement('td');
-  //         td1.textContent = avg.toFixed(2);
-  //         const td2 = document.createElement('td');
-  //         td2.classList.add('x-kecil');
-  //         td2.dataset.pair = `${fb}${fa}`;
-  //         td2.textContent = 'x';
-  //         avgRow.appendChild(td1);
-  //         avgRow.appendChild(td2);
-  //       });
-  //       tbody.appendChild(avgRow);
-  //       const xRow = document.createElement('tr');
-  //       faktorAList.forEach(fa => {
-  //         const td = document.createElement('td');
-  //         td.colSpan = 2;
-  //         td.classList.add('x-besar');
-  //         td.dataset.pair = `${fa}${fb}`;
-  //         td.textContent = 'X';
-  //         xRow.appendChild(td);
-  //       });
-  //       tbody.appendChild(xRow);
-  //     });
-  //     newTable.appendChild(tbody);
-  //     const container = document.getElementById('interaction-table');
-  //     container.innerHTML = '';
-  //     container.appendChild(newTable);
-  //     const perFaktorContainer = document.createElement('div');
-  //     perFaktorContainer.classList.add('posthoc-collapsed-item');
-  //     container.appendChild(perFaktorContainer);
-  //     const posthocTables = document.querySelectorAll('#posthoc table[id^="leading_"][id$="-LETTER"]');
-  //     const notasiMap = {};
-  //     posthocTables.forEach(tbl => {
-  //       const trs = tbl.querySelectorAll('tbody tr');
-  //       trs.forEach(tr => {
-  //         const perlakuan = tr.cells[0].textContent.trim();
-  //         const notasi = tr.cells[2].textContent.trim();
-  //         notasiMap[perlakuan] = notasi;
-  //       });
-  //     });
-  //     document.querySelectorAll('#interaction-table .x-kecil').forEach(td => {
-  //       const pair = td.dataset.pair;
-  //       if (notasiMap[pair]) {
-  //         td.textContent = notasiMap[pair];
-  //       }
-  //     });
-  //     document.querySelectorAll('#interaction-table .x-besar').forEach(td => {
-  //       const pair = td.dataset.pair;
-  //       if (notasiMap[pair]) {
-  //         td.textContent = notasiMap[pair];
-  //       }
-  //     });
-  //     const target = container.querySelector('.posthoc-collapsed-item');
-  //     let nextSibling = container.nextElementSibling;
-  //     while (nextSibling) {
-  //       const temp = nextSibling;
-  //       nextSibling = nextSibling.nextElementSibling;
-  //       target.appendChild(temp);
-  //     }
-  //   })();
-  // }
+  // THSD
+  else if (selectedPosthoc === "bnj") {
+    // Nilai Tabel
+    tableA = (jStat.tukey.inv(0.95, getData.count("FaktorA"), AGdb));
+    tableB = (jStat.tukey.inv(0.95, getData.count("FaktorB"), BGdb));
+    tableAB = (jStat.tukey.inv(0.95, getData.count("FaktorA") * getData.count("FaktorB"), BGdb));
+    // Nilai Hitung
+    thitA = (tableA * Math.sqrt(AGkt / (getData.count("FaktorB") * getData.count("Ulangan"))));
+    thitB = (tableB * Math.sqrt(BGkt / (getData.count("FaktorA") * getData.count("Ulangan"))));
+    thitAB = (tableAB * Math.sqrt(BGkt / getData.count("Ulangan")));
+    // Faktor A, Faktor B, dan Kombinasi AB
+    processTHSD(selectedFaktorAText, 'factorA', getData.info("FaktorA", "Hasil"), thitA);
+    processTHSD(selectedFaktorBText, 'factorB', getData.info("FaktorB", "Hasil"), thitB);
+    processTHSD('<span data-id="Kombinasi">Combination</span>: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, 'factorAB', getData.info("FaktorA", "FaktorB", "Hasil"), thitAB);
+    // Interaksi AB
+    document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'><span data-id='Interaksi'>Interaction</span>: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
+    const uniqueFaktorA = new Set();
+    const uniqueFaktorB = new Set();
+    const rows = document.querySelectorAll('#tableContainer tbody tr');
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 2) {
+        uniqueFaktorA.add(cells[0].textContent.trim());
+        uniqueFaktorB.add(cells[1].textContent.trim());
+      }
+    });
+    uniqueFaktorA.forEach(faktorA => {
+      const info = getData.info("FaktorA", "FaktorB", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorA));
+      if (info.length > 0) {
+        processTHSD(faktorA, `leading_${faktorA}`, info.join('\n'), thitA);
+      }
+    });
+    uniqueFaktorB.forEach(faktorB => {
+      const info = getData.info("FaktorB", "FaktorA", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorB));
+      if (info.length > 0) {
+        processTHSD(faktorB, `leading_${faktorB}`, info.join('\n'), thitB);
+      }
+    });
+    // Tabel Interaksi 
+    (function () {
+      const table = document.querySelector('#tableContainer table');
+      if (!table) return;
+      const rows = Array.from(table.querySelectorAll('tbody tr')).slice(1);
+      const headers = Array.from(table.querySelectorAll('th'));
+      const colIndex = {};
+      headers.forEach((th, i) => {
+        if (th.dataset.setting) {
+          colIndex[th.dataset.setting] = i;
+        }
+      });
+      const dataMap = {};
+      rows.forEach(tr => {
+        const cells = tr.querySelectorAll('td');
+        if (!cells.length) return;
+        const faktorA = cells[colIndex['FaktorA']].textContent.trim();
+        const faktorB = cells[colIndex['FaktorB']].textContent.trim();
+        const nilai = parseFloat(cells[colIndex['Hasil']].textContent.trim());
+        if (!dataMap[faktorB]) dataMap[faktorB] = {};
+        if (!dataMap[faktorB][faktorA]) dataMap[faktorB][faktorA] = [];
+        dataMap[faktorB][faktorA].push(nilai);
+      });
+      const faktorAList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorA']]?.textContent.trim()).filter(Boolean))];
+      const faktorBList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorB']]?.textContent.trim()).filter(Boolean))];
+      const newTable = document.createElement('table');
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      headRow.appendChild(document.createElement('th')).textContent = '×';
+      faktorAList.forEach(fa => {
+        const th = document.createElement('th');
+        th.colSpan = 2;
+        th.textContent = fa;
+        headRow.appendChild(th);
+      });
+      thead.appendChild(headRow);
+      newTable.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      faktorBList.forEach(fb => {
+        const avgRow = document.createElement('tr');
+        const fbCell = document.createElement('th');
+        fbCell.rowSpan = 2;
+        fbCell.textContent = fb;
+        avgRow.appendChild(fbCell);
+        faktorAList.forEach(fa => {
+          const avg = dataMap[fb]?.[fa] ? (dataMap[fb][fa].reduce((a, b) => a + b, 0) / dataMap[fb][fa].length) : 0;
+          const td1 = document.createElement('td');
+          td1.textContent = avg.toFixed(2);
+          const td2 = document.createElement('td');
+          td2.classList.add('x-kecil');
+          td2.dataset.pair = `${fb}${fa}`;
+          td2.textContent = 'x';
+          avgRow.appendChild(td1);
+          avgRow.appendChild(td2);
+        });
+        tbody.appendChild(avgRow);
+        const xRow = document.createElement('tr');
+        faktorAList.forEach(fa => {
+          const td = document.createElement('td');
+          td.colSpan = 2;
+          td.classList.add('x-besar');
+          td.dataset.pair = `${fa}${fb}`;
+          td.textContent = 'X';
+          xRow.appendChild(td);
+        });
+        tbody.appendChild(xRow);
+      });
+      newTable.appendChild(tbody);
+      const container = document.getElementById('interaction-table');
+      container.innerHTML = '';
+      container.appendChild(newTable);
+      const perFaktorContainer = document.createElement('div');
+      perFaktorContainer.classList.add('posthoc-collapsed-item');
+      container.appendChild(perFaktorContainer);
+      const posthocTables = document.querySelectorAll('#posthoc table[id^="leading_"][id$="-LETTER"]');
+      const notasiMap = {};
+      posthocTables.forEach(tbl => {
+        const trs = tbl.querySelectorAll('tbody tr');
+        trs.forEach(tr => {
+          const perlakuan = tr.cells[0].textContent.trim();
+          const notasi = tr.cells[2].textContent.trim();
+          notasiMap[perlakuan] = notasi;
+        });
+      });
+      document.querySelectorAll('#interaction-table .x-kecil').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      document.querySelectorAll('#interaction-table .x-besar').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      const target = container.querySelector('.posthoc-collapsed-item');
+      let nextSibling = container.nextElementSibling;
+      while (nextSibling) {
+        const temp = nextSibling;
+        nextSibling = nextSibling.nextElementSibling;
+        target.appendChild(temp);
+      }
+    })();
+  }
+  // DMRT
+  else if (selectedPosthoc === "dmrt") {
+    // Faktor A, Faktor B, dan Kombinasi AB
+    processDMRT(selectedFaktorAText, 'factorA', getData.info("FaktorA", "Hasil"), getData.count("FaktorA"), AGdb, AGkt, getData.count("Ulangan"));
+    processDMRT(selectedFaktorBText, 'factorB', getData.info("FaktorB", "Hasil"), getData.count("FaktorB"), BGdb, BGkt, getData.count("Ulangan"));
+    processDMRT('<span data-id="Kombinasi">Combination</span>: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, 'factorAB', getData.info("FaktorA", "FaktorB", "Hasil"), getData.count("FaktorA") * getData.count("FaktorB"), BGdb, BGkt, getData.count("Ulangan"));
+    // Interaksi AB
+    document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'><span data-id='Interaksi'>Interaction</span>: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
+    const uniqueFaktorA = new Set();
+    const uniqueFaktorB = new Set();
+    const rows = document.querySelectorAll('#tableContainer tbody tr');
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 2) {
+        uniqueFaktorA.add(cells[0].textContent.trim());
+        uniqueFaktorB.add(cells[1].textContent.trim());
+      }
+    });
+    uniqueFaktorA.forEach(faktorA => {
+      const info = getData.info("FaktorA", "FaktorB", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorA));
+      if (info.length > 0) {
+        processDMRT(faktorA, `leading_${faktorA}`, info.join('\n'), getData.count("FaktorA"), AGdb, AGkt, getData.count("Ulangan"));
+      }
+    });
+    uniqueFaktorB.forEach(faktorB => {
+      const info = getData.info("FaktorB", "FaktorA", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorB));
+      if (info.length > 0) {
+        processDMRT(faktorB, `leading_${faktorB}`, info.join('\n'), getData.count("FaktorB"), BGdb, BGkt, getData.count("Ulangan"));
+      }
+    });
+    // Tabel Interaksi 
+    (function () {
+      const table = document.querySelector('#tableContainer table');
+      if (!table) return;
+      const rows = Array.from(table.querySelectorAll('tbody tr')).slice(1);
+      const headers = Array.from(table.querySelectorAll('th'));
+      const colIndex = {};
+      headers.forEach((th, i) => {
+        if (th.dataset.setting) {
+          colIndex[th.dataset.setting] = i;
+        }
+      });
+      const dataMap = {};
+      rows.forEach(tr => {
+        const cells = tr.querySelectorAll('td');
+        if (!cells.length) return;
+        const faktorA = cells[colIndex['FaktorA']].textContent.trim();
+        const faktorB = cells[colIndex['FaktorB']].textContent.trim();
+        const nilai = parseFloat(cells[colIndex['Hasil']].textContent.trim());
+        if (!dataMap[faktorB]) dataMap[faktorB] = {};
+        if (!dataMap[faktorB][faktorA]) dataMap[faktorB][faktorA] = [];
+        dataMap[faktorB][faktorA].push(nilai);
+      });
+      const faktorAList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorA']]?.textContent.trim()).filter(Boolean))];
+      const faktorBList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorB']]?.textContent.trim()).filter(Boolean))];
+      const newTable = document.createElement('table');
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      headRow.appendChild(document.createElement('th')).textContent = '×';
+      faktorAList.forEach(fa => {
+        const th = document.createElement('th');
+        th.colSpan = 2;
+        th.textContent = fa;
+        headRow.appendChild(th);
+      });
+      thead.appendChild(headRow);
+      newTable.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      faktorBList.forEach(fb => {
+        const avgRow = document.createElement('tr');
+        const fbCell = document.createElement('th');
+        fbCell.rowSpan = 2;
+        fbCell.textContent = fb;
+        avgRow.appendChild(fbCell);
+        faktorAList.forEach(fa => {
+          const avg = dataMap[fb]?.[fa] ? (dataMap[fb][fa].reduce((a, b) => a + b, 0) / dataMap[fb][fa].length) : 0;
+          const td1 = document.createElement('td');
+          td1.textContent = avg.toFixed(2);
+          const td2 = document.createElement('td');
+          td2.classList.add('x-kecil');
+          td2.dataset.pair = `${fb}${fa}`;
+          td2.textContent = 'x';
+          avgRow.appendChild(td1);
+          avgRow.appendChild(td2);
+        });
+        tbody.appendChild(avgRow);
+        const xRow = document.createElement('tr');
+        faktorAList.forEach(fa => {
+          const td = document.createElement('td');
+          td.colSpan = 2;
+          td.classList.add('x-besar');
+          td.dataset.pair = `${fa}${fb}`;
+          td.textContent = 'X';
+          xRow.appendChild(td);
+        });
+        tbody.appendChild(xRow);
+      });
+      newTable.appendChild(tbody);
+      const container = document.getElementById('interaction-table');
+      container.innerHTML = '';
+      container.appendChild(newTable);
+      const perFaktorContainer = document.createElement('div');
+      perFaktorContainer.classList.add('posthoc-collapsed-item');
+      container.appendChild(perFaktorContainer);
+      const posthocTables = document.querySelectorAll('#posthoc table[id^="leading_"][id$="-LETTER"]');
+      const notasiMap = {};
+      posthocTables.forEach(tbl => {
+        const trs = tbl.querySelectorAll('tbody tr');
+        trs.forEach(tr => {
+          const perlakuan = tr.cells[0].textContent.trim();
+          const notasi = tr.cells[2].textContent.trim();
+          notasiMap[perlakuan] = notasi;
+        });
+      });
+      document.querySelectorAll('#interaction-table .x-kecil').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      document.querySelectorAll('#interaction-table .x-besar').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      const target = container.querySelector('.posthoc-collapsed-item');
+      let nextSibling = container.nextElementSibling;
+      while (nextSibling) {
+        const temp = nextSibling;
+        nextSibling = nextSibling.nextElementSibling;
+        target.appendChild(temp);
+      }
+    })();
+  }
+  // SNK
+  else if (selectedPosthoc === "snk") {
+    // Faktor A, Faktor B, dan Kombinasi AB
+    processSNK(selectedFaktorAText, 'factorA', getData.info("FaktorA", "Hasil"), getData.count("FaktorA"), AGdb, AGkt, getData.count("Ulangan"));
+    processSNK(selectedFaktorBText, 'factorB', getData.info("FaktorB", "Hasil"), getData.count("FaktorB"), BGdb, BGkt, getData.count("Ulangan"));
+    processSNK('<span data-id="Kombinasi">Combination</span>: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, 'factorAB', getData.info("FaktorA", "FaktorB", "Hasil"), getData.count("FaktorA") * getData.count("FaktorB"), BGdb, BGkt, getData.count("Ulangan"));
+    // Interaksi AB
+    document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'><span data-id='Interaksi'>Interaction</span>: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
+    const uniqueFaktorA = new Set();
+    const uniqueFaktorB = new Set();
+    const rows = document.querySelectorAll('#tableContainer tbody tr');
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 2) {
+        uniqueFaktorA.add(cells[0].textContent.trim());
+        uniqueFaktorB.add(cells[1].textContent.trim());
+      }
+    });
+    uniqueFaktorA.forEach(faktorA => {
+      const info = getData.info("FaktorA", "FaktorB", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorA));
+      if (info.length > 0) {
+        processSNK(faktorA, `leading_${faktorA}`, info.join('\n'), getData.count("FaktorA"), AGdb, AGkt, getData.count("Ulangan"));
+      }
+    });
+    uniqueFaktorB.forEach(faktorB => {
+      const info = getData.info("FaktorB", "FaktorA", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorB));
+      if (info.length > 0) {
+        processSNK(faktorB, `leading_${faktorB}`, info.join('\n'), getData.count("FaktorB"), BGdb, BGkt, getData.count("Ulangan"));
+      }
+    });
+    // Tabel Interaksi 
+    (function () {
+      const table = document.querySelector('#tableContainer table');
+      if (!table) return;
+      const rows = Array.from(table.querySelectorAll('tbody tr')).slice(1);
+      const headers = Array.from(table.querySelectorAll('th'));
+      const colIndex = {};
+      headers.forEach((th, i) => {
+        if (th.dataset.setting) {
+          colIndex[th.dataset.setting] = i;
+        }
+      });
+      const dataMap = {};
+      rows.forEach(tr => {
+        const cells = tr.querySelectorAll('td');
+        if (!cells.length) return;
+        const faktorA = cells[colIndex['FaktorA']].textContent.trim();
+        const faktorB = cells[colIndex['FaktorB']].textContent.trim();
+        const nilai = parseFloat(cells[colIndex['Hasil']].textContent.trim());
+        if (!dataMap[faktorB]) dataMap[faktorB] = {};
+        if (!dataMap[faktorB][faktorA]) dataMap[faktorB][faktorA] = [];
+        dataMap[faktorB][faktorA].push(nilai);
+      });
+      const faktorAList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorA']]?.textContent.trim()).filter(Boolean))];
+      const faktorBList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorB']]?.textContent.trim()).filter(Boolean))];
+      const newTable = document.createElement('table');
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      headRow.appendChild(document.createElement('th')).textContent = '×';
+      faktorAList.forEach(fa => {
+        const th = document.createElement('th');
+        th.colSpan = 2;
+        th.textContent = fa;
+        headRow.appendChild(th);
+      });
+      thead.appendChild(headRow);
+      newTable.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      faktorBList.forEach(fb => {
+        const avgRow = document.createElement('tr');
+        const fbCell = document.createElement('th');
+        fbCell.rowSpan = 2;
+        fbCell.textContent = fb;
+        avgRow.appendChild(fbCell);
+        faktorAList.forEach(fa => {
+          const avg = dataMap[fb]?.[fa] ? (dataMap[fb][fa].reduce((a, b) => a + b, 0) / dataMap[fb][fa].length) : 0;
+          const td1 = document.createElement('td');
+          td1.textContent = avg.toFixed(2);
+          const td2 = document.createElement('td');
+          td2.classList.add('x-kecil');
+          td2.dataset.pair = `${fb}${fa}`;
+          td2.textContent = 'x';
+          avgRow.appendChild(td1);
+          avgRow.appendChild(td2);
+        });
+        tbody.appendChild(avgRow);
+        const xRow = document.createElement('tr');
+        faktorAList.forEach(fa => {
+          const td = document.createElement('td');
+          td.colSpan = 2;
+          td.classList.add('x-besar');
+          td.dataset.pair = `${fa}${fb}`;
+          td.textContent = 'X';
+          xRow.appendChild(td);
+        });
+        tbody.appendChild(xRow);
+      });
+      newTable.appendChild(tbody);
+      const container = document.getElementById('interaction-table');
+      container.innerHTML = '';
+      container.appendChild(newTable);
+      const perFaktorContainer = document.createElement('div');
+      perFaktorContainer.classList.add('posthoc-collapsed-item');
+      container.appendChild(perFaktorContainer);
+      const posthocTables = document.querySelectorAll('#posthoc table[id^="leading_"][id$="-LETTER"]');
+      const notasiMap = {};
+      posthocTables.forEach(tbl => {
+        const trs = tbl.querySelectorAll('tbody tr');
+        trs.forEach(tr => {
+          const perlakuan = tr.cells[0].textContent.trim();
+          const notasi = tr.cells[2].textContent.trim();
+          notasiMap[perlakuan] = notasi;
+        });
+      });
+      document.querySelectorAll('#interaction-table .x-kecil').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      document.querySelectorAll('#interaction-table .x-besar').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      const target = container.querySelector('.posthoc-collapsed-item');
+      let nextSibling = container.nextElementSibling;
+      while (nextSibling) {
+        const temp = nextSibling;
+        nextSibling = nextSibling.nextElementSibling;
+        target.appendChild(temp);
+      }
+    })();
+  }
+  // SK
+  else if (selectedPosthoc === "sk") {
+    // Faktor A, Faktor B, dan Kombinasi AB
+    processSK('factorA', selectedFaktorAText, getData.info("FaktorA", "Hasil"));
+    processSK('factorB', selectedFaktorBText, getData.info("FaktorB", "Hasil"));
+    processSK('factorAB', '<span data-id="Kombinasi">Combination</span>: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, getData.info("FaktorA", "FaktorB", "Hasil"));
+    // Interaksi AB
+    document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'><span data-id='Interaksi'>Interaction</span>: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
+    const uniqueFaktorA = new Set();
+    const uniqueFaktorB = new Set();
+    const rows = document.querySelectorAll('#tableContainer tbody tr');
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 2) {
+        uniqueFaktorA.add(cells[0].textContent.trim());
+        uniqueFaktorB.add(cells[1].textContent.trim());
+      }
+    });
+    uniqueFaktorA.forEach(faktorA => {
+      const info = getData.info("FaktorA", "FaktorB", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorA));
+      if (info.length > 0) {
+        processSK(`leading_${faktorA}`, faktorA, info.join('\n'));
+      }
+    });
+    uniqueFaktorB.forEach(faktorB => {
+      const info = getData.info("FaktorB", "FaktorA", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorB));
+      if (info.length > 0) {
+        processSK(`leading_${faktorB}`, faktorB, info.join('\n'));
+      }
+    });
+    // Tabel Interaksi 
+    (function () {
+      const table = document.querySelector('#tableContainer table');
+      if (!table) return;
+      const rows = Array.from(table.querySelectorAll('tbody tr')).slice(1);
+      const headers = Array.from(table.querySelectorAll('th'));
+      const colIndex = {};
+      headers.forEach((th, i) => {
+        if (th.dataset.setting) {
+          colIndex[th.dataset.setting] = i;
+        }
+      });
+      const dataMap = {};
+      rows.forEach(tr => {
+        const cells = tr.querySelectorAll('td');
+        if (!cells.length) return;
+        const faktorA = cells[colIndex['FaktorA']].textContent.trim();
+        const faktorB = cells[colIndex['FaktorB']].textContent.trim();
+        const nilai = parseFloat(cells[colIndex['Hasil']].textContent.trim());
+        if (!dataMap[faktorB]) dataMap[faktorB] = {};
+        if (!dataMap[faktorB][faktorA]) dataMap[faktorB][faktorA] = [];
+        dataMap[faktorB][faktorA].push(nilai);
+      });
+      const faktorAList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorA']]?.textContent.trim()).filter(Boolean))];
+      const faktorBList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorB']]?.textContent.trim()).filter(Boolean))];
+      const newTable = document.createElement('table');
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      headRow.appendChild(document.createElement('th')).textContent = '×';
+      faktorAList.forEach(fa => {
+        const th = document.createElement('th');
+        th.colSpan = 2;
+        th.textContent = fa;
+        headRow.appendChild(th);
+      });
+      thead.appendChild(headRow);
+      newTable.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      faktorBList.forEach(fb => {
+        const avgRow = document.createElement('tr');
+        const fbCell = document.createElement('th');
+        fbCell.rowSpan = 2;
+        fbCell.textContent = fb;
+        avgRow.appendChild(fbCell);
+        faktorAList.forEach(fa => {
+          const avg = dataMap[fb]?.[fa] ? (dataMap[fb][fa].reduce((a, b) => a + b, 0) / dataMap[fb][fa].length) : 0;
+          const td1 = document.createElement('td');
+          td1.textContent = avg.toFixed(2);
+          const td2 = document.createElement('td');
+          td2.classList.add('x-kecil');
+          td2.dataset.pair = `${fb}${fa}`;
+          td2.textContent = 'x';
+          avgRow.appendChild(td1);
+          avgRow.appendChild(td2);
+        });
+        tbody.appendChild(avgRow);
+        const xRow = document.createElement('tr');
+        faktorAList.forEach(fa => {
+          const td = document.createElement('td');
+          td.colSpan = 2;
+          td.classList.add('x-besar');
+          td.dataset.pair = `${fa}${fb}`;
+          td.textContent = 'X';
+          xRow.appendChild(td);
+        });
+        tbody.appendChild(xRow);
+      });
+      newTable.appendChild(tbody);
+      const container = document.getElementById('interaction-table');
+      container.innerHTML = '';
+      container.appendChild(newTable);
+      const perFaktorContainer = document.createElement('div');
+      perFaktorContainer.classList.add('posthoc-collapsed-item');
+      container.appendChild(perFaktorContainer);
+      const posthocTables = document.querySelectorAll('#posthoc table[id^="leading_"][id$="-LETTER"]');
+      const notasiMap = {};
+      posthocTables.forEach(tbl => {
+        const trs = tbl.querySelectorAll('tbody tr');
+        trs.forEach(tr => {
+          const perlakuan = tr.cells[0].textContent.trim();
+          const notasi = tr.cells[2].textContent.trim();
+          notasiMap[perlakuan] = notasi;
+        });
+      });
+      document.querySelectorAll('#interaction-table .x-kecil').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      document.querySelectorAll('#interaction-table .x-besar').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      const target = container.querySelector('.posthoc-collapsed-item');
+      let nextSibling = container.nextElementSibling;
+      while (nextSibling) {
+        const temp = nextSibling;
+        nextSibling = nextSibling.nextElementSibling;
+        target.appendChild(temp);
+      }
+    })();
+  }
 
 }
 
