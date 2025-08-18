@@ -96,13 +96,26 @@
               <label for="jenis-anova" data-id="Rancangan Percobaan (Anova)">Experimental Design (Anova)</label>
               <select name="jenis-anova" id="jenis-anova">
                 <option value="ral" data-id="Rancangan Acak Lengkap (RAL)">Completely Randomized Design (CRD)</option>
-                <option value="ralf" data-id="Rancangan Acak Lengkap Faktorial (RAL-F)">Factorial Completely Randomized Design (F-CRD)</option>
                 <option value="rak" data-id="Rancangan Acak Kelompok (RAK)">Randomized Block Design (RBD)</option>
-                <option value="rakf" data-id="Rancangan Acak Kelompok Faktorial (RAK-F)">Factorial Randomized Block Design (F-RBD)</option>
                 <option value="rbsl" data-id="Rancangan Bujur Sangkar Latin (RBSL)">Latin Square Design (LSD)</option>
-                <option value="rpt" disabled data-id="Rancangan Petak Terbagi (RPT)">Split Plot Design (SPD)</option>
+                <option value="rpt" data-id="Rancangan Petak Terbagi (RPT)">Split Plot Design (SPD)</option>
                 <option value="rptf" disabled data-id="Rancangan Petak Terbagi Faktorial (RPT-F)">Factorial Split Plot Design (FSPD)</option>
                 <option value="ra" disabled data-id="Rancangan Beralih (Cross-over)">Cross-over Design (COD)</option>
+              </select>
+            </div>
+            <div class="jenis-faktor">
+              <label for="jenis-faktor" data-id="Jumlah Faktor">Number of Factors</label>
+              <select name="jenis-faktor" id="jenis-faktor">
+                <option value="1" data-id="Tunggal">Single</option>
+                <option value="2" data-id="2">2</option>
+              </select>
+            </div>
+            <div class="jenis-rpt">
+              <label for="jenis-rpt" data-id="Tipe Petak Utama">Main Plot Type</label>
+              <select name="jenis-rpt" id="jenis-rpt">
+                <option value="ral" data-id="Rancangan Acak Lengkap (RAL)">Completely Randomized Design (CRD)</option>
+                <option value="rak" selected data-id="Rancangan Acak Kelompok (RAK)">Randomized Block Design (RBD)</option>
+                <option value="rbsl" disabled data-id="Rancangan Bujur Sangkar Latin (RBSL)">Latin Square Design (LSD)</option>
               </select>
             </div>
             <div class="jenis-posthoc">
@@ -186,14 +199,18 @@
             <table id="anovaSup">
               <thead>
                 <tr>
-                  <th data-id="Koefisien Keragaman">Coefficient of Variation</th>
+                  <th class="no-bujursangkar" data-id="Koefisien Keragaman">Coefficient of Variation</th>
+                  <th class="bujursangkar" data-id="Koefisien Keragaman (A)">Coefficient of Variation (A)</th>
+                  <th class="bujursangkar" data-id="Koefisien Keragaman (B)">Coefficient of Variation (B)</th>
                   <th data-id="Faktor Koreksi">Correction Factor</th>
                   <th data-id="Total Keseluruhan">Grand Total</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td class="kk"></td>
+                  <td class="no-bujursangkar kk"></td>
+                  <td class="bujursangkar kkA"></td>
+                  <td class="bujursangkar kkB"></td>
                   <td class="fk"></td>
                   <td class="gt"></td>
                 </tr>

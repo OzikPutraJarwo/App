@@ -210,16 +210,26 @@ th#renderbyMerged svg {
   gap: 1rem
 }
 
-.jenis-anova,
-.jenis-posthoc {
-  display: grid;
-  gap: .5rem;
-}
-
 .type .content {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 200px 1fr;
   gap: 1.5rem;
+}
+
+.type.rpt .content {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.type .content .jenis-rpt {
+  display: none;
+}
+
+.type.rpt .content .jenis-rpt {
+  display: grid;
+}
+
+.type.rpt .content .jenis-faktor {
+  display: none;
 }
 
 .type .content.factorial {
@@ -230,46 +240,9 @@ th#renderbyMerged svg {
   display: none;
 }
 
-.show-set,
-.uncollapse,
-.set-graph {
-  background: #fff;
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  line-height: 0;
-  box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em, rgb(204, 219, 232, 0) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0) -3px -3px 6px 1px inset;
-  padding: .5rem;
-  border-radius: .5rem;
-  transition: .2s;
-  cursor: pointer;
-  width: 35px;
-  height: 35px;
-}
-
-.uncollapse {
-  top: 1.4rem;
-  right: 1.4rem;
-}
-
-.uncollapse img {
-  scale: 1.5;
-}
-
-.show-set:hover,
-.uncollapse:hover,
-.set-graph:hover {
-  box-shadow: rgba(67, 71, 85, 0) 0px 0px 0.25em, rgba(90, 125, 188, 0) 0px 0.25em 1em, rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
-}
-
-.show-set img,
-.uncollapse img {
-  width: 20px;
-  height: auto;
-}
-
-.collapse {
-  position: relative;
+.type .content > div {
+  display: grid;
+  gap: .5rem;
 }
 
 .excel .file-container {
@@ -413,6 +386,18 @@ table#anovaTable tbody tr td:first-child {
 
 table#anovaSup {
   table-layout: fixed;
+}
+
+#anovaSup .bujursangkar {
+  display: none;
+}
+
+#anovaSup.bujursangkar .no-bujursangkar {
+  display: none;
+}
+
+#anovaSup.bujursangkar .bujursangkar {
+  display: table-cell;
 }
 
 /* ----- Posthoc ----- */

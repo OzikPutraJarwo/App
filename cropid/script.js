@@ -212,6 +212,20 @@ function getFileName() {
   document.querySelector('.excel .input-files label span:first-child').style.display = 'none';
 };
 
+let selectedDesign = document.getElementById('jenis-anova').value;
+let selectedFactor = document.getElementById('jenis-faktor').value;
+let selectedRPT = document.getElementById('jenis-rpt').value;
+let selectedPosthoc = document.getElementById('jenis-posthoc').value;
+
+document.querySelectorAll('.type select').forEach(selectElement => {
+  selectElement.addEventListener('change', function () {
+    selectedDesign = document.getElementById('jenis-anova').value;
+    selectedFactor = document.getElementById('jenis-faktor').value;
+    selectedRPT = document.getElementById('jenis-rpt').value;
+    selectedPosthoc = document.getElementById('jenis-posthoc').value;
+  });
+});
+
 const fileInput = document.getElementById('fileInput');
 const tableContainer = document.getElementById('tableContainer');
 const fileContainer = document.querySelector('.file-container');
@@ -404,24 +418,26 @@ function activateSetting(settingType) {
   document.getElementById(`${settingType.toLowerCase()}Btn`).classList.add('active');
 }
 
-let selectedDesign = document.getElementById('jenis-anova').value;
-document.getElementById('jenis-anova').addEventListener('change', function (event) {
-  selectedDesign = event.target.value;
-  if (selectedDesign === "ral" || selectedDesign === "rak") {
-    document.getElementById('buttonContainer').classList.remove('factorial');
-    document.getElementById('buttonContainer').classList.remove('bujursangkar');
-  } else if (selectedDesign === "rakf" || selectedDesign === "ralf") {
-    document.getElementById('buttonContainer').classList.add('factorial');
-    document.getElementById('buttonContainer').classList.remove('bujursangkar');
-  } else if (selectedDesign === "rbsl") {
-    document.getElementById('buttonContainer').classList.remove('factorial');
-    document.getElementById('buttonContainer').classList.add('bujursangkar');
-  }
-});
-
-let selectedPosthoc = document.getElementById('jenis-posthoc').value;
-document.getElementById('jenis-posthoc').addEventListener('change', function (event) {
-  selectedPosthoc = event.target.value;
+document.querySelectorAll('.type select').forEach(selectElement => {
+  selectElement.addEventListener('change', function () {
+    if (selectedDesign === "ral" && selectedFactor === "1" || selectedDesign === "rak" && selectedFactor === "1") {
+      document.getElementById('buttonContainer').classList.remove('factorial');
+      document.getElementById('buttonContainer').classList.remove('bujursangkar');
+      document.querySelector('.type').classList.remove('rpt');
+    } else if (selectedDesign === "ral" && selectedFactor === "2" || selectedDesign === "rak" && selectedFactor === "2") {
+      document.getElementById('buttonContainer').classList.add('factorial');
+      document.getElementById('buttonContainer').classList.remove('bujursangkar');
+      document.querySelector('.type').classList.remove('rpt');
+    } else if (selectedDesign === "rbsl") {
+      document.getElementById('buttonContainer').classList.remove('factorial');
+      document.getElementById('buttonContainer').classList.add('bujursangkar');
+      document.querySelector('.type').classList.remove('rpt');
+    } else if (selectedDesign === "rpt") {
+      document.getElementById('buttonContainer').classList.add('factorial');
+      document.getElementById('buttonContainer').classList.remove('bujursangkar');
+      document.querySelector('.type').classList.add('rpt');
+    }
+  });
 });
 
 function handleHeaderClick(event) {
@@ -462,20 +478,23 @@ function handleHeaderClick(event) {
   selectedSettingType = null;
 
   // Menampilkan tombol analisis (.run) dan scroll ke tombolnya
-  if (selectedDesign === "ral" || selectedDesign === "rak") {
-    // Scroll ketika perlakuan, ulangan, dan hasil telah dipilih (1 faktor)
+  if (selectedDesign === "ral" && selectedFactor === "1" || selectedDesign === "rak" && selectedFactor === "1") {
     if (selectedHeaders.Perlakuan && selectedHeaders.Ulangan && selectedHeaders.Hasil) {
       document.querySelector('.run').classList.remove('none');
       smoothScroll('.run', top = 75);
     }
-  } else if (selectedDesign === "rakf" || selectedDesign === "ralf") {
-    // Scroll ketika faktor A, faktor B, ulangan, dan hasil telah dipilih (2 faktor)
+  } else if (selectedDesign === "ral" && selectedFactor === "2" || selectedDesign === "rak" && selectedFactor === "2") {
     if (selectedHeaders.FaktorA && selectedHeaders.FaktorB && selectedHeaders.Ulangan && selectedHeaders.Hasil) {
       document.querySelector('.run').classList.remove('none');
       smoothScroll('.run', top = 75);
     }
   } else if (selectedDesign === "rbsl") {
     if (selectedHeaders.Perlakuan && selectedHeaders.Baris && selectedHeaders.Kolom && selectedHeaders.Hasil) {
+      document.querySelector('.run').classList.remove('none');
+      smoothScroll('.run', top = 75);
+    }
+  } else if (selectedDesign === "rpt") {
+    if (selectedHeaders.FaktorA && selectedHeaders.FaktorB && selectedHeaders.Ulangan && selectedHeaders.Hasil) {
       document.querySelector('.run').classList.remove('none');
       smoothScroll('.run', top = 75);
     }
@@ -491,17 +510,31 @@ function handleHeaderClick(event) {
     document.querySelector('.anova').classList.add('show');
     document.querySelector('#posthoc').classList.remove('none');
     document.querySelector('#posthoc').innerHTML = ``;
-    if (selectedDesign === "ral") {
+
+    const anovaSup = document.querySelector("#anovaSup");
+    if (selectedDesign === "ral" && selectedFactor === "1") {
       countAnovaRAL();
-    } else if (selectedDesign === "rak") {
+      anovaSup.classList.remove("bujursangkar")
+    } else if (selectedDesign === "rak" && selectedFactor === "1") {
       countAnovaRAK();
-    } else if (selectedDesign === "ralf") {
+      anovaSup.classList.remove("bujursangkar")
+    } else if (selectedDesign === "ral" && selectedFactor === "2") {
       countAnovaRALF();
-    } else if (selectedDesign === "rakf") {
+      anovaSup.classList.remove("bujursangkar")
+    } else if (selectedDesign === "rak" && selectedFactor === "2") {
       countAnovaRAKF();
+      anovaSup.classList.remove("bujursangkar")
     } else if (selectedDesign === "rbsl") {
       countAnovaRBSL();
+      anovaSup.classList.remove("bujursangkar")
+    } else if (selectedDesign === "rpt" && selectedRPT === "ral") {
+      countAnovaRPT_RAL();
+      anovaSup.classList.add("bujursangkar")
+    } else if (selectedDesign === "rpt" && selectedRPT === "rak") {
+      countAnovaRPT_RAK();
+      anovaSup.classList.add("bujursangkar")
     }
+
     document.querySelectorAll('.posthoc-collapser').forEach(c => {
       c.innerHTML += `<div class='posthoc-collapser-item'><img src='../icon/arrow-down.png'></div>`;
     });
@@ -704,7 +737,6 @@ function countAnovaRAL() {
 }
 
 // ----- RAK -----
-
 function countAnovaRAK() {
   const anovaTitle = document.querySelector("#anova h3");
   anovaTitle.innerHTML = `ANOVA: Randomized Block Design (RBD)`;
@@ -728,7 +760,7 @@ function countAnovaRAK() {
     </thead>  
     <tbody>
       <tr>
-        <td data-id='Blok'>Block</td>
+        <td data-id='Kelompok'>Block</td>
         <td class="Udb"></td>
         <td class="Ujk"></td>
         <td class="Ukt"></td>
@@ -1036,7 +1068,7 @@ function countAnovaRALF() {
     cellABsg.innerHTML = "*";
     document.querySelector('#posthoc').classList.remove('tanpa-interaksi')
   } else {
-    cellABsg.innerHTML = "ns";
+    cellABsg.innerHTML = "<span data-id='tn'>ns</span>";
     document.querySelector('#posthoc').classList.add('tanpa-interaksi')
   }
 
@@ -1781,7 +1813,7 @@ function countAnovaRAKF() {
     </thead>  
     <tbody>
       <tr>
-        <td data-id='Blok'>Block</td>
+        <td data-id='Kelompok'>Block</td>
         <td class="Udb"></td>
         <td class="Ujk"></td>
         <td class="Ukt"></td>
@@ -1953,7 +1985,7 @@ function countAnovaRAKF() {
     cellABsg.innerHTML = "*";
     document.querySelector('#posthoc').classList.remove('tanpa-interaksi')
   } else {
-    cellABsg.innerHTML = "ns";
+    cellABsg.innerHTML = "<span data-id='tn'>ns</span>";
     document.querySelector('#posthoc').classList.add('tanpa-interaksi')
   }
 
@@ -2867,6 +2899,943 @@ function countAnovaRBSL() {
   else if (selectedPosthoc === "sk") {
     processSK('Perlakuan', selectedPerlakuanText, getData.info("Perlakuan", "Hasil"));
   }
+
+}
+
+// ----- RPT RAK -----
+function countAnovaRPT_RAK() {
+  const anovaTitle = document.querySelector("#anova h3");
+  anovaTitle.innerHTML = `ANOVA: Split Plot Design RBD (SPD-RBD)`;
+  anovaTitle.setAttribute("data-id", "Anova: Rancangan Petak Terbagi RAK (RPT-RAK)")
+
+  document.querySelector('table#anovaTable').innerHTML = `
+    <thead>
+      <tr>
+        <th rowspan='2' data-id='Sumber Keragaman'>Source of Variation</th>
+        <th rowspan='2' data-id='Derajat Bebas'>Degrees of Freedom</th>
+        <th rowspan='2' data-id='Jumlah Kuadrat'>Sum of Squares</th>
+        <th rowspan='2' data-id='Kuadrat Tengah'>Mean Square</th>
+        <th rowspan='2' data-id='F Hitung'>F Stat</th>
+        <th colspan='2' data-id='F Tabel'>F Table</th>
+        <th rowspan='2' data-id='Signifikansi'>Significance</th>
+      </tr>
+      <tr>
+        <th>5%</th>
+        <th>1%</th>
+      </tr>
+    </thead>  
+    <tbody>
+      <tr>
+        <td data-id='Petak Utama' colspan="8">Main Plot</td>
+      </tr>
+      <tr>
+        <td data-id='Kelompok'>Block</td>
+        <td class="Udb"></td>
+        <td class="Ujk"></td>
+        <td class="Ukt"></td>
+        <td class="Ufh"></td>
+        <td class="Uft5"></td>
+        <td class="Uft1"></td>
+        <td class="Usg"></td>
+      </tr>
+      <tr>
+        <td>${selectedFaktorAText} (A)</td>
+        <td class="Adb"></td>
+        <td class="Ajk"></td>
+        <td class="Akt"></td>
+        <td class="Afh"></td>
+        <td class="Aft5"></td>
+        <td class="Aft1"></td>
+        <td class="Asg"></td>
+      </tr>
+      <tr>
+        <td>Residuals</td>
+        <td class="AGdb"></td>
+        <td class="AGjk"></td>
+        <td class="AGkt"></td>
+        <td class="AGfh" colspan="4"></td>
+      </tr>
+      <tr>
+        <td data-id='Anak Petak' colspan="8">Sub Plot</td>
+      </tr>
+      <tr>
+        <td>${selectedFaktorBText} (B)</td>
+        <td class="Bdb"></td>
+        <td class="Bjk"></td>
+        <td class="Bkt"></td>
+        <td class="Bfh"></td>
+        <td class="Bft5"></td>
+        <td class="Bft1"></td>
+        <td class="Bsg"></td>
+      </tr>
+      <tr>
+        <td>${selectedFaktorAText} × ${selectedFaktorBText} (A × B)</td>
+        <td class="ABdb"></td>
+        <td class="ABjk"></td>
+        <td class="ABkt"></td>
+        <td class="ABfh"></td>
+        <td class="ABft5"></td>
+        <td class="ABft1"></td>
+        <td class="ABsg"></td>
+      </tr>
+      <tr>
+        <td>Residuals</td>
+        <td class="BGdb"></td>
+        <td class="BGjk"></td>
+        <td class="BGkt"></td>
+        <td class="BGfh" colspan="4"></td>
+      </tr>
+      <tr>
+        <td>Total</td>
+        <td class="BTdb"></td>
+        <td class="BTjk"></td>
+        <td class="BTkt" colspan="5"></td>
+      </tr>
+    </tbody>
+  `;
+  const [
+    cellkkA, cellkkB, cellfk, cellgt,
+    cellUdb, cellUjk, cellUkt, cellUfh, cellUft5, cellUft1, cellUsg,
+    cellAdb, cellAjk, cellAkt, cellAfh, cellAsg, cellAGdb, cellAGjk, cellAGkt, cellAft5, cellAft1,
+    cellBdb, cellBjk, cellBkt, cellBfh, cellBsg, cellBGdb, cellBGjk, cellBGkt, cellBTdb, cellBTjk, cellBft5, cellBft1,
+    cellABdb, cellABjk, cellABkt, cellABfh, cellABsg, cellABft5, cellABft1
+  ] = [
+    'kkA', 'kkB', 'fk', 'gt',
+    'Udb', 'Ujk', 'Ukt', 'Ufh', 'Uft5', 'Uft1', 'Usg',
+    'Adb', 'Ajk', 'Akt', 'Afh', 'Asg', 'AGdb', 'AGjk', 'AGkt', 'Aft5', 'Aft1',
+    'Bdb', 'Bjk', 'Bkt', 'Bfh', 'Bsg', 'BGdb', 'BGjk', 'BGkt', 'BTdb', 'BTjk', 'Bft5', 'Bft1',
+    'ABdb', 'ABjk', 'ABkt', 'ABfh', 'ABsg', 'ABft5', 'ABft1'
+  ]
+    .map(cls => document.querySelector(`.${cls}`));
+
+  const fk = (getData.sum("Hasil") * getData.sum("Hasil")) / (getData.count("Ulangan") * (getData.count("FaktorA") * getData.count("FaktorB")));
+  cellfk.innerHTML = fk.toFixed(2);
+  cellgt.innerHTML = getData.sumSquared("Hasil").toFixed(2);
+
+  const Udb = getData.count("Ulangan") - 1;
+  cellUdb.innerHTML = Udb;
+  const Adb = getData.count("FaktorA") - 1;
+  cellAdb.innerHTML = Adb;
+  const AGdb = (getData.count("FaktorA") - 1) * (getData.count("Ulangan") - 1);
+  cellAGdb.innerHTML = AGdb;
+  const Bdb = getData.count("FaktorB") - 1;
+  cellBdb.innerHTML = Bdb;
+  const BGdb = getData.count("FaktorA") * (getData.count("Ulangan") - 1) * (getData.count("FaktorB") - 1);
+  cellBGdb.innerHTML = BGdb;
+  const BTdb = getData.count("Ulangan") * getData.count("FaktorA") * getData.count("FaktorB") - 1;
+  cellBTdb.innerHTML = BTdb;
+  const ABdb = (getData.count("FaktorA") - 1) * (getData.count("FaktorB") - 1);
+  cellABdb.innerHTML = ABdb;
+
+  const Ujk = getData.sumOfGroupedSquares("Ulangan", "Hasil") / (getData.count("FaktorA") * getData.count("FaktorB")) - fk;
+  cellUjk.innerHTML = Ujk.toFixed(2);
+  const Ajk = getData.sumOfGroupedSquares("FaktorA", "Hasil") / (getData.count("Ulangan") * getData.count("FaktorB")) - fk;
+  cellAjk.innerHTML = Ajk.toFixed(2);
+  const AGjk = getData.sumOfGroupedSquares("FaktorA", "Ulangan", "Hasil") / getData.count("FaktorB") - fk - Ujk - Ajk;
+  cellAGjk.innerHTML = AGjk.toFixed(2);
+  const Bjk = getData.sumOfGroupedSquares("FaktorB", "Hasil") / (getData.count("Ulangan") * getData.count("FaktorA")) - fk;
+  cellBjk.innerHTML = Bjk.toFixed(2);
+  const ABjk = (getData.sumOfGroupedSquares("FaktorA", "FaktorB", "Hasil") / getData.count("Ulangan")) - fk - Ajk - Bjk;
+  cellABjk.innerHTML = ABjk.toFixed(2);
+  const BTjk = getData.sumSquared("Hasil") - fk;
+  cellBTjk.innerHTML = BTjk.toFixed(2);
+  const BGjk = BTjk - Ujk - Ajk - AGjk - Bjk - ABjk;
+  cellBGjk.innerHTML = BGjk.toFixed(2);
+
+  const Ukt = Ujk / Udb;
+  cellUkt.innerHTML = Ukt.toFixed(2);
+  const Akt = Ajk / Adb;
+  cellAkt.innerHTML = Akt.toFixed(2);
+  const AGkt = AGjk / AGdb;
+  cellAGkt.innerHTML = AGkt.toFixed(2);
+  const Bkt = Bjk / Bdb;
+  cellBkt.innerHTML = Bkt.toFixed(2);
+  const BGkt = BGjk / BGdb;
+  cellBGkt.innerHTML = BGkt.toFixed(2);
+  const ABkt = ABjk / ABdb;
+  cellABkt.innerHTML = ABkt.toFixed(2);
+
+  const Ufh = Ukt / AGkt;
+  cellUfh.innerHTML = Ufh.toFixed(2);
+  const Afh = Akt / AGkt;
+  cellAfh.innerHTML = Afh.toFixed(2);
+  const Bfh = Bkt / BGkt;
+  cellBfh.innerHTML = Bfh.toFixed(2);
+  const ABfh = ABkt / BGkt;
+  cellABfh.innerHTML = ABfh.toFixed(2);
+
+  const Uft5 = jStat.centralF.inv(0.95, Udb, AGdb);
+  cellUft5.innerHTML = Uft5.toFixed(2);
+  const Uft1 = jStat.centralF.inv(0.99, Udb, AGdb);
+  cellUft1.innerHTML = Uft1.toFixed(2);
+
+  const Aft5 = jStat.centralF.inv(0.95, Adb, AGdb);
+  cellAft5.innerHTML = Aft5.toFixed(2);
+  const Aft1 = jStat.centralF.inv(0.99, Adb, AGdb);
+  cellAft1.innerHTML = Aft1.toFixed(2);
+
+  const Bft5 = jStat.centralF.inv(0.95, Bdb, BGdb);
+  cellBft5.innerHTML = Bft5.toFixed(2);
+  const Bft1 = jStat.centralF.inv(0.99, Bdb, BGdb);
+  cellBft1.innerHTML = Bft1.toFixed(2);
+
+  const ABft5 = jStat.centralF.inv(0.95, ABdb, BGdb);
+  cellABft5.innerHTML = ABft5.toFixed(2);
+  const ABft1 = jStat.centralF.inv(0.99, ABdb, BGdb);
+  cellABft1.innerHTML = ABft1.toFixed(2);
+
+  if (Ufh > Uft1) {
+    cellUsg.innerHTML = "**"
+  } else if (Ufh > Uft5) {
+    cellUsg.innerHTML = "*"
+  } else {
+    cellUsg.innerHTML = "<span data-id='tn'>ns</span>"
+  }
+
+  if (Afh > Aft1) {
+    cellAsg.innerHTML = "**"
+  } else if (Afh > Aft5) {
+    cellAsg.innerHTML = "*"
+  } else {
+    cellAsg.innerHTML = "<span data-id='tn'>ns</span>"
+  }
+
+  if (Bfh > Bft1) {
+    cellBsg.innerHTML = "**"
+  } else if (Bfh > Bft5) {
+    cellBsg.innerHTML = "*"
+  } else {
+    cellBsg.innerHTML = "<span data-id='tn'>ns</span>"
+  }
+
+  if (ABfh > ABft1) {
+    cellABsg.innerHTML = "**";
+    document.querySelector('#posthoc').classList.remove('tanpa-interaksi')
+  } else if (ABfh > ABft5) {
+    cellABsg.innerHTML = "*";
+    document.querySelector('#posthoc').classList.remove('tanpa-interaksi')
+  } else {
+    cellABsg.innerHTML = "<span data-id='tn'>ns</span>";
+    document.querySelector('#posthoc').classList.add('tanpa-interaksi')
+  }
+
+  const kkA = Math.sqrt(AGkt) / (getData.sum("Hasil") / (getData.count("FaktorA") * getData.count("FaktorB") * getData.count("Ulangan"))) * 100;
+  cellkkA.innerHTML = kkA.toFixed(0) + "%";
+  const kkB = Math.sqrt(BGkt) / (getData.sum("Hasil") / (getData.count("FaktorA") * getData.count("FaktorB") * getData.count("Ulangan"))) * 100;
+  cellkkB.innerHTML = kkB.toFixed(0) + "%";
+
+  document.getElementById('posthoc').innerHTML = `<h3 id="posthoc-title"></h3>`;
+
+  // FLSD
+  if (selectedPosthoc === "bnt") {
+    // Nilai Tabel
+    tableA = (jStat.studentt.inv(1 - 0.05 / 2, BGdb));
+    tableB = (jStat.studentt.inv(1 - 0.05 / 2, AGdb));
+    // Nilai Hitung
+    thitA = (tableA * Math.sqrt((2 * AGkt) / (getData.count("Ulangan") * getData.count("FaktorB"))));
+    thitB = (tableB * Math.sqrt((2 * BGkt) / (getData.count("Ulangan") * getData.count("FaktorA"))));
+    thitAB = (tableB * Math.sqrt((2 * BGkt) / getData.count("Ulangan")));
+    // Faktor A, Faktor B, dan Kombinasi AB
+    processFLSD(selectedFaktorAText, 'factorA', getData.info("FaktorA", "Hasil"), thitA);
+    processFLSD(selectedFaktorBText, 'factorB', getData.info("FaktorB", "Hasil"), thitB);
+    processFLSD('<span data-id="Kombinasi">Combination</span>: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, 'factorAB', getData.info("FaktorA", "FaktorB", "Hasil"), thitAB);
+    // Interaksi AB
+    document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'><span data-id='Interaksi'>Interaction</span>: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
+    const uniqueFaktorA = new Set();
+    const uniqueFaktorB = new Set();
+    const rows = document.querySelectorAll('#tableContainer tbody tr');
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 2) {
+        uniqueFaktorA.add(cells[0].textContent.trim());
+        uniqueFaktorB.add(cells[1].textContent.trim());
+      }
+    });
+    uniqueFaktorA.forEach(faktorA => {
+      const info = getData.info("FaktorA", "FaktorB", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorA));
+      if (info.length > 0) {
+        processFLSD(faktorA, `leading_${faktorA}`, info.join('\n'), thitA);
+      }
+    });
+    uniqueFaktorB.forEach(faktorB => {
+      const info = getData.info("FaktorB", "FaktorA", "Hasil")
+        .split('\n')
+        .filter(line => line.startsWith(faktorB));
+      if (info.length > 0) {
+        processFLSD(faktorB, `leading_${faktorB}`, info.join('\n'), thitB);
+      }
+    });
+    // Tabel Interaksi 
+    (function () {
+      const table = document.querySelector('#tableContainer table');
+      if (!table) return;
+      const rows = Array.from(table.querySelectorAll('tbody tr')).slice(1);
+      const headers = Array.from(table.querySelectorAll('th'));
+      const colIndex = {};
+      headers.forEach((th, i) => {
+        if (th.dataset.setting) {
+          colIndex[th.dataset.setting] = i;
+        }
+      });
+      const dataMap = {};
+      rows.forEach(tr => {
+        const cells = tr.querySelectorAll('td');
+        if (!cells.length) return;
+        const faktorA = cells[colIndex['FaktorA']].textContent.trim();
+        const faktorB = cells[colIndex['FaktorB']].textContent.trim();
+        const nilai = parseFloat(cells[colIndex['Hasil']].textContent.trim());
+        if (!dataMap[faktorB]) dataMap[faktorB] = {};
+        if (!dataMap[faktorB][faktorA]) dataMap[faktorB][faktorA] = [];
+        dataMap[faktorB][faktorA].push(nilai);
+      });
+      const faktorAList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorA']]?.textContent.trim()).filter(Boolean))];
+      const faktorBList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorB']]?.textContent.trim()).filter(Boolean))];
+      const newTable = document.createElement('table');
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+      headRow.appendChild(document.createElement('th')).textContent = '×';
+      faktorAList.forEach(fa => {
+        const th = document.createElement('th');
+        th.colSpan = 2;
+        th.textContent = fa;
+        headRow.appendChild(th);
+      });
+      thead.appendChild(headRow);
+      newTable.appendChild(thead);
+      const tbody = document.createElement('tbody');
+      faktorBList.forEach(fb => {
+        const avgRow = document.createElement('tr');
+        const fbCell = document.createElement('th');
+        fbCell.rowSpan = 2;
+        fbCell.textContent = fb;
+        avgRow.appendChild(fbCell);
+        faktorAList.forEach(fa => {
+          const avg = dataMap[fb]?.[fa] ? (dataMap[fb][fa].reduce((a, b) => a + b, 0) / dataMap[fb][fa].length) : 0;
+          const td1 = document.createElement('td');
+          td1.textContent = avg.toFixed(2);
+          const td2 = document.createElement('td');
+          td2.classList.add('x-kecil');
+          td2.dataset.pair = `${fb}${fa}`;
+          td2.textContent = 'x';
+          avgRow.appendChild(td1);
+          avgRow.appendChild(td2);
+        });
+        tbody.appendChild(avgRow);
+        const xRow = document.createElement('tr');
+        faktorAList.forEach(fa => {
+          const td = document.createElement('td');
+          td.colSpan = 2;
+          td.classList.add('x-besar');
+          td.dataset.pair = `${fa}${fb}`;
+          td.textContent = 'X';
+          xRow.appendChild(td);
+        });
+        tbody.appendChild(xRow);
+      });
+      newTable.appendChild(tbody);
+      const container = document.getElementById('interaction-table');
+      container.innerHTML = '';
+      container.appendChild(newTable);
+      const perFaktorContainer = document.createElement('div');
+      perFaktorContainer.classList.add('posthoc-collapsed-item');
+      container.appendChild(perFaktorContainer);
+      const posthocTables = document.querySelectorAll('#posthoc table[id^="leading_"][id$="-LETTER"]');
+      const notasiMap = {};
+      posthocTables.forEach(tbl => {
+        const trs = tbl.querySelectorAll('tbody tr');
+        trs.forEach(tr => {
+          const perlakuan = tr.cells[0].textContent.trim();
+          const notasi = tr.cells[2].textContent.trim();
+          notasiMap[perlakuan] = notasi;
+        });
+      });
+      document.querySelectorAll('#interaction-table .x-kecil').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      document.querySelectorAll('#interaction-table .x-besar').forEach(td => {
+        const pair = td.dataset.pair;
+        if (notasiMap[pair]) {
+          td.textContent = notasiMap[pair];
+        }
+      });
+      const target = container.querySelector('.posthoc-collapsed-item');
+      let nextSibling = container.nextElementSibling;
+      while (nextSibling) {
+        const temp = nextSibling;
+        nextSibling = nextSibling.nextElementSibling;
+        target.appendChild(temp);
+      }
+    })();
+  }
+  // // THSD
+  // else if (selectedPosthoc === "bnj") {
+  //   // Nilai Tabel
+  //   tableA = (jStat.tukey.inv(0.95, getData.count("FaktorA"), Gdb));
+  //   tableB = (jStat.tukey.inv(0.95, getData.count("FaktorB"), Gdb));
+  //   tableAB = (jStat.tukey.inv(0.95, getData.count("FaktorA") * getData.count("FaktorB"), Gdb));
+  //   // Nilai Hitung
+  //   thitA = (tableA * Math.sqrt(Gkt / (getData.count("FaktorB") * getData.count("Ulangan"))));
+  //   thitB = (tableB * Math.sqrt(Gkt / (getData.count("FaktorA") * getData.count("Ulangan"))));
+  //   thitAB = (tableAB * Math.sqrt(Gkt / getData.count("Ulangan")));
+  //   // Faktor A, Faktor B, dan Kombinasi AB
+  //   processTHSD(selectedFaktorAText, 'factorA', getData.info("FaktorA", "Hasil"), thitA);
+  //   processTHSD(selectedFaktorBText, 'factorB', getData.info("FaktorB", "Hasil"), thitB);
+  //   processTHSD('<span data-id="Kombinasi">Combination</span>: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, 'factorAB', getData.info("FaktorA", "FaktorB", "Hasil"), thitAB);
+  //   // Interaksi AB
+  //   document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'><span data-id='Interaksi'>Interaction</span>: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
+  //   const uniqueFaktorA = new Set();
+  //   const uniqueFaktorB = new Set();
+  //   const rows = document.querySelectorAll('#tableContainer tbody tr');
+  //   rows.forEach(row => {
+  //     const cells = row.querySelectorAll('td');
+  //     if (cells.length >= 2) {
+  //       uniqueFaktorA.add(cells[0].textContent.trim());
+  //       uniqueFaktorB.add(cells[1].textContent.trim());
+  //     }
+  //   });
+  //   uniqueFaktorA.forEach(faktorA => {
+  //     const info = getData.info("FaktorA", "FaktorB", "Hasil")
+  //       .split('\n')
+  //       .filter(line => line.startsWith(faktorA));
+  //     if (info.length > 0) {
+  //       processTHSD(faktorA, `leading_${faktorA}`, info.join('\n'), thitA);
+  //     }
+  //   });
+  //   uniqueFaktorB.forEach(faktorB => {
+  //     const info = getData.info("FaktorB", "FaktorA", "Hasil")
+  //       .split('\n')
+  //       .filter(line => line.startsWith(faktorB));
+  //     if (info.length > 0) {
+  //       processTHSD(faktorB, `leading_${faktorB}`, info.join('\n'), thitB);
+  //     }
+  //   });
+  //   // Tabel Interaksi 
+  //   (function () {
+  //     const table = document.querySelector('#tableContainer table');
+  //     if (!table) return;
+  //     const rows = Array.from(table.querySelectorAll('tbody tr')).slice(1);
+  //     const headers = Array.from(table.querySelectorAll('th'));
+  //     const colIndex = {};
+  //     headers.forEach((th, i) => {
+  //       if (th.dataset.setting) {
+  //         colIndex[th.dataset.setting] = i;
+  //       }
+  //     });
+  //     const dataMap = {};
+  //     rows.forEach(tr => {
+  //       const cells = tr.querySelectorAll('td');
+  //       if (!cells.length) return;
+  //       const faktorA = cells[colIndex['FaktorA']].textContent.trim();
+  //       const faktorB = cells[colIndex['FaktorB']].textContent.trim();
+  //       const nilai = parseFloat(cells[colIndex['Hasil']].textContent.trim());
+  //       if (!dataMap[faktorB]) dataMap[faktorB] = {};
+  //       if (!dataMap[faktorB][faktorA]) dataMap[faktorB][faktorA] = [];
+  //       dataMap[faktorB][faktorA].push(nilai);
+  //     });
+  //     const faktorAList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorA']]?.textContent.trim()).filter(Boolean))];
+  //     const faktorBList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorB']]?.textContent.trim()).filter(Boolean))];
+  //     const newTable = document.createElement('table');
+  //     const thead = document.createElement('thead');
+  //     const headRow = document.createElement('tr');
+  //     headRow.appendChild(document.createElement('th')).textContent = '×';
+  //     faktorAList.forEach(fa => {
+  //       const th = document.createElement('th');
+  //       th.colSpan = 2;
+  //       th.textContent = fa;
+  //       headRow.appendChild(th);
+  //     });
+  //     thead.appendChild(headRow);
+  //     newTable.appendChild(thead);
+  //     const tbody = document.createElement('tbody');
+  //     faktorBList.forEach(fb => {
+  //       const avgRow = document.createElement('tr');
+  //       const fbCell = document.createElement('th');
+  //       fbCell.rowSpan = 2;
+  //       fbCell.textContent = fb;
+  //       avgRow.appendChild(fbCell);
+  //       faktorAList.forEach(fa => {
+  //         const avg = dataMap[fb]?.[fa] ? (dataMap[fb][fa].reduce((a, b) => a + b, 0) / dataMap[fb][fa].length) : 0;
+  //         const td1 = document.createElement('td');
+  //         td1.textContent = avg.toFixed(2);
+  //         const td2 = document.createElement('td');
+  //         td2.classList.add('x-kecil');
+  //         td2.dataset.pair = `${fb}${fa}`;
+  //         td2.textContent = 'x';
+  //         avgRow.appendChild(td1);
+  //         avgRow.appendChild(td2);
+  //       });
+  //       tbody.appendChild(avgRow);
+  //       const xRow = document.createElement('tr');
+  //       faktorAList.forEach(fa => {
+  //         const td = document.createElement('td');
+  //         td.colSpan = 2;
+  //         td.classList.add('x-besar');
+  //         td.dataset.pair = `${fa}${fb}`;
+  //         td.textContent = 'X';
+  //         xRow.appendChild(td);
+  //       });
+  //       tbody.appendChild(xRow);
+  //     });
+  //     newTable.appendChild(tbody);
+  //     const container = document.getElementById('interaction-table');
+  //     container.innerHTML = '';
+  //     container.appendChild(newTable);
+  //     const perFaktorContainer = document.createElement('div');
+  //     perFaktorContainer.classList.add('posthoc-collapsed-item');
+  //     container.appendChild(perFaktorContainer);
+  //     const posthocTables = document.querySelectorAll('#posthoc table[id^="leading_"][id$="-LETTER"]');
+  //     const notasiMap = {};
+  //     posthocTables.forEach(tbl => {
+  //       const trs = tbl.querySelectorAll('tbody tr');
+  //       trs.forEach(tr => {
+  //         const perlakuan = tr.cells[0].textContent.trim();
+  //         const notasi = tr.cells[2].textContent.trim();
+  //         notasiMap[perlakuan] = notasi;
+  //       });
+  //     });
+  //     document.querySelectorAll('#interaction-table .x-kecil').forEach(td => {
+  //       const pair = td.dataset.pair;
+  //       if (notasiMap[pair]) {
+  //         td.textContent = notasiMap[pair];
+  //       }
+  //     });
+  //     document.querySelectorAll('#interaction-table .x-besar').forEach(td => {
+  //       const pair = td.dataset.pair;
+  //       if (notasiMap[pair]) {
+  //         td.textContent = notasiMap[pair];
+  //       }
+  //     });
+  //     const target = container.querySelector('.posthoc-collapsed-item');
+  //     let nextSibling = container.nextElementSibling;
+  //     while (nextSibling) {
+  //       const temp = nextSibling;
+  //       nextSibling = nextSibling.nextElementSibling;
+  //       target.appendChild(temp);
+  //     }
+  //   })();
+  // }
+  // // DMRT
+  // else if (selectedPosthoc === "dmrt") {
+  //   // Faktor A, Faktor B, dan Kombinasi AB
+  //   processDMRT(selectedFaktorAText, 'factorA', getData.info("FaktorA", "Hasil"), getData.count("FaktorA"), Gdb, Gkt, getData.count("Ulangan"));
+  //   processDMRT(selectedFaktorBText, 'factorB', getData.info("FaktorB", "Hasil"), getData.count("FaktorB"), Gdb, Gkt, getData.count("Ulangan"));
+  //   processDMRT('<span data-id="Kombinasi">Combination</span>: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, 'factorAB', getData.info("FaktorA", "FaktorB", "Hasil"), getData.count("FaktorA") * getData.count("FaktorB"), Gdb, Gkt, getData.count("Ulangan"));
+  //   // Interaksi AB
+  //   document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'><span data-id='Interaksi'>Interaction</span>: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
+  //   const uniqueFaktorA = new Set();
+  //   const uniqueFaktorB = new Set();
+  //   const rows = document.querySelectorAll('#tableContainer tbody tr');
+  //   rows.forEach(row => {
+  //     const cells = row.querySelectorAll('td');
+  //     if (cells.length >= 2) {
+  //       uniqueFaktorA.add(cells[0].textContent.trim());
+  //       uniqueFaktorB.add(cells[1].textContent.trim());
+  //     }
+  //   });
+  //   uniqueFaktorA.forEach(faktorA => {
+  //     const info = getData.info("FaktorA", "FaktorB", "Hasil")
+  //       .split('\n')
+  //       .filter(line => line.startsWith(faktorA));
+  //     if (info.length > 0) {
+  //       processDMRT(faktorA, `leading_${faktorA}`, info.join('\n'), getData.count("FaktorA"), Gdb, Gkt, getData.count("Ulangan"));
+  //     }
+  //   });
+  //   uniqueFaktorB.forEach(faktorB => {
+  //     const info = getData.info("FaktorB", "FaktorA", "Hasil")
+  //       .split('\n')
+  //       .filter(line => line.startsWith(faktorB));
+  //     if (info.length > 0) {
+  //       processDMRT(faktorB, `leading_${faktorB}`, info.join('\n'), getData.count("FaktorB"), Gdb, Gkt, getData.count("Ulangan"));
+  //     }
+  //   });
+  //   // Tabel Interaksi 
+  //   (function () {
+  //     const table = document.querySelector('#tableContainer table');
+  //     if (!table) return;
+  //     const rows = Array.from(table.querySelectorAll('tbody tr')).slice(1);
+  //     const headers = Array.from(table.querySelectorAll('th'));
+  //     const colIndex = {};
+  //     headers.forEach((th, i) => {
+  //       if (th.dataset.setting) {
+  //         colIndex[th.dataset.setting] = i;
+  //       }
+  //     });
+  //     const dataMap = {};
+  //     rows.forEach(tr => {
+  //       const cells = tr.querySelectorAll('td');
+  //       if (!cells.length) return;
+  //       const faktorA = cells[colIndex['FaktorA']].textContent.trim();
+  //       const faktorB = cells[colIndex['FaktorB']].textContent.trim();
+  //       const nilai = parseFloat(cells[colIndex['Hasil']].textContent.trim());
+  //       if (!dataMap[faktorB]) dataMap[faktorB] = {};
+  //       if (!dataMap[faktorB][faktorA]) dataMap[faktorB][faktorA] = [];
+  //       dataMap[faktorB][faktorA].push(nilai);
+  //     });
+  //     const faktorAList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorA']]?.textContent.trim()).filter(Boolean))];
+  //     const faktorBList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorB']]?.textContent.trim()).filter(Boolean))];
+  //     const newTable = document.createElement('table');
+  //     const thead = document.createElement('thead');
+  //     const headRow = document.createElement('tr');
+  //     headRow.appendChild(document.createElement('th')).textContent = '×';
+  //     faktorAList.forEach(fa => {
+  //       const th = document.createElement('th');
+  //       th.colSpan = 2;
+  //       th.textContent = fa;
+  //       headRow.appendChild(th);
+  //     });
+  //     thead.appendChild(headRow);
+  //     newTable.appendChild(thead);
+  //     const tbody = document.createElement('tbody');
+  //     faktorBList.forEach(fb => {
+  //       const avgRow = document.createElement('tr');
+  //       const fbCell = document.createElement('th');
+  //       fbCell.rowSpan = 2;
+  //       fbCell.textContent = fb;
+  //       avgRow.appendChild(fbCell);
+  //       faktorAList.forEach(fa => {
+  //         const avg = dataMap[fb]?.[fa] ? (dataMap[fb][fa].reduce((a, b) => a + b, 0) / dataMap[fb][fa].length) : 0;
+  //         const td1 = document.createElement('td');
+  //         td1.textContent = avg.toFixed(2);
+  //         const td2 = document.createElement('td');
+  //         td2.classList.add('x-kecil');
+  //         td2.dataset.pair = `${fb}${fa}`;
+  //         td2.textContent = 'x';
+  //         avgRow.appendChild(td1);
+  //         avgRow.appendChild(td2);
+  //       });
+  //       tbody.appendChild(avgRow);
+  //       const xRow = document.createElement('tr');
+  //       faktorAList.forEach(fa => {
+  //         const td = document.createElement('td');
+  //         td.colSpan = 2;
+  //         td.classList.add('x-besar');
+  //         td.dataset.pair = `${fa}${fb}`;
+  //         td.textContent = 'X';
+  //         xRow.appendChild(td);
+  //       });
+  //       tbody.appendChild(xRow);
+  //     });
+  //     newTable.appendChild(tbody);
+  //     const container = document.getElementById('interaction-table');
+  //     container.innerHTML = '';
+  //     container.appendChild(newTable);
+  //     const perFaktorContainer = document.createElement('div');
+  //     perFaktorContainer.classList.add('posthoc-collapsed-item');
+  //     container.appendChild(perFaktorContainer);
+  //     const posthocTables = document.querySelectorAll('#posthoc table[id^="leading_"][id$="-LETTER"]');
+  //     const notasiMap = {};
+  //     posthocTables.forEach(tbl => {
+  //       const trs = tbl.querySelectorAll('tbody tr');
+  //       trs.forEach(tr => {
+  //         const perlakuan = tr.cells[0].textContent.trim();
+  //         const notasi = tr.cells[2].textContent.trim();
+  //         notasiMap[perlakuan] = notasi;
+  //       });
+  //     });
+  //     document.querySelectorAll('#interaction-table .x-kecil').forEach(td => {
+  //       const pair = td.dataset.pair;
+  //       if (notasiMap[pair]) {
+  //         td.textContent = notasiMap[pair];
+  //       }
+  //     });
+  //     document.querySelectorAll('#interaction-table .x-besar').forEach(td => {
+  //       const pair = td.dataset.pair;
+  //       if (notasiMap[pair]) {
+  //         td.textContent = notasiMap[pair];
+  //       }
+  //     });
+  //     const target = container.querySelector('.posthoc-collapsed-item');
+  //     let nextSibling = container.nextElementSibling;
+  //     while (nextSibling) {
+  //       const temp = nextSibling;
+  //       nextSibling = nextSibling.nextElementSibling;
+  //       target.appendChild(temp);
+  //     }
+  //   })();
+  // }
+  // // SNK
+  // else if (selectedPosthoc === "snk") {
+  //   // Faktor A, Faktor B, dan Kombinasi AB
+  //   processSNK(selectedFaktorAText, 'factorA', getData.info("FaktorA", "Hasil"), getData.count("FaktorA"), Gdb, Gkt, getData.count("Ulangan"));
+  //   processSNK(selectedFaktorBText, 'factorB', getData.info("FaktorB", "Hasil"), getData.count("FaktorB"), Gdb, Gkt, getData.count("Ulangan"));
+  //   processSNK('<span data-id="Kombinasi">Combination</span>: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, 'factorAB', getData.info("FaktorA", "FaktorB", "Hasil"), getData.count("FaktorA") * getData.count("FaktorB"), Gdb, Gkt, getData.count("Ulangan"));
+  //   // Interaksi AB
+  //   document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'><span data-id='Interaksi'>Interaction</span>: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
+  //   const uniqueFaktorA = new Set();
+  //   const uniqueFaktorB = new Set();
+  //   const rows = document.querySelectorAll('#tableContainer tbody tr');
+  //   rows.forEach(row => {
+  //     const cells = row.querySelectorAll('td');
+  //     if (cells.length >= 2) {
+  //       uniqueFaktorA.add(cells[0].textContent.trim());
+  //       uniqueFaktorB.add(cells[1].textContent.trim());
+  //     }
+  //   });
+  //   uniqueFaktorA.forEach(faktorA => {
+  //     const info = getData.info("FaktorA", "FaktorB", "Hasil")
+  //       .split('\n')
+  //       .filter(line => line.startsWith(faktorA));
+  //     if (info.length > 0) {
+  //       processSNK(faktorA, `leading_${faktorA}`, info.join('\n'), getData.count("FaktorA"), Gdb, Gkt, getData.count("Ulangan"));
+  //     }
+  //   });
+  //   uniqueFaktorB.forEach(faktorB => {
+  //     const info = getData.info("FaktorB", "FaktorA", "Hasil")
+  //       .split('\n')
+  //       .filter(line => line.startsWith(faktorB));
+  //     if (info.length > 0) {
+  //       processSNK(faktorB, `leading_${faktorB}`, info.join('\n'), getData.count("FaktorB"), Gdb, Gkt, getData.count("Ulangan"));
+  //     }
+  //   });
+  //   // Tabel Interaksi 
+  //   (function () {
+  //     const table = document.querySelector('#tableContainer table');
+  //     if (!table) return;
+  //     const rows = Array.from(table.querySelectorAll('tbody tr')).slice(1);
+  //     const headers = Array.from(table.querySelectorAll('th'));
+  //     const colIndex = {};
+  //     headers.forEach((th, i) => {
+  //       if (th.dataset.setting) {
+  //         colIndex[th.dataset.setting] = i;
+  //       }
+  //     });
+  //     const dataMap = {};
+  //     rows.forEach(tr => {
+  //       const cells = tr.querySelectorAll('td');
+  //       if (!cells.length) return;
+  //       const faktorA = cells[colIndex['FaktorA']].textContent.trim();
+  //       const faktorB = cells[colIndex['FaktorB']].textContent.trim();
+  //       const nilai = parseFloat(cells[colIndex['Hasil']].textContent.trim());
+  //       if (!dataMap[faktorB]) dataMap[faktorB] = {};
+  //       if (!dataMap[faktorB][faktorA]) dataMap[faktorB][faktorA] = [];
+  //       dataMap[faktorB][faktorA].push(nilai);
+  //     });
+  //     const faktorAList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorA']]?.textContent.trim()).filter(Boolean))];
+  //     const faktorBList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorB']]?.textContent.trim()).filter(Boolean))];
+  //     const newTable = document.createElement('table');
+  //     const thead = document.createElement('thead');
+  //     const headRow = document.createElement('tr');
+  //     headRow.appendChild(document.createElement('th')).textContent = '×';
+  //     faktorAList.forEach(fa => {
+  //       const th = document.createElement('th');
+  //       th.colSpan = 2;
+  //       th.textContent = fa;
+  //       headRow.appendChild(th);
+  //     });
+  //     thead.appendChild(headRow);
+  //     newTable.appendChild(thead);
+  //     const tbody = document.createElement('tbody');
+  //     faktorBList.forEach(fb => {
+  //       const avgRow = document.createElement('tr');
+  //       const fbCell = document.createElement('th');
+  //       fbCell.rowSpan = 2;
+  //       fbCell.textContent = fb;
+  //       avgRow.appendChild(fbCell);
+  //       faktorAList.forEach(fa => {
+  //         const avg = dataMap[fb]?.[fa] ? (dataMap[fb][fa].reduce((a, b) => a + b, 0) / dataMap[fb][fa].length) : 0;
+  //         const td1 = document.createElement('td');
+  //         td1.textContent = avg.toFixed(2);
+  //         const td2 = document.createElement('td');
+  //         td2.classList.add('x-kecil');
+  //         td2.dataset.pair = `${fb}${fa}`;
+  //         td2.textContent = 'x';
+  //         avgRow.appendChild(td1);
+  //         avgRow.appendChild(td2);
+  //       });
+  //       tbody.appendChild(avgRow);
+  //       const xRow = document.createElement('tr');
+  //       faktorAList.forEach(fa => {
+  //         const td = document.createElement('td');
+  //         td.colSpan = 2;
+  //         td.classList.add('x-besar');
+  //         td.dataset.pair = `${fa}${fb}`;
+  //         td.textContent = 'X';
+  //         xRow.appendChild(td);
+  //       });
+  //       tbody.appendChild(xRow);
+  //     });
+  //     newTable.appendChild(tbody);
+  //     const container = document.getElementById('interaction-table');
+  //     container.innerHTML = '';
+  //     container.appendChild(newTable);
+  //     const perFaktorContainer = document.createElement('div');
+  //     perFaktorContainer.classList.add('posthoc-collapsed-item');
+  //     container.appendChild(perFaktorContainer);
+  //     const posthocTables = document.querySelectorAll('#posthoc table[id^="leading_"][id$="-LETTER"]');
+  //     const notasiMap = {};
+  //     posthocTables.forEach(tbl => {
+  //       const trs = tbl.querySelectorAll('tbody tr');
+  //       trs.forEach(tr => {
+  //         const perlakuan = tr.cells[0].textContent.trim();
+  //         const notasi = tr.cells[2].textContent.trim();
+  //         notasiMap[perlakuan] = notasi;
+  //       });
+  //     });
+  //     document.querySelectorAll('#interaction-table .x-kecil').forEach(td => {
+  //       const pair = td.dataset.pair;
+  //       if (notasiMap[pair]) {
+  //         td.textContent = notasiMap[pair];
+  //       }
+  //     });
+  //     document.querySelectorAll('#interaction-table .x-besar').forEach(td => {
+  //       const pair = td.dataset.pair;
+  //       if (notasiMap[pair]) {
+  //         td.textContent = notasiMap[pair];
+  //       }
+  //     });
+  //     const target = container.querySelector('.posthoc-collapsed-item');
+  //     let nextSibling = container.nextElementSibling;
+  //     while (nextSibling) {
+  //       const temp = nextSibling;
+  //       nextSibling = nextSibling.nextElementSibling;
+  //       target.appendChild(temp);
+  //     }
+  //   })();
+  // }
+  // // SK
+  // else if (selectedPosthoc === "sk") {
+  //   // Faktor A, Faktor B, dan Kombinasi AB
+  //   processSK('factorA', selectedFaktorAText, getData.info("FaktorA", "Hasil"));
+  //   processSK('factorB', selectedFaktorBText, getData.info("FaktorB", "Hasil"));
+  //   processSK('factorAB', '<span data-id="Kombinasi">Combination</span>: ' + selectedFaktorAText + ' × ' + selectedFaktorBText, getData.info("FaktorA", "FaktorB", "Hasil"));
+  //   // Interaksi AB
+  //   document.getElementById('factorAB-LETTER').parentNode.insertAdjacentHTML('afterend', "<h4 class='posthoc-collapser interaksi'><span data-id='Interaksi'>Interaction</span>: " + selectedFaktorAText + " × " + selectedFaktorBText + "</h4> <div id='interaction-table' class='posthoc-collapsed'></div>");
+  //   const uniqueFaktorA = new Set();
+  //   const uniqueFaktorB = new Set();
+  //   const rows = document.querySelectorAll('#tableContainer tbody tr');
+  //   rows.forEach(row => {
+  //     const cells = row.querySelectorAll('td');
+  //     if (cells.length >= 2) {
+  //       uniqueFaktorA.add(cells[0].textContent.trim());
+  //       uniqueFaktorB.add(cells[1].textContent.trim());
+  //     }
+  //   });
+  //   uniqueFaktorA.forEach(faktorA => {
+  //     const info = getData.info("FaktorA", "FaktorB", "Hasil")
+  //       .split('\n')
+  //       .filter(line => line.startsWith(faktorA));
+  //     if (info.length > 0) {
+  //       processSK(`leading_${faktorA}`, faktorA, info.join('\n'));
+  //     }
+  //   });
+  //   uniqueFaktorB.forEach(faktorB => {
+  //     const info = getData.info("FaktorB", "FaktorA", "Hasil")
+  //       .split('\n')
+  //       .filter(line => line.startsWith(faktorB));
+  //     if (info.length > 0) {
+  //       processSK(`leading_${faktorB}`, faktorB, info.join('\n'));
+  //     }
+  //   });
+  //   // Tabel Interaksi 
+  //   (function () {
+  //     const table = document.querySelector('#tableContainer table');
+  //     if (!table) return;
+  //     const rows = Array.from(table.querySelectorAll('tbody tr')).slice(1);
+  //     const headers = Array.from(table.querySelectorAll('th'));
+  //     const colIndex = {};
+  //     headers.forEach((th, i) => {
+  //       if (th.dataset.setting) {
+  //         colIndex[th.dataset.setting] = i;
+  //       }
+  //     });
+  //     const dataMap = {};
+  //     rows.forEach(tr => {
+  //       const cells = tr.querySelectorAll('td');
+  //       if (!cells.length) return;
+  //       const faktorA = cells[colIndex['FaktorA']].textContent.trim();
+  //       const faktorB = cells[colIndex['FaktorB']].textContent.trim();
+  //       const nilai = parseFloat(cells[colIndex['Hasil']].textContent.trim());
+  //       if (!dataMap[faktorB]) dataMap[faktorB] = {};
+  //       if (!dataMap[faktorB][faktorA]) dataMap[faktorB][faktorA] = [];
+  //       dataMap[faktorB][faktorA].push(nilai);
+  //     });
+  //     const faktorAList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorA']]?.textContent.trim()).filter(Boolean))];
+  //     const faktorBList = [...new Set(rows.map(tr => tr.querySelectorAll('td')[colIndex['FaktorB']]?.textContent.trim()).filter(Boolean))];
+  //     const newTable = document.createElement('table');
+  //     const thead = document.createElement('thead');
+  //     const headRow = document.createElement('tr');
+  //     headRow.appendChild(document.createElement('th')).textContent = '×';
+  //     faktorAList.forEach(fa => {
+  //       const th = document.createElement('th');
+  //       th.colSpan = 2;
+  //       th.textContent = fa;
+  //       headRow.appendChild(th);
+  //     });
+  //     thead.appendChild(headRow);
+  //     newTable.appendChild(thead);
+  //     const tbody = document.createElement('tbody');
+  //     faktorBList.forEach(fb => {
+  //       const avgRow = document.createElement('tr');
+  //       const fbCell = document.createElement('th');
+  //       fbCell.rowSpan = 2;
+  //       fbCell.textContent = fb;
+  //       avgRow.appendChild(fbCell);
+  //       faktorAList.forEach(fa => {
+  //         const avg = dataMap[fb]?.[fa] ? (dataMap[fb][fa].reduce((a, b) => a + b, 0) / dataMap[fb][fa].length) : 0;
+  //         const td1 = document.createElement('td');
+  //         td1.textContent = avg.toFixed(2);
+  //         const td2 = document.createElement('td');
+  //         td2.classList.add('x-kecil');
+  //         td2.dataset.pair = `${fb}${fa}`;
+  //         td2.textContent = 'x';
+  //         avgRow.appendChild(td1);
+  //         avgRow.appendChild(td2);
+  //       });
+  //       tbody.appendChild(avgRow);
+  //       const xRow = document.createElement('tr');
+  //       faktorAList.forEach(fa => {
+  //         const td = document.createElement('td');
+  //         td.colSpan = 2;
+  //         td.classList.add('x-besar');
+  //         td.dataset.pair = `${fa}${fb}`;
+  //         td.textContent = 'X';
+  //         xRow.appendChild(td);
+  //       });
+  //       tbody.appendChild(xRow);
+  //     });
+  //     newTable.appendChild(tbody);
+  //     const container = document.getElementById('interaction-table');
+  //     container.innerHTML = '';
+  //     container.appendChild(newTable);
+  //     const perFaktorContainer = document.createElement('div');
+  //     perFaktorContainer.classList.add('posthoc-collapsed-item');
+  //     container.appendChild(perFaktorContainer);
+  //     const posthocTables = document.querySelectorAll('#posthoc table[id^="leading_"][id$="-LETTER"]');
+  //     const notasiMap = {};
+  //     posthocTables.forEach(tbl => {
+  //       const trs = tbl.querySelectorAll('tbody tr');
+  //       trs.forEach(tr => {
+  //         const perlakuan = tr.cells[0].textContent.trim();
+  //         const notasi = tr.cells[2].textContent.trim();
+  //         notasiMap[perlakuan] = notasi;
+  //       });
+  //     });
+  //     document.querySelectorAll('#interaction-table .x-kecil').forEach(td => {
+  //       const pair = td.dataset.pair;
+  //       if (notasiMap[pair]) {
+  //         td.textContent = notasiMap[pair];
+  //       }
+  //     });
+  //     document.querySelectorAll('#interaction-table .x-besar').forEach(td => {
+  //       const pair = td.dataset.pair;
+  //       if (notasiMap[pair]) {
+  //         td.textContent = notasiMap[pair];
+  //       }
+  //     });
+  //     const target = container.querySelector('.posthoc-collapsed-item');
+  //     let nextSibling = container.nextElementSibling;
+  //     while (nextSibling) {
+  //       const temp = nextSibling;
+  //       nextSibling = nextSibling.nextElementSibling;
+  //       target.appendChild(temp);
+  //     }
+  //   })();
+  // }
 
 }
 
