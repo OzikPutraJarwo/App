@@ -527,9 +527,6 @@ function handleHeaderClick(event) {
     } else if (selectedDesign === "rbsl") {
       countAnovaRBSL();
       anovaSup.classList.remove("bujursangkar")
-    } else if (selectedDesign === "rpt" && selectedRPT === "ral") {
-      countAnovaRPT_RAL();
-      anovaSup.classList.add("bujursangkar")
     } else if (selectedDesign === "rpt" && selectedRPT === "rak") {
       countAnovaRPT_RAK();
       anovaSup.classList.add("bujursangkar")
@@ -2900,6 +2897,13 @@ function countAnovaRBSL() {
     processSK('Perlakuan', selectedPerlakuanText, getData.info("Perlakuan", "Hasil"));
   }
 
+}
+
+// ----- RPT RAK -----
+function countAnovaRPT_RAL() {
+  const anovaTitle = document.querySelector("#anova h3");
+  anovaTitle.innerHTML = `Under Maintenance`;
+  anovaTitle.setAttribute("data-id", "Dalam Perbaikan")
 }
 
 // ----- RPT RAK -----
