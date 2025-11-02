@@ -1,209 +1,66 @@
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+html {
+  font-size: 15px;
 }
 
-input, select {
-  padding: .7rem !important
-}
-
-button {
-  user-select: none;
-}
-
-.hide {
-  display: none !important;
-}
-
-.hidemore {
-  display: none !important;
-}
-  
 svg {
+  width: 100%;
+  height: auto;
+}
+
+.main {
+  display: grid;
+  grid-template-columns: 1fr 450px;
+  gap: 1.5rem;
+  max-width: 1600px !important;
   font-size: 80%;
 }
 
-.main.wrap {
+/* Info */
+
+.marker-detail div, .input div, .results div {
   display: grid;
-  grid-template-columns: 1fr 375px;
-  gap: 1.5rem;
+  grid-template-columns: 1fr 5px 80px 60px;
+  gap: .5rem;
 }
 
-.info {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem
-}
-
-.chart-container {
-  display: grid;
-  padding: 0 !important;
-  overflow: hidden;
-}
-
-.chart {
-  margin: auto 0;
-  background-color: #fff;
-}
-
-.button-action {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: 50px 1fr;
-}
-
-.help {
-  overflow: hidden;
-  height: 0;
-  display: none;
-  transition: height 0.5s;
-}
-
-.cursor {
-  font-size: 90%;
-}
-
-.title {
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
+.marker-item.show {
   font-weight: bold;
+  color: red;
 }
 
-.cursor .content {
-  display: grid;
-  grid-template-columns: 1fr 65px 55px;
-  gap: .5rem
+/* Graph */
+
+.graph {
+  display: flex;
+  width: 100%;
+  height: auto;
 }
 
-g[name="marker"] circle {
-  transition: .2s;
-}
-
-g[name="marker"] circle:hover, g[name="marker"] circle.active {
-  fill: black;
-  cursor: pointer;
-}
-
-g[name="outerline"] {
-  display: block;
+.graph-outline {
+  fill: transparent;
+  z-index: 9;
   position: relative;
 }
 
-.cursor-marker {
-  transition: unset !important;
-  fill: blue !important;
-  cursor: unset !important;
+.placed-marker, .moving-marker, .input-marker {
+  r: 8;
+  stroke: #00000014;
+  stroke-width: 20;
+  transition: .2s all linear;
 }
 
-.marker-popup{
-  position:absolute;
-  max-width:220px;
-  background:#fff;
-  color:#333;
-  border:1px solid #ccc;
-  border-radius:6px;
-  box-shadow:var(--box-shadow);
-  padding:1rem;
-  font:12px/1.4 system-ui, sans-serif;
-  z-index:9999;
+.moving-marker {
+  transition: none;
 }
 
-.marker-popup::after{
-  content:"";
-  position:absolute;
-  left:50%;
-  bottom:-12px;
-  transform:translateX(-50%);
-  width:0;height:0;
-  border:6px solid transparent;
-  border-top-color:#ccc;
+.placed-marker {
+  fill: red;
 }
 
-.marker-popup[data-pos="below"]::after{
-  top:-12px;
-  bottom:auto;
-  border-top-color:transparent;
-  border-bottom-color:#ccc;
+.placed-marker:hover {
+  stroke: rgba(255, 0, 0, 0.322);
 }
 
-.marker-popup div {
-  display: grid;
-  grid-template-columns: 35px 10px 65px 50px;
-}
-
-.marker-popup .popup-close {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  font-size: 16px;
-  background: none;
-  border: none;
-  color: #555;
+#custom-marker circle {
   cursor: pointer;
-  padding: 0;
-  line-height: 0.7;
-}
-
-.marker-popup .popup-close:hover {
-  color: #000;
-}
-
-.custom .custom-param {
-  display: grid;
-  grid-template-columns: 1fr 130px;
-  gap: 1rem
-}
-
-.custom hr {
-  margin: 1rem 0;
-}
-
-.custom .param-input {
-  display: flex;
-}
-
-.custom .param-input input {
-  text-align: center;
-}
-
-.custom .param-input input:first-child {
-  flex-grow: 1;
-}
-
-.custom .param-input input:last-child {
-  width: 40px;
-  font-size: 90%;
-  background: white;
-  padding: 0 !important;
-  text-align: right;
-}
-
-.custom #custom-submit {
-  width: 100%;
-  margin-top: 1.5rem
-}
-
-@media (min-width: 1900px) {
-  .marker-popup {
-    transform: translateX(0);
-  }
-}
-
-@media (min-width: 1440px) {
-  html {
-    font-size: 15px !important;
-  }
-}
-
-@media (min-width: 1900px) {
-  .marker-popup {
-    transform: translateX(7px);
-  }
-}
-
-@media (max-width: 940px) {
-  .main.wrap {
-    grid-template-columns: 1fr;
-  }
 }
