@@ -119,6 +119,7 @@ function calculate(xValue, yValue, container) {
 
 const graphOutline = document.querySelector('.graph-outline');
 const marker = document.querySelector('.moving-marker');
+const inputMarker = document.querySelector('.input-marker');
 const fixedMarkerGroup = document.getElementById('custom-marker');
 const infoMarker = document.querySelector('#info-marker');
 
@@ -148,19 +149,19 @@ graphOutline.addEventListener('mouseover', () => {
 
 let number = 1;
 
-graphOutline.addEventListener('click', () => {
+function addMarker(e) {
   if (document.querySelector('#info-marker .no-marker')) {
     infoMarker.innerHTML = '';
   }
-  const cx = marker.getAttribute('cx');
-  const cy = marker.getAttribute('cy');
-
+  const cx = e.getAttribute('cx');
+  const cy = e.getAttribute('cy');
+  
   const placedMarker = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
   placedMarker.setAttribute('cx', cx);
   placedMarker.setAttribute('cy', cy);
   placedMarker.setAttribute('class', `placed-marker number-${number}`);
   fixedMarkerGroup.appendChild(placedMarker);
-
+  
   const item = document.createElement('span');
   item.classList.add(`marker-item`);
   item.classList.add(`number-${number}`);
@@ -168,6 +169,14 @@ graphOutline.addEventListener('click', () => {
   infoMarker.appendChild(item);
   number++;
   showMarkerInfo();
+}
+
+document.querySelector('.input-mark').addEventListener('click', () => {
+  addMarker(inputMarker);
+});
+
+graphOutline.addEventListener('click', () => {
+  addMarker(marker);
 });
 
 graphOutline.addEventListener('mouseout', () => {
