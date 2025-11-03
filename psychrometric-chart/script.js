@@ -340,7 +340,7 @@ function defaultSelect(p1Key, p2Key) {
 // --- Event Listeners ---
 
 const param1Unit = document.querySelector('.x-input span'),
-      param2Unit = document.querySelector('.y-input span');
+  param2Unit = document.querySelector('.y-input span');
 
 // Ketika Select 1 berubah, filter Select 2
 select1.addEventListener('change', () => {
@@ -945,7 +945,7 @@ function calculateTdbW(param1, val1, param2, val2) {
 }
 
 let param1Value = document.getElementById('x-input'),
-    param2Value = document.getElementById('y-input');
+  param2Value = document.getElementById('y-input');
 
 const handleChange = () => {
   param1 = select1.value;
@@ -970,3 +970,71 @@ select1.addEventListener('change', handleChange);
 select2.addEventListener('change', handleChange);
 param1Value.addEventListener('change', handleChange);
 param2Value.addEventListener('change', handleChange);
+
+// Download Graph
+
+function downloadFile(data, filename) {
+  const a = document.createElement('a');
+  a.href = data;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+
+function inlineStyles(svg) {
+  const style = document.createElement('style');
+  const css = Array.from(document.styleSheets)
+    .flatMap(sheet => {
+      try {
+        return Array.from(sheet.cssRules).map(rule => rule.cssText);
+      } catch (e) {
+        return [];
+      }
+    })
+    .join(' ');
+  style.innerHTML = css;
+  const defs = svg.querySelector('defs') || document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+  defs.appendChild(style);
+  if (!svg.querySelector('defs')) {
+    svg.insertBefore(defs, svg.firstChild);
+  }
+}
+
+function processSvg(svg) {
+  inlineStyles(svg);
+  if (!svg.getAttribute('xmlns')) {
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  }
+  if (!svg.getAttribute('xmlns:xlink')) {
+    svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+  }
+  return (new XMLSerializer()).serializeToString(svg);
+}
+
+document.querySelector('#download-as-svg').addEventListener('click', function() {
+  const svg = document.querySelector('#psychrometric').cloneNode(true);
+  const svgData = processSvg(svg);
+  const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  downloadFile(url, 'psychrometric.svg');
+  URL.revokeObjectURL(url);
+});
+
+document.querySelector('#download-as-png').addEventListener('click', function() {
+  const svg = document.querySelector('#psychrometric').cloneNode(true);
+  const width = 3840;
+  const height = 2900;
+  const svgData = processSvg(svg);
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = width;
+  canvas.height = height;
+  const img = new Image();
+  img.onload = function() {
+    ctx.drawImage(img, 0, 0, width, height);
+    const pngDataUrl = canvas.toDataURL('image/png');
+    downloadFile(pngDataUrl, 'psychrometric.png');
+  };
+  img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+});

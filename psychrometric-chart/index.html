@@ -91,7 +91,7 @@
 
         <div class="chart-container">
           <div class="item graph">
-            <svg width="2988" height="2273" viewBox="0 0 2988 2273" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg id="psychrometric" width="2988" height="2273" viewBox="0 0 2988 2273" fill="none" xmlns="http://www.w3.org/2000/svg">
               <g>
                 <path d="M452 1961L714.5 2149" stroke="#25BD3C" stroke-width="5" />
                 <path d="M1165.5 2149C1165.1 2149 874 1941.33 728.5 1837.5" stroke="#25BD3C" stroke-width="5" />
@@ -460,14 +460,19 @@
                   fill="black" />
               </g>
               <g id="default-marker">
-                <circle cx="0" cy="0" r="15" fill="transparent" stroke="red" stroke-width="5" class="border-marker">
+                <circle cx="-20" cy="-20" r="15" fill="transparent" stroke="red" stroke-width="5" class="border-marker">
                 </circle>
-                <circle cx="0" cy="0" fill="blue" class="moving-marker"></circle>
-                <circle cx="0" cy="0" fill="green" class="input-marker"></circle>
+                <circle cx="-20" cy="-20" fill="blue" class="moving-marker"></circle>
+                <circle cx="-20" cy="-20" fill="green" class="input-marker"></circle>
                 <path d="M2850 2149H31L31.2298 57H2850V2149Z" stroke="black" stroke-width="5" class="graph-outline" />
               </g>
               <g id="custom-marker"></g>
             </svg>
+          </div>
+
+          <div class="download">
+            <button id="download-as-png">Download as PNG</button>
+            <button id="download-as-svg">Download as SVG</button>
           </div>
         </div>
 

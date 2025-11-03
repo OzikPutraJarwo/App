@@ -140,6 +140,17 @@ svg {
   cursor: pointer;
 }
 
+.download {
+    margin-top: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.download button {
+    font-weight: bold;
+}
+
 @media (max-width: 1000px) {
   .main {
     grid-template-columns: 1fr;
