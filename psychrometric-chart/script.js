@@ -7,7 +7,7 @@ function calculate(xValue, yValue, container) {
   T = xValue; // °C
 
   // Humidity Ratio (W)
-  W = yValue; // g/kg
+  W = yValue / 1000; // g/kg
 
   // Vapor Pressure (pw)
   pw = (W * ptot) / (0.622 + W); // kPa
@@ -97,12 +97,12 @@ function calculate(xValue, yValue, container) {
   // Moist Air Density (ρ)
   p = (1 + W) / v; // kg/m³
 
-  toFixedAll = 4
+  toFixedAll = 3
 
   // Display results
   document.querySelector(container).innerHTML = `
     <div><span>Dry Bulb Temperature (Tdb)</span><span>:</span><span>${T.toFixed(toFixedAll)}</span><span>°C</span></div>
-    <div><span>Humidity Ratio (W)</span><span>:</span><span>${W.toFixed(toFixedAll)}</span><span>g<sub>w</sub>/kg<sub>da</sub></span></div>
+    <div><span>Humidity Ratio (W)</span><span>:</span><span>${(W * 1000).toFixed(toFixedAll)}</span><span>g<sub>w</sub>/kg<sub>da</sub></span></div>
     <div><span>Vapor Pressure (pw)</span><span>:</span><span>${pw.toFixed(toFixedAll)}</span><span>kPa</span></div>
     <div><span>Saturation Vapor Pressure (pws)</span><span>:</span><span>${pws.toFixed(toFixedAll)}</span><span>kPa</span></div>
     <div><span>Relative Humidity (ϕ)</span><span>:</span><span>${(phi * 100).toFixed(toFixedAll)}</span><span>%</span></div>
