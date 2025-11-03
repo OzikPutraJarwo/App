@@ -15,17 +15,87 @@ svg {
   font-size: 80%;
 }
 
-/* Info */
+.info {
+  gap: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
 
-.marker-detail div, .input div, .results div {
+.info .item {
   display: grid;
-  grid-template-columns: 1fr 5px 80px 60px;
+  gap: 1rem;
+}
+
+.info .item h2 {
+  font-size: 1.3rem;
+}
+
+#info-marker {
+  display: flex;
+  flex-wrap: wrap;
   gap: .5rem;
 }
 
-.marker-item.show {
+#info-marker .marker-item {
+  box-shadow: rgba(67, 71, 85, 0.27) 0px 0px 0.25em, rgba(90, 125, 188, 0.05) 0px 0.25em 1em, rgb(204, 219, 232, 0) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0) -3px -3px 6px 1px inset;
+  text-align: center;
+  border-radius: 0.3rem;
+  background: var(--bg-color);
+  padding: 0.9rem 0.67rem;
+  line-height: 0;
+  transition: .2s all;
+  cursor: pointer;
+  user-select: none;
+}
+
+#info-marker .marker-item:hover,
+#info-marker .marker-item.show {
+  background: transparent;
+}
+
+#info-marker .marker-item.show {
+  box-shadow: unset;
   font-weight: bold;
   color: red;
+}
+
+#input .control {
+  display: grid;
+  gap: 1rem;
+}
+
+#input #select1,
+#input #select2 {
+  padding: 0;
+  background: unset;
+  box-shadow: unset;
+  border: none;
+  margin: 0 0 .25rem -0.2rem;
+}
+
+#input .input-number {
+  display: grid;
+  grid-template-columns: 1fr 59px;
+}
+
+#input #x-input,
+#input #y-input {
+  padding: .5rem 1rem;
+}
+
+#input .input-number span {
+  text-align: right;
+  line-height: 1.8rem;
+}
+
+/* Info */
+
+.marker-detail div,
+.input div,
+.results div {
+  display: grid;
+  grid-template-columns: 1fr 5px 80px 60px;
+  gap: .5rem;
 }
 
 /* Graph */
@@ -42,7 +112,9 @@ svg {
   position: relative;
 }
 
-.placed-marker, .moving-marker, .input-marker {
+.placed-marker,
+.moving-marker,
+.input-marker {
   r: 8;
   stroke: #00000014;
   stroke-width: 20;
