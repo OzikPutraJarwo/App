@@ -281,6 +281,8 @@ const displayNames = {
 
 const select1 = document.getElementById('select1');
 const select2 = document.getElementById('select2');
+let param1Value = document.getElementById('x-input');
+let param2Value = document.getElementById('y-input');
 let param1, param2;
 
 // Fungsi untuk mengisi opsi di Select 1
@@ -302,6 +304,8 @@ function filterAndPopulateSelect2(selectedKey) {
   select2.innerHTML = '<option value="" disabled selected>Select second parameter</option>';
   select2.disabled = true;
   select2.selectedIndex = 0; // Pastikan kembali ke opsi default
+  param2Value.value = '';
+  param2Value.disabled = true;
 
   // Jika Select 1 belum dipilih, keluar dari fungsi
   if (!selectedKey) return;
@@ -311,6 +315,7 @@ function filterAndPopulateSelect2(selectedKey) {
 
   // 3. Aktifkan Select 2
   select2.disabled = false;
+  param2Value.disabled = false;
 
   // 4. Isi Select 2 dengan opsi yang diizinkan
   allowedPartners.forEach(partnerKey => {
@@ -952,9 +957,6 @@ function calculateTdbW(param1, val1, param2, val2) {
   console.warn(`calculateTdbW: combination (${A}, ${B}) not implemented or not supported.`);
   return { Tdb: NaN, W: NaN };
 }
-
-let param1Value = document.getElementById('x-input'),
-  param2Value = document.getElementById('y-input');
 
 const handleChange = () => {
   param1 = select1.value;
