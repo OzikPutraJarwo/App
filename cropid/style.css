@@ -41,6 +41,10 @@ input[type="color"]::-webkit-color-swatch {
   overflow: auto;
 }
 
+#tableContainer .responsive-table {
+  overflow: unset;
+}
+
 .main.wrap {
   display: flex;
   flex-direction: column;
@@ -361,10 +365,6 @@ th#renderbyMerged svg {
 #tableContainer {
   max-height: 150px;
   overflow: auto;
-}
-
-#tableContainer table {
-  table-layout: fixed;
 }
 
 #tableContainer th {
