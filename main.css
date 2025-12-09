@@ -232,7 +232,7 @@ header {
 }
 
 .logged-in .header.wrap.cloud {
-  grid-template-columns: 31px 1fr 25px auto 31px auto
+  grid-template-columns: 31px 1fr 25px auto 31px
 }
 
 .home .header.wrap {
@@ -244,7 +244,7 @@ header {
 }
 
 .home .logged-in .header.wrap.cloud {
-  grid-template-columns: 1fr 25px auto 31px auto
+  grid-template-columns: 1fr 25px auto 31px
 }
 
 .header.wrap .site-cloud {
@@ -547,7 +547,7 @@ footer span {
   }
 
   .logged-in .header.wrap.cloud {
-    grid-template-columns: 31px 1fr 25px 31px 31px auto;
+    grid-template-columns: 31px 1fr 25px 31px 31px;
   }
 
   .home .logged-in .header.wrap {
@@ -555,7 +555,7 @@ footer span {
   }
 
   .home .logged-in .header.wrap.cloud {
-    grid-template-columns: 1fr 25px 31px 31px auto
+    grid-template-columns: 1fr 25px 31px 31px
   }
 
   .site-title {

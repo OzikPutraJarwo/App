@@ -157,13 +157,13 @@
 
 .month-table thead tr {
   display: grid;
-  grid-template-columns: 120px 1fr 70px 70px;
+  grid-template-columns: 120px 1fr 70px 75px;
   width: 100%;
 }
 
 .month-table tbody tr {
   display: grid;
-  grid-template-columns: 70px 50px 1fr 70px 70px;
+  grid-template-columns: 70px 50px 1fr 70px 75px;
 }
 
 .month-table tbody tr {
@@ -504,6 +504,7 @@ textarea#task-notes {
 
   .year-calendar {
     grid-template-columns: repeat(2, 1fr);
+    padding: 0 1rem;
   }
 
   .month-table {
@@ -544,10 +545,6 @@ textarea#task-notes {
   .month-table th:nth-child(4),
   .status-cell {
     display: none;
-  }
-
-  .year-calendar {
-    grid-template-columns: 1fr;
   }
 
   .main-actions {
