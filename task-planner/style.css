@@ -1,3 +1,8 @@
+.main.wrap {
+  font-size: .9rem;
+  max-width: 1000px;
+}
+
 .announcement {
   text-align: center;
   background-color: #fff;
@@ -20,6 +25,7 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
+  width: 100%;
 }
 
 .view-title {
@@ -38,10 +44,23 @@
   justify-content: center;
 }
 
+.nav-btn img {
+  filter: invert(1);
+}
+
+#prev-btn img {
+  transform: rotate(90deg)
+}
+
+#next-btn img {
+  transform: rotate(-90deg)
+}
+
 .view-switch {
   display: flex;
   gap: 0.5rem;
   justify-content: center;
+  width: 100%;
 }
 
 .view-switch button {
@@ -49,6 +68,12 @@
   max-width: 150px;
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
+  background: #e7e9eb;
+  color: #373737;
+}
+
+.view-switch button:hover {
+  color: white;
 }
 
 .view-switch button.active {
@@ -66,7 +91,6 @@
 .view-container {
   background-color: #fff;
   border-radius: 0.5rem;
-  box-shadow: var(--box-shadow);
   overflow: hidden;
 }
 
@@ -110,7 +134,6 @@
 .month-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px;
 }
 
 .month-table thead {
@@ -125,22 +148,35 @@
   white-space: nowrap;
 }
 
-.month-table th:nth-child(1) { width: 120px; } /* Date */
-.month-table th:nth-child(2) { width: 40%; }   /* Task Name */
-.month-table th:nth-child(3) { width: 30%; }   /* Task Time */
-.month-table th:nth-child(4) { width: 100px; } /* Status */
+/* .month-table tr td:nth-child(1) {width: 10px;}
+.month-table tr td:nth-child(2) { width: 10px; }
+.month-table th:nth-child(1) { width: 20px; }
+.month-table th:nth-child(2) { width: 100%; }
+.month-table th:nth-child(3) { width: 60px; }
+.month-table th:nth-child(4) { width: 100px; } */
+
+.month-table thead tr {
+  display: grid;
+  grid-template-columns: 120px 1fr 70px 70px;
+  width: 100%;
+}
+
+.month-table tbody tr {
+  display: grid;
+  grid-template-columns: 70px 50px 1fr 70px 70px;
+}
 
 .month-table tbody tr {
   border-bottom: 1px solid #eee;
   transition: background-color 0.2s;
 }
 
-.month-table tbody tr:hover {
+.month-table tbody tr:hover :not(.date-cell) {
   background-color: #f8f9fa;
 }
 
 .month-table td {
-  padding: 1rem;
+  padding: .75rem;
   vertical-align: middle;
 }
 
@@ -165,6 +201,7 @@
 
 .status-cell {
   text-align: center;
+  line-height: 0;
 }
 
 .task-checkbox {
@@ -174,6 +211,10 @@
 }
 
 /* Completed task styling */
+
+.task-row.weekend .date-cell {
+  color: #e9241d;
+}
 
 .task-row.completed .task-name-cell {
   opacity: 0.6;
@@ -187,11 +228,16 @@
 }
 
 /* Year View Styles */
+
+#year-container {
+  background-color: unset;
+}
+
 .year-calendar {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
-  padding: 1rem;
+  padding: 5px 0;
 }
 
 .year-month {
@@ -248,7 +294,7 @@
 }
 
 .year-day-cell:hover {
-  background-color: #f0f7ff;
+  background-color: #e4e4e4;
 }
 
 .year-day-cell.empty {
@@ -261,7 +307,6 @@
 }
 
 .year-day-cell.has-tasks {
-  background-color: #e7f3ff;
   color: var(--blue);
   font-weight: 600;
 }
@@ -279,9 +324,9 @@
 
 .task-dot {
   position: absolute;
-  bottom: 2px;
-  width: 4px;
-  height: 4px;
+  bottom: 1.5px;
+  width: 3px;
+  height: 3px;
   background-color: var(--green);
   border-radius: 50%;
 }
@@ -341,16 +386,48 @@
   font-weight: bold;
 }
 
+textarea#task-notes {
+  transition: unset;
+  display: block;
+  width: 100%;
+  min-width: 100%;
+  min-height: 90px;
+  background: var(--bg-color);
+  outline: 0px;
+  border-width: initial;
+  border-style: none;
+  border-color: initial;
+  border-image: initial;
+  padding: 0.7rem 1rem;
+  border-radius: 0.7rem;
+}
+
 .modal-actions {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: 1fr 40px 40px;
 }
 
 .modal-actions button {
   flex: 1;
   font-weight: bold;
   min-width: 100px;
+}
+
+.modal-actions div {
+  cursor: pointer;
+  display: grid;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-actions img {
+  width: 30px;
+  transition: .2s all;
+}
+
+.modal-actions div:hover img {
+  scale: 1.2;
 }
 
 .modal-actions .ok {
@@ -367,6 +444,14 @@
 
 .modal-actions .cancel:hover {
   background-color: var(--red-hover);
+}
+
+.modal-actions .close-modal {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  width: 25px;
+  cursor: pointer;
 }
 
 /* Task Detail Styles */
@@ -410,40 +495,35 @@
   .year-calendar {
     grid-template-columns: repeat(2, 1fr);
   }
-  
-  .month-table th:nth-child(2),
-  .month-table th:nth-child(3) {
-    width: auto;
-  }
 }
 
 @media (max-width: 768px) {
+  main {
+    padding: 1.5rem 0 !important;
+  }
+
   .year-calendar {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .month-table {
     font-size: 0.9rem;
   }
-  
+
   .month-table th,
   .month-table td {
     padding: 0.75rem 0.5rem;
   }
-  
-  .view-switch {
-    flex-direction: column;
-  }
-  
+
   .view-switch button {
     max-width: none;
   }
-  
+
   .fab {
     bottom: 1.5rem;
     right: 1.5rem;
   }
-  
+
   .fab button {
     width: 56px;
     height: 56px;
@@ -452,36 +532,33 @@
 }
 
 @media (max-width: 600px) {
+  .month-table thead tr {
+    grid-template-columns: 85px 1fr 60px;
+    width: 100%;
+  }
+
+  .month-table tbody tr {
+    grid-template-columns: 50px 35px 1fr 60px;
+  }
+
+  .month-table th:nth-child(4),
+  .status-cell {
+    display: none;
+  }
+
   .year-calendar {
     grid-template-columns: 1fr;
   }
-  
+
   .main-actions {
     grid-template-columns: 1fr;
   }
-  
-  .modal-actions {
-    flex-direction: column;
-  }
-  
-  .modal-actions button {
-    width: 100%;
-  }
-  
-  .month-table-container {
-    margin: 0 -1rem;
-    width: calc(100% + 2rem);
-  }
-  
-  .month-table {
-    min-width: 500px;
-  }
-  
+
   .fab {
     bottom: 1rem;
     right: 1rem;
   }
-  
+
   .fab button {
     width: 52px;
     height: 52px;
@@ -493,21 +570,21 @@
   .view-controls {
     padding: 0.75rem 1rem;
   }
-  
+
   .view-title {
     font-size: 1.2rem;
   }
-  
+
   .nav-btn {
     width: 36px;
     height: 36px;
   }
-  
+
   .modal .modal-content {
     width: calc(100% - 2rem);
     padding: 1.5rem;
   }
-  
+
   .year-month {
     padding: 0.75rem;
   }

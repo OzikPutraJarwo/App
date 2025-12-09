@@ -82,7 +82,7 @@ function sortTasks(tasks) {
 function appOnLogin() {
   ['add-task-btn', 'today-btn'].forEach(id => document.getElementById(id).style.display = '');
   fab.style.display = 'block';
-  document.querySelector('.view-controls').style.display = 'flex';
+  document.querySelector('.view-controls').style.display = 'grid';
   announcement.classList.add('none');
   loadDataFromDrive();
 }
@@ -270,6 +270,9 @@ function renderMonthView() {
       }
       dateCell.textContent = formatDateForTable_WeekDay(dateStr);
       row.appendChild(dateCell);
+      if (dateCell.textContent === 'Sat' || dateCell.textContent === 'Sun') {
+        dateCell.parentNode.classList.add('weekend');
+      }
 
       const dayCell = document.createElement('td');
       dayCell.className = 'date-cell';
@@ -296,8 +299,6 @@ function renderMonthView() {
       row.appendChild(statusCell);
       
       tbody.appendChild(row);
-
-      document.querySelectorAll('.date-cell:empty').forEach(el => el.remove());
     } else {
       // Create a row for each task
       tasks.forEach((task, index) => {
@@ -372,7 +373,7 @@ function renderMonthView() {
   table.appendChild(tbody);
   tableContainer.appendChild(table);
   container.appendChild(tableContainer);
-  document.querySelectorAll('.date-cell:empty').forEach(el => el.remove());
+  document.querySelectorAll('.date-cell:empty').forEach(el => el.classList.add('empty'));
 }
 
 function renderYearView() {
@@ -391,7 +392,8 @@ function renderYearView() {
     
     const monthTitle = document.createElement('div');
     monthTitle.className = 'month-title';
-    monthTitle.textContent = getShortMonth(month);
+    // monthTitle.textContent = getShortMonth(month);
+    monthTitle.textContent = formatMonth(month);
     
     // Month grid
     const monthGrid = document.createElement('div');
@@ -448,24 +450,24 @@ function renderYearView() {
     }
     
     // Task count for month
-    const monthTaskCount = document.createElement('div');
-    monthTaskCount.className = 'month-task-count';
-    let totalTasks = 0;
-    let completedTasks = 0;
+    // const monthTaskCount = document.createElement('div');
+    // monthTaskCount.className = 'month-task-count';
+    // let totalTasks = 0;
+    // let completedTasks = 0;
     
-    if (data[yearStr] && data[yearStr][monthStr]) {
-      for (const day in data[yearStr][monthStr]) {
-        const dayTasks = data[yearStr][monthStr][day];
-        totalTasks += dayTasks.length;
-        completedTasks += dayTasks.filter(task => task.completed).length;
-      }
-    }
+    // if (data[yearStr] && data[yearStr][monthStr]) {
+    //   for (const day in data[yearStr][monthStr]) {
+    //     const dayTasks = data[yearStr][monthStr][day];
+    //     totalTasks += dayTasks.length;
+    //     completedTasks += dayTasks.filter(task => task.completed).length;
+    //   }
+    // }
     
-    monthTaskCount.textContent = `${completedTasks}/${totalTasks} done`;
+    // monthTaskCount.textContent = `${completedTasks}/${totalTasks} done`;
+    // monthDiv.appendChild(monthTaskCount);
     
     monthDiv.appendChild(monthTitle);
     monthDiv.appendChild(monthGrid);
-    monthDiv.appendChild(monthTaskCount);
     
     // Click on month to switch to month view
     monthDiv.onclick = () => {
@@ -633,7 +635,7 @@ function openDetailModal(taskId) {
   document.getElementById('detail-status').textContent = task.completed ? 'Completed' : 'Pending';
   
   const toggleBtn = document.getElementById('toggle-status-btn');
-  toggleBtn.textContent = task.completed ? 'Mark as Pending' : 'Mark Complete';
+  toggleBtn.textContent = task.completed ? 'Set as Pending ⏳' : 'Set as Complete ✅';
   toggleBtn.className = `button ${task.completed ? 'cancel' : 'ok'}`;
   
   // Set up button actions
