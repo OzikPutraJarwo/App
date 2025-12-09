@@ -1,0 +1,514 @@
+.announcement {
+  text-align: center;
+  background-color: #fff;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  box-shadow: var(--box-shadow);
+  margin-bottom: 1.5rem;
+}
+
+.view-controls {
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: var(--box-shadow);
+  margin-bottom: 1.5rem;
+}
+
+.navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.view-title {
+  font-size: 1.4rem;
+  font-weight: bold;
+  text-align: center;
+  flex-grow: 1;
+}
+
+.nav-btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-switch {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.view-switch button {
+  flex: 1;
+  max-width: 150px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.view-switch button.active {
+  background-color: var(--blue);
+  color: white;
+}
+
+.main-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.view-container {
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: var(--box-shadow);
+  overflow: hidden;
+}
+
+/* Floating Action Button */
+.fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 100;
+}
+
+.fab button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--blue);
+  color: white;
+  border: none;
+  font-size: 1.8rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.fab button:hover {
+  background-color: var(--blue-hover);
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Month View - Table Layout */
+.month-table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.month-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+.month-table thead {
+  background-color: var(--blue);
+  color: white;
+}
+
+.month-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.month-table th:nth-child(1) { width: 120px; } /* Date */
+.month-table th:nth-child(2) { width: 40%; }   /* Task Name */
+.month-table th:nth-child(3) { width: 30%; }   /* Task Time */
+.month-table th:nth-child(4) { width: 100px; } /* Status */
+
+.month-table tbody tr {
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.2s;
+}
+
+.month-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.month-table td {
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+.date-cell {
+  font-weight: 600;
+  border-right: 2px solid #eee;
+}
+
+.date-cell.today {
+  color: var(--blue);
+  font-weight: bold;
+}
+
+.task-name-cell {
+  font-weight: 500;
+}
+
+.task-time-cell {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.status-cell {
+  text-align: center;
+}
+
+.task-checkbox {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+/* Completed task styling */
+
+.task-row.completed .task-name-cell {
+  opacity: 0.6;
+  text-decoration: line-through;
+  color: #888;
+}
+
+.task-row.completed .task-time-cell {
+  opacity: 0.6;
+  color: #888;
+}
+
+/* Year View Styles */
+.year-calendar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.year-month {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #eee;
+}
+
+.year-month:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  border-color: var(--blue);
+}
+
+.month-title {
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 0.75rem;
+  color: var(--blue);
+  font-size: 1.1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.year-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.125rem;
+  margin-top: 0.5rem;
+}
+
+.year-day-header {
+  font-size: 0.7rem;
+  text-align: center;
+  color: #666;
+  padding: 0.25rem 0;
+  font-weight: 600;
+}
+
+.year-day-cell {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.year-day-cell:hover {
+  background-color: #f0f7ff;
+}
+
+.year-day-cell.empty {
+  background-color: transparent;
+  cursor: default;
+}
+
+.year-day-cell.empty:hover {
+  background-color: transparent;
+}
+
+.year-day-cell.has-tasks {
+  background-color: #e7f3ff;
+  color: var(--blue);
+  font-weight: 600;
+}
+
+.year-day-cell.today {
+  background-color: var(--blue);
+  color: white;
+  font-weight: bold;
+}
+
+.year-day-cell.has-tasks.today {
+  background-color: var(--blue);
+  color: white;
+}
+
+.task-dot {
+  position: absolute;
+  bottom: 2px;
+  width: 4px;
+  height: 4px;
+  background-color: var(--green);
+  border-radius: 50%;
+}
+
+.year-day-cell.has-tasks .task-dot {
+  background-color: var(--green);
+}
+
+.year-day-cell.today .task-dot {
+  background-color: white;
+}
+
+.month-task-count {
+  font-size: 0.8rem;
+  color: #666;
+  text-align: center;
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000000a8;
+  z-index: 1000;
+  display: none;
+}
+
+.modal.show {
+  display: block;
+}
+
+.modal .modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: white;
+  max-width: 500px;
+  width: calc(100% - 4rem);
+  max-height: calc(100% - 4rem);
+  overflow: auto;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: 2rem;
+  border-radius: 1rem;
+}
+
+#modal-title {
+  font-size: 1.6rem;
+  font-weight: bold;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.modal-actions button {
+  flex: 1;
+  font-weight: bold;
+  min-width: 100px;
+}
+
+.modal-actions .ok {
+  background-color: var(--green);
+}
+
+.modal-actions .ok:hover {
+  background-color: var(--green-hover);
+}
+
+.modal-actions .cancel {
+  background-color: var(--red);
+}
+
+.modal-actions .cancel:hover {
+  background-color: var(--red-hover);
+}
+
+/* Task Detail Styles */
+.task-detail-title {
+  font-size: 1.4rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.task-detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+}
+
+.task-detail-info div {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.task-detail-info strong {
+  min-width: 80px;
+}
+
+.task-detail-info span {
+  color: #555;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .year-calendar {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .year-calendar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .month-table th:nth-child(2),
+  .month-table th:nth-child(3) {
+    width: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .year-calendar {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .month-table {
+    font-size: 0.9rem;
+  }
+  
+  .month-table th,
+  .month-table td {
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .view-switch {
+    flex-direction: column;
+  }
+  
+  .view-switch button {
+    max-width: none;
+  }
+  
+  .fab {
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
+  
+  .fab button {
+    width: 56px;
+    height: 56px;
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .year-calendar {
+    grid-template-columns: 1fr;
+  }
+  
+  .main-actions {
+    grid-template-columns: 1fr;
+  }
+  
+  .modal-actions {
+    flex-direction: column;
+  }
+  
+  .modal-actions button {
+    width: 100%;
+  }
+  
+  .month-table-container {
+    margin: 0 -1rem;
+    width: calc(100% + 2rem);
+  }
+  
+  .month-table {
+    min-width: 500px;
+  }
+  
+  .fab {
+    bottom: 1rem;
+    right: 1rem;
+  }
+  
+  .fab button {
+    width: 52px;
+    height: 52px;
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .view-controls {
+    padding: 0.75rem 1rem;
+  }
+  
+  .view-title {
+    font-size: 1.2rem;
+  }
+  
+  .nav-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .modal .modal-content {
+    width: calc(100% - 2rem);
+    padding: 1.5rem;
+  }
+  
+  .year-month {
+    padding: 0.75rem;
+  }
+}
