@@ -7,6 +7,7 @@
 }
 
 /* SIDEBAR & CONTROLS */
+
 .controls-section {
   width: 400px;
   display: flex;
@@ -127,7 +128,24 @@ input:focus {
   background: var(--blue);
 }
 
+.zone-tabs {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #bbdefb;
+  padding-bottom: 5px;
+}
+
+.z-tab {
+  flex:1; padding:4px; font-size:10px; text-align:center; cursor:pointer; border-radius:3px; background:rgba(255,255,255,0.5); color:#1565c0;
+}
+
+.z-tab.active {
+  background:#2196f3; color:white;
+}
+
 /* LIST ITEMS (Points & Zones) */
+
 .section-title {
   font-size: 11px;
   font-weight: 800;

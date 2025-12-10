@@ -121,21 +121,74 @@
                 </div>
 
                 <button class="tool-btn" onclick="openManualModal('point')"><span>⌨ Point - Input</span></button>
-                <button class="tool-btn" onclick="openManualModal('zone')"><span>⌨ Zone - Input</span></button>
               </div>
             </div>
 
-            <div id="zone-controls">
-              <div class="zone-tabs"
-                style="display:flex; gap:5px; margin-bottom:10px; border-bottom:1px solid #bbdefb; padding-bottom:5px;">
-                <div class="z-tab active" id="tab-manual" onclick="setZoneSubMode('manual')" style="flex:1; padding:4px; font-size:10px; text-align:center; cursor:pointer; border-radius:3px; background:#2196f3; color:white;">Manual (Click)</div>
-                <div class="z-tab" id="tab-range" onclick="setZoneSubMode('range')" style="flex:1; padding:4px; font-size:10px; text-align:center; cursor:pointer; border-radius:3px; background:rgba(255,255,255,0.5); color:#1565c0;">Range (Sliders)</div>
+            <div id="point-controls">
+
+              <div class="point-tabs">
+
+              </div>
+
+            </div>
+
+            <div id="zone-controls" style="display: none">
+
+              <div class="zone-tabs">
+                <div class="z-tab active" id="tab-manual" onclick="setZoneSubMode('manual')" >Click</div>
+                <!-- <div class="z-tab" id="tab-input" onclick="openManualModal('zone')">Input</div> -->
+                <div class="z-tab" id="tab-input" onclick="setZoneSubMode('input')">Input</div>
+                <div class="z-tab" id="tab-range" onclick="setZoneSubMode('range')">Range</div>
               </div>
 
               <div id="zone-manual-ui">
                 <div style="font-size:10px; margin-bottom:5px; font-weight:bold; color:#0277bd; display:flex; justify-content:space-between;">
                   <span>DRAWING...</span>
                   <span id="zonePtCount">0 pts</span>
+                </div>
+              </div>
+
+              <div id="zone-input-ui">
+                <div class="modal-box">
+                  <div class="modal-header">
+                    <span id="modalTitle">Add Zone Vertex</span>
+                    <span onclick="closeModal('manualModal')" style="cursor:pointer">✕</span>
+                  </div>
+              
+                  <div style="margin-bottom:10px; font-size:11px; color:#666;">
+                    Select two parameters to define the state point.
+                  </div>
+              
+                  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                    <div>
+                      <label>Parameter 1</label>
+                      <select id="p1Type" style="margin-bottom:5px;">
+                        <option value="Tdb">Dry Bulb Temp (°C)</option>
+                        <option value="Twb">Wet Bulb Temp (°C)</option>
+                        <option value="RH">Rel. Humidity (%)</option>
+                        <option value="W">Humidity Ratio (kg/kg)</option>
+                        <option value="h">Enthalpy (kJ/kg)</option>
+                      </select>
+                      <input type="number" id="p1Val" step="0.1" placeholder="Value">
+                    </div>
+              
+                    <div>
+                      <label>Parameter 2</label>
+                      <select id="p2Type" style="margin-bottom:5px;">
+                        <option value="RH" selected="">Rel. Humidity (%)</option>
+                        <option value="Tdb">Dry Bulb Temp (°C)</option>
+                        <option value="Twb">Wet Bulb Temp (°C)</option>
+                        <option value="W">Humidity Ratio (kg/kg)</option>
+                        <option value="h">Enthalpy (kJ/kg)</option>
+                      </select>
+                      <input type="number" id="p2Val" step="0.1" placeholder="Value">
+                    </div>
+                  </div>
+              
+                  <div class="modal-footer">
+                    <!-- <button class="tool-btn" onclick="closeModal('manualModal')">Cancel</button> -->
+                    <button class="tool-btn btn-primary" onclick="submitManualInput()">Add</button>
+                  </div>
                 </div>
               </div>
 

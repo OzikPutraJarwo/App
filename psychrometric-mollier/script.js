@@ -305,6 +305,8 @@ function setZoneSubMode(subMode) {
 
   document.getElementById("zone-manual-ui").style.display =
     subMode === "manual" ? "block" : "none";
+  document.getElementById("zone-input-ui").style.display =
+    subMode === "input" ? "block" : "none";
   document.getElementById("zone-range-ui").style.display =
     subMode === "range" ? "block" : "none";
 
@@ -454,9 +456,9 @@ function updateZonePtCount() {
 // --- MANUAL INPUT HANDLER ---
 function openManualModal(target) {
   State.targetForManual = target;
-  document.getElementById("modalTitle").innerText =
-    target === "point" ? "Add Manual Point" : "Add Zone Vertex";
-  document.getElementById("manualModal").style.display = "flex";
+  // document.getElementById("modalTitle").innerText =
+  //   target === "point" ? "Add Manual Point" : "Add Zone Vertex";
+  // document.getElementById("manualModal").style.display = "flex";
 }
 
 function closeModal(id) {
