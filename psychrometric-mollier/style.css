@@ -130,10 +130,7 @@ input:focus {
 
 .zone-tabs {
   display: flex;
-  gap: 5px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid #bbdefb;
-  padding-bottom: 5px;
+  gap: .5rem;
 }
 
 .z-tab {

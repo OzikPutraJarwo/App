@@ -115,7 +115,8 @@
               <div class="toolbar-group">
 
                 <div class="toolbar-button">
-                  <button class="tool-btn active" id="btn-view" onclick="setMode('view')"><span>👁️ Explore</span></button>
+                  <button class="tool-btn active" id="btn-view" onclick="setMode('view')"><span>👁️
+                      Explore</span></button>
                   <button class="tool-btn" id="btn-point" onclick="setMode('point')"><span>📍 Point</span></button>
                   <button class="tool-btn" id="btn-zone" onclick="setMode('zone')"><span>📐 Zone</span></button>
                 </div>
@@ -135,70 +136,79 @@
             <div id="zone-controls" style="display: none">
 
               <div class="zone-tabs">
-                <div class="z-tab active" id="tab-manual" onclick="setZoneSubMode('manual')" >Click</div>
+                <div class="z-tab active" id="tab-manual" onclick="setZoneSubMode('manual')">Click</div>
                 <!-- <div class="z-tab" id="tab-input" onclick="openManualModal('zone')">Input</div> -->
                 <div class="z-tab" id="tab-input" onclick="setZoneSubMode('input')">Input</div>
                 <div class="z-tab" id="tab-range" onclick="setZoneSubMode('range')">Range</div>
               </div>
 
               <div id="zone-manual-ui">
-                <div style="font-size:10px; margin-bottom:5px; font-weight:bold; color:#0277bd; display:flex; justify-content:space-between;">
+                <div
+                  style="font-size:10px; margin-bottom:5px; font-weight:bold; color:#0277bd; display:flex; justify-content:space-between;">
                   <span>DRAWING...</span>
                   <span id="zonePtCount">0 pts</span>
+                </div>
+                <div style="margin-top:10px; display:flex; gap:5px;">
+                  <button class="tool-btn btn-primary" style="flex:1" onclick="finishZone()">Finish Zone</button>
+                  <button class="tool-btn btn-danger" style="flex:1" onclick="cancelZone()">Cancel</button>
                 </div>
               </div>
 
               <div id="zone-input-ui">
-                <div class="modal-box">
-                  <div class="modal-header">
-                    <span id="modalTitle">Add Zone Vertex</span>
-                    <span onclick="closeModal('manualModal')" style="cursor:pointer">✕</span>
+                <div class="modal-header">
+                  <span id="modalTitle">Add Zone Vertex</span>
+                </div>
+
+                <div style="margin-bottom:10px; font-size:11px; color:#666;">
+                  Select two parameters to define the state point.
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                  <div>
+                    <label>Parameter 1</label>
+                    <select id="p1Type" style="margin-bottom:5px;">
+                      <option value="Tdb">Dry Bulb Temp (°C)</option>
+                      <option value="Twb">Wet Bulb Temp (°C)</option>
+                      <option value="RH">Rel. Humidity (%)</option>
+                      <option value="W">Humidity Ratio (kg/kg)</option>
+                      <option value="h">Enthalpy (kJ/kg)</option>
+                    </select>
+                    <input type="number" id="p1Val" step="0.1" placeholder="Value">
                   </div>
-              
-                  <div style="margin-bottom:10px; font-size:11px; color:#666;">
-                    Select two parameters to define the state point.
+
+                  <div>
+                    <label>Parameter 2</label>
+                    <select id="p2Type" style="margin-bottom:5px;">
+                      <option value="RH" selected="">Rel. Humidity (%)</option>
+                      <option value="Tdb">Dry Bulb Temp (°C)</option>
+                      <option value="Twb">Wet Bulb Temp (°C)</option>
+                      <option value="W">Humidity Ratio (kg/kg)</option>
+                      <option value="h">Enthalpy (kJ/kg)</option>
+                    </select>
+                    <input type="number" id="p2Val" step="0.1" placeholder="Value">
                   </div>
-              
-                  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-                    <div>
-                      <label>Parameter 1</label>
-                      <select id="p1Type" style="margin-bottom:5px;">
-                        <option value="Tdb">Dry Bulb Temp (°C)</option>
-                        <option value="Twb">Wet Bulb Temp (°C)</option>
-                        <option value="RH">Rel. Humidity (%)</option>
-                        <option value="W">Humidity Ratio (kg/kg)</option>
-                        <option value="h">Enthalpy (kJ/kg)</option>
-                      </select>
-                      <input type="number" id="p1Val" step="0.1" placeholder="Value">
-                    </div>
-              
-                    <div>
-                      <label>Parameter 2</label>
-                      <select id="p2Type" style="margin-bottom:5px;">
-                        <option value="RH" selected="">Rel. Humidity (%)</option>
-                        <option value="Tdb">Dry Bulb Temp (°C)</option>
-                        <option value="Twb">Wet Bulb Temp (°C)</option>
-                        <option value="W">Humidity Ratio (kg/kg)</option>
-                        <option value="h">Enthalpy (kJ/kg)</option>
-                      </select>
-                      <input type="number" id="p2Val" step="0.1" placeholder="Value">
-                    </div>
-                  </div>
-              
-                  <div class="modal-footer">
-                    <!-- <button class="tool-btn" onclick="closeModal('manualModal')">Cancel</button> -->
-                    <button class="tool-btn btn-primary" onclick="submitManualInput('zone')">Add</button>
-                  </div>
+                </div>
+
+                <div style="margin-top:10px; display:flex; gap:5px;">
+                  <!-- <button class="tool-btn" onclick="closeModal('manualModal')">Cancel</button> -->
+                  <button class="tool-btn btn-primary" onclick="submitManualInput('zone')">Add</button>
+                </div>
+
+                <div class="modal-footer">
                 </div>
               </div>
 
               <div id="zone-range-ui" style="display:none;">
                 <label>Range 1: Dry Bulb (°C)</label>
                 <div class="range-row" style="display:flex; align-items:center; gap:5px; margin-bottom:10px;">
-                  <input type="number" class="range-val" id="rangeTmin" value="20" oninput="updateRangeZone()" style="width:40px; text-align:center; font-size:10px;">
-                  <input type="range" class="range-slider" id="sliderTmin" min="0" max="60" value="20" oninput="syncRange('Tmin')" style="flex:1; height:4px;">
-                  <input type="range" class="range-slider" id="sliderTmax" min="0" max="60" value="30" oninput="syncRange('Tmax')" style="flex:1; height:4px;">
-                  <input type="number" class="range-val" id="rangeTmax" value="30" oninput="updateRangeZone()" style="width:40px; text-align:center; font-size:10px;">
+                  <input type="number" class="range-val" id="rangeTmin" value="20" oninput="updateRangeZone()"
+                    style="width:40px; text-align:center; font-size:10px;">
+                  <input type="range" class="range-slider" id="sliderTmin" min="0" max="60" value="20"
+                    oninput="syncRange('Tmin')" style="flex:1; height:4px;">
+                  <input type="range" class="range-slider" id="sliderTmax" min="0" max="60" value="30"
+                    oninput="syncRange('Tmax')" style="flex:1; height:4px;">
+                  <input type="number" class="range-val" id="rangeTmax" value="30" oninput="updateRangeZone()"
+                    style="width:40px; text-align:center; font-size:10px;">
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:end; margin-bottom:3px;">
                   <label>Range 2 Parameter:</label>
@@ -211,16 +221,19 @@
                   </select>
                 </div>
                 <div class="range-row" style="display:flex; align-items:center; gap:5px; margin-bottom:5px;">
-                  <input type="number" class="range-val" id="rangeP2min" step="0.1" oninput="updateRangeZone()" style="width:40px; text-align:center; font-size:10px;">
-                  <input type="range" class="range-slider" id="sliderP2min" oninput="syncRange('P2min')" style="flex:1; height:4px;">
-                  <input type="range" class="range-slider" id="sliderP2max" oninput="syncRange('P2max')" style="flex:1; height:4px;">
-                  <input type="number" class="range-val" id="rangeP2max" step="0.1" oninput="updateRangeZone()" style="width:40px; text-align:center; font-size:10px;">
+                  <input type="number" class="range-val" id="rangeP2min" step="0.1" oninput="updateRangeZone()"
+                    style="width:40px; text-align:center; font-size:10px;">
+                  <input type="range" class="range-slider" id="sliderP2min" oninput="syncRange('P2min')"
+                    style="flex:1; height:4px;">
+                  <input type="range" class="range-slider" id="sliderP2max" oninput="syncRange('P2max')"
+                    style="flex:1; height:4px;">
+                  <input type="number" class="range-val" id="rangeP2max" step="0.1" oninput="updateRangeZone()"
+                    style="width:40px; text-align:center; font-size:10px;">
                 </div>
-              </div>
-
-              <div style="margin-top:10px; display:flex; gap:5px;">
-                <button class="tool-btn btn-primary" style="flex:1" onclick="finishZone()">Finish Zone</button>
-                <button class="tool-btn btn-danger" style="flex:1" onclick="cancelZone()">Cancel</button>
+                <div style="margin-top:10px; display:flex; gap:5px;">
+                  <button class="tool-btn btn-primary" style="flex:1" onclick="finishZone()">Finish Zone</button>
+                  <button class="tool-btn btn-danger" style="flex:1" onclick="cancelZone()">Cancel</button>
+                </div>
               </div>
 
             </div>
@@ -235,7 +248,8 @@
               <div id="list-zones"></div>
             </div>
 
-            <button class="tool-btn btn-danger" onclick="clearAllData()" style="margin-top:20px;">🗑 Clear All Data</button>
+            <button class="tool-btn btn-danger" onclick="clearAllData()" style="margin-top:20px;">🗑 Clear All
+              Data</button>
           </div>
         </div>
 
