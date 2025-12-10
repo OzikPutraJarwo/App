@@ -187,7 +187,7 @@
               
                   <div class="modal-footer">
                     <!-- <button class="tool-btn" onclick="closeModal('manualModal')">Cancel</button> -->
-                    <button class="tool-btn btn-primary" onclick="submitManualInput()">Add</button>
+                    <button class="tool-btn btn-primary" onclick="submitManualInput('zone')">Add</button>
                   </div>
                 </div>
               </div>
@@ -225,14 +225,17 @@
 
             </div>
 
-            <div class="section-title">MARKED POINTS <span class="count-badge" id="count-points">0</span></div>
-            <div id="list-points"></div>
+            <div class="marked-point">
+              <div class="section-title">MARKED POINTS <span class="count-badge" id="count-points">0</span></div>
+              <div id="list-points"></div>
+            </div>
 
-            <div class="section-title">COMFORT ZONES <span class="count-badge" id="count-zones">0</span></div>
-            <div id="list-zones"></div>
+            <div class="comfort-zone">
+              <div class="section-title">COMFORT ZONES <span class="count-badge" id="count-zones">0</span></div>
+              <div id="list-zones"></div>
+            </div>
 
-            <button class="tool-btn btn-danger" onclick="clearAllData()" style="margin-top:20px;">🗑
-              Clear All Data</button>
+            <button class="tool-btn btn-danger" onclick="clearAllData()" style="margin-top:20px;">🗑 Clear All Data</button>
           </div>
         </div>
 

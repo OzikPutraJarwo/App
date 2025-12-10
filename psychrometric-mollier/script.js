@@ -454,8 +454,8 @@ function updateZonePtCount() {
 }
 
 // --- MANUAL INPUT HANDLER ---
-function openManualModal(target) {
-  State.targetForManual = target;
+function openManualModal(target, target2) {
+  State.targetForManual = target2;
   // document.getElementById("modalTitle").innerText =
   //   target === "point" ? "Add Manual Point" : "Add Zone Vertex";
   // document.getElementById("manualModal").style.display = "flex";
@@ -465,7 +465,8 @@ function closeModal(id) {
   document.getElementById(id).style.display = "none";
 }
 
-function submitManualInput() {
+function submitManualInput(target) {
+  State.targetForManual = target;
   const p1Type = document.getElementById("p1Type").value;
   const p1Val = parseFloat(document.getElementById("p1Val").value);
   const p2Type = document.getElementById("p2Type").value;
@@ -496,7 +497,7 @@ function submitManualInput() {
     updateZonePtCount();
     drawChart();
   }
-  closeModal("manualModal");
+  // closeModal("manualModal");
 }
 
 // --- LIST & CRUD ---
