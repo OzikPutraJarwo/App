@@ -27,6 +27,7 @@ const State = {
   selectedZoneId: null,
   targetForManual: null,
   zoneSubMode: "manual", // 'manual' atau 'range'
+  pointSubMode: "manual",
   rangePreview: [], // Menyimpan 4 titik sementara dari slider
 };
 
@@ -233,6 +234,9 @@ const Psychro = {
 function calculateAllProperties(t, w, Patm) {
   const Pws = Psychro.getSatVapPres(t);
   const Pw = Psychro.getPwFromW(w, Patm);
+  const Wsat = Psychro.getWFromPw(Pws, Patm);
+  const vpdVal = Pws - Pw;
+  const hdVal = Wsat - w;
   return {
     Tdb: t,
     W: w,
@@ -246,6 +250,9 @@ function calculateAllProperties(t, w, Patm) {
     Pws: Pws,
     mu: (w / Psychro.getWFromPw(Pws, Patm)) * 100,
     cp: 1.006 + 1.86 * w,
+    Wsat: Wsat,
+    VPD: vpdVal,
+    HD: hdVal
   };
 }
 
@@ -299,9 +306,9 @@ function setZoneSubMode(subMode) {
     t.style.color = "#1565c0";
     t.classList.remove("active");
   });
-  document.getElementById("tab-" + subMode).style.background = "#2196f3";
-  document.getElementById("tab-" + subMode).style.color = "white";
-  document.getElementById("tab-" + subMode).classList.add("active");
+  document.querySelector(".zone-tabs #tab-" + subMode).style.background = "#2196f3";
+  document.querySelector(".zone-tabs #tab-" + subMode).style.color = "white";
+  document.querySelector(".zone-tabs #tab-" + subMode).classList.add("active");
 
   document.getElementById("zone-manual-ui").style.display =
     subMode === "manual" ? "block" : "none";
@@ -310,13 +317,35 @@ function setZoneSubMode(subMode) {
   document.getElementById("zone-range-ui").style.display =
     subMode === "range" ? "block" : "none";
 
+  if (subMode !== "manual") {
+    cancelZone();
+  }
+
   if (subMode === "range") {
     State.tempZone = [];
-    setupRangeDefaults(); // <--- TAMBAHAN: Reset slider saat masuk mode range
+    updateZonePtCount();
+    setupRangeDefaults(); 
   } else {
     State.rangePreview = [];
     drawChart();
   }
+}
+
+function setPointSubMode(subMode) {
+  State.pointSubMode = subMode;
+  document.querySelectorAll(".p-tab").forEach((t) => {
+    t.style.background = "rgba(255,255,255,0.5)";
+    t.style.color = "#1565c0";
+    t.classList.remove("active");
+  });
+  document.querySelector(".point-tabs #tab-" + subMode).style.background = "#2196f3";
+  document.querySelector(".point-tabs #tab-" + subMode).style.color = "white";
+  document.querySelector(".point-tabs #tab-" + subMode).classList.add("active");
+
+  document.getElementById("point-manual-ui").style.display =
+    subMode === "manual" ? "block" : "none";
+  document.getElementById("point-input-ui").style.display =
+    subMode === "input" ? "block" : "none";
 }
 
 // Sinkronisasi Slider <-> Input Angka
@@ -424,7 +453,6 @@ function updateRangeZone() {
 
 function setMode(mode) {
   State.mode = mode;
-  // ... code existing button active toggle ...
   document
     .querySelectorAll(".tool-btn")
     .forEach((b) => b.classList.remove("active"));
@@ -433,6 +461,9 @@ function setMode(mode) {
 
   const zoneCtrl = document.getElementById("zone-controls");
   zoneCtrl.style.display = mode === "zone" ? "block" : "none";
+
+  const pointCtrl = document.getElementById("point-controls");
+  pointCtrl.style.display = mode === "point" ? "block" : "none";
 
   // TAMBAHAN: Init submode jika masuk ke zone
   if (mode === "zone") {
@@ -454,11 +485,11 @@ function updateZonePtCount() {
 }
 
 // --- MANUAL INPUT HANDLER ---
-function openManualModal(target, target2) {
-  State.targetForManual = target2;
-  // document.getElementById("modalTitle").innerText =
-  //   target === "point" ? "Add Manual Point" : "Add Zone Vertex";
-  // document.getElementById("manualModal").style.display = "flex";
+function openManualModal(target) {
+  State.targetForManual = target;
+  document.getElementById("modalTitle").innerText =
+    target === "point" ? "Add Manual Point" : "Add Zone Vertex";
+  document.getElementById("manualModal").style.display = "flex";
 }
 
 function closeModal(id) {
@@ -467,10 +498,10 @@ function closeModal(id) {
 
 function submitManualInput(target) {
   State.targetForManual = target;
-  const p1Type = document.getElementById("p1Type").value;
-  const p1Val = parseFloat(document.getElementById("p1Val").value);
-  const p2Type = document.getElementById("p2Type").value;
-  const p2Val = parseFloat(document.getElementById("p2Val").value);
+  const p1Type = document.getElementById("p1Type-" + target).value;
+  const p1Val = parseFloat(document.getElementById("p1Val-" + target).value);
+  const p2Type = document.getElementById("p2Type-" + target).value;
+  const p2Val = parseFloat(document.getElementById("p2Val-" + target).value);
   const Patm = parseFloat(document.getElementById("pressure").value);
 
   if (isNaN(p1Val) || isNaN(p2Val)) {
@@ -1179,6 +1210,18 @@ function generateHTMLGrid(d) {
             <span>:</span>
             <span class="det-val">${d.cp.toFixed(3)} kJ/(kg·°C)</span>
         </div>
+        <div class="detail-row">
+            <span class="det-label">Vapor Pressure Deficit</span>
+            <span class="det-abbr">VPD</span>
+            <span>:</span>
+            <span class="det-val">${d.VPD.toFixed(2)} Pa</span>
+        </div>
+        <div class="detail-row">
+            <span class="det-label">Humidity Deficit</span>
+            <span class="det-abbr">HD</span>
+            <span>:</span>
+            <span class="det-val">${d.HD.toFixed(2)} kg/kg</span>
+        </div>
     `;
 }
 
@@ -1371,3 +1414,7 @@ function renderSmartLabels(container, labelData, position, width, height) {
 updateLists();
 drawChart();
 window.addEventListener("resize", drawChart);
+
+////////////////////////////////////////////////////
+
+setMode('zone');

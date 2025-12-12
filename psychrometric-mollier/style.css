@@ -10,7 +10,6 @@
 
 .controls-section {
   width: 400px;
-  display: flex;
   flex-direction: column;
   flex-shrink: 0;
   overflow: hidden;
@@ -18,7 +17,7 @@
 
 .controls-scroll {
   overflow-y: auto;
-  flex: 1;
+  height: calc(100dvh - 65px - 4rem - 3rem);
 }
 
 /* Typography & Inputs */
@@ -63,16 +62,18 @@ input:focus {
   gap: 1rem;
 }
 
+/* SECTION CONTROL */
+
+.controls-section h4 {
+  margin-bottom: 1rem;
+}
+
 /* TOOLBAR BUTTONS */
 
 .toolbar {
   border-top: 2px solid #eceff1;
   padding-top: 1.25rem;
   margin-top: 1.25rem;
-}
-
-.toolbar h4 {
-  margin-bottom: 1rem;
 }
 
 .toolbar-button {
@@ -128,17 +129,60 @@ input:focus {
   background: var(--blue);
 }
 
-.zone-tabs {
+.zone-tabs, .point-tabs {
   display: flex;
   gap: .5rem;
 }
 
-.z-tab {
-  flex:1; padding:4px; font-size:10px; text-align:center; cursor:pointer; border-radius:3px; background:rgba(255,255,255,0.5); color:#1565c0;
+.toolbar-controls {
+  padding: 1rem;
+  border: 1px solid #eceff1;
+  border-radius: .5rem;
+  margin-top: 1rem;
+  overflow: hidden;
 }
 
-.z-tab.active {
-  background:#2196f3; color:white;
+.toolbar-tabs {
+  margin: -1rem -1rem 1rem;
+  border-bottom: 1px solid #eceff1;
+}
+
+.toolbar-tab {
+  flex: 1;
+  padding: .4rem;
+  font-size: .7rem;
+  text-align: center;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.5);
+  color: #1565c0;
+}
+
+.toolbar-tab.active {
+  background: #2196f3;
+  color: white;
+}
+
+.toolbar-desc {
+  margin-bottom: 1rem;;
+  font-size: .75rem;
+  color: #666;
+}
+
+.toolbar-action {
+  display: grid;
+  gap: .5rem;
+}
+
+.toolbar-action.c2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* --- Zone --- */
+
+#zonePtCount {
+  font-weight: bold;
+  font-size: .9rem;
+  margin-bottom: 1rem;
 }
 
 /* LIST ITEMS (Points & Zones) */
@@ -147,16 +191,6 @@ input:focus {
   border-top: 2px solid #eceff1;
   padding-top: 1.25rem;
   margin-top: 1.25rem;
-}
-
-.section-title {
-  font-size: 11px;
-  font-weight: 800;
-  color: #90a4ae;
-  margin: 20px 0 8px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .count-badge {
@@ -384,7 +418,7 @@ input:focus {
   fill: #ffeb3b;
   stroke: #263238;
   stroke-width: 2px;
-  r: 9;
+  r: 6;
 }
 
 .user-zone {

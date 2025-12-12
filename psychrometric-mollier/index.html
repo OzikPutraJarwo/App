@@ -113,92 +113,77 @@
               <h4>Toolbars</h4>
 
               <div class="toolbar-group">
-
                 <div class="toolbar-button">
                   <button class="tool-btn active" id="btn-view" onclick="setMode('view')"><span>👁️
                       Explore</span></button>
                   <button class="tool-btn" id="btn-point" onclick="setMode('point')"><span>📍 Point</span></button>
                   <button class="tool-btn" id="btn-zone" onclick="setMode('zone')"><span>📐 Zone</span></button>
                 </div>
-
-                <button class="tool-btn" onclick="openManualModal('point')"><span>⌨ Point - Input</span></button>
               </div>
             </div>
 
-            <div id="point-controls">
+            <div id="zone-controls" class="toolbar-controls" style="display: none">
 
-              <div class="point-tabs">
-
-              </div>
-
-            </div>
-
-            <div id="zone-controls" style="display: none">
-
-              <div class="zone-tabs">
-                <div class="z-tab active" id="tab-manual" onclick="setZoneSubMode('manual')">Click</div>
+              <div class="zone-tabs toolbar-tabs">
+                <div class="z-tab active toolbar-tab" id="tab-manual" onclick="setZoneSubMode('manual')">Click</div>
                 <!-- <div class="z-tab" id="tab-input" onclick="openManualModal('zone')">Input</div> -->
-                <div class="z-tab" id="tab-input" onclick="setZoneSubMode('input')">Input</div>
-                <div class="z-tab" id="tab-range" onclick="setZoneSubMode('range')">Range</div>
+                <div class="z-tab toolbar-tab" id="tab-input" onclick="setZoneSubMode('input')">Input</div>
+                <div class="z-tab toolbar-tab" id="tab-range" onclick="setZoneSubMode('range')">Range</div>
               </div>
 
               <div id="zone-manual-ui">
-                <div
-                  style="font-size:10px; margin-bottom:5px; font-weight:bold; color:#0277bd; display:flex; justify-content:space-between;">
-                  <span>DRAWING...</span>
-                  <span id="zonePtCount">0 pts</span>
+                <div class="toolbar-desc">
+                  Click on the chart to define the point (minimum 3 points required).
                 </div>
-                <div style="margin-top:10px; display:flex; gap:5px;">
-                  <button class="tool-btn btn-primary" style="flex:1" onclick="finishZone()">Finish Zone</button>
-                  <button class="tool-btn btn-danger" style="flex:1" onclick="cancelZone()">Cancel</button>
+                <div id="zonePtCount">0 pts</div>
+                <div class="toolbar-action c2">
+                  <button class="tool-btn btn-primary" onclick="finishZone()">Finish Zone</button>
+                  <button class="tool-btn btn-danger" onclick="cancelZone()">Cancel</button>
                 </div>
               </div>
 
               <div id="zone-input-ui">
-                <div class="modal-header">
-                  <span id="modalTitle">Add Zone Vertex</span>
-                </div>
 
-                <div style="margin-bottom:10px; font-size:11px; color:#666;">
-                  Select two parameters to define the state point.
+                <div class="toolbar-desc">
+                  Define the parameters and fill in their values to determine the point.
                 </div>
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
                   <div>
                     <label>Parameter 1</label>
-                    <select id="p1Type" style="margin-bottom:5px;">
+                    <select id="p1Type-zone" style="margin-bottom:5px;">
                       <option value="Tdb">Dry Bulb Temp (°C)</option>
                       <option value="Twb">Wet Bulb Temp (°C)</option>
                       <option value="RH">Rel. Humidity (%)</option>
                       <option value="W">Humidity Ratio (kg/kg)</option>
                       <option value="h">Enthalpy (kJ/kg)</option>
                     </select>
-                    <input type="number" id="p1Val" step="0.1" placeholder="Value">
+                    <input type="number" id="p1Val-zone" step="0.1" placeholder="Value">
                   </div>
 
                   <div>
                     <label>Parameter 2</label>
-                    <select id="p2Type" style="margin-bottom:5px;">
+                    <select id="p2Type-zone" style="margin-bottom:5px;">
                       <option value="RH" selected="">Rel. Humidity (%)</option>
                       <option value="Tdb">Dry Bulb Temp (°C)</option>
                       <option value="Twb">Wet Bulb Temp (°C)</option>
                       <option value="W">Humidity Ratio (kg/kg)</option>
                       <option value="h">Enthalpy (kJ/kg)</option>
                     </select>
-                    <input type="number" id="p2Val" step="0.1" placeholder="Value">
+                    <input type="number" id="p2Val-zone" step="0.1" placeholder="Value">
                   </div>
                 </div>
 
-                <div style="margin-top:10px; display:flex; gap:5px;">
+                <div class="toolbar-action">
                   <!-- <button class="tool-btn" onclick="closeModal('manualModal')">Cancel</button> -->
                   <button class="tool-btn btn-primary" onclick="submitManualInput('zone')">Add</button>
                 </div>
-
-                <div class="modal-footer">
-                </div>
               </div>
 
-              <div id="zone-range-ui" style="display:none;">
+              <div id="zone-range-ui" style="display: none;">
+                <div class="toolbar-desc">
+                  Define the parameters and move the slider to define the zone.
+                </div>
                 <label>Range 1: Dry Bulb (°C)</label>
                 <div class="range-row" style="display:flex; align-items:center; gap:5px; margin-bottom:10px;">
                   <input type="number" class="range-val" id="rangeTmin" value="20" oninput="updateRangeZone()"
@@ -230,26 +215,78 @@
                   <input type="number" class="range-val" id="rangeP2max" step="0.1" oninput="updateRangeZone()"
                     style="width:40px; text-align:center; font-size:10px;">
                 </div>
-                <div style="margin-top:10px; display:flex; gap:5px;">
-                  <button class="tool-btn btn-primary" style="flex:1" onclick="finishZone()">Finish Zone</button>
-                  <button class="tool-btn btn-danger" style="flex:1" onclick="cancelZone()">Cancel</button>
+                <div class="toolbar-action c2">
+                  <button class="tool-btn btn-primary" onclick="finishZone()">Finish Zone</button>
+                  <button class="tool-btn btn-danger" onclick="cancelZone()">Cancel</button>
+                </div>
+              </div>
+
+            </div>
+
+            <div id="point-controls" class="toolbar-controls" style="display: none;">
+
+              <div class="point-tabs toolbar-tabs">
+                <div class="p-tab active toolbar-tab" id="tab-manual" onclick="setPointSubMode('manual')">Click</div>
+                <div class="p-tab toolbar-tab" id="tab-input" onclick="setPointSubMode('input')">Input</div>
+              </div>
+
+              <div id="point-manual-ui">Click on the graph to place a point.</div>
+
+              <div id="point-input-ui" style="display: none;">
+                <div class="modal-header">
+                  <span id="modalTitle">Add Manual Point</span>
+                </div>
+
+                <div style="margin-bottom:10px; font-size:11px; color:#666;">
+                  Select two parameters to define the state point.
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                  <div>
+                    <label>Parameter 1</label>
+                    <select id="p1Type-point" style="margin-bottom:5px;">
+                      <option value="Tdb">Dry Bulb Temp (°C)</option>
+                      <option value="Twb">Wet Bulb Temp (°C)</option>
+                      <option value="RH">Rel. Humidity (%)</option>
+                      <option value="W">Humidity Ratio (kg/kg)</option>
+                      <option value="h">Enthalpy (kJ/kg)</option>
+                    </select>
+                    <input type="number" id="p1Val-point" step="0.1" placeholder="Value">
+                  </div>
+
+                  <div>
+                    <label>Parameter 2</label>
+                    <select id="p2Type-point" style="margin-bottom:5px;">
+                      <option value="RH" selected="">Rel. Humidity (%)</option>
+                      <option value="Tdb">Dry Bulb Temp (°C)</option>
+                      <option value="Twb">Wet Bulb Temp (°C)</option>
+                      <option value="W">Humidity Ratio (kg/kg)</option>
+                      <option value="h">Enthalpy (kJ/kg)</option>
+                    </select>
+                    <input type="number" id="p2Val-point" step="0.1" placeholder="Value">
+                  </div>
+                </div>
+
+                <div class="modal-footer">
+                  <button class="tool-btn btn-primary" onclick="submitManualInput('point')">Add</button>
                 </div>
               </div>
 
             </div>
 
             <div class="marked-point">
-              <div class="section-title">MARKED POINTS <span class="count-badge" id="count-points">0</span></div>
+              <h4>Marked Points</h4>
+              <span class="count-badge" id="count-points">0</span>
               <div id="list-points"></div>
             </div>
 
             <div class="comfort-zone">
-              <div class="section-title">COMFORT ZONES <span class="count-badge" id="count-zones">0</span></div>
+              <h4>Zones</h4>
+              <span class="count-badge" id="count-zones">0</span>
               <div id="list-zones"></div>
             </div>
 
-            <button class="tool-btn btn-danger" onclick="clearAllData()" style="margin-top:20px;">🗑 Clear All
-              Data</button>
+            <button class="tool-btn btn-danger" onclick="clearAllData()" style="margin-top:20px;">🗑 Clear All Data</button>
           </div>
         </div>
 
@@ -273,106 +310,15 @@
 
       </div>
 
-      <div class="modal-overlay" id="manualModal">
-        <div class="modal-box">
-          <div class="modal-header">
-            <span id="modalTitle">Add Manual Point</span>
-            <span onclick="closeModal('manualModal')" style="cursor:pointer">✕</span>
-          </div>
-
-          <div style="margin-bottom:10px; font-size:11px; color:#666;">
-            Select two parameters to define the state point.
-          </div>
-
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-            <div>
-              <label>Parameter 1</label>
-              <select id="p1Type" style="margin-bottom:5px;">
-                <option value="Tdb">Dry Bulb Temp (°C)</option>
-                <option value="Twb">Wet Bulb Temp (°C)</option>
-                <option value="RH">Rel. Humidity (%)</option>
-                <option value="W">Humidity Ratio (kg/kg)</option>
-                <option value="h">Enthalpy (kJ/kg)</option>
-              </select>
-              <input type="number" id="p1Val" step="0.1" placeholder="Value">
-            </div>
-
-            <div>
-              <label>Parameter 2</label>
-              <select id="p2Type" style="margin-bottom:5px;">
-                <option value="RH" selected>Rel. Humidity (%)</option>
-                <option value="Tdb">Dry Bulb Temp (°C)</option>
-                <option value="Twb">Wet Bulb Temp (°C)</option>
-                <option value="W">Humidity Ratio (kg/kg)</option>
-                <option value="h">Enthalpy (kJ/kg)</option>
-              </select>
-              <input type="number" id="p2Val" step="0.1" placeholder="Value">
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button class="tool-btn" onclick="closeModal('manualModal')">Cancel</button>
-            <button class="tool-btn btn-primary" onclick="submitManualInput()">Add</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-overlay" id="manualModal">
-        <div class="modal-box">
-          <div class="modal-header">
-            <span id="modalTitle">Add Manual Point</span>
-            <span onclick="closeModal('manualModal')" style="cursor:pointer">✕</span>
-          </div>
-
-          <div style="margin-bottom:10px; font-size:11px; color:#666;">
-            Select two parameters to calculate the state.
-          </div>
-
-          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
-            <div>
-              <label>Parameter 1</label>
-              <select id="p1Type" style="margin-bottom:5px;">
-                <option value="Tdb">Dry Bulb (°C)</option>
-                <option value="Twb">Wet Bulb (°C)</option>
-                <option value="RH">Rel. Humidity (%)</option>
-                <option value="W">Hum. Ratio (kg/kg)</option>
-                <option value="h">Enthalpy (kJ/kg)</option>
-              </select>
-              <input type="number" id="p1Val" step="0.1" placeholder="Value">
-            </div>
-
-            <div>
-              <label>Parameter 2</label>
-              <select id="p2Type" style="margin-bottom:5px;">
-                <option value="RH" selected>Rel. Humidity (%)</option>
-                <option value="Tdb">Dry Bulb (°C)</option>
-                <option value="Twb">Wet Bulb (°C)</option>
-                <option value="W">Hum. Ratio (kg/kg)</option>
-                <option value="h">Enthalpy (kJ/kg)</option>
-              </select>
-              <input type="number" id="p2Val" step="0.1" placeholder="Value">
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button class="tool-btn" onclick="closeModal('manualModal')">Cancel</button>
-            <button class="tool-btn btn-primary" onclick="submitManualInput()">Add</button>
-          </div>
-        </div>
-      </div>
-
       <div class="modal-overlay" id="zoneModal">
         <div class="modal-box">
           <div class="modal-header">Edit Zone Settings <span onclick="closeModal('zoneModal')"
               style="cursor:pointer">✕</span></div>
           <input type="hidden" id="editZoneId">
-
           <label>Zone Name</label>
           <input type="text" id="zoneNameInput" style="margin-bottom:15px;">
-
           <label>Zone Color</label>
           <input type="color" id="zoneColorInput" style="margin-bottom:15px;">
-
           <div class="modal-footer">
             <button class="tool-btn" onclick="closeModal('zoneModal')">Cancel</button>
             <button class="tool-btn btn-primary" onclick="saveZoneSettings()">Save Changes</button>
@@ -386,18 +332,14 @@
             <span id="editModalTitle">Edit Item</span>
             <span onclick="closeModal('editModal')" style="float:right;cursor:pointer">✕</span>
           </div>
-
           <input type="hidden" id="editId">
           <input type="hidden" id="editType">
-
           <label>Name</label>
           <input type="text" id="editName" style="margin-bottom:10px;">
-
           <div id="colorContainer">
             <label>Color</label>
             <input type="color" id="editColor" style="margin-bottom:15px; width:100%; height:30px;">
           </div>
-
           <button class="tool-btn btn-primary" onclick="saveSettings()">Save Changes</button>
         </div>
       </div>
