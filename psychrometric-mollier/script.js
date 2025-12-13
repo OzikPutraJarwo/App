@@ -441,7 +441,7 @@ function updateRangeZone() {
     // Validasi semua input range terlebih dahulu
     validateRangeInputs('rangeTmin', 'rangeTmax');
     validateRangeInputs('rangeP2min', 'rangeP2max');
-    
+
   // 1. Sync Inputs Tdb
   ["Tmin", "Tmax"].forEach((k) => {
     const val = parseFloat(document.getElementById("range" + k).value);
@@ -1099,32 +1099,46 @@ function drawChart() {
     });
   }
 
-  // POINTS
-  pointLayer.selectAll("*").remove();
-  State.points.forEach((p, idx) => {
-    const cx = x(p.t),
-      cy = y(p.w);
-    if (cx < 0 || cx > w || cy < 0 || cy > h) return;
-    const c = pointLayer
-      .append("circle")
-      .attr("class", "user-point")
-      .attr("cx", cx)
-      .attr("cy", cy)
-      .attr("r", 6)
-      .on("click", (e) => {
-        e.stopPropagation();
-        selectPoint(p.id);
-      });
-    if (p.id === State.selectedPointId) c.classed("selected", true);
-    pointLayer
-      .append("text")
-      .attr("x", cx + 10)
-      .attr("y", cy + 3)
-      .text(idx + 1)
-      .attr("font-size", "10px")
-      .attr("fill", "#d32f2f")
-      .style("pointer-events", "none");
-  });
+// POINTS
+pointLayer.selectAll("*").remove();
+State.points.forEach((p) => {
+  const cx = x(p.t),
+    cy = y(p.w);
+  if (cx < 0 || cx > w || cy < 0 || cy > h) return;
+  
+  const isSelected = p.id === State.selectedPointId;
+  
+  // Buat group untuk setiap point
+  const pointGroup = pointLayer
+    .append("g")
+    .attr("class", "point-group")
+    .on("click", (e) => {
+      e.stopPropagation();
+      selectPoint(p.id);
+    });
+  
+  // Gambar lingkaran
+  pointGroup
+    .append("circle")
+    .attr("class", isSelected ? "user-point selected" : "user-point")
+    .attr("cx", cx)
+    .attr("cy", cy)
+    .attr("r", isSelected ? 8 : 6);
+  
+  // Tentukan posisi label
+  const labelX = cx > w * 0.8 ? cx - 15 : cx + 10;
+  const labelY = cy < h * 0.2 ? cy + 15 : cy - 5;
+  
+  // Gambar label
+  pointGroup
+    .append("text")
+    .attr("class", isSelected ? "point-label selected" : "point-label")
+    .attr("x", labelX)
+    .attr("y", labelY)
+    .text(p.name)
+    .style("pointer-events", "none")
+    .style("text-anchor", cx > w * 0.8 ? "end" : "start");
+});
 
   overlay
     .on("mousemove", (e) => handleMouseMove(e, x, y, minT, maxT, maxH, Patm))
@@ -1473,6 +1487,3 @@ drawChart();
 window.addEventListener("resize", drawChart);
 
 ////////////////////////////////////////////////////
-
-setMode('zone');
-setZoneSubMode('range');

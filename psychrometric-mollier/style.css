@@ -505,6 +505,14 @@ input, select {
   r: 6;
 }
 
+.point-label {
+  font-size: .6rem
+}
+
+.point-label.selected {
+  font-weight: bold
+}
+
 .user-zone {
   cursor: pointer;
   transition: opacity 0.2s;
