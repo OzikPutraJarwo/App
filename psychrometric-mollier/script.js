@@ -295,6 +295,50 @@ function setupRangeDefaults() {
   updateRangeZone();
 }
 
+function validateRangeInputs(minId, maxId) {
+    const minInput = document.getElementById(minId);
+    const maxInput = document.getElementById(maxId);
+    const minSlider = document.getElementById(minId.replace('range', 'slider'));
+    const maxSlider = document.getElementById(maxId.replace('range', 'slider'));
+    
+    let minVal = parseFloat(minInput.value);
+    let maxVal = parseFloat(maxInput.value);
+    
+    // Validasi agar min tidak melebihi max
+    if (minVal > maxVal) {
+        minVal = maxVal;
+        minInput.value = minVal;
+        if (minSlider) minSlider.value = minVal;
+    }
+    
+    // Validasi agar max tidak kurang dari min
+    if (maxVal < minVal) {
+        maxVal = minVal;
+        maxInput.value = maxVal;
+        if (maxSlider) maxSlider.value = maxVal;
+    }
+    
+    // Pastikan nilai tidak keluar batas
+    const config = RangeConfigs[document.getElementById("rangeParamType").value];
+    if (config) {
+        minVal = Math.max(config.min, Math.min(minVal, config.max));
+        maxVal = Math.max(config.min, Math.min(maxVal, config.max));
+        
+        minInput.value = minVal;
+        maxInput.value = maxVal;
+        if (minSlider) {
+            minSlider.value = minVal;
+            minSlider.min = config.min;
+            minSlider.max = config.max;
+        }
+        if (maxSlider) {
+            maxSlider.value = maxVal;
+            maxSlider.min = config.min;
+            maxSlider.max = config.max;
+        }
+    }
+}
+
 // Panggil ini sekali saat init atau saat masuk mode range
 // (Tambahkan panggilan ini di dalam setZoneSubMode)
 
@@ -350,10 +394,19 @@ function setPointSubMode(subMode) {
 
 // Sinkronisasi Slider <-> Input Angka
 function syncRange(id) {
-  document.getElementById("range" + id).value = document.getElementById(
-    "slider" + id
-  ).value;
-  updateRangeZone();
+    const slider = document.getElementById("slider" + id);
+    const input = document.getElementById("range" + id);
+    
+    input.value = slider.value;
+    
+    // Panggil validasi berdasarkan tipe input
+    if (id.includes('Tmin') || id.includes('Tmax')) {
+        validateRangeInputs('rangeTmin', 'rangeTmax');
+    } else if (id.includes('P2min') || id.includes('P2max')) {
+        validateRangeInputs('rangeP2min', 'rangeP2max');
+    }
+    
+    updateRangeZone();
 }
 
 // Fungsi Sinkronisasi Batas Slider Zone dengan Global Chart Settings
@@ -385,6 +438,10 @@ function syncZoneRangeLimits(globalMin, globalMax) {
 // Menghitung 4 Titik Sudut berdasarkan Range
 // Menghitung Polygon Zona dengan Sisi Melengkung (RH Curve)
 function updateRangeZone() {
+    // Validasi semua input range terlebih dahulu
+    validateRangeInputs('rangeTmin', 'rangeTmax');
+    validateRangeInputs('rangeP2min', 'rangeP2max');
+    
   // 1. Sync Inputs Tdb
   ["Tmin", "Tmax"].forEach((k) => {
     const val = parseFloat(document.getElementById("range" + k).value);
