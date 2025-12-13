@@ -98,7 +98,7 @@
                   <input type="number" id="minTemp" value="-10" oninput="drawChart()">
                 </div>
                 <div class="input-item">
-                  <label>Max Temp (°C) (°C)</label>
+                  <label>Max Temp (°C)</label>
                   <input type="number" id="maxTemp" value="50" oninput="drawChart()">
                 </div>
               </div>
@@ -145,13 +145,13 @@
               <div id="zone-input-ui">
 
                 <div class="toolbar-desc">
-                  Define the parameters and fill in their values to determine the point.
+                  Define the parameters and fill in their values to determine the point (minimum 3 points required).
                 </div>
 
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                <div class="toolbar-type-input">
                   <div>
-                    <label>Parameter 1</label>
-                    <select id="p1Type-zone" style="margin-bottom:5px;">
+                    <label>1st Parameter</label>
+                    <select id="p1Type-zone">
                       <option value="Tdb">Dry Bulb Temp (°C)</option>
                       <option value="Twb">Wet Bulb Temp (°C)</option>
                       <option value="RH">Rel. Humidity (%)</option>
@@ -162,8 +162,8 @@
                   </div>
 
                   <div>
-                    <label>Parameter 2</label>
-                    <select id="p2Type-zone" style="margin-bottom:5px;">
+                    <label>2nd Parameter</label>
+                    <select id="p2Type-zone">
                       <option value="RH" selected="">Rel. Humidity (%)</option>
                       <option value="Tdb">Dry Bulb Temp (°C)</option>
                       <option value="Twb">Wet Bulb Temp (°C)</option>
@@ -174,51 +174,60 @@
                   </div>
                 </div>
 
-                <div class="toolbar-action">
+                <div class="toolbar-action c2">
                   <!-- <button class="tool-btn" onclick="closeModal('manualModal')">Cancel</button> -->
-                  <button class="tool-btn btn-primary" onclick="submitManualInput('zone')">Add</button>
+                  <button class="tool-btn btn-secondary" onclick="submitManualInput('zone')">Add</button>
+                  <button class="tool-btn btn-primary" onclick="finishZone()">Finish Zone</button>
                 </div>
               </div>
 
               <div id="zone-range-ui" style="display: none;">
+
                 <div class="toolbar-desc">
                   Define the parameters and move the slider to define the zone.
                 </div>
-                <label>Range 1: Dry Bulb (°C)</label>
-                <div class="range-row" style="display:flex; align-items:center; gap:5px; margin-bottom:10px;">
-                  <input type="number" class="range-val" id="rangeTmin" value="20" oninput="updateRangeZone()"
-                    style="width:40px; text-align:center; font-size:10px;">
-                  <input type="range" class="range-slider" id="sliderTmin" min="0" max="60" value="20"
-                    oninput="syncRange('Tmin')" style="flex:1; height:4px;">
-                  <input type="range" class="range-slider" id="sliderTmax" min="0" max="60" value="30"
-                    oninput="syncRange('Tmax')" style="flex:1; height:4px;">
-                  <input type="number" class="range-val" id="rangeTmax" value="30" oninput="updateRangeZone()"
-                    style="width:40px; text-align:center; font-size:10px;">
+
+                <div class="toolbar-type-range">
+                  <div>
+                    <div class="title-row">
+                      <label>1st Parameter:</label>
+                      <input type="text" value="Dry Bulb (°C)" disabled>
+                    </div>
+                    <div class="range-row">
+                      <label for="rangeTmin">Min</label>
+                      <input type="range" class="range-slider" id="sliderTmin" min="0" max="60" value="20" oninput="syncRange('Tmin')">
+                      <input type="number" class="range-val" id="rangeTmin" value="20" oninput="updateRangeZone()">
+                      <label for="rangeTmax">Max</label>
+                      <input type="range" class="range-slider" id="sliderTmax" min="0" max="60" value="30" oninput="syncRange('Tmax')">
+                      <input type="number" class="range-val" id="rangeTmax" value="30" oninput="updateRangeZone()">
+                    </div>
+                  </div>
+                  <div>
+                    <div class="title-row">
+                      <label>2nd Parameter:</label>
+                      <select id="rangeParamType" onchange="setupRangeDefaults()">
+                        <option value="RH">Rel. Humidity (%)</option>
+                        <option value="Twb">Wet Bulb (°C)</option>
+                        <option value="h">Enthalpy (kJ/kg)</option>
+                        <option value="v">Spec. Volume (m³/kg)</option>
+                      </select>
+                    </div>
+                    <div class="range-row">
+                      <label for="rangeP2min">Min</label>
+                      <input type="range" class="range-slider" id="sliderP2min" oninput="syncRange('P2min')">
+                      <input type="number" class="range-val" id="rangeP2min" step="0.1" oninput="updateRangeZone()">
+                      <label for="rangeP2max">Max</label>
+                      <input type="range" class="range-slider" id="sliderP2max" oninput="syncRange('P2max')">
+                      <input type="number" class="range-val" id="rangeP2max" step="0.1" oninput="updateRangeZone()">
+                    </div>
+                  </div>
                 </div>
-                <div style="display:flex; justify-content:space-between; align-items:end; margin-bottom:3px;">
-                  <label>Range 2 Parameter:</label>
-                  <select id="rangeParamType" onchange="setupRangeDefaults()"
-                    style="width:110px; padding:2px; font-size:10px;">
-                    <option value="RH">Rel. Humidity (%)</option>
-                    <option value="Twb">Wet Bulb (°C)</option>
-                    <option value="h">Enthalpy (kJ/kg)</option>
-                    <option value="v">Spec. Volume (m³/kg)</option>
-                  </select>
-                </div>
-                <div class="range-row" style="display:flex; align-items:center; gap:5px; margin-bottom:5px;">
-                  <input type="number" class="range-val" id="rangeP2min" step="0.1" oninput="updateRangeZone()"
-                    style="width:40px; text-align:center; font-size:10px;">
-                  <input type="range" class="range-slider" id="sliderP2min" oninput="syncRange('P2min')"
-                    style="flex:1; height:4px;">
-                  <input type="range" class="range-slider" id="sliderP2max" oninput="syncRange('P2max')"
-                    style="flex:1; height:4px;">
-                  <input type="number" class="range-val" id="rangeP2max" step="0.1" oninput="updateRangeZone()"
-                    style="width:40px; text-align:center; font-size:10px;">
-                </div>
+
                 <div class="toolbar-action c2">
                   <button class="tool-btn btn-primary" onclick="finishZone()">Finish Zone</button>
                   <button class="tool-btn btn-danger" onclick="cancelZone()">Cancel</button>
                 </div>
+
               </div>
 
             </div>
@@ -230,21 +239,21 @@
                 <div class="p-tab toolbar-tab" id="tab-input" onclick="setPointSubMode('input')">Input</div>
               </div>
 
-              <div id="point-manual-ui">Click on the graph to place a point.</div>
+              <div id="point-manual-ui">
+                <div class="toolbar-desc">
+                  Click on the chart to define the point.
+                </div>
+              </div>
 
               <div id="point-input-ui" style="display: none;">
-                <div class="modal-header">
-                  <span id="modalTitle">Add Manual Point</span>
+                <div class="toolbar-desc">
+                  Define the parameters and fill in their values to determine the point.
                 </div>
 
-                <div style="margin-bottom:10px; font-size:11px; color:#666;">
-                  Select two parameters to define the state point.
-                </div>
-
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:15px;">
+                <div class="toolbar-type-input">
                   <div>
-                    <label>Parameter 1</label>
-                    <select id="p1Type-point" style="margin-bottom:5px;">
+                    <label>1st Parameter</label>
+                    <select id="p1Type-point">
                       <option value="Tdb">Dry Bulb Temp (°C)</option>
                       <option value="Twb">Wet Bulb Temp (°C)</option>
                       <option value="RH">Rel. Humidity (%)</option>
@@ -255,8 +264,8 @@
                   </div>
 
                   <div>
-                    <label>Parameter 2</label>
-                    <select id="p2Type-point" style="margin-bottom:5px;">
+                    <label>2nd Parameter</label>
+                    <select id="p2Type-point">
                       <option value="RH" selected="">Rel. Humidity (%)</option>
                       <option value="Tdb">Dry Bulb Temp (°C)</option>
                       <option value="Twb">Wet Bulb Temp (°C)</option>
@@ -267,7 +276,7 @@
                   </div>
                 </div>
 
-                <div class="modal-footer">
+                <div class="toolbar-action">
                   <button class="tool-btn btn-primary" onclick="submitManualInput('point')">Add</button>
                 </div>
               </div>
@@ -275,14 +284,18 @@
             </div>
 
             <div class="marked-point">
-              <h4>Marked Points</h4>
-              <span class="count-badge" id="count-points">0</span>
+              <div class="toolbar-head">
+                <h4>Marked Points</h4>
+                <span class="count-badge" id="count-points">0</span>
+              </div>
               <div id="list-points"></div>
             </div>
 
             <div class="comfort-zone">
-              <h4>Zones</h4>
-              <span class="count-badge" id="count-zones">0</span>
+              <div class="toolbar-head">
+                <h4>Zones</h4>
+                <span class="count-badge" id="count-zones">0</span>
+              </div>
               <div id="list-zones"></div>
             </div>
 

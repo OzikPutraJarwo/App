@@ -543,17 +543,17 @@ function updateLists() {
         (p, i) => `
         <div class="list-item ${
           p.id === State.selectedPointId ? "active" : ""
-        }" onclick="selectPoint(${p.id})">
-            <div class="item-header">
+        }">
+            <div class="item-header" onclick="selectPoint(${p.id})">
                 <div class="id-circle">${i + 1}</div>
                 <div class="item-name">${p.name}</div>
                 <div class="item-actions">
-                    <button class="icon-btn" onclick="openEditModal('point', ${
-                      p.id
-                    })">⚙️</button>
-                    <button class="icon-btn btn-delete" onclick="deletePoint(event, ${
-                      p.id
-                    })">🗑</button>
+                    <div class="icon-btn" onclick="openEditModal('point', ${p.id})">
+                      <img src="../icon/gear.png">
+                    </div>
+                    <div class="icon-btn btn-delete" onclick="deletePoint(event, ${p.id})">
+                      <img src="../icon/trash.png">
+                    </div>
                 </div>
             </div>
             <div class="item-details">${generateHTMLGrid(p.data)}</div>
@@ -581,12 +581,12 @@ function updateLists() {
         }</div>
                 <div class="item-name">${z.name}</div>
                 <div class="item-actions">
-                    <button class="icon-btn" onclick="openEditModal('zone', ${
-                      z.id
-                    })">⚙️</button>
-                    <button class="icon-btn btn-delete" onclick="deleteZone(event, ${
-                      z.id
-                    })">🗑</button>
+                    <div class="icon-btn" onclick="openEditModal('zone', ${z.id})">
+                      <img src="../icon/gear.png">
+                    </div>
+                    <div class="icon-btn btn-delete" onclick="deleteZone(event, ${z.id})">
+                      <img src="../icon/trash.png">
+                    </div>
                 </div>
             </div>
         </div>`
@@ -1418,3 +1418,4 @@ window.addEventListener("resize", drawChart);
 ////////////////////////////////////////////////////
 
 setMode('zone');
+setZoneSubMode('range');

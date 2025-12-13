@@ -17,7 +17,9 @@
 
 .controls-scroll {
   overflow-y: auto;
-  height: calc(100dvh - 65px - 4rem - 3rem);
+  height: calc(100dvh - 65px - 4rem);
+  margin: -1.5rem;
+  padding: 1.5rem;
 }
 
 /* Typography & Inputs */
@@ -30,19 +32,12 @@
 
 label {
   display: block;
-  font-size: .7rem;
-  margin-bottom: 3px;
-}
-
-input[type="number"],
-input[type="text"] {
-  padding: .5rem .75rem;
   font-size: .8rem;
+  margin-bottom: .25rem;
 }
 
-input:focus {
-  border-color: #2196f3;
-  outline: none;
+input, select {
+  font-size: .8rem;
 }
 
 /* INPUT GROUPS */
@@ -62,12 +57,6 @@ input:focus {
   gap: 1rem;
 }
 
-/* SECTION CONTROL */
-
-.controls-section h4 {
-  margin-bottom: 1rem;
-}
-
 /* TOOLBAR BUTTONS */
 
 .toolbar {
@@ -76,10 +65,17 @@ input:focus {
   margin-top: 1.25rem;
 }
 
+.toolbar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .toolbar-button {
   display: grid;
   gap: 1rem;
   grid-template-columns: 1fr 1fr 1fr;
+  margin-top: 1rem;
 }
 
 .tool-btn {
@@ -129,6 +125,16 @@ input:focus {
   background: var(--blue);
 }
 
+.btn-secondary {
+  background: var(--green-hover);
+  color: white;
+  border: none;
+}
+
+.btn-secondary:hover {
+  background: var(--green);
+}
+
 .zone-tabs, .point-tabs {
   display: flex;
   gap: .5rem;
@@ -163,7 +169,6 @@ input:focus {
 }
 
 .toolbar-desc {
-  margin-bottom: 1rem;;
   font-size: .75rem;
   color: #666;
 }
@@ -171,10 +176,85 @@ input:focus {
 .toolbar-action {
   display: grid;
   gap: .5rem;
+  margin-top: 1rem;
 }
 
 .toolbar-action.c2 {
   grid-template-columns: 1fr 1fr;
+}
+
+/* --- Point --- */
+
+#list-points, #list-zones {
+  margin-top: 1rem;
+}
+
+/* --- Input --- */
+
+.toolbar-type-input {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.toolbar-type-input select {
+  padding: .4rem .2rem;
+  border-radius: .25rem;
+  font-size: .7rem;
+  margin: .5rem 0;
+}
+
+.toolbar-type-input input {
+  padding: .4rem;
+  border-radius: .25rem;
+  font-size: .7rem
+}
+
+/* --- Range --- */
+
+.toolbar-type-range {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.title-row {
+  display: grid;
+  grid-template-columns: 110px auto;
+  align-items: center;
+}
+
+.title-row input, .title-row select {
+  padding: .3rem .5rem;
+  border-radius: .25rem;
+  font-size: .8rem
+}
+
+.title-row input:disabled {
+  color: var(--text);
+}
+
+.range-row {
+  display: grid;
+  grid-template-columns: 30px 1fr 50px;
+  gap: .5rem;
+  align-items: center;
+  line-height: 0;
+  margin-top: 1rem;
+}
+
+.range-row input[type="range"] {
+  padding: 0;
+  background: unset;
+  box-shadow: none !important;
+}
+
+.range-row input[type="number"] {
+  padding: .2rem;
+  font-size: .7rem;
+  text-align: right;
+  border-radius: .3rem;
 }
 
 /* --- Zone --- */
@@ -182,7 +262,7 @@ input:focus {
 #zonePtCount {
   font-weight: bold;
   font-size: .9rem;
-  margin-bottom: 1rem;
+  margin-top: 1rem;
 }
 
 /* LIST ITEMS (Points & Zones) */
@@ -206,7 +286,6 @@ input:focus {
   border: 1px solid #eceff1;
   border-radius: 5px;
   margin-bottom: 6px;
-  cursor: pointer;
   transition: all 0.2s;
   font-size: 11px;
   position: relative;
@@ -229,6 +308,7 @@ input:focus {
   align-items: center;
   padding: 8px;
   justify-content: space-between;
+  cursor: pointer;
 }
 
 .id-circle {
@@ -256,21 +336,25 @@ input:focus {
 
 .item-actions {
   display: flex;
-  gap: 4px;
+  gap: .5rem;
+  line-height: 0;
 }
 
 .icon-btn {
   background: none;
   border: none;
   cursor: pointer;
-  opacity: 0.5;
-  padding: 2px;
-  font-size: 14px;
+  opacity: 0.3;
+  transition: .2s all;
 }
 
 .icon-btn:hover {
   opacity: 1;
   transform: scale(1.1);
+}
+
+.icon-btn img {
+  width: 17px;
 }
 
 /* Expanded Details */
