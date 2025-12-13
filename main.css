@@ -184,10 +184,19 @@ input:focus, select:focus, textarea:focus {
 }
 
 input[type="color"] {
-  height: 2rem;
+  height: 1.75rem;
+  border-radius: .5rem;
   cursor: pointer;
   padding: 0;
   background: 0 0;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+	padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+	border: none;
 }
 
 select {
@@ -446,6 +455,33 @@ header {
 
 .popup-close:hover {
   scale: 1.2;
+}
+
+.popup-content {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+
+.popup-action {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1f;
+  gap: 1rem;
+}
+
+.popup-btn {
+  background-color: var(--blue);
+  color: white;
+  padding: .75rem;
+  font-size: .9rem;
+  border-radius: .5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: .2s all;
+}
+
+.popup-btn:hover {
+  background-color: var(--blue-hover);
 }
 
 main {

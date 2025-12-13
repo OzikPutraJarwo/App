@@ -252,7 +252,7 @@ function calculateAllProperties(t, w, Patm) {
     cp: 1.006 + 1.86 * w,
     Wsat: Wsat,
     VPD: vpdVal,
-    HD: hdVal
+    HD: hdVal,
   };
 }
 
@@ -296,47 +296,47 @@ function setupRangeDefaults() {
 }
 
 function validateRangeInputs(minId, maxId) {
-    const minInput = document.getElementById(minId);
-    const maxInput = document.getElementById(maxId);
-    const minSlider = document.getElementById(minId.replace('range', 'slider'));
-    const maxSlider = document.getElementById(maxId.replace('range', 'slider'));
-    
-    let minVal = parseFloat(minInput.value);
-    let maxVal = parseFloat(maxInput.value);
-    
-    // Validasi agar min tidak melebihi max
-    if (minVal > maxVal) {
-        minVal = maxVal;
-        minInput.value = minVal;
-        if (minSlider) minSlider.value = minVal;
+  const minInput = document.getElementById(minId);
+  const maxInput = document.getElementById(maxId);
+  const minSlider = document.getElementById(minId.replace("range", "slider"));
+  const maxSlider = document.getElementById(maxId.replace("range", "slider"));
+
+  let minVal = parseFloat(minInput.value);
+  let maxVal = parseFloat(maxInput.value);
+
+  // Validasi agar min tidak melebihi max
+  if (minVal > maxVal) {
+    minVal = maxVal;
+    minInput.value = minVal;
+    if (minSlider) minSlider.value = minVal;
+  }
+
+  // Validasi agar max tidak kurang dari min
+  if (maxVal < minVal) {
+    maxVal = minVal;
+    maxInput.value = maxVal;
+    if (maxSlider) maxSlider.value = maxVal;
+  }
+
+  // Pastikan nilai tidak keluar batas
+  const config = RangeConfigs[document.getElementById("rangeParamType").value];
+  if (config) {
+    minVal = Math.max(config.min, Math.min(minVal, config.max));
+    maxVal = Math.max(config.min, Math.min(maxVal, config.max));
+
+    minInput.value = minVal;
+    maxInput.value = maxVal;
+    if (minSlider) {
+      minSlider.value = minVal;
+      minSlider.min = config.min;
+      minSlider.max = config.max;
     }
-    
-    // Validasi agar max tidak kurang dari min
-    if (maxVal < minVal) {
-        maxVal = minVal;
-        maxInput.value = maxVal;
-        if (maxSlider) maxSlider.value = maxVal;
+    if (maxSlider) {
+      maxSlider.value = maxVal;
+      maxSlider.min = config.min;
+      maxSlider.max = config.max;
     }
-    
-    // Pastikan nilai tidak keluar batas
-    const config = RangeConfigs[document.getElementById("rangeParamType").value];
-    if (config) {
-        minVal = Math.max(config.min, Math.min(minVal, config.max));
-        maxVal = Math.max(config.min, Math.min(maxVal, config.max));
-        
-        minInput.value = minVal;
-        maxInput.value = maxVal;
-        if (minSlider) {
-            minSlider.value = minVal;
-            minSlider.min = config.min;
-            minSlider.max = config.max;
-        }
-        if (maxSlider) {
-            maxSlider.value = maxVal;
-            maxSlider.min = config.min;
-            maxSlider.max = config.max;
-        }
-    }
+  }
 }
 
 // Panggil ini sekali saat init atau saat masuk mode range
@@ -350,7 +350,8 @@ function setZoneSubMode(subMode) {
     t.style.color = "#1565c0";
     t.classList.remove("active");
   });
-  document.querySelector(".zone-tabs #tab-" + subMode).style.background = "#2196f3";
+  document.querySelector(".zone-tabs #tab-" + subMode).style.background =
+    "#2196f3";
   document.querySelector(".zone-tabs #tab-" + subMode).style.color = "white";
   document.querySelector(".zone-tabs #tab-" + subMode).classList.add("active");
 
@@ -368,7 +369,7 @@ function setZoneSubMode(subMode) {
   if (subMode === "range") {
     State.tempZone = [];
     updateZonePtCount();
-    setupRangeDefaults(); 
+    setupRangeDefaults();
   } else {
     State.rangePreview = [];
     drawChart();
@@ -382,7 +383,8 @@ function setPointSubMode(subMode) {
     t.style.color = "#1565c0";
     t.classList.remove("active");
   });
-  document.querySelector(".point-tabs #tab-" + subMode).style.background = "#2196f3";
+  document.querySelector(".point-tabs #tab-" + subMode).style.background =
+    "#2196f3";
   document.querySelector(".point-tabs #tab-" + subMode).style.color = "white";
   document.querySelector(".point-tabs #tab-" + subMode).classList.add("active");
 
@@ -394,53 +396,53 @@ function setPointSubMode(subMode) {
 
 // Sinkronisasi Slider <-> Input Angka
 function syncRange(id) {
-    const slider = document.getElementById("slider" + id);
-    const input = document.getElementById("range" + id);
-    
-    input.value = slider.value;
-    
-    // Panggil validasi berdasarkan tipe input
-    if (id.includes('Tmin') || id.includes('Tmax')) {
-        validateRangeInputs('rangeTmin', 'rangeTmax');
-    } else if (id.includes('P2min') || id.includes('P2max')) {
-        validateRangeInputs('rangeP2min', 'rangeP2max');
-    }
-    
-    updateRangeZone();
+  const slider = document.getElementById("slider" + id);
+  const input = document.getElementById("range" + id);
+
+  input.value = slider.value;
+
+  // Panggil validasi berdasarkan tipe input
+  if (id.includes("Tmin") || id.includes("Tmax")) {
+    validateRangeInputs("rangeTmin", "rangeTmax");
+  } else if (id.includes("P2min") || id.includes("P2max")) {
+    validateRangeInputs("rangeP2min", "rangeP2max");
+  }
+
+  updateRangeZone();
 }
 
 // Fungsi Sinkronisasi Batas Slider Zone dengan Global Chart Settings
 function syncZoneRangeLimits(globalMin, globalMax) {
-    const ids = ['rangeTmin', 'sliderTmin', 'rangeTmax', 'sliderTmax'];
-    
-    ids.forEach(id => {
-        const el = document.getElementById(id);
-        // 1. Update batas slider (HTML attributes)
-        el.min = globalMin;
-        el.max = globalMax;
+  const ids = ["rangeTmin", "sliderTmin", "rangeTmax", "sliderTmax"];
 
-        // 2. Koreksi nilai jika saat ini nilainya di luar batas baru
-        let val = parseFloat(el.value);
-        if (val < globalMin) el.value = globalMin;
-        if (val > globalMax) el.value = globalMax;
-    });
+  ids.forEach((id) => {
+    const el = document.getElementById(id);
+    // 1. Update batas slider (HTML attributes)
+    el.min = globalMin;
+    el.max = globalMax;
 
-    // Update preview jika sedang dalam mode range
-    if (State.zoneSubMode === 'range') {
-        // Kita panggil updateRangeZone agar polygon preview menyesuaikan diri
-        // Tapi kita panggil secara 'silent' agar tidak loop infinite drawChart
-        // Cukup update variable State.rangePreview nya saja lewat logika di dalamnya
-        // Namun, cara teraman adalah membiarkan drawChart menanganinya di frame berikutnya
-        // atau cukup biarkan visual slidernya berubah.
-    }
+    // 2. Koreksi nilai jika saat ini nilainya di luar batas baru
+    let val = parseFloat(el.value);
+    if (val < globalMin) el.value = globalMin;
+    if (val > globalMax) el.value = globalMax;
+  });
+
+  // Update preview jika sedang dalam mode range
+  if (State.zoneSubMode === "range") {
+    // Kita panggil updateRangeZone agar polygon preview menyesuaikan diri
+    // Tapi kita panggil secara 'silent' agar tidak loop infinite drawChart
+    // Cukup update variable State.rangePreview nya saja lewat logika di dalamnya
+    // Namun, cara teraman adalah membiarkan drawChart menanganinya di frame berikutnya
+    // atau cukup biarkan visual slidernya berubah.
+  }
 }
 
 // Menghitung 4 Titik Sudut berdasarkan Range
 // Menghitung Polygon Zona dengan Sisi Melengkung (RH Curve)
 function updateRangeZone() {
-    // Validasi semua input range terlebih dahulu
-    validateRangeInputs('rangeTmin', 'rangeTmax');
-    validateRangeInputs('rangeP2min', 'rangeP2max');
+  // Validasi semua input range terlebih dahulu
+  validateRangeInputs("rangeTmin", "rangeTmax");
+  validateRangeInputs("rangeP2min", "rangeP2max");
 
   // 1. Sync Inputs Tdb
   ["Tmin", "Tmax"].forEach((k) => {
@@ -549,10 +551,6 @@ function openManualModal(target) {
   document.getElementById("manualModal").style.display = "flex";
 }
 
-function closeModal(id) {
-  document.getElementById(id).style.display = "none";
-}
-
 function submitManualInput(target) {
   State.targetForManual = target;
   const p1Type = document.getElementById("p1Type-" + target).value;
@@ -585,7 +583,6 @@ function submitManualInput(target) {
     updateZonePtCount();
     drawChart();
   }
-  // closeModal("manualModal");
 }
 
 // --- LIST & CRUD ---
@@ -605,10 +602,14 @@ function updateLists() {
                 <div class="id-circle">${i + 1}</div>
                 <div class="item-name">${p.name}</div>
                 <div class="item-actions">
-                    <div class="icon-btn" onclick="openEditModal('point', ${p.id})">
+                    <div class="icon-btn" onclick="openEditModal('point', ${
+                      p.id
+                    })">
                       <img src="../icon/gear.png">
                     </div>
-                    <div class="icon-btn btn-delete" onclick="deletePoint(event, ${p.id})">
+                    <div class="icon-btn btn-delete" onclick="deletePoint(event, ${
+                      p.id
+                    })">
                       <img src="../icon/trash.png">
                     </div>
                 </div>
@@ -638,10 +639,14 @@ function updateLists() {
         }</div>
                 <div class="item-name">${z.name}</div>
                 <div class="item-actions">
-                    <div class="icon-btn" onclick="openEditModal('zone', ${z.id})">
+                    <div class="icon-btn" onclick="openEditModal('zone', ${
+                      z.id
+                    })">
                       <img src="../icon/gear.png">
                     </div>
-                    <div class="icon-btn btn-delete" onclick="deleteZone(event, ${z.id})">
+                    <div class="icon-btn btn-delete" onclick="deleteZone(event, ${
+                      z.id
+                    })">
                       <img src="../icon/trash.png">
                     </div>
                 </div>
@@ -722,7 +727,8 @@ function openEditModal(type, id) {
     colorContainer.style.display = "block";
   }
 
-  document.getElementById("editModal").style.display = "flex";
+  document.querySelector(".editModal").style.display = "grid";
+  document.querySelector(".editModal").style.opacity = "1";
 }
 
 function saveSettings() {
@@ -744,7 +750,6 @@ function saveSettings() {
 
   updateLists();
   drawChart();
-  closeModal("editModal");
 }
 
 function finishZone() {
@@ -1099,46 +1104,46 @@ function drawChart() {
     });
   }
 
-// POINTS
-pointLayer.selectAll("*").remove();
-State.points.forEach((p) => {
-  const cx = x(p.t),
-    cy = y(p.w);
-  if (cx < 0 || cx > w || cy < 0 || cy > h) return;
-  
-  const isSelected = p.id === State.selectedPointId;
-  
-  // Buat group untuk setiap point
-  const pointGroup = pointLayer
-    .append("g")
-    .attr("class", "point-group")
-    .on("click", (e) => {
-      e.stopPropagation();
-      selectPoint(p.id);
-    });
-  
-  // Gambar lingkaran
-  pointGroup
-    .append("circle")
-    .attr("class", isSelected ? "user-point selected" : "user-point")
-    .attr("cx", cx)
-    .attr("cy", cy)
-    .attr("r", isSelected ? 8 : 6);
-  
-  // Tentukan posisi label
-  const labelX = cx > w * 0.8 ? cx - 15 : cx + 10;
-  const labelY = cy < h * 0.2 ? cy + 15 : cy - 5;
-  
-  // Gambar label
-  pointGroup
-    .append("text")
-    .attr("class", isSelected ? "point-label selected" : "point-label")
-    .attr("x", labelX)
-    .attr("y", labelY)
-    .text(p.name)
-    .style("pointer-events", "none")
-    .style("text-anchor", cx > w * 0.8 ? "end" : "start");
-});
+  // POINTS
+  pointLayer.selectAll("*").remove();
+  State.points.forEach((p) => {
+    const cx = x(p.t),
+      cy = y(p.w);
+    if (cx < 0 || cx > w || cy < 0 || cy > h) return;
+
+    const isSelected = p.id === State.selectedPointId;
+
+    // Buat group untuk setiap point
+    const pointGroup = pointLayer
+      .append("g")
+      .attr("class", "point-group")
+      .on("click", (e) => {
+        e.stopPropagation();
+        selectPoint(p.id);
+      });
+
+    // Gambar lingkaran
+    pointGroup
+      .append("circle")
+      .attr("class", isSelected ? "user-point selected" : "user-point")
+      .attr("cx", cx)
+      .attr("cy", cy)
+      .attr("r", isSelected ? 8 : 6);
+
+    // Tentukan posisi label
+    const labelX = cx > w * 0.8 ? cx - 15 : cx + 10;
+    const labelY = cy < h * 0.2 ? cy + 15 : cy - 5;
+
+    // Gambar label
+    pointGroup
+      .append("text")
+      .attr("class", isSelected ? "point-label selected" : "point-label")
+      .attr("x", labelX)
+      .attr("y", labelY)
+      .text(p.name)
+      .style("pointer-events", "none")
+      .style("text-anchor", cx > w * 0.8 ? "end" : "start");
+  });
 
   overlay
     .on("mousemove", (e) => handleMouseMove(e, x, y, minT, maxT, maxH, Patm))
@@ -1487,3 +1492,5 @@ drawChart();
 window.addEventListener("resize", drawChart);
 
 ////////////////////////////////////////////////////
+
+// popupShow(".editModal");

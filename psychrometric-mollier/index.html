@@ -195,10 +195,12 @@
                     </div>
                     <div class="range-row">
                       <label for="rangeTmin">Min</label>
-                      <input type="range" class="range-slider" id="sliderTmin" min="0" max="60" value="20" oninput="syncRange('Tmin')">
+                      <input type="range" class="range-slider" id="sliderTmin" min="0" max="60" value="20"
+                        oninput="syncRange('Tmin')">
                       <input type="number" class="range-val" id="rangeTmin" value="20" oninput="updateRangeZone()">
                       <label for="rangeTmax">Max</label>
-                      <input type="range" class="range-slider" id="sliderTmax" min="0" max="60" value="30" oninput="syncRange('Tmax')">
+                      <input type="range" class="range-slider" id="sliderTmax" min="0" max="60" value="30"
+                        oninput="syncRange('Tmax')">
                       <input type="number" class="range-val" id="rangeTmax" value="30" oninput="updateRangeZone()">
                     </div>
                   </div>
@@ -299,7 +301,8 @@
               <div id="list-zones"></div>
             </div>
 
-            <button class="tool-btn btn-danger" onclick="clearAllData()" style="margin-top:20px;">🗑 Clear All Data</button>
+            <button class="tool-btn btn-danger" onclick="clearAllData()" style="margin-top:20px;">🗑 Clear All
+              Data</button>
           </div>
         </div>
 
@@ -312,38 +315,33 @@
           </div>
         </div>
 
-        <div id="popup" class="test">
+        <div id="popup" class="no-click-close editModal">
           <div class="popup">
             <div class="popup-wrap">
-              <div class="popup-title">Test</div>
-              <div class="popup-content">Test content</div>
+              <div class="popup-title" id="editModalTitle">Edit Item</div>
+              <div class="popup-content">
+                <input type="hidden" id="editId">
+                <input type="hidden" id="editType">
+                <label>Name</label>
+                <input type="text" id="editName">
+                <div id="colorContainer">
+                  <label>Color</label>
+                  <input type="color" id="editColor">
+                </div>
+              </div>
+              <div class="popup-action">
+                <div class="popup-btn blue" onclick="saveSettings();popupClose(this)">Save Changes</div>
+              </div>
             </div>
           </div>
         </div>
 
       </div>
 
-      <div class="modal-overlay" id="zoneModal">
-        <div class="modal-box">
-          <div class="modal-header">Edit Zone Settings <span onclick="closeModal('zoneModal')"
-              style="cursor:pointer">✕</span></div>
-          <input type="hidden" id="editZoneId">
-          <label>Zone Name</label>
-          <input type="text" id="zoneNameInput" style="margin-bottom:15px;">
-          <label>Zone Color</label>
-          <input type="color" id="zoneColorInput" style="margin-bottom:15px;">
-          <div class="modal-footer">
-            <button class="tool-btn" onclick="closeModal('zoneModal')">Cancel</button>
-            <button class="tool-btn btn-primary" onclick="saveZoneSettings()">Save Changes</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-overlay" id="editModal">
+      <!-- <div class="modal-overlay" id="editModal">
         <div class="modal-box">
           <div style="font-weight:bold; margin-bottom:10px;">
             <span id="editModalTitle">Edit Item</span>
-            <span onclick="closeModal('editModal')" style="float:right;cursor:pointer">✕</span>
           </div>
           <input type="hidden" id="editId">
           <input type="hidden" id="editType">
@@ -355,18 +353,19 @@
           </div>
           <button class="tool-btn btn-primary" onclick="saveSettings()">Save Changes</button>
         </div>
-      </div>
+      </div> -->
 
     </main>
 
-    <script src="./script.js"></script>
-
+    
     <div id="notification"></div>
-
+    
     <script src="../main.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
     <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
 
+    <script src="./script.js"></script>
+    
   </body>
 
 </html>
