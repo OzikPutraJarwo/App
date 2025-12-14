@@ -19,6 +19,7 @@ const chart_margin_top = 35,
 // ==========================================
 
 const State = {
+  chartType: "psychrometric", // 'psychrometric' atau 'mollier'
   mode: "view",
   points: [],
   zones: [],
@@ -260,6 +261,35 @@ function calculateAllProperties(t, w, Patm) {
 // 2. UI HANDLERS
 // ==========================================
 
+function changeChartType(type) {
+  State.chartType = type;
+  drawChart();
+
+  // Update label sumbu sesuai tipe chart
+  updateAxisLabels();
+
+  if (State.chartType === "psychrometric") {
+    document.querySelector(".chart-type .psychrometric").classList.add("active");
+    document.querySelector(".chart-type .mollier").classList.remove("active");
+  } else {
+    document.querySelector(".chart-type .mollier").classList.add("active");
+    document.querySelector(".chart-type .psychrometric").classList.remove("active");
+  }
+}
+
+function updateAxisLabels() {
+  const axisLabelX = document.querySelector(".axis-label.x");
+  const axisLabelY = document.querySelector(".axis-label.y");
+
+  if (State.chartType === "psychrometric") {
+    if (axisLabelX) axisLabelX.textContent = "Dry Bulb Temperature (°C)";
+    if (axisLabelY) axisLabelY.textContent = "Humidity Ratio (kg/kg)";
+  } else {
+    if (axisLabelX) axisLabelX.textContent = "Humidity Ratio (kg/kg)";
+    if (axisLabelY) axisLabelY.textContent = "Dry Bulb Temperature (°C)";
+  }
+}
+
 // Konfigurasi batas slider untuk tiap parameter
 const RangeConfigs = {
   RH: { min: 0, max: 100, step: 1, defMin: 30, defMax: 70 },
@@ -406,8 +436,8 @@ function syncRange(id) {
   if (id.includes("Tmin") || id.includes("Tmax")) {
     validateRangeInputs("rangeTmin", "rangeTmax", "Tdb");
   } else if (id.includes("P2min") || id.includes("P2max")) {
-const type = document.getElementById("rangeParamType").value;
-validateRangeInputs("rangeP2min", "rangeP2max", type);
+    const type = document.getElementById("rangeParamType").value;
+    validateRangeInputs("rangeP2min", "rangeP2max", type);
   }
 
   updateRangeZone();
@@ -443,9 +473,9 @@ function syncZoneRangeLimits(globalMin, globalMax) {
 // Menghitung Polygon Zona dengan Sisi Melengkung (RH Curve)
 function updateRangeZone() {
   // Validasi semua input range terlebih dahulu
-validateRangeInputs("rangeTmin", "rangeTmax", "Tdb");
-const type = document.getElementById("rangeParamType").value;
-validateRangeInputs("rangeP2min", "rangeP2max", type);
+  validateRangeInputs("rangeTmin", "rangeTmax", "Tdb");
+  const type = document.getElementById("rangeParamType").value;
+  validateRangeInputs("rangeP2min", "rangeP2max", type);
 
   // 1. Sync Inputs Tdb
   ["Tmin", "Tmax"].forEach((k) => {
@@ -859,6 +889,7 @@ function drawChart() {
 
   d3.select("#chart-clip rect").attr("width", w).attr("height", h);
 
+  // Validasi input
   const minTInput = document.getElementById("minTemp");
   if (parseFloat(minTInput.value) < min_tdb) {
     minTInput.value = min_tdb;
@@ -876,7 +907,7 @@ function drawChart() {
     maxTInput.value = parseFloat(minTInput.value) + 1;
   }
 
-  // Ambil nilai setelah divalidasi
+  // Ambil nilai
   const minT = parseFloat(document.getElementById("minTemp").value);
   const maxT = parseFloat(maxTInput.value);
   const maxH = parseFloat(document.getElementById("maxHum").value);
@@ -884,79 +915,260 @@ function drawChart() {
 
   syncZoneRangeLimits(minT, maxT);
 
-  const x = d3.scaleLinear().domain([minT, maxT]).range([0, w]);
-  const y = d3.scaleLinear().domain([0, maxH]).range([h, 0]);
-  const line = d3
-    .line()
-    .x((d) => x(d.t))
-    .y((d) => y(d.w));
-  const curve = d3
-    .line()
-    .x((d) => x(d.t))
-    .y((d) => y(d.w))
-    .curve(d3.curveMonotoneX);
+  // Tentukan skala berdasarkan tipe chart
+  let x, y;
+  if (State.chartType === "psychrometric") {
+    // Psychrometric: x = DBT, y = W
+    x = d3.scaleLinear().domain([minT, maxT]).range([0, w]);
+    y = d3.scaleLinear().domain([0, maxH]).range([h, 0]);
+  } else {
+    // Mollier: x = W, y = DBT (dibalik)
+    x = d3.scaleLinear().domain([0, maxH]).range([0, w]);
+    y = d3.scaleLinear().domain([minT, maxT]).range([h, 0]);
+  }
+
+  // Fungsi line untuk drawing
+  const line =
+    State.chartType === "psychrometric"
+      ? d3
+          .line()
+          .x((d) => x(d.t))
+          .y((d) => y(d.w))
+      : d3
+          .line()
+          .x((d) => x(d.w))
+          .y((d) => y(d.t));
+
+  const curve =
+    State.chartType === "psychrometric"
+      ? d3
+          .line()
+          .x((d) => x(d.t))
+          .y((d) => y(d.w))
+          .curve(d3.curveMonotoneX)
+      : d3
+          .line()
+          .x((d) => x(d.w))
+          .y((d) => y(d.t))
+          .curve(d3.curveMonotoneX);
 
   // GRID & AXES
   axesLayer.selectAll("*").remove();
+
+  // X-axis (bawah)
   axesLayer
     .append("g")
     .attr("transform", `translate(0,${h})`)
     .call(d3.axisBottom(x).ticks(10).tickSize(-h))
     .selectAll("line")
     .attr("class", "grid-line");
+
+  // Y-axis (kiri)
   axesLayer
     .append("g")
     .call(d3.axisLeft(y).ticks(10).tickSize(-w))
     .selectAll("line")
     .attr("class", "grid-line");
-  // Dry Bulb Temp (x)
-  axesLayer
-    .append("text")
-    .attr("class", "axis-label")
-    .attr("x", w / 2)
-    .attr("y", h + 45)
-    .text("Dry Bulb Temperature (°C)");
-  // Humidity Ratio (y)
-  axesLayer
-    .append("text")
-    .attr("class", "axis-label")
-    .attr("transform", "rotate(-90)")
-    .attr("x", -h / 2)
-    .attr("y", -45)
-    .text("Humidity Ratio (kg/kg)");
-  // // Relative Humidity (red)
-  // axesLayer.append("text")
-  //   .attr("x", h / 2).attr("y", -w - 35)
-  //   .attr("transform", "rotate(90)")
-  //   .attr("text-anchor", "end")
-  //   .attr("class", "label-text rh-text")
-  //   .text("Relative Humidity (%)");
-  // // Enthalpy (purple)
-  // axesLayer.append("text")
-  //   .attr("x", 0).attr("y", -w - 35)
-  //   .attr("transform", "rotate(90)")
-  //   .style("text-anchor", "start")
-  //   .attr("text-anchor", "end")
-  //   .attr("class", "label-text h-text")
-  //   .text("Enthalpy (kJ/kg)");
-  // // Wet Bulb Temp (green)
-  // axesLayer.append("text")
-  //   .attr("x", h).attr("y", -w - 35)
-  //   .attr("transform", "rotate(90)")
-  //   .attr("text-anchor", "end")
-  //   .attr("class", "label-text wb-text")
-  //   .text("Wet Bulb Temp (°C)");
-  // // Specific Volume (yellow)
-  // axesLayer.append("text")
-  //   .attr("class", "axis-label")
-  //   .attr("x", w)
-  //   .attr("y", h + 45)
-  //   .attr("text-anchor", "end")
-  //   .attr("class", "label-text v-text")
-  //   .text("Specific Volume (m³/kg)");
 
-  // ================= MULAI SISIPAN LEGEND =================
-  const legG = axesLayer.append("g").attr("transform", `translate(10, 10)`);
+  // Label sumbu berdasarkan tipe chart
+  if (State.chartType === "psychrometric") {
+    // Psychrometric labels
+    axesLayer
+      .append("text")
+      .attr("class", "axis-label x")
+      .attr("x", w / 2)
+      .attr("y", h + 45)
+      .text("Dry Bulb Temperature (°C)");
+    axesLayer
+      .append("text")
+      .attr("class", "axis-label y")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -h / 2)
+      .attr("y", -45)
+      .text("Humidity Ratio (kg/kg)");
+  } else {
+    // Mollier labels
+    axesLayer
+      .append("text")
+      .attr("class", "axis-label x")
+      .attr("x", w / 2)
+      .attr("y", h + 45)
+      .text("Humidity Ratio (kg/kg)");
+    axesLayer
+      .append("text")
+      .attr("class", "axis-label y")
+      .attr("transform", "rotate(-90)")
+      .attr("x", -h / 2)
+      .attr("y", -45)
+      .text("Dry Bulb Temperature (°C)");
+  }
+
+  // PSYCHRO LINES & LABELS
+  linesLayer.selectAll("*").remove();
+  labelLayer.selectAll("*").remove();
+  drawPsychroLines(
+    linesLayer,
+    labelLayer,
+    x,
+    y,
+    w,
+    h,
+    minT,
+    maxT,
+    maxH,
+    Patm,
+    line,
+    curve,
+    State.chartType
+  );
+
+  // ZONES - render dengan koordinat yang sesuai
+  zoneLayer.selectAll("*").remove();
+  State.zones.forEach((z) => {
+    // Konversi titik zona ke koordinat yang benar
+    const polyStr = z.points
+      .map((p) => {
+        if (State.chartType === "psychrometric") {
+          return [x(p.t), y(p.w)].join(",");
+        } else {
+          return [x(p.w), y(p.t)].join(",");
+        }
+      })
+      .join(" ");
+
+    const rgb = hexToRgb(z.color);
+    const poly = zoneLayer
+      .append("polygon")
+      .attr("points", polyStr)
+      .attr("class", "user-zone")
+      .attr("fill", `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.3)`)
+      .attr("stroke", z.color)
+      .on("click", (e) => {
+        e.stopPropagation();
+        selectZone(z.id);
+      });
+
+    if (z.id === State.selectedZoneId) poly.classed("selected", true);
+
+    // Hitung posisi tengah untuk label
+    const cx =
+      State.chartType === "psychrometric"
+        ? d3.mean(z.points, (p) => x(p.t))
+        : d3.mean(z.points, (p) => x(p.w));
+    const cy =
+      State.chartType === "psychrometric"
+        ? d3.mean(z.points, (p) => y(p.w))
+        : d3.mean(z.points, (p) => y(p.t));
+
+    zoneLayer
+      .append("text")
+      .attr("x", cx)
+      .attr("y", cy)
+      .attr("text-anchor", "middle")
+      .attr("fill", z.color)
+      .attr("font-size", "10px")
+      .attr("font-weight", "bold")
+      .text(z.name)
+      .style("pointer-events", "none");
+  });
+
+  // TEMP ZONES (Manual)
+  if (State.tempZone.length > 0) {
+    const path =
+      State.chartType === "psychrometric"
+        ? d3.line()(State.tempZone.map((p) => [x(p.t), y(p.w)]))
+        : d3.line()(State.tempZone.map((p) => [x(p.w), y(p.t)]));
+
+    zoneLayer.append("path").attr("d", path).attr("class", "temp-zone-line");
+
+    State.tempZone.forEach((p) => {
+      const cx = State.chartType === "psychrometric" ? x(p.t) : x(p.w);
+      const cy = State.chartType === "psychrometric" ? y(p.w) : y(p.t);
+      zoneLayer
+        .append("circle")
+        .attr("cx", cx)
+        .attr("cy", cy)
+        .attr("r", 4)
+        .attr("fill", "#2196f3");
+    });
+  }
+
+  // TEMP ZONES (Range)
+  if (State.rangePreview.length > 0) {
+    const polyStr = State.rangePreview
+      .map((p) => {
+        if (State.chartType === "psychrometric") {
+          return [x(p.t), y(p.w)].join(",");
+        } else {
+          return [x(p.w), y(p.t)].join(",");
+        }
+      })
+      .join(" ");
+
+    zoneLayer
+      .append("polygon")
+      .attr("points", polyStr)
+      .attr("class", "temp-zone-poly");
+  }
+
+  // POINTS - render dengan koordinat yang sesuai
+  pointLayer.selectAll("*").remove();
+  State.points.forEach((p) => {
+    const cx = State.chartType === "psychrometric" ? x(p.t) : x(p.w);
+    const cy = State.chartType === "psychrometric" ? y(p.w) : y(p.t);
+
+    if (cx < 0 || cx > w || cy < 0 || cy > h) return;
+
+    const isSelected = p.id === State.selectedPointId;
+
+    const pointGroup = pointLayer
+      .append("g")
+      .attr("class", "point-group")
+      .on("click", (e) => {
+        e.stopPropagation();
+        selectPoint(p.id);
+      });
+
+    pointGroup
+      .append("circle")
+      .attr("class", isSelected ? "user-point selected" : "user-point")
+      .attr("cx", cx)
+      .attr("cy", cy)
+      .attr("r", isSelected ? 8 : 6);
+
+    // Posisi label
+    const labelX = cx > w * 0.8 ? cx - 15 : cx + 10;
+    const labelY = cy < h * 0.2 ? cy + 15 : cy - 5;
+
+    pointGroup
+      .append("text")
+      .attr("class", isSelected ? "point-label selected" : "point-label")
+      .attr("x", labelX)
+      .attr("y", labelY)
+      .text(p.name)
+      .style("pointer-events", "none")
+      .style("text-anchor", cx > w * 0.8 ? "end" : "start");
+  });
+
+  // Interaksi mouse - sesuaikan dengan tipe chart
+  overlay
+    .on("mousemove", (e) => handleMouseMove(e, x, y, minT, maxT, maxH, Patm))
+    .on("mouseout", () => {
+      document.getElementById("info-panel").style.display = "none";
+    })
+    .on("click", (e) => handleChartClick(e, x, y, minT, maxT, maxH, Patm));
+
+  // ================= LEGEND =================
+  const legG = axesLayer.append("g");
+
+  // Tentukan posisi legend berdasarkan chart type
+  if (State.chartType === "psychrometric") {
+    // Psychrometric: legend di kiri atas
+    legG.attr("transform", `translate(10, 10)`);
+  } else {
+    // Mollier: legend di kanan atas
+    legG.attr("transform", `translate(${w - 120}, ${h - 95})`); // Ganti width dengan w
+  }
 
   // Gambar Kotak Background
   legG
@@ -994,175 +1206,28 @@ function drawChart() {
       .attr("y", ly + 4)
       .text(item.t);
   });
-
-  // PSYCHRO LINES & LABELS
-  linesLayer.selectAll("*").remove();
-  labelLayer.selectAll("*").remove();
-  drawPsychroLines(
-    linesLayer,
-    labelLayer,
-    x,
-    y,
-    w,
-    h,
-    minT,
-    maxT,
-    maxH,
-    Patm,
-    line,
-    curve
-  );
-
-  // ZONES
-  zoneLayer.selectAll("*").remove();
-  State.zones.forEach((z) => {
-    const polyStr = z.points.map((p) => [x(p.t), y(p.w)].join(",")).join(" ");
-    const rgb = hexToRgb(z.color);
-    const poly = zoneLayer
-      .append("polygon")
-      .attr("points", polyStr)
-      .attr("class", "user-zone")
-      .attr("fill", `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.3)`)
-      .attr("stroke", z.color)
-      .on("click", (e) => {
-        e.stopPropagation();
-        selectZone(z.id);
-      });
-    if (z.id === State.selectedZoneId) poly.classed("selected", true);
-    const cx = d3.mean(z.points, (p) => x(p.t));
-    const cy = d3.mean(z.points, (p) => y(p.w));
-    zoneLayer
-      .append("text")
-      .attr("x", cx)
-      .attr("y", cy)
-      .attr("text-anchor", "middle")
-      .attr("fill", z.color)
-      .attr("font-size", "10px")
-      .attr("font-weight", "bold")
-      .text(z.name)
-      .style("pointer-events", "none");
-  });
-
-  // TEMP ZONES (Manual or Range)
-  // 1. Manual Click Mode
-  if (State.tempZone.length > 0) {
-    const path = d3.line()(State.tempZone.map((p) => [x(p.t), y(p.w)]));
-    zoneLayer.append("path").attr("d", path).attr("class", "temp-zone-line");
-    // Gambar semua titik karena ini mode manual (klik sembarang)
-    State.tempZone.forEach((p) =>
-      zoneLayer
-        .append("circle")
-        .attr("cx", x(p.t))
-        .attr("cy", y(p.w))
-        .attr("r", 4)
-        .attr("fill", "#2196f3")
-    );
-  }
-
-  // 2. Range Slider Mode
-  if (State.rangePreview.length > 0) {
-    // Gambar Polygon
-    const polyStr = State.rangePreview
-      .map((p) => [x(p.t), y(p.w)].join(","))
-      .join(" ");
-    zoneLayer
-      .append("polygon")
-      .attr("points", polyStr)
-      .attr("class", "temp-zone-poly");
-
-    // Gambar 4 Sudut Utama (Clamped)
-    const rTmin = parseFloat(document.getElementById("rangeTmin").value);
-    const rTmax = parseFloat(document.getElementById("rangeTmax").value);
-    const rType = document.getElementById("rangeParamType").value;
-    const rPmin = parseFloat(document.getElementById("rangeP2min").value);
-    const rPmax = parseFloat(document.getElementById("rangeP2max").value);
-
-    // Helper Clamping lokal untuk drawChart
-    const solveClamped = (t, val) => {
-      const res = Psychro.solveRobust("Tdb", t, rType, val, Patm);
-      const Pws = Psychro.getSatVapPres(t);
-      const Wmax = Psychro.getWFromPw(Pws, Patm);
-      if (res.w > Wmax) res.w = Wmax;
-      return res;
-    };
-
-    const corners = [
-      solveClamped(rTmin, rPmin), // Kiri Bawah
-      solveClamped(rTmax, rPmin), // Kanan Bawah
-      solveClamped(rTmax, rPmax), // Kanan Atas
-      solveClamped(rTmin, rPmax), // Kiri Atas
-    ];
-
-    corners.forEach((p) => {
-      if (!isNaN(p.w)) {
-        zoneLayer
-          .append("circle")
-          .attr("cx", x(p.t))
-          .attr("cy", y(p.w))
-          .attr("r", 4)
-          .attr("fill", "#2196f3")
-          .attr("stroke", "white")
-          .attr("stroke-width", 1);
-      }
-    });
-  }
-
-  // POINTS
-  pointLayer.selectAll("*").remove();
-  State.points.forEach((p) => {
-    const cx = x(p.t),
-      cy = y(p.w);
-    if (cx < 0 || cx > w || cy < 0 || cy > h) return;
-
-    const isSelected = p.id === State.selectedPointId;
-
-    // Buat group untuk setiap point
-    const pointGroup = pointLayer
-      .append("g")
-      .attr("class", "point-group")
-      .on("click", (e) => {
-        e.stopPropagation();
-        selectPoint(p.id);
-      });
-
-    // Gambar lingkaran
-    pointGroup
-      .append("circle")
-      .attr("class", isSelected ? "user-point selected" : "user-point")
-      .attr("cx", cx)
-      .attr("cy", cy)
-      .attr("r", isSelected ? 8 : 6);
-
-    // Tentukan posisi label
-    const labelX = cx > w * 0.8 ? cx - 15 : cx + 10;
-    const labelY = cy < h * 0.2 ? cy + 15 : cy - 5;
-
-    // Gambar label
-    pointGroup
-      .append("text")
-      .attr("class", isSelected ? "point-label selected" : "point-label")
-      .attr("x", labelX)
-      .attr("y", labelY)
-      .text(p.name)
-      .style("pointer-events", "none")
-      .style("text-anchor", cx > w * 0.8 ? "end" : "start");
-  });
-
-  overlay
-    .on("mousemove", (e) => handleMouseMove(e, x, y, minT, maxT, maxH, Patm))
-    .on(
-      "mouseout",
-      () => (document.getElementById("info-panel").style.display = "none")
-    )
-    .on("click", (e) => handleChartClick(e, x, y, minT, maxT, maxH, Patm));
 }
 
+// Update fungsi handleMouseMove untuk Mollier
 function handleMouseMove(e, x, y, minT, maxT, maxH, Patm) {
   const [mx, my] = d3.pointer(e, svg.node());
-  const t = x.invert(mx),
-    w = y.invert(my);
 
-  // Boundary check
+  // Tentukan t dan w berdasarkan chart type
+  let t, w;
+  if (State.chartType === "psychrometric") {
+    // Psychrometric: x = T, y = W
+    t = x.invert(mx);
+    w = y.invert(my);
+  } else {
+    // Mollier: x = W, y = T
+    w = x.invert(mx);
+    t = y.invert(my);
+  }
+
+  // Debug: console.log untuk memastikan konversi benar
+  // console.log(`Chart: ${State.chartType}, mx: ${mx}, my: ${my}, t: ${t}, w: ${w}`);
+
+  // Boundary check - sesuaikan dengan chart type
   if (t < minT || t > maxT || w < 0 || w > maxH) {
     document.getElementById("info-panel").style.display = "none";
     return;
@@ -1171,26 +1236,22 @@ function handleMouseMove(e, x, y, minT, maxT, maxH, Patm) {
   const d = calculateAllProperties(t, w, Patm);
   const panel = document.getElementById("info-panel");
 
-  // Set display block dulu agar kita bisa baca width/height-nya
   panel.style.display = "block";
   document.getElementById("tooltip-grid").innerHTML = generateHTMLGrid(d);
 
-  // --- LOGIKA POSISI BARU (X & Y FLIP) ---
+  // Positioning panel info
   const panelW = panel.offsetWidth;
   const panelH = panel.offsetHeight;
   const wrapperW = chartWrapper.clientWidth;
   const wrapperH = chartWrapper.clientHeight;
 
-  // Default: Kanan Bawah dari kursor
   let left = margin.left + mx + 15;
   let top = margin.top + my + 15;
 
-  // Cek Tabrakan Kanan (Flip ke Kiri)
   if (left + panelW > wrapperW) {
     left = margin.left + mx - panelW - 15;
   }
 
-  // Cek Tabrakan Bawah (Flip ke Atas)
   if (top + panelH > wrapperH) {
     top = margin.top + my - panelH - 15;
   }
@@ -1201,9 +1262,21 @@ function handleMouseMove(e, x, y, minT, maxT, maxH, Patm) {
 
 function handleChartClick(e, x, y, minT, maxT, maxH, Patm) {
   const [mx, my] = d3.pointer(e, svg.node());
-  const t = x.invert(mx),
+
+  // Tentukan t dan w berdasarkan chart type
+  let t, w;
+  if (State.chartType === "psychrometric") {
+    // Psychrometric: x = T, y = W
+    t = x.invert(mx);
     w = y.invert(my);
+  } else {
+    // Mollier: x = W, y = T
+    w = x.invert(mx);
+    t = y.invert(my);
+  }
+
   if (t < minT || t > maxT || w < 0 || w > maxH) return;
+
   if (State.mode === "point") addPoint(t, w);
   else if (State.mode === "zone") {
     State.tempZone.push({ t, w });
@@ -1315,7 +1388,6 @@ function hexToRgb(hex) {
     : { r: 0, g: 0, b: 0 };
 }
 
-// --- RESTORED LINE DRAWING & LABELS ---
 function drawPsychroLines(
   linesG,
   labelsG,
@@ -1328,14 +1400,15 @@ function drawPsychroLines(
   maxH,
   Patm,
   line,
-  curve
+  curve,
+  chartType
 ) {
-  const labels = { right: [], top: [], bottom: [] };
+  const labels = { left: [], right: [], top: [], bottom: [] }; // Tambah left untuk mollier
   const addLabel = (pos, text, cls, loc) => {
     labels[loc].push({ pos, text, class: cls });
   };
 
-  // 1. VOL
+  // 1. VOLUME LINES (Specific Volume)
   for (let v = 0.75; v <= 1.11; v += 0.01) {
     const ts = Psychro.solveIntersectionWithSaturation(
       "volume",
@@ -1353,27 +1426,40 @@ function drawPsychroLines(
       d.push({ t: t, w: Psychro.getWFromVolLine(t, v, Patm) });
     }
     d.push({ t: te, w: 0 });
+
+    // Gambar garis
     linesG.append("path").datum(d).attr("class", "v-line").attr("d", line);
 
-    // --- LABEL LOGIC (BARU) ---
-    // Label setiap 0.05 m3/kg (0.80, 0.85, dst) agar rapi
+    // Label setiap 0.05 m3/kg
     if (Math.round(v * 100) % 5 === 0) {
       const labelText = v.toFixed(2);
 
-      // Cek Tabrakan Bawah (Sumbu X)
-      if (te >= minT && te <= maxT) {
-        addLabel(x(te), labelText, "lbl-v", "bottom");
+      if (chartType === "psychrometric") {
+        // Psychrometric: label di bottom atau top
+        if (te >= minT && te <= maxT) {
+          addLabel(x(te), labelText, "lbl-v", "bottom");
+        } else {
+          const tAtMaxH = Psychro.getTdbFromVolLine(v, maxH, Patm);
+          if (tAtMaxH >= minT && tAtMaxH <= maxT) {
+            addLabel(x(tAtMaxH), labelText, "lbl-v", "top");
+          }
+        }
       } else {
-        // Cek Tabrakan Atas (Max Hum Ratio)
-        // Jika garis volume miring ke kiri atas
-        const tAtMaxH = Psychro.getTdbFromVolLine(v, maxH, Patm);
-        if (tAtMaxH >= minT && tAtMaxH <= maxT) {
-          addLabel(x(tAtMaxH), labelText, "lbl-v", "top");
+        // Mollier: label di LEFT (kiri) karena garis volume miring ke kiri
+        // Temukan titik di mana garis volume memotong batas kiri (T = minT)
+        const wAtMinT = Psychro.getWFromVolLine(minT, v, Patm);
+        if (wAtMinT >= 0 && wAtMinT <= maxH) {
+          // Garis masuk di kiri (batas T minimum)
+          addLabel(y(minT), labelText, "lbl-v", "left");
+        } else {
+          // Garis masuk di bottom (batas W = 0)
+          addLabel(x(0), labelText, "lbl-v", "bottom");
         }
       }
     }
   }
-  // 2. ENTH
+
+  // 2. ENTHALPY LINES
   for (let h = -20; h <= 180; h += 5) {
     const ts = Psychro.solveIntersectionWithSaturation(
       "enthalpy",
@@ -1389,22 +1475,39 @@ function drawPsychroLines(
     for (let t = Math.ceil(ts); t < te && t <= maxT; t += 2)
       d.push({ t: t, w: Psychro.getWFromEnthalpyLine(t, h) });
     d.push({ t: te, w: 0 });
+
     linesG.append("path").datum(d).attr("class", "h-line").attr("d", line);
 
+    // Label setiap 10 kJ/kg
     if (h % 10 === 0) {
       const wAtMaxT = Psychro.getWFromEnthalpyLine(maxT, h);
-      if (wAtMaxT >= 0 && wAtMaxT <= maxH)
-        addLabel(y(wAtMaxT), h, "lbl-h", "right");
-      else if (wAtMaxT < 0 && te >= minT && te <= maxT)
-        addLabel(x(te), h, "lbl-h", "bottom");
-      else {
-        const tAtMaxH = (h - 2501 * maxH) / (1.006 + 1.86 * maxH);
-        if (tAtMaxH >= minT && tAtMaxH <= maxT)
-          addLabel(x(tAtMaxH), h, "lbl-h", "top");
+
+      if (chartType === "psychrometric") {
+        if (wAtMaxT >= 0 && wAtMaxT <= maxH) {
+          addLabel(y(wAtMaxT), h, "lbl-h", "right");
+        } else if (wAtMaxT < 0 && te >= minT && te <= maxT) {
+          addLabel(x(te), h, "lbl-h", "bottom");
+        } else {
+          const tAtMaxH = (h - 2501 * maxH) / (1.006 + 1.86 * maxH);
+          if (tAtMaxH >= minT && tAtMaxH <= maxT) {
+            addLabel(x(tAtMaxH), h, "lbl-h", "top");
+          }
+        }
+      } else {
+        // Mollier: enthalpy lines miring ke kanan bawah
+        // Label di LEFT (kiri) atau TOP (atas)
+        if (te >= minT && te <= maxT) {
+          // Garis berakhir di kiri (W = 0)
+          addLabel(y(te), h, "lbl-h", "left");
+        } else {
+          // Garis berakhir di atas (T = maxT)
+          addLabel(x(wAtMaxT), h, "lbl-h", "top");
+        }
       }
     }
   }
-  // 3. WB
+
+  // 3. WET BULB LINES
   for (let wb = -10; wb <= maxT + 20; wb += 5) {
     const Pws = Psychro.getSatVapPres(wb);
     const Ws = Psychro.getWFromPw(Pws, Patm);
@@ -1414,72 +1517,256 @@ function drawPsychroLines(
       if (w < -0.005) break;
       d.push({ t, w });
     }
+
     linesG.append("path").datum(d).attr("class", "wb-line").attr("d", line);
 
     const wAtMaxT = Psychro.getWFromTwbLine(maxT, wb, Patm);
-    if (wAtMaxT >= 0 && wAtMaxT <= maxH)
-      addLabel(y(wAtMaxT), wb, "lbl-wb", "right");
-    else if (wAtMaxT < 0) {
+
+    if (chartType === "psychrometric") {
+      if (wAtMaxT >= 0 && wAtMaxT <= maxH) {
+        addLabel(y(wAtMaxT), wb, "lbl-wb", "right");
+      } else if (wAtMaxT < 0) {
+        const tAtZeroW = Psychro.getTdbFromTwbZeroW(wb, Patm);
+        if (tAtZeroW >= minT && tAtZeroW <= maxT) {
+          addLabel(x(tAtZeroW), wb, "lbl-wb", "bottom");
+        }
+      }
+    } else {
+      // Mollier: wet bulb lines miring ke kanan atas
+      // Label di LEFT (kiri) karena garis dimulai dari kiri
       const tAtZeroW = Psychro.getTdbFromTwbZeroW(wb, Patm);
-      if (tAtZeroW >= minT && tAtZeroW <= maxT)
-        addLabel(x(tAtZeroW), wb, "lbl-wb", "bottom");
+      if (tAtZeroW >= minT && tAtZeroW <= maxT) {
+        // Garis berawal di kiri (W = 0)
+        addLabel(y(tAtZeroW), wb, "lbl-wb", "left");
+      } else {
+        // Garis berawal di top (T = wb)
+        addLabel(x(Ws), wb, "lbl-wb", "top");
+      }
     }
   }
-  // 4. RH
+
+  // 4. RELATIVE HUMIDITY LINES
   [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0].forEach((rh) => {
     const d = [];
-    for (let t = minT; t <= maxT + 5; t += 0.25)
+    for (let t = minT; t <= maxT + 5; t += 0.25) {
       d.push({ t, w: Psychro.getWFromPw(Psychro.getSatVapPres(t) * rh, Patm) });
+    }
+
     linesG
       .append("path")
       .datum(d)
       .attr("class", rh === 1.0 ? "saturation-line" : "rh-line")
       .attr("d", curve);
+
     if (rh < 1) {
-      const Wmax = Psychro.getWFromPw(Psychro.getSatVapPres(maxT) * rh, Patm);
-      if (Wmax <= maxH)
-        addLabel(y(Wmax), (rh * 100).toFixed(0) + "%", "lbl-rh", "right");
-      else {
+      if (chartType === "psychrometric") {
+        // Psychrometric: label di kanan atau atas
+        const W_at_maxT = Psychro.getWFromPw(
+          Psychro.getSatVapPres(maxT) * rh,
+          Patm
+        );
+        if (W_at_maxT <= maxH && W_at_maxT >= 0) {
+          // Keluar di kanan (T = maxT)
+          addLabel(
+            y(W_at_maxT),
+            (rh * 100).toFixed(0) + "%",
+            "lbl-rh",
+            "right"
+          );
+        } else {
+          // Cari T di mana W = maxH (keluar di atas)
+          const Pw_target = Psychro.getPwFromW(maxH, Patm);
+          const T_at_maxH = Psychro.getTempFromSatPres(Pw_target / rh);
+          if (T_at_maxH >= minT && T_at_maxH <= maxT) {
+            addLabel(
+              x(T_at_maxH),
+              (rh * 100).toFixed(0) + "%",
+              "lbl-rh",
+              "top"
+            );
+          }
+        }
+      } else {
+        // Mollier: label ditempatkan di ujung garis yang keluar dari area chart
+        let exitPoint = null;
+        let exitType = null; // 'top', 'left', atau 'right'
+
+        // Periksa ujung kanan (W = maxH) - PRIORITAS UTAMA untuk Mollier
         const Pw_target = Psychro.getPwFromW(maxH, Patm);
-        const T_top = Psychro.getTempFromSatPres(Pw_target / rh);
-        if (T_top >= minT && T_top <= maxT)
-          addLabel(x(T_top), (rh * 100).toFixed(0) + "%", "lbl-rh", "top");
+        const T_at_maxH = Psychro.getTempFromSatPres(Pw_target / rh);
+        if (T_at_maxH >= minT && T_at_maxH <= maxT) {
+          exitPoint = { t: T_at_maxH, w: maxH };
+          exitType = "right"; // Pada Mollier, kanan adalah W maksimum
+        }
+
+        // Jika tidak keluar di kanan, periksa ujung atas (T = maxT)
+        if (!exitPoint) {
+          const W_at_maxT = Psychro.getWFromPw(
+            Psychro.getSatVapPres(maxT) * rh,
+            Patm
+          );
+          if (W_at_maxT >= 0 && W_at_maxT <= maxH) {
+            exitPoint = { t: maxT, w: W_at_maxT };
+            exitType = "top"; // Pada Mollier, atas adalah T maksimum
+          }
+        }
+
+        // Jika tidak keluar di atas, periksa ujung kiri (W = 0 atau mendekati 0)
+        if (!exitPoint) {
+          // Cari titik dengan W terkecil yang masih positif
+          let minW = Infinity;
+          let minWPoint = null;
+          for (let i = 0; i < d.length; i++) {
+            const point = d[i];
+            if (point.w > 0 && point.w < minW && point.w <= maxH) {
+              minW = point.w;
+              minWPoint = point;
+            }
+          }
+          if (minWPoint && minWPoint.w <= 0.001) {
+            // Hanya jika mendekati 0
+            exitPoint = minWPoint;
+            exitType = "left"; // Pada Mollier, kiri adalah W minimum
+          }
+        }
+
+        // Jika masih tidak ditemukan, gunakan titik terakhir yang valid
+        if (!exitPoint) {
+          for (let i = d.length - 1; i >= 0; i--) {
+            const point = d[i];
+            if (point.w >= 0 && point.w <= maxH) {
+              exitPoint = point;
+              exitType = "top"; // Default ke atas
+              break;
+            }
+          }
+        }
+
+        // Tambahkan label berdasarkan jenis exit
+        if (exitPoint && exitType) {
+          if (exitType === "top") {
+            // Keluar di atas (T = maxT) - label di atas
+            addLabel(
+              x(exitPoint.w),
+              (rh * 100).toFixed(0) + "%",
+              "lbl-rh",
+              "top"
+            );
+          } else if (exitType === "right") {
+            // Keluar di kanan (W = maxH) - label di KANAN
+            addLabel(
+              y(exitPoint.t),
+              (rh * 100).toFixed(0) + "%",
+              "lbl-rh",
+              "right"
+            );
+          } else if (exitType === "left") {
+            // Keluar di kiri (W mendekati 0) - label di kiri
+            addLabel(
+              y(exitPoint.t),
+              (rh * 100).toFixed(0) + "%",
+              "lbl-rh",
+              "left"
+            );
+          }
+        }
       }
     }
   });
 
-  renderSmartLabels(labelsG, labels.right, "right", width, height);
-  renderSmartLabels(labelsG, labels.bottom, "bottom", width, height);
-  renderSmartLabels(labelsG, labels.top, "top", width, height);
+  // Render smart labels dengan parameter chartType
+  if (chartType === "psychrometric") {
+    renderSmartLabels(labelsG, labels.right, "right", width, height, chartType);
+    renderSmartLabels(
+      labelsG,
+      labels.bottom,
+      "bottom",
+      width,
+      height,
+      chartType
+    );
+    renderSmartLabels(labelsG, labels.top, "top", width, height, chartType);
+  } else {
+    // Mollier: gunakan left dan top saja
+    renderSmartLabels(labelsG, labels.left, "left", width, height, chartType);
+    renderSmartLabels(labelsG, labels.top, "top", width, height, chartType);
+    renderSmartLabels(labelsG, labels.right, "right", width, height, chartType);
+  }
 }
 
-function renderSmartLabels(container, labelData, position, width, height) {
+function renderSmartLabels(
+  container,
+  labelData,
+  position,
+  width,
+  height,
+  chartType
+) {
+  if (labelData.length === 0) return;
+
+  // Urutkan label berdasarkan posisinya
   labelData.sort((a, b) => a.pos - b.pos);
-  for (let i = 1; i < labelData.length; i++)
-    if (labelData[i].pos < labelData[i - 1].pos + 12)
+
+  // Hindari tabrakan label
+  for (let i = 1; i < labelData.length; i++) {
+    if (labelData[i].pos < labelData[i - 1].pos + 12) {
       labelData[i].pos = labelData[i - 1].pos + 12;
+    }
+  }
+
+  // Gambar label
   labelData.forEach((d) => {
-    let x, y, anchor, alignment;
+    let x, y, anchor, alignment, baseline;
+
     if (position === "right") {
+      // Label di sisi kanan chart - hanya untuk psychrometric
       x = width + 8;
       y = d.pos;
       anchor = "start";
       alignment = "middle";
-      if (y > height + 20) return;
+
+      // Filter label yang berada di luar area chart
+      if (y < 0 || y > height + 20) return;
     } else if (position === "bottom") {
+      // Label di bawah chart - hanya untuk psychrometric
       x = d.pos;
       y = height + 15;
       anchor = "middle";
       alignment = "hanging";
+
+      // Filter label yang berada di luar area chart
       if (x < -10 || x > width + 10) return;
     } else if (position === "top") {
+      // Label di atas chart - untuk psychrometric dan mollier
       x = d.pos;
       y = -10;
       anchor = "middle";
       alignment = "baseline";
-      if (x < -10 || x > width + 10) return;
+
+      // Filter label yang berada di luar area chart
+      if (chartType === "psychrometric") {
+        // Psychrometric: x adalah posisi T
+        if (x < -10 || x > width + 10) return;
+      } else {
+        // Mollier: x adalah posisi W
+        if (x < -10 || x > width + 10) return;
+      }
+    } else if (position === "left") {
+      // Label di kiri chart - hanya untuk mollier
+      x = -8;
+      y = d.pos;
+      anchor = "end";
+      alignment = "middle";
+
+      // Filter label yang berada di luar area chart
+      if (chartType === "mollier") {
+        // Mollier: y adalah posisi T
+        if (y < -10 || y > height + 10) return;
+      }
     }
-    container
+
+    // Gambar teks label
+    const textElem = container
       .append("text")
       .attr("class", "smart-label " + d.class)
       .attr("x", x)
@@ -1487,6 +1774,23 @@ function renderSmartLabels(container, labelData, position, width, height) {
       .attr("text-anchor", anchor)
       .attr("dominant-baseline", alignment)
       .text(d.text);
+
+    // Untuk mollier di posisi left, putar teks agar lebih mudah dibaca
+    if (chartType === "mollier" && position === "left") {
+      textElem
+        // .attr("transform", `rotate(-90, ${x}, ${y})`)
+        .attr("x", x - 15) // Geser sedikit ke kiri
+        .attr("text-anchor", "end")
+        .attr("dominant-baseline", "middle");
+    }
+
+    // Untuk mollier di posisi top, biarkan horizontal
+    if (chartType === "mollier" && position === "top") {
+      textElem
+        .attr("transform", null) // Pastikan tidak ada rotasi
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "baseline");
+    }
   });
 }
 
@@ -1495,5 +1799,3 @@ drawChart();
 window.addEventListener("resize", drawChart);
 
 ////////////////////////////////////////////////////
-
-// popupShow(".editModal");

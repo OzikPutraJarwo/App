@@ -79,6 +79,10 @@ select {
   margin-top: 1rem;
 }
 
+.toolbar-button.c2 {
+  grid-template-columns: 1fr 1fr;
+}
+
 .tool-btn {
   padding: 8px 12px;
   border: 1px solid #cfd8dc;
@@ -135,6 +139,23 @@ select {
 .btn-secondary:hover {
   background: var(--green);
 }
+
+/* Chart Type */
+
+.chart-type {
+  margin-top: .5rem;
+}
+
+.chart-type span {
+  font-weight: 700;
+  color: #414a4f
+}
+
+.chart-type img {
+  width: 20px;
+}
+
+/* Tabs */
 
 .zone-tabs,
 .point-tabs {

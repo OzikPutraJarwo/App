@@ -89,6 +89,19 @@
 
             <div class="input-group">
               <div class="input-item">
+                <label>Chart Type</label>
+                <div class="toolbar-button c2 chart-type">
+                  <button class="tool-btn psychrometric active" value="psychrometric" onclick="changeChartType(this.value)">
+                    <img src="../icon/type-psychrometric.png" alt="">
+                    <span>Psychrometric</span>
+                  </button>
+                  <button class="tool-btn mollier" value="mollier" onclick="changeChartType(this.value)">
+                    <img src="../icon/type-mollier.png" alt="">
+                    <span>Mollier</span>
+                  </button>
+                </div>
+              </div>
+              <div class="input-item">
                 <label>Atm Pressure (Pa)</label>
                 <input type="number" id="pressure" value="101325" oninput="drawChart()" step="100">
               </div>
@@ -114,8 +127,7 @@
 
               <div class="toolbar-group">
                 <div class="toolbar-button">
-                  <button class="tool-btn active" id="btn-view" onclick="setMode('view')"><span>👁️
-                      Explore</span></button>
+                  <button class="tool-btn active" id="btn-view" onclick="setMode('view')"><span>👁️ Explore</span></button>
                   <button class="tool-btn" id="btn-point" onclick="setMode('point')"><span>📍 Point</span></button>
                   <button class="tool-btn" id="btn-zone" onclick="setMode('zone')"><span>📐 Zone</span></button>
                 </div>
@@ -197,11 +209,13 @@
                       <label for="rangeTmin">Min</label>
                       <input type="range" class="range-slider" id="sliderTmin" min="-10" max="60" value="20"
                         oninput="syncRange('Tmin')">
-                      <input type="number" class="range-val" id="rangeTmin" min="-10" max="60" value="20" oninput="updateRangeZone()">
+                      <input type="number" class="range-val" id="rangeTmin" min="-10" max="60" value="20"
+                        oninput="updateRangeZone()">
                       <label for="rangeTmax">Max</label>
                       <input type="range" class="range-slider" id="sliderTmax" min="-10" max="60" value="30"
                         oninput="syncRange('Tmax')">
-                      <input type="number" class="range-val" id="rangeTmax" min="-10" max="60" value="30" oninput="updateRangeZone()">
+                      <input type="number" class="range-val" id="rangeTmax" min="-10" max="60" value="30"
+                        oninput="updateRangeZone()">
                     </div>
                   </div>
                   <div>
@@ -357,15 +371,15 @@
 
     </main>
 
-    
+
     <div id="notification"></div>
-    
+
     <script src="../main.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
     <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
 
     <script src="./script.js"></script>
-    
+
   </body>
 
 </html>
