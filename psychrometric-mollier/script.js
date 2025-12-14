@@ -295,7 +295,7 @@ function setupRangeDefaults() {
   updateRangeZone();
 }
 
-function validateRangeInputs(minId, maxId) {
+function validateRangeInputs(minId, maxId, type = "Tdb") {
   const minInput = document.getElementById(minId);
   const maxInput = document.getElementById(maxId);
   const minSlider = document.getElementById(minId.replace("range", "slider"));
@@ -304,38 +304,39 @@ function validateRangeInputs(minId, maxId) {
   let minVal = parseFloat(minInput.value);
   let maxVal = parseFloat(maxInput.value);
 
-  // Validasi agar min tidak melebihi max
-  if (minVal > maxVal) {
-    minVal = maxVal;
-    minInput.value = minVal;
-    if (minSlider) minSlider.value = minVal;
+  // Urutan min ≤ max
+  if (minVal > maxVal) minVal = maxVal;
+  if (maxVal < minVal) maxVal = minVal;
+
+  // Tentukan batas berdasarkan tipe
+  let minLimit, maxLimit;
+
+  if (type === "Tdb") {
+    minLimit = parseFloat(document.getElementById("minTemp").value);
+    maxLimit = parseFloat(document.getElementById("maxTemp").value);
+  } else {
+    const cfg = RangeConfigs[type];
+    minLimit = cfg.min;
+    maxLimit = cfg.max;
   }
 
-  // Validasi agar max tidak kurang dari min
-  if (maxVal < minVal) {
-    maxVal = minVal;
-    maxInput.value = maxVal;
-    if (maxSlider) maxSlider.value = maxVal;
+  // Clamp ke batas yang benar
+  minVal = Math.max(minLimit, Math.min(minVal, maxLimit));
+  maxVal = Math.max(minLimit, Math.min(maxVal, maxLimit));
+
+  minInput.value = minVal;
+  maxInput.value = maxVal;
+
+  if (minSlider) {
+    minSlider.value = minVal;
+    minSlider.min = minLimit;
+    minSlider.max = maxLimit;
   }
 
-  // Pastikan nilai tidak keluar batas
-  const config = RangeConfigs[document.getElementById("rangeParamType").value];
-  if (config) {
-    minVal = Math.max(config.min, Math.min(minVal, config.max));
-    maxVal = Math.max(config.min, Math.min(maxVal, config.max));
-
-    minInput.value = minVal;
-    maxInput.value = maxVal;
-    if (minSlider) {
-      minSlider.value = minVal;
-      minSlider.min = config.min;
-      minSlider.max = config.max;
-    }
-    if (maxSlider) {
-      maxSlider.value = maxVal;
-      maxSlider.min = config.min;
-      maxSlider.max = config.max;
-    }
+  if (maxSlider) {
+    maxSlider.value = maxVal;
+    maxSlider.min = minLimit;
+    maxSlider.max = maxLimit;
   }
 }
 
@@ -403,9 +404,10 @@ function syncRange(id) {
 
   // Panggil validasi berdasarkan tipe input
   if (id.includes("Tmin") || id.includes("Tmax")) {
-    validateRangeInputs("rangeTmin", "rangeTmax");
+    validateRangeInputs("rangeTmin", "rangeTmax", "Tdb");
   } else if (id.includes("P2min") || id.includes("P2max")) {
-    validateRangeInputs("rangeP2min", "rangeP2max");
+const type = document.getElementById("rangeParamType").value;
+validateRangeInputs("rangeP2min", "rangeP2max", type);
   }
 
   updateRangeZone();
@@ -441,8 +443,9 @@ function syncZoneRangeLimits(globalMin, globalMax) {
 // Menghitung Polygon Zona dengan Sisi Melengkung (RH Curve)
 function updateRangeZone() {
   // Validasi semua input range terlebih dahulu
-  validateRangeInputs("rangeTmin", "rangeTmax");
-  validateRangeInputs("rangeP2min", "rangeP2max");
+validateRangeInputs("rangeTmin", "rangeTmax", "Tdb");
+const type = document.getElementById("rangeParamType").value;
+validateRangeInputs("rangeP2min", "rangeP2max", type);
 
   // 1. Sync Inputs Tdb
   ["Tmin", "Tmax"].forEach((k) => {

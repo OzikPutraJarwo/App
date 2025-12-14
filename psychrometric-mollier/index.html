@@ -195,13 +195,13 @@
                     </div>
                     <div class="range-row">
                       <label for="rangeTmin">Min</label>
-                      <input type="range" class="range-slider" id="sliderTmin" min="0" max="60" value="20"
+                      <input type="range" class="range-slider" id="sliderTmin" min="-10" max="60" value="20"
                         oninput="syncRange('Tmin')">
-                      <input type="number" class="range-val" id="rangeTmin" value="20" oninput="updateRangeZone()">
+                      <input type="number" class="range-val" id="rangeTmin" min="-10" max="60" value="20" oninput="updateRangeZone()">
                       <label for="rangeTmax">Max</label>
-                      <input type="range" class="range-slider" id="sliderTmax" min="0" max="60" value="30"
+                      <input type="range" class="range-slider" id="sliderTmax" min="-10" max="60" value="30"
                         oninput="syncRange('Tmax')">
-                      <input type="number" class="range-val" id="rangeTmax" value="30" oninput="updateRangeZone()">
+                      <input type="number" class="range-val" id="rangeTmax" min="-10" max="60" value="30" oninput="updateRangeZone()">
                     </div>
                   </div>
                   <div>
