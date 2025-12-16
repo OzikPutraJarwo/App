@@ -218,7 +218,6 @@
 
 .task-row.completed .task-name-cell {
   opacity: 0.6;
-  text-decoration: line-through;
   color: #888;
 }
 
