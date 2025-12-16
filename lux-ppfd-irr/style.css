@@ -53,10 +53,6 @@ th {
   gap: 1rem;
 }
 
-.input .content {
-  grid-template-columns: 50% 50%;
-}
-
 .graph {
   display: flex;
   align-items: center;

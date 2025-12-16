@@ -4,7 +4,7 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lux & PPFD Converter</title>
+    <title>Lux, PPFD, & IRR Converter</title>
     <link rel="icon" type="image/x-icon" href="../icon/lux-ppfd.webp">
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="../main.css">
@@ -30,7 +30,7 @@
             </g>
           </svg>
         </a>
-        <div class='site-title'>Lux & PPFD Converter</div>
+        <div class='site-title'>Lux, PPFD, & IRR Converter</div>
         <div class="site-user site-button" id="user-info">
           <img id="user-pic"
             src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhaVLwQAl6q4_kwU6fVHxwfgd9ZTa7JFl-EAr4xw36isYMfsTO1ibS3BL4Z89Gev_ctnu3dP2Uc38FqWjk1xGCFUtzCnBo77-o9tl12xPBOuxDxa1rREKo7RT2paYYOxB00Ad_uXhU_N1eWx6-aWavyq_cGU9c80oWnTK0KcO9qQSsfehL7Io0VZPxUtlk/s1/blank.png"
@@ -82,42 +82,35 @@
       <div class="main wrap">
 
         <div class="item select">
-          <label for="select-spectrum" class="title">Select Spectrum</label>
+          <label for="select-spectrum" class="title">Select Light Source</label>
           <select name="select-spectrum" id="select-spectrum">
-            <option value="none" selected disabled>Select light source</option>
+            <option value="none" selected disabled>Select light source first</option>
           </select>
         </div>
 
         <div class="options none">
 
-          <div class="input">
-            <div class="item lux-to-ppfd">
-              <div class="title">Lux to PPFD</div>
-              <div class="content">
-                <div class="lux">
-                  <label for="lux-to-ppfd-lux">Lux (lx)</label>
-                  <input type="number" name="lux-to-ppfd-lux" id="lux-to-ppfd-lux" placeholder="Input your number here">
-                </div>
-                <div class="ppfd">
-                  <label for="lux-to-ppfd-ppfd">PPFD (µmol/m²/s)</label>
-                  <input type="number" name="lux-to-ppfd-ppfd" id="lux-to-ppfd-ppfd" disabled value="0">
-                </div>
-              </div>
-            </div>
-            <div class="item ppfd-to-lux">
-              <div class="title">PPFD to Lux</div>
-              <div class="content">
-                <div class="ppfd">
-                  <label for="lux-to-ppfd-ppfd">PPFD (µmol/m²/s)</label>
-                  <input type="number" name="ppfd-to-lux-ppfd" id="ppfd-to-lux-ppfd" placeholder="Input your number here">
-                </div>
-                <div class="lux">
-                  <label for="lux-to-ppfd-lux">Lux (lx)</label>
-                  <input type="number" name="ppfd-to-lux-lux" id="ppfd-to-lux-lux" disabled value="0">
-                </div>
-              </div>
-            </div>
-          </div>
+<div class="input">
+  <div class="item unified-converter">
+    <div class="title">Converter</div>
+    <div class="content">
+      <div class="input-group">
+        <label for="lux-input">Illuminance (lux)</label>
+        <input type="number" name="lux-input" id="lux-input" placeholder="Enter Illuminance value">
+      </div>
+      
+      <div class="input-group">
+        <label for="ppfd-input">PPFD (µmol·m⁻²·s⁻¹)</label>
+        <input type="number" name="ppfd-input" id="ppfd-input" placeholder="Enter PPFD value">
+      </div>
+      
+      <div class="input-group">
+        <label for="wm2-input">Total Irradiance (W·m⁻²)</label>
+        <input type="number" name="wm2-input" id="wm2-input" placeholder="Enter Total Irradiance value">
+      </div>
+    </div>
+  </div>
+</div>
 
           <div class="item graph"></div>
 
