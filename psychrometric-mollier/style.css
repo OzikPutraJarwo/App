@@ -83,33 +83,6 @@ select {
   grid-template-columns: 1fr 1fr;
 }
 
-.tool-btn {
-  padding: 8px 12px;
-  border: 1px solid #cfd8dc;
-  background: #f5f7f8;
-  cursor: pointer;
-  border-radius: 4px;
-  font-weight: 600;
-  font-size: 11px;
-  color: #546e7a;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-}
-
-.tool-btn:hover {
-  background: #eceff1;
-  border-color: #b0bec5;
-}
-
-.tool-btn.active {
-  background: #e3f2fd;
-  border-color: var(--blue-hover);
-  color: var(--blue);
-}
-
 .btn-danger {
   color: #d32f2f;
   border-color: #ffcdd2;
