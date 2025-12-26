@@ -1,5 +1,4 @@
-*.pem
-.archive
-*.txt
-*.drawio
-*.r
+.gitignore
+/3d-light-sim
+/3d-room
+/test
