@@ -233,6 +233,10 @@ header {
 }
 
 .header.wrap {
+  grid-template-columns: 31px 1fr 90px;
+}
+
+.cropid .header.wrap {
   grid-template-columns: 31px 1fr 90px auto;
 }
 
