@@ -1,0 +1,14 @@
+{
+  "name": "Task Planner",
+  "short_name": "Task Planner",
+  "description": "Comprehensive responsive task planner with monthly or yearly views, saved to Drive.",
+  "start_url": "/task-planner/",
+  "scope": "/task-planner/",
+  "icons": [
+    {
+      "src": "../icon/task-planner.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
