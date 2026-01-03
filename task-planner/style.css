@@ -483,6 +483,20 @@ textarea#task-notes {
   color: #555;
 }
 
+.task-detail-info textarea {
+  width: 100%;
+  overflow: auto;
+  transition: unset;
+  background: #ffffffbd;
+  outline: none;
+  border: none;
+  padding: 0.6rem 0.9rem;
+  border-radius: .5rem;
+  field-sizing: content;
+  resize: none;
+  cursor: unset;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .year-calendar {
