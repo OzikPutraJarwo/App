@@ -313,7 +313,6 @@
         width: 24px;
         height: 24px;
         border-radius: 4px;
-        background: var(--bg-hover);
         object-fit: cover;
       }
 
@@ -559,7 +558,7 @@
     <div id="login-screen" class="modal-overlay" style="z-index: 100;">
       <div class="glass auth-container">
         <h1>Vault</h1>
-        <p style="margin-bottom: 2rem;">Secure your data in your private Google Drive</p>
+        <p style="margin-bottom: 1rem;">Secure your data in your private Google Drive</p>
 
         <div id="setup-api" class="hidden" style="display: flex; flex-direction: column; gap: 1rem;">
           <input type="text" id="api-key" placeholder="Google API Key">
@@ -593,8 +592,6 @@
           <input type="password" id="master-password" placeholder="Master Password" style="margin-bottom: 1rem;"
             onkeydown="if(event.key==='Enter') unlockVault()">
           <button onclick="unlockVault()" class="btn btn-success w-full">Unlock Vault</button>
-          <p class="text-xs" style="text-align: center; margin-top: 0.5rem; font-style: italic;">Press Enter to unlock
-          </p>
         </div>
       </div>
     </div>
@@ -747,9 +744,14 @@
             const savedToken = localStorage.getItem('sv_access_token');
             if (savedToken) {
               gapi.client.setToken({ access_token: savedToken });
-              document.getElementById('btn-login').classList.add('hidden');
-              document.getElementById('master-key-area').classList.remove('hidden');
-              document.getElementById('master-password').focus();
+              gapi.client.drive.about.get({ fields: 'user' }).then(() => {
+                document.getElementById('btn-login').classList.add('hidden');
+                document.getElementById('master-key-area').classList.remove('hidden');
+                document.getElementById('master-password').focus();
+              }).catch(err => {
+                localStorage.removeItem('sv_access_token');
+                initGoogleAuth();
+              });
             } else {
               initGoogleAuth();
             }
@@ -793,16 +795,24 @@
 
         try {
           encryptionKey = await deriveKey(pass);
+
           await loadFromCloud();
+
           document.getElementById('login-screen').classList.add('hidden');
           notify("Vault Unlocked");
           showDashboard();
         } catch (e) {
-          notify("Failed to unlock. Wrong password or no connection.");
+          console.error(e);
+          if (e.status === 401 || (e.result && e.result.error && e.result.error.code === 401)) {
+            notify("Session expired. Please login again.");
+            localStorage.removeItem('sv_access_token');
+            setTimeout(() => location.reload(), 1500);
+          } else {
+            notify("Failed to unlock. Wrong password or connection issue.");
+          }
         }
       }
 
-      // Encryption Helpers
       async function deriveKey(password) {
         const encoder = new TextEncoder();
         const baseKey = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveKey"]);
@@ -836,13 +846,25 @@
       // Cloud Operations
       async function loadFromCloud() {
         document.getElementById('sync-status').textContent = "Syncing...";
-        const list = await gapi.client.drive.files.list({ q: "name = 'sv_vault_v2.json' and trashed = false" });
-        const files = list.result.files;
-        if (files.length > 0) {
+
+        const response = await gapi.client.drive.files.list({
+          q: "name = 'sv_vault_v2.json' and trashed = false"
+        });
+
+        const files = response.result.files;
+        if (files && files.length > 0) {
           fileId = files[0].id;
-          const resp = await gapi.client.drive.files.get({ fileId: fileId, alt: 'media' });
-          vaultData = await decrypt(resp.body);
-          document.getElementById('sync-status').textContent = "Synced";
+          const resp = await gapi.client.drive.files.get({
+            fileId: fileId,
+            alt: 'media'
+          });
+
+          try {
+            vaultData = await decrypt(resp.body);
+            document.getElementById('sync-status').textContent = "Synced";
+          } catch (decryptError) {
+            throw new Error("DECRYPTION_FAILED");
+          }
         } else {
           vaultData = { sections: [] };
           document.getElementById('sync-status').textContent = "New Vault";
@@ -930,7 +952,7 @@
                             <label class="field-label">${f.label}</label>
                             <div class="field-value-container">
                                 <input type="text" value="${f.value}" readonly class="field-value">
-                                <button onclick="copyText('${f.value}')" class="action-link link-edit" style="border: none; background: none; font-size: 0.75rem;">Copy</button>
+                                <button onclick="copyText('${f.value}')" class="action-link link-edit" style="border: none; background: none; font-size: 0.75rem;">📋</button>
                             </div>
                         </div>
                     `;
@@ -938,8 +960,8 @@
 
           card.innerHTML = fieldsHtml + `
                     <div class="card-actions">
-                        <span onclick="showEditItemModal(${idx})" class="action-link link-edit">Edit</span>
-                        <span onclick="deleteItem(${idx})" class="action-link link-delete">Delete</span>
+                        <span onclick="showEditItemModal(${idx})" class="action-link link-edit"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path> </svg></span>
+                        <span onclick="deleteItem(${idx})" class="action-link link-delete">🗑️</span>
                     </div>
                 `;
           grid.appendChild(card);
