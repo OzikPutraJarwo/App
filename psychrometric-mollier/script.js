@@ -736,24 +736,58 @@ function addPoint(t, w) {
   selectPoint(pt.id);
 }
 
+function clearSelections() {
+  document.querySelectorAll(".list-item.active").forEach((item) => {
+    item.classList.remove("active");
+  });
+  document.querySelectorAll("#zones-layer polygon").forEach((zone) => {
+    zone.classList.remove("selected");
+  })
+  document
+    .querySelectorAll("#points-layer .selected")
+    .forEach((selectedPoint) => {
+      selectedPoint.classList.remove("selected");
+    });
+  document
+    .querySelectorAll("#zones-layer .selected")
+    .forEach((selectedZone) => {
+      selectedZone.classList.remove("selected");
+    });
+}
+
 function selectPoint(id) {
+  let element = this.event.target;
+  let parent = element.closest('.active');
+  if (parent) {
+    clearSelections();
+    return;
+  }
   State.selectedPointId = id;
   State.selectedZoneId = null;
   updateLists();
   drawChart();
 }
+
 function selectZone(id) {
+  let element = this.event.target;
+  let parent = element.closest('.active');
+  if (parent) {
+    clearSelections();
+    return;
+  }
   State.selectedZoneId = id;
   State.selectedPointId = null;
   updateLists();
   drawChart();
 }
+
 function deletePoint(e, id) {
   e.stopPropagation();
   State.points = State.points.filter((p) => p.id !== id);
   updateLists();
   drawChart();
 }
+
 function deleteZone(e, id) {
   e.stopPropagation();
   State.zones = State.zones.filter((z) => z.id !== id);
@@ -888,6 +922,7 @@ const chartWrapper = document.getElementById("chart-wrapper");
 const svgContainer = d3
   .select("#chart-container")
   .append("svg")
+  .attr("style", "background: #fff")
   .attr("width", "100%")
   .attr("height", "100%");
 svgContainer
@@ -899,11 +934,18 @@ const svg = svgContainer
   .append("g")
   .attr("transform", `translate(${margin.left},${margin.top})`);
 
-const axesLayer = svg.append("g");
-const linesLayer = svg.append("g").attr("clip-path", "url(#chart-clip)");
-const zoneLayer = svg.append("g").attr("clip-path", "url(#chart-clip)");
-const pointLayer = svg.append("g").attr("clip-path", "url(#chart-clip)");
+// 1. Layer Grid (Paling Bawah - agar garis grid ada di belakang kurva)
+const gridLayer = svg.append("g"); 
+
+// 2. Layer Kurva & Data
+const linesLayer = svg.append("g").attr("clip-path", "url(#chart-clip)").attr("id", "lines-layer");
+const zoneLayer = svg.append("g").attr("clip-path", "url(#chart-clip)").attr("id", "zones-layer");
+const pointLayer = svg.append("g").attr("clip-path", "url(#chart-clip)").attr("id", "points-layer");
 const labelLayer = svg.append("g");
+
+// 3. Layer Axis/Border (Paling Atas - agar garis tepi menimpa kurva)
+const axesLayer = svg.append("g");
+
 const overlay = svg
   .append("rect")
   .attr("width", "100%")
@@ -911,9 +953,7 @@ const overlay = svg
   .attr("fill", "transparent")
   .style("pointer-events", "all");
 
-// ==========================================
 // FUNGSI KONVERSI ABSOLUTE HUMIDITY
-// ==========================================
 
 // Fungsi untuk menghitung Absolute Humidity (g/m³) dari t, w, dan Patm
 function calculateAbsoluteHumidity(t, w, Patm) {
@@ -947,9 +987,7 @@ function getWFromAbsoluteHumidity(t, ah, Patm) {
   return wMid;
 }
 
-// ==========================================
 // UPDATE FUNGSI RENDERING CHART
-// ==========================================
 
 // Fungsi untuk mendapatkan nilai Y berdasarkan tipe sumbu Y
 function getYValue(t, w, Patm) {
@@ -1002,6 +1040,12 @@ function drawChart() {
   if (w < 0 || h < 0) return;
 
   d3.select("#chart-clip rect").attr("width", w).attr("height", h);
+
+  overlay
+    .attr("width", w)
+    .attr("height", h)
+    .attr("x", 0)
+    .attr("y", 0);
 
   // Validasi input
   const minTInput = document.getElementById("minTemp");
@@ -1108,26 +1152,54 @@ function drawChart() {
   updateAxisLabels();
 
   // GRID & AXES
+  gridLayer.selectAll("*").remove();
+
+  // Grid X (Vertikal)
+  gridLayer
+    .append("g")
+    .attr("transform", `translate(0,${h})`)
+    .call(
+      d3.axisBottom(x).ticks(10).tickSize(-h).tickFormat("") // Kosongkan teks agar tidak duplikat/tebal
+    )
+    .call((g) => g.select(".domain").remove()) // Hapus garis border di layer grid (biar tidak dobel)
+    .selectAll("line")
+    .attr("class", "grid-line")
+    .attr("stroke-opacity", 0.5); // Opsional: buat grid sedikit transparan
+
+  // Grid Y (Horizontal)
+  gridLayer
+    .append("g")
+    .call(
+      d3.axisLeft(y).ticks(10).tickSize(-w).tickFormat("") // Kosongkan teks
+    )
+    .call((g) => g.select(".domain").remove()) // Hapus garis border di layer grid
+    .selectAll("line")
+    .attr("class", "grid-line")
+    .attr("stroke-opacity", 0.5);
+
+  // 2. GAMBAR AXIS & BORDER (Di Layer Depan)
   axesLayer.selectAll("*").remove();
 
-  // X-axis (bawah)
+  // Axis X (Border Bawah & Angka)
   axesLayer
     .append("g")
     .attr("transform", `translate(0,${h})`)
-    .call(d3.axisBottom(x).ticks(10).tickSize(-h))
-    .selectAll("line")
-    .attr("class", "grid-line");
+    .call(d3.axisBottom(x).ticks(10)); // Tick size default, border (.domain) akan muncul
 
-  // Y-axis (kiri)
-  axesLayer
-    .append("g")
-    .call(d3.axisLeft(y).ticks(10).tickSize(-w))
-    .selectAll("line")
-    .attr("class", "grid-line");
+  // Axis Y (Border Kiri & Angka)
+  axesLayer.append("g").call(d3.axisLeft(y).ticks(10));
 
-  // Label sumbu berdasarkan tipe chart
+  // Tambahan: Border Atas dan Kanan (agar chart tertutup kotak sempurna)
+  // axesLayer
+  //   .append("rect")
+  //   .attr("width", w)
+  //   .attr("height", h)
+  //   .attr("fill", "none")
+  //   .attr("stroke", "black")
+  //   .style("pointer-events", "none");
+
+  // LABEL SUMBU (Tetap di axesLayer agar paling atas)
   if (State.chartType === "psychrometric") {
-    // Psychrometric labels
     axesLayer
       .append("text")
       .attr("class", "axis-label x")
@@ -1140,15 +1212,22 @@ function drawChart() {
       .attr("transform", "rotate(-90)")
       .attr("x", -h / 2)
       .attr("y", -45)
-      .text("Humidity Ratio (kg/kg)");
+      .text(
+        State.yAxisType === "absoluteHumidity"
+          ? "Absolute Humidity (g/m³)"
+          : "Humidity Ratio (kg/kg)"
+      );
   } else {
-    // Mollier labels
     axesLayer
       .append("text")
       .attr("class", "axis-label x")
       .attr("x", w / 2)
       .attr("y", h + 45)
-      .text("Humidity Ratio (kg/kg)");
+      .text(
+        State.yAxisType === "absoluteHumidity"
+          ? "Absolute Humidity (g/m³)"
+          : "Humidity Ratio (kg/kg)"
+      );
     axesLayer
       .append("text")
       .attr("class", "axis-label y")
@@ -1294,7 +1373,7 @@ function drawChart() {
       .attr("class", isSelected ? "user-point selected" : "user-point")
       .attr("cx", cx)
       .attr("cy", cy)
-      .attr("r", isSelected ? 8 : 6);
+      .attr("r", 6);
 
     // Posisi label
     const labelX = cx > w * 0.8 ? cx - 15 : cx + 10;
@@ -2033,6 +2112,10 @@ function renderSmartLabels(
     let xPos, yPos, anchor, alignment;
     let rotate = false;
 
+    const
+      left = -10,
+      bottom = 20;
+
     // Untuk mode Absolute Humidity
     if (State.yAxisType === "absoluteHumidity" && d.ahValue !== undefined) {
       if (chartType === "psychrometric") {
@@ -2048,13 +2131,13 @@ function renderSmartLabels(
           anchor = "middle";
           alignment = "baseline";
         } else if (position === "left") {
-          xPos = -8;
+          xPos = left;
           yPos = d.pos; // d.pos adalah y(ah)
           anchor = "end";
           alignment = "middle";
         } else if (position === "bottom") {
           xPos = d.pos; // d.pos adalah x(te)
-          yPos = height + 15;
+          yPos = height + bottom;
           anchor = "middle";
           alignment = "hanging";
         }
@@ -2071,14 +2154,14 @@ function renderSmartLabels(
           anchor = "middle";
           alignment = "baseline";
         } else if (position === "left") {
-          xPos = -8;
+          xPos = left;
           yPos = d.pos; // d.pos adalah y(tValue)
           anchor = "end";
           alignment = "middle";
           rotate = true;
         } else if (position === "bottom") {
           xPos = d.pos; // d.pos adalah x(ah) untuk specific volume
-          yPos = height + 15;
+          yPos = height + bottom;
           anchor = "middle";
           alignment = "hanging";
         }
@@ -2092,7 +2175,7 @@ function renderSmartLabels(
         alignment = "middle";
       } else if (position === "bottom") {
         xPos = d.pos;
-        yPos = height + 15;
+        yPos = height + bottom;
         anchor = "middle";
         alignment = "hanging";
       } else if (position === "top") {
@@ -2101,7 +2184,7 @@ function renderSmartLabels(
         anchor = "middle";
         alignment = "baseline";
       } else if (position === "left") {
-        xPos = -8;
+        xPos = left;
         yPos = d.pos;
         anchor = "end";
         alignment = "middle";
@@ -2141,5 +2224,59 @@ function renderSmartLabels(
 updateLists();
 drawChart();
 window.addEventListener("resize", drawChart);
+
+// ==========================================
+// 4. DOWNLOAD
+// ==========================================
+
+function downloadSvgAsPng(svgSelector, fileName = 'image.png', scale = 3) {
+  const originalSvg = document.querySelector(svgSelector);
+  const clonedSvg = originalSvg.cloneNode(true);
+  const { width, height } = originalSvg.getBoundingClientRect();
+  
+  const scaledWidth = width * scale;
+  const scaledHeight = height * scale;
+
+  if (!originalSvg.getAttribute('viewBox')) {
+    clonedSvg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  }
+
+  clonedSvg.setAttribute('width', scaledWidth);
+  clonedSvg.setAttribute('height', scaledHeight);
+
+  const styleElement = document.createElement('style');
+  let cssRules = '';
+  [...document.styleSheets].forEach(sheet => {
+    try {
+      [...sheet.cssRules].forEach(rule => { cssRules += rule.cssText; });
+    } catch (e) {}
+  });
+  styleElement.textContent = cssRules;
+  clonedSvg.prepend(styleElement);
+
+  const svgData = new XMLSerializer().serializeToString(clonedSvg);
+  const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(svgBlob);
+
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = scaledWidth;
+    canvas.height = scaledHeight;
+    const ctx = canvas.getContext('2d');
+
+    ctx.drawImage(img, 0, 0, scaledWidth, scaledHeight);
+
+    const pngUrl = canvas.toDataURL('image/png');
+    const downloadLink = document.createElement('a');
+    downloadLink.href = pngUrl;
+    downloadLink.download = fileName;
+    downloadLink.click();
+
+    URL.revokeObjectURL(url);
+  };
+
+  img.src = url;
+}
 
 ////////////////////////////////////////////////////

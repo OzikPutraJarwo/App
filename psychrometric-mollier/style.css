@@ -84,33 +84,33 @@ select {
 }
 
 .btn-danger {
-  color: #d32f2f;
-  border-color: #ffcdd2;
-  background: #ffebee;
+  color: #d32f2f !important;
+  border-color: #ffcdd2 !important;
+  background: #ffebee !important;
 }
 
 .btn-danger:hover {
-  background: #ffcdd2;
+  background: #ffcdd2 !important;
 }
 
 .btn-primary {
-  background: var(--blue-hover);
-  color: white;
-  border: none;
+  background: var(--blue-hover) !important;
+  color: white !important;
+  border: none !important;
 }
 
 .btn-primary:hover {
-  background: var(--blue);
+  background: var(--blue) !important;
 }
 
 .btn-secondary {
-  background: var(--green-hover);
-  color: white;
-  border: none;
+  background: var(--green-hover) !important;
+  color: white !important;
+  border: none !important;
 }
 
 .btn-secondary:hover {
-  background: var(--green);
+  background: var(--green) !important;
 }
 
 /* Chart Type */
@@ -421,6 +421,10 @@ select {
 }
 
 /* SVG & Lines */
+#chart-container svg {
+  background-color: white;
+}
+
 .axis-label,
 .label-text {
   font-size: 11px;
