@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="../main.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
 
   </head>
 
@@ -135,10 +136,15 @@
 
               <div class="toolbar-group">
                 <div class="toolbar-button">
-                  <button class="tool-btn active" id="btn-view" onclick="setMode('view')"><span>👁️
-                      Explore</span></button>
-                  <button class="tool-btn" id="btn-point" onclick="setMode('point')"><span>📍 Point</span></button>
-                  <button class="tool-btn" id="btn-zone" onclick="setMode('zone')"><span>📐 Zone</span></button>
+                  <button class="tool-btn active" id="btn-view" onclick="setMode('view')">
+                    <span><span class="material-symbols-rounded"> explore </span> Explore</span>
+                  </button>
+                  <button class="tool-btn" id="btn-point" onclick="setMode('point')">
+                    <span><span class="material-symbols-rounded"> pin_drop </span> Point</span>
+                  </button>
+                  <button class="tool-btn" id="btn-zone" onclick="setMode('zone')">
+                    <span><span class="material-symbols-rounded"> add_triangle </span> Zone</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -323,8 +329,18 @@
               <div id="list-zones"></div>
             </div>
 
-            <button class="tool-btn btn-danger" onclick="clearAllData()" style="margin-top:20px;">🗑 Clear All Data</button>
-            <button class="tool-btn btn-primary" onclick="downloadSvgAsPng('#chart-container svg', 'chart.png', 3)">Download</button>
+            <div class="chart-actions">
+              <button class="tool-btn btn-primary" onclick="downloadSvgAsPng('#chart-container svg', 'chart.png', 3)">
+                <span>
+                  <span class="material-symbols-rounded"> download </span> Download
+                </span>
+              </button>
+              <button class="tool-btn btn-danger" onclick="clearAllData()">
+                <span>
+                  <span class="material-symbols-rounded"> delete_forever </span> Clear All
+                </span>
+              </button>
+            </div>
           </div>
         </div>
 

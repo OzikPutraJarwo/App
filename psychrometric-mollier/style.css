@@ -113,6 +113,23 @@ select {
   background: var(--green) !important;
 }
 
+.tool-btn>span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.tool-btn>span .material-symbols-rounded {
+  font-size: 18px;
+}
+
+.chart-actions {
+  display: grid;
+  grid-template-columns: 1fr 100px;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
 /* Chart Type */
 
 .chart-type {
