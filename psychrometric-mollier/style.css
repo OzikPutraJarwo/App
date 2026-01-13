@@ -378,8 +378,12 @@ select {
   transform: scale(1.1);
 }
 
-.icon-btn img {
-  width: 17px;
+.icon-btn span {
+  font-size: 17px;
+}
+
+.icon-btn.btn-delete span {
+  color: var(--red-hover);
 }
 
 /* Expanded Details */

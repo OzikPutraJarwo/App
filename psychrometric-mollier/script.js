@@ -583,7 +583,7 @@ function updateRangeZone() {
 function setMode(mode) {
   State.mode = mode;
   document
-    .querySelectorAll(".tool-btn")
+    .querySelectorAll(".toolbar .tool-btn")
     .forEach((b) => b.classList.remove("active"));
   if (document.getElementById("btn-" + mode))
     document.getElementById("btn-" + mode).classList.add("active");
@@ -675,12 +675,12 @@ function updateLists() {
                     <div class="icon-btn" onclick="openEditModal('point', ${
                       p.id
                     })">
-                      <img src="../icon/gear.png">
+                      <span class="material-symbols-rounded"> edit_square </span>
                     </div>
                     <div class="icon-btn btn-delete" onclick="deletePoint(event, ${
                       p.id
                     })">
-                      <img src="../icon/trash.png">
+                      <span class="material-symbols-rounded"> delete </span>
                     </div>
                 </div>
             </div>
@@ -712,12 +712,12 @@ function updateLists() {
                     <div class="icon-btn" onclick="openEditModal('zone', ${
                       z.id
                     })">
-                      <img src="../icon/gear.png">
+                      <span class="material-symbols-rounded"> edit_square </span>
                     </div>
                     <div class="icon-btn btn-delete" onclick="deleteZone(event, ${
                       z.id
                     })">
-                      <img src="../icon/trash.png">
+                      <span class="material-symbols-rounded"> delete </span>
                     </div>
                 </div>
             </div>
