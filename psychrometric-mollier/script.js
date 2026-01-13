@@ -312,11 +312,19 @@ function changeYAxisType(type) {
   State.yAxisType = type;
   drawChart();
 
-  // Update UI aktif
-  document.querySelectorAll("#yAxisType option").forEach((option) => {
-    option.selected = option.value === type;
-  });
   updateAxisLabels();
+
+  if (State.yAxisType === "humidityRatio") {
+    document
+      .querySelector(".yAxis-type .humidityRatio")
+      .classList.add("active");
+    document.querySelector(".yAxis-type .absoluteHumidity").classList.remove("active");
+  } else {
+    document.querySelector(".yAxis-type .absoluteHumidity").classList.add("active");
+    document
+      .querySelector(".yAxis-type .humidityRatio")
+      .classList.remove("active");
+  }
 }
 
 // Konfigurasi batas slider untuk tiap parameter
@@ -940,7 +948,6 @@ const gridLayer = svg.append("g");
 // 2. Layer Kurva & Data
 const linesLayer = svg.append("g").attr("clip-path", "url(#chart-clip)").attr("id", "lines-layer");
 const zoneLayer = svg.append("g").attr("clip-path", "url(#chart-clip)").attr("id", "zones-layer");
-const pointLayer = svg.append("g").attr("clip-path", "url(#chart-clip)").attr("id", "points-layer");
 const labelLayer = svg.append("g");
 
 // 3. Layer Axis/Border (Paling Atas - agar garis tepi menimpa kurva)
@@ -952,6 +959,8 @@ const overlay = svg
   .attr("height", "100%")
   .attr("fill", "transparent")
   .style("pointer-events", "all");
+
+  const pointLayer = svg.append("g").attr("clip-path", "url(#chart-clip)").attr("id", "points-layer");
 
 // FUNGSI KONVERSI ABSOLUTE HUMIDITY
 
@@ -1386,7 +1395,10 @@ function drawChart() {
       .attr("y", labelY)
       .text(p.name)
       .style("pointer-events", "none")
-      .style("text-anchor", cx > w * 0.8 ? "end" : "start");
+      .style("text-anchor", cx > w * 0.8 ? "end" : "start")
+      .attr("onclick", "selectPoint(" + p.id + ")");
+
+      console.log(p)
   });
 
   // Interaksi mouse - sesuaikan dengan tipe chart
@@ -1518,85 +1530,85 @@ function handleChartClick(e, x, y, minT, maxT, maxH, Patm) {
 function generateHTMLGrid(d) {
   return `
         <div class="detail-row">
-            <span class="det-label">Dry Bulb Temperature</span>
+            <span class="det-label"><span class="material-symbols-rounded"> thermometer </span> Dry Bulb Temperature</span>
             <span class="det-abbr">Tdb</span>
             <span>:</span>
             <span class="det-val">${d.Tdb.toFixed(1)} °C</span>
         </div>
         <div class="detail-row">
-            <span class="det-label">Humidity Ratio</span>
+            <span class="det-label"><span class="material-symbols-rounded"> water_do </span> Humidity Ratio</span>
             <span class="det-abbr">W</span>
             <span>:</span>
             <span class="det-val">${d.W.toFixed(4)} kg/kg</span>
         </div>
         <div class="detail-row">
-            <span class="det-label">Relative Humidity</span>
+            <span class="det-label"><span class="material-symbols-rounded"> humidity_percentage </span> Relative Humidity</span>
             <span class="det-abbr">RH</span>
             <span>:</span>
-            <span class="det-val">${d.RH.toFixed(1)} %</span>
+            <span class="det-val">${d.RH.toFixed(1)}%</span>
         </div>
         <div class="detail-row">
-            <span class="det-label">Wet Bulb Temperature</span>
+            <span class="det-label"><span class="material-symbols-rounded"> device_thermostat </span> Wet Bulb Temperature</span>
             <span class="det-abbr">Twb</span>
             <span>:</span>
             <span class="det-val">${d.Twb.toFixed(1)} °C</span>
         </div>
         <div class="detail-row">
-            <span class="det-label">Dew Point Temperature</span>
+            <span class="det-label"><span class="material-symbols-rounded"> water_drop </span> Dew Point Temperature</span>
             <span class="det-abbr">Tdp</span>
             <span>:</span>
             <span class="det-val">${d.Tdp.toFixed(1)} °C</span>
         </div>
         <div class="detail-row">
-            <span class="det-label">Enthalpy</span>
+            <span class="det-label"><span class="material-symbols-rounded"> local_fire_department </span> Enthalpy</span>
             <span class="det-abbr">h</span>
             <span>:</span>
             <span class="det-val">${d.h.toFixed(1)} kJ/kg</span>
         </div>
         <div class="detail-row">
-            <span class="det-label">Specific Volume</span>
+            <span class="det-label"><span class="material-symbols-rounded"> open_in_full </span> Specific Volume</span>
             <span class="det-abbr">v</span>
             <span>:</span>
             <span class="det-val">${d.v.toFixed(3)} c</span>
         </div>
         <div class="detail-row">
-            <span class="det-label">Density</span>
+            <span class="det-label"><span class="material-symbols-rounded"> layers </span> Density</span>
             <span class="det-abbr">ρ</span>
             <span>:</span>
             <span class="det-val">${d.rho.toFixed(2)} kg/m³</span>
         </div>
         <div class="detail-row">
-            <span class="det-label">Partial Pressure of Water Vapor</span>
+            <span class="det-label"><span class="material-symbols-rounded"> speed </span> Partial Pressure of Water Vapor</span>
             <span class="det-abbr">Pw</span>
             <span>:</span>
             <span class="det-val">${d.Pw.toFixed(0)} Pa</span>
         </div>
         <div class="detail-row">
-            <span class="det-label">Saturation Pressure of Water Vapor</span>
+            <span class="det-label"><span class="material-symbols-rounded"> speed </span> Saturation Pressure of Water Vapor</span>
             <span class="det-abbr">Pws</span>
             <span>:</span>
             <span class="det-val">${d.Pws.toFixed(0)} Pa</span>
         </div>
         <div class="detail-row">
-            <span class="det-label">Moisture Content</span>
+            <span class="det-label"><span class="material-symbols-rounded"> water </span> Moisture Content</span>
             <span class="det-abbr">μ</span>
             <span>:</span>
-            <span class="det-val">${d.mu.toFixed(1)} %</span>
+            <span class="det-val">${d.mu.toFixed(1)}%</span>
         </div>
         <div class="detail-row">
-            <span class="det-label">Specific Heat Capacity</span>
+            <span class="det-label"><span class="material-symbols-rounded"> heat </span> Specific Heat Capacity</span>
             <span class="det-abbr">Cp</span>
             <span>:</span>
             <span class="det-val">${d.cp.toFixed(3)} kJ/(kg·°C)</span>
         </div>
         <div class="detail-row">
-            <span class="det-label">Vapor Pressure Deficit</span>
+            <span class="det-label"><span class="material-symbols-rounded"> trending_down </span> Vapor Pressure Deficit</span>
             <span class="det-abbr">VPD</span>
             <span>:</span>
             <span class="det-val">${d.VPD.toFixed(2)} Pa</span>
         </div>
         <div class="detail-row">
-            <span class="det-label">Humidity Deficit</span>
+            <span class="det-label"><span class="material-symbols-rounded"> water_drop </span> Humidity Deficit</span>
             <span class="det-abbr">HD</span>
             <span>:</span>
             <span class="det-val">${d.HD.toFixed(2)} kg/kg</span>
