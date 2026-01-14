@@ -233,18 +233,30 @@ const Psychro = {
   },
 };
 
+function getFrostPoint(Pw) {
+  // Magnus-type equation for ice
+  const lnRatio = Math.log(Pw / 611.2);
+  return (272.62 * lnRatio) / (22.46 - lnRatio);
+}
+
+
 function calculateAllProperties(t, w, Patm) {
   const Pws = Psychro.getSatVapPres(t);
   const Pw = Psychro.getPwFromW(w, Patm);
   const Wsat = Psychro.getWFromPw(Pws, Patm);
   const vpdVal = Pws - Pw;
   const hdVal = Wsat - w;
+  const v = Psychro.getSpecificVolume(t, w, Patm);
+  const ahVal = (w / v) * 1000;
+  const Tdp = Psychro.getDewPoint(Pw);
+  const Tf = Tdp >= 0 ? Tdp : getFrostPoint(Pw);
+
   return {
     Tdb: t,
     W: w,
     RH: (Pw / Pws) * 100,
     Twb: Psychro.getTwbFromState(t, w, Patm),
-    Tdp: Psychro.getDewPoint(Pw),
+    Tdp: Tdp,
     h: Psychro.getEnthalpy(t, w),
     v: Psychro.getSpecificVolume(t, w, Patm),
     rho: (1 + w) / Psychro.getSpecificVolume(t, w, Patm),
@@ -255,6 +267,11 @@ function calculateAllProperties(t, w, Patm) {
     Wsat: Wsat,
     VPD: vpdVal,
     HD: hdVal,
+    AH: ahVal,
+    PD: t - Psychro.getTwbFromState(t, w, Patm),
+    VMR: (Pw / (Patm - Pw)) * 1000000,
+    Dvs: 1000 * Pws / (461.5 * (t + 273.15)),
+    Tf: Tf,
   };
 }
 
@@ -688,7 +705,14 @@ function updateLists() {
         </div>`
       )
       .join("") ||
-    '<div style="font-size:10px;text-align:center;color:#999;padding:10px">No points</div>';
+    `
+      <div style="font-size:10px;text-align:center;color:#999;padding:10px">No points</div>
+      <style>
+        .marked-point {display:none}
+        .comfort-zone + .chart-actions {grid-template-columns:1fr}
+        .comfort-zone + .chart-actions :nth-child(2) {display:none}
+      </style>
+    `;
 
   // 2. RENDER ZONES (Update onclick ke openEditModal)
   const zl = document.getElementById("list-zones");
@@ -724,7 +748,14 @@ function updateLists() {
         </div>`
       )
       .join("") ||
-    '<div style="font-size:10px;text-align:center;color:#999;padding:10px">No zones</div>';
+    `
+      <div style="font-size:10px;text-align:center;color:#999;padding:10px">No zones</div> 
+      <style>
+        .comfort-zone {display:none}
+        .comfort-zone + .chart-actions {grid-template-columns:1fr}
+        .comfort-zone + .chart-actions :nth-child(2) {display:none}
+      </style>
+    `;
 }
 
 function addPoint(t, w) {
@@ -1529,89 +1560,151 @@ function handleChartClick(e, x, y, minT, maxT, maxH, Patm) {
 
 function generateHTMLGrid(d) {
   return `
+
+        <!-- TEMPERATURES -->
         <div class="detail-row">
             <span class="det-label"><span class="material-symbols-rounded"> thermometer </span> Dry Bulb Temperature</span>
             <span class="det-abbr">Tdb</span>
             <span>:</span>
-            <span class="det-val">${d.Tdb.toFixed(1)} °C</span>
+            <span class="det-val">${d.Tdb.toFixed(2)} °C</span>
         </div>
+
+        <div class="detail-row">
+            <span class="det-label"><span class="material-symbols-rounded"> device_thermostat </span> Wet Bulb Temperature</span>
+            <span class="det-abbr">Twb</span>
+            <span>:</span>
+            <span class="det-val">${d.Twb.toFixed(2)} °C</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="det-label"><span class="material-symbols-rounded"> water_drop </span> Dew Point Temperature</span>
+            <span class="det-abbr">Tdp</span>
+            <span>:</span>
+            <span class="det-val">${d.Tdp.toFixed(2)} °C</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="det-label"><span class="material-symbols-rounded"> ac_unit </span> Frost Point Temperature</span>
+            <span class="det-abbr">Tf</span>
+            <span>:</span>
+            <span class="det-val">${d.Tf.toFixed(2)} °C</span>
+        </div>
+
+
+        <!-- MOISTURE -->
         <div class="detail-row">
             <span class="det-label"><span class="material-symbols-rounded"> water_do </span> Humidity Ratio</span>
             <span class="det-abbr">W</span>
             <span>:</span>
             <span class="det-val">${d.W.toFixed(4)} kg/kg</span>
         </div>
+
         <div class="detail-row">
             <span class="det-label"><span class="material-symbols-rounded"> humidity_percentage </span> Relative Humidity</span>
             <span class="det-abbr">RH</span>
             <span>:</span>
-            <span class="det-val">${d.RH.toFixed(1)}%</span>
+            <span class="det-val">${d.RH.toFixed(2)} %</span>
         </div>
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> device_thermostat </span> Wet Bulb Temperature</span>
-            <span class="det-abbr">Twb</span>
-            <span>:</span>
-            <span class="det-val">${d.Twb.toFixed(1)} °C</span>
-        </div>
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> water_drop </span> Dew Point Temperature</span>
-            <span class="det-abbr">Tdp</span>
-            <span>:</span>
-            <span class="det-val">${d.Tdp.toFixed(1)} °C</span>
-        </div>
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> local_fire_department </span> Enthalpy</span>
-            <span class="det-abbr">h</span>
-            <span>:</span>
-            <span class="det-val">${d.h.toFixed(1)} kJ/kg</span>
-        </div>
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> open_in_full </span> Specific Volume</span>
-            <span class="det-abbr">v</span>
-            <span>:</span>
-            <span class="det-val">${d.v.toFixed(3)} c</span>
-        </div>
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> layers </span> Density</span>
-            <span class="det-abbr">ρ</span>
-            <span>:</span>
-            <span class="det-val">${d.rho.toFixed(2)} kg/m³</span>
-        </div>
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> speed </span> Partial Pressure of Water Vapor</span>
-            <span class="det-abbr">Pw</span>
-            <span>:</span>
-            <span class="det-val">${d.Pw.toFixed(0)} Pa</span>
-        </div>
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> speed </span> Saturation Pressure of Water Vapor</span>
-            <span class="det-abbr">Pws</span>
-            <span>:</span>
-            <span class="det-val">${d.Pws.toFixed(0)} Pa</span>
-        </div>
+
         <div class="detail-row">
             <span class="det-label"><span class="material-symbols-rounded"> water </span> Moisture Content</span>
             <span class="det-abbr">μ</span>
             <span>:</span>
-            <span class="det-val">${d.mu.toFixed(1)}%</span>
+            <span class="det-val">${d.mu.toFixed(2)} %</span>
         </div>
+
+
+        <!-- ENERGY & THERMOPHYSICAL -->
+        <div class="detail-row">
+            <span class="det-label"><span class="material-symbols-rounded"> local_fire_department </span> Enthalpy</span>
+            <span class="det-abbr">h</span>
+            <span>:</span>
+            <span class="det-val">${d.h.toFixed(2)} kJ/kg</span>
+        </div>
+
         <div class="detail-row">
             <span class="det-label"><span class="material-symbols-rounded"> heat </span> Specific Heat Capacity</span>
             <span class="det-abbr">Cp</span>
             <span>:</span>
             <span class="det-val">${d.cp.toFixed(3)} kJ/(kg·°C)</span>
         </div>
+
+        <div class="detail-row">
+            <span class="det-label"><span class="material-symbols-rounded"> open_in_full </span> Specific Volume</span>
+            <span class="det-abbr">v</span>
+            <span>:</span>
+            <span class="det-val">${d.v.toFixed(3)} m³/kg</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="det-label"><span class="material-symbols-rounded"> layers </span> Density</span>
+            <span class="det-abbr">ρ</span>
+            <span>:</span>
+            <span class="det-val">${d.rho.toFixed(2)} kg/m³</span>
+        </div>
+
+
+        <!-- PRESSURE -->
+        <div class="detail-row">
+            <span class="det-label"><span class="material-symbols-rounded"> speed </span> Vapor Partial Pressure</span>
+            <span class="det-abbr">Pw</span>
+            <span>:</span>
+            <span class="det-val">${d.Pw.toFixed(0)} Pa</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="det-label"><span class="material-symbols-rounded"> speed </span> Saturation Vapor Pressure</span>
+            <span class="det-abbr">Pws</span>
+            <span>:</span>
+            <span class="det-val">${d.Pws.toFixed(0)} Pa</span>
+        </div>
+
+
+        <!-- DEFICITS -->
         <div class="detail-row">
             <span class="det-label"><span class="material-symbols-rounded"> trending_down </span> Vapor Pressure Deficit</span>
             <span class="det-abbr">VPD</span>
             <span>:</span>
             <span class="det-val">${d.VPD.toFixed(2)} Pa</span>
         </div>
+
         <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> water_drop </span> Humidity Deficit</span>
+            <span class="det-label"><span class="material-symbols-rounded"> compare_arrows </span> Humidity Deficit</span>
             <span class="det-abbr">HD</span>
             <span>:</span>
-            <span class="det-val">${d.HD.toFixed(2)} kg/kg</span>
+            <span class="det-val">${d.HD.toFixed(4)} kg/kg</span>
+        </div>
+
+
+        <!-- CONCENTRATIONS -->
+        <div class="detail-row">
+            <span class="det-label"><span class="material-symbols-rounded"> water_drop </span> Absolute Humidity</span>
+            <span class="det-abbr">AH</span>
+            <span>:</span>
+            <span class="det-val">${d.AH.toFixed(2)} g/m³</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="det-label"><span class="material-symbols-rounded"> water_drop </span> Saturation Vapor Concentration</span>
+            <span class="det-abbr">Dvs</span>
+            <span>:</span>
+            <span class="det-val">${d.Dvs.toFixed(2)} g/m³</span>
+        </div>
+
+        <div class="detail-row">
+            <span class="det-label"><span class="material-symbols-rounded"> science </span> Volume Mixing Ratio (dry)</span>
+            <span class="det-abbr">VMR</span>
+            <span>:</span>
+            <span class="det-val">${d.VMR.toFixed(2)} ppm</span>
+        </div>
+
+
+        <!-- DIFFERENCE -->
+        <div class="detail-row">
+            <span class="det-label"><span class="material-symbols-rounded"> difference </span> Psychrometric Difference</span>
+            <span class="det-abbr">PD</span>
+            <span>:</span>
+            <span class="det-val">${d.PD.toFixed(2)} °C</span>
         </div>
     `;
 }
