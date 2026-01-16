@@ -2,6 +2,7 @@
 <html lang="en">
 
   <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Psychrometric - Mollier</title>
@@ -83,8 +84,9 @@
 
       <div class="main wrap">
 
-        <div class="controls-section item">
-          <div class="controls-scroll">
+        <div class="controls-section">
+
+          <div class="controls-scroll item">
 
             <h3>Chart Settings</h3>
 
@@ -117,17 +119,14 @@
                   <input type="number" id="maxTemp" value="50" oninput="drawChart()">
                 </div>
               </div>
-              <div class="input-item">
-                <label><span class="material-symbols-rounded"> water_do </span> Max Hum Ratio (kg/kg)</label>
-                <input type="number" id="maxHum" value="0.030" step="0.001" oninput="drawChart()">
-              </div>
+
               <div class="input-item">
                 <label><span class="material-symbols-rounded"> line_axis </span> Y-axis Type</label>
                 <div class="toolbar-button c2 yAxis-type">
                   <button class="tool-btn humidityRatio active" value="humidityRatio" onclick="changeYAxisType(this.value)">
                     <span>
                       <span class="material-symbols-rounded"> water_do </span>
-                      <span>Humidity Ratio (kg/kg)</span>
+                      <span>Humidity Ratio (kg/kg')</span>
                     </span>
                   </button>
                   <button class="tool-btn absoluteHumidity" value="absoluteHumidity" onclick="changeYAxisType(this.value)">
@@ -138,12 +137,62 @@
                   </button>
                 </div>
               </div>
+              <div class="input-item ratio">
+                <label><span class="material-symbols-rounded"> water_do </span> Max Humidity Ratio (kg/kg')</label>
+                <input type="number" id="maxHum" value="0.030" step="0.001" min="0.001" oninput="syncHumidityInputs('ratio')">
+              </div>
+              <div class="input-item absolute none">
+                <label><span class="material-symbols-rounded"> salinity </span> Max Absolute Humidity (g/m³)</label>
+                <input type="number" id="maxAbsHum" value="31" step="1" oninput="syncHumidityInputs('absolute')">
+              </div>
+
+              <div class="input-item item-border advanced-settings">
+                <h4>Advanced Settings</h4>
+                <div class="setting-legend">
+                  <div class="settype-checkbox">
+                    <input type="checkbox" name="set-show-legend" id="set-show-legend" checked>
+                    <label for="set-show-legend">Show Legend</label>
+                  </div>
+                  <div class="settype-checkbox child">
+                    <input type="checkbox" name="set-show-rh" id="set-show-rh" checked>
+                    <label for="set-show-rh">Relative Humidity</label>
+                  </div>
+                  <div class="settype-checkbox child">
+                    <input type="checkbox" name="set-show-h" id="set-show-h" checked>
+                    <label for="set-show-h">Enthalpy</label>
+                  </div>
+                  <div class="settype-checkbox child">
+                    <input type="checkbox" name="set-show-twb" id="set-show-twb" checked>
+                    <label for="set-show-twb">Wet Bulb Temperature</label>
+                  </div>
+                  <div class="settype-checkbox child">
+                    <input type="checkbox" name="set-show-v" id="set-show-v" checked>
+                    <label for="set-show-v">Specific Volume</label>
+                  </div>
+                  <div class="settype-checkbox child">
+                    <input type="checkbox" name="set-show-sat" id="set-show-sat" checked>
+                    <label for="set-show-sat">Saturation</label>
+                  </div>
+                  <div class="settype-ratio">
+                    <label for="chart-ratio-x">Chart Ratio</label>
+                    <div>
+                      <input type="number" name="chart-ratio-x" id="chart-ratio-x" value="3">
+                      <span>/</span>
+                      <input type="number" name="chart-ratio-y" id="chart-ratio-y" value="2">
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
+          </div>
+          
+          <div class="controls-scroll item">
+
+            <h3>Toolbars</h3>
+
             <div class="toolbar">
-
-              <h4>Toolbars</h4>
-
               <div class="toolbar-group">
                 <div class="toolbar-button">
                   <button class="tool-btn active" id="btn-view" onclick="setMode('view')">
@@ -191,7 +240,7 @@
                       <option value="Tdb">Dry Bulb Temp (°C)</option>
                       <option value="Twb">Wet Bulb Temp (°C)</option>
                       <option value="RH">Rel. Humidity (%)</option>
-                      <option value="W">Humidity Ratio (kg/kg)</option>
+                      <option value="W">Humidity Ratio (kg/kg')</option>
                       <option value="h">Enthalpy (kJ/kg)</option>
                     </select>
                     <input type="number" id="p1Val-zone" step="0.1" placeholder="Value">
@@ -203,7 +252,7 @@
                       <option value="RH" selected="">Rel. Humidity (%)</option>
                       <option value="Tdb">Dry Bulb Temp (°C)</option>
                       <option value="Twb">Wet Bulb Temp (°C)</option>
-                      <option value="W">Humidity Ratio (kg/kg)</option>
+                      <option value="W">Humidity Ratio (kg/kg')</option>
                       <option value="h">Enthalpy (kJ/kg)</option>
                     </select>
                     <input type="number" id="p2Val-zone" step="0.1" placeholder="Value">
@@ -297,7 +346,7 @@
                       <option value="Tdb">Dry Bulb Temp (°C)</option>
                       <option value="Twb">Wet Bulb Temp (°C)</option>
                       <option value="RH">Rel. Humidity (%)</option>
-                      <option value="W">Humidity Ratio (kg/kg)</option>
+                      <option value="W">Humidity Ratio (kg/kg')</option>
                       <option value="h">Enthalpy (kJ/kg)</option>
                     </select>
                     <input type="number" id="p1Val-point" step="0.1" placeholder="Value">
@@ -309,7 +358,7 @@
                       <option value="RH" selected="">Rel. Humidity (%)</option>
                       <option value="Tdb">Dry Bulb Temp (°C)</option>
                       <option value="Twb">Wet Bulb Temp (°C)</option>
-                      <option value="W">Humidity Ratio (kg/kg)</option>
+                      <option value="W">Humidity Ratio (kg/kg')</option>
                       <option value="h">Enthalpy (kJ/kg)</option>
                     </select>
                     <input type="number" id="p2Val-point" step="0.1" placeholder="Value">
@@ -339,19 +388,21 @@
               <div id="list-zones"></div>
             </div>
 
-            <div class="chart-actions">
-              <button class="tool-btn btn-primary" onclick="downloadSvgAsPng('#chart-container svg', 'chart.png', 3)">
-                <span>
-                  <span class="material-symbols-rounded"> download </span> Download
-                </span>
-              </button>
-              <button class="tool-btn btn-danger" onclick="clearAllData()">
-                <span>
-                  <span class="material-symbols-rounded"> delete_forever </span> Clear All
-                </span>
-              </button>
-            </div>
           </div>
+
+          <div class="chart-actions">
+            <button class="tool-btn btn-primary" onclick="downloadSvgAsPng('#chart-container svg', 'chart.png', 3)">
+              <span>
+                <span class="material-symbols-rounded"> download </span> Download Chart
+              </span>
+            </button>
+            <!-- <button class="tool-btn btn-danger" onclick="clearAllData()">
+              <span>
+                <span class="material-symbols-rounded"> delete_forever </span> Clear All
+              </span>
+            </button> -->
+          </div>
+          
         </div>
 
         <div class="chart-section">

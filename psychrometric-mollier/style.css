@@ -1,28 +1,37 @@
 /* --- CORE LAYOUT --- */
 
+body {
+  padding-toP: 65px
+}
+
 body .wrap {
   max-width: 1700px;
 }
 
 .main {
-  display: flex;
+  display: grid;
+  grid-template-columns: 400px 1fr;
   gap: 1.5rem;
+}
+
+.chart-section {
+  aspect-ratio: 3 / 2;
+  position: sticky;
+  top: calc(65px + 2rem);
+  max-height: calc(100dvh - 65px - 4rem);
+      float: right;
+    right: 0;
+    width: 100%;
 }
 
 /* SIDEBAR & CONTROLS */
 
 .controls-section {
   width: 400px;
-  flex-direction: column;
-  flex-shrink: 0;
   overflow: hidden;
-}
-
-.controls-scroll {
-  overflow-y: auto;
-  height: calc(100dvh - 65px - 4rem);
-  margin: -1.5rem;
-  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 /* Typography & Inputs */
@@ -79,7 +88,6 @@ select {
   display: grid;
   gap: 1rem;
   grid-template-columns: 1fr 1fr 1fr;
-  margin-top: 1rem;
 }
 
 .toolbar-button.c2 {
@@ -128,9 +136,8 @@ select {
 
 .chart-actions {
   display: grid;
-  grid-template-columns: 1fr 100px;
+  grid-template-columns: 1fr;
   gap: 1rem;
-  margin-top: 1.5rem;
 }
 
 /* Chart Type */
@@ -292,7 +299,8 @@ select {
 /* LIST ITEMS (Points & Zones) */
 
 .marked-point,
-.comfort-zone {
+.comfort-zone,
+.item-border {
   border-top: 2px solid #eceff1;
   padding-top: 1.25rem;
   margin-top: 1.25rem;
@@ -340,7 +348,6 @@ select {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #78909c;
   color: white;
   display: flex;
   align-items: center;
@@ -460,12 +467,10 @@ select {
 .chart-section {
   flex: 1;
   min-width: 0;
-  position: relative;
   display: flex;
   flex-direction: column;
   background: white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  border: 1px solid #cfd8dc;
   overflow: hidden;
   border-radius: .5rem;
 }
@@ -552,7 +557,6 @@ select {
 
 /* User Interaction */
 .user-point {
-  fill: #d32f2f;
   stroke: white;
   stroke-width: 2;
   cursor: pointer;
@@ -564,7 +568,6 @@ select {
 }
 
 .user-point.selected {
-  fill: #ffeb3b;
   stroke: #263238;
   stroke-width: 2px;
   r: 6;
@@ -660,9 +663,56 @@ select {
   stroke-width: 1px;
 }
 
+.legend-title {
+  font-size: 12px;
+  fill: #2d2d2d;
+  pointer-events: none;
+  font-weight: bold;
+}
+
 .legend-text {
   font-size: 10px;
-  font-family: sans-serif;
-  fill: #546e7a;
+  fill: #6f6f6f;
   pointer-events: none;
+}
+
+/* ADVANCED SETTINGS */
+
+.advanced-settings h4 {
+  margin-bottom: 1rem;
+}
+
+.setting-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.settype-checkbox {
+  display: grid;
+  grid-template-columns: 1rem 1fr;
+  gap: 0.5rem;
+}
+
+.settype-checkbox input {
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+.settype-checkbox label {
+  margin: 0;
+  cursor: pointer;
+}
+
+.settype-ratio div {
+  display: grid;
+  grid-template-columns: 1fr 3rem 1fr;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.settype-checkbox.child {
+  margin-left: 1.5rem;
+  margin-top: -.25rem;
 }

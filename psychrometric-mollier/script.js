@@ -309,7 +309,7 @@ function updateAxisLabels() {
       if (State.yAxisType === "absoluteHumidity") {
         axisLabelY.textContent = "Absolute Humidity (g/m³)";
       } else {
-        axisLabelY.textContent = "Humidity Ratio (kg/kg)";
+        axisLabelY.textContent = "Humidity Ratio (kg/kg')";
       }
     }
   } else {
@@ -318,7 +318,7 @@ function updateAxisLabels() {
       if (State.yAxisType === "absoluteHumidity") {
         axisLabelX.textContent = "Absolute Humidity (g/m³)";
       } else {
-        axisLabelX.textContent = "Humidity Ratio (kg/kg)";
+        axisLabelX.textContent = "Humidity Ratio (kg/kg')";
       }
     }
     if (axisLabelY) axisLabelY.textContent = "Dry Bulb Temperature (°C)";
@@ -332,16 +332,40 @@ function changeYAxisType(type) {
   updateAxisLabels();
 
   if (State.yAxisType === "humidityRatio") {
-    document
-      .querySelector(".yAxis-type .humidityRatio")
-      .classList.add("active");
+    document.querySelector(".yAxis-type .humidityRatio").classList.add("active");
     document.querySelector(".yAxis-type .absoluteHumidity").classList.remove("active");
+    document.querySelector(".input-item.ratio").classList.remove("none");
+    document.querySelector(".input-item.absolute").classList.add("none");
   } else {
     document.querySelector(".yAxis-type .absoluteHumidity").classList.add("active");
-    document
-      .querySelector(".yAxis-type .humidityRatio")
-      .classList.remove("active");
+    document.querySelector(".yAxis-type .humidityRatio").classList.remove("active");
+    document.querySelector(".input-item.ratio").classList.add("none");
+    document.querySelector(".input-item.absolute").classList.remove("none");
   }
+}
+
+function syncHumidityInputs(source) {
+  const Patm = parseFloat(document.getElementById("pressure").value);
+  const maxT = parseFloat(document.getElementById("maxTemp").value);
+  const elMaxHum = document.getElementById("maxHum");
+  const elMaxAbsHum = document.getElementById("maxAbsHum");
+
+  if (source === 'ratio') {
+    const valW = parseFloat(elMaxHum.value);
+    if (!isNaN(valW)) {
+      const valAH = calculateAbsoluteHumidity(maxT, valW, Patm);
+      elMaxAbsHum.value = valAH.toFixed(3);
+    }
+  } else if (source === 'absolute') {
+    const valAH = parseFloat(elMaxAbsHum.value);
+    if (!isNaN(valAH)) {
+      const valW = getWFromAbsoluteHumidity(maxT, valAH, Patm);
+      elMaxHum.value = valW.toFixed(4);
+    }
+  }
+
+  // Gambar ulang chart dengan nilai baru
+  drawChart();
 }
 
 // Konfigurasi batas slider untuk tiap parameter
@@ -686,7 +710,8 @@ function updateLists() {
           p.id === State.selectedPointId ? "active" : ""
         }">
             <div class="item-header" onclick="selectPoint(${p.id})">
-                <div class="id-circle">${i + 1}</div>
+                <div class="id-circle" style="background-color: ${p.color || '#ff0000'}">${i + 1}</div>
+                
                 <div class="item-name">${p.name}</div>
                 <div class="item-actions">
                     <div class="icon-btn" onclick="openEditModal('point', ${
@@ -709,8 +734,6 @@ function updateLists() {
       <div style="font-size:10px;text-align:center;color:#999;padding:10px">No points</div>
       <style>
         .marked-point {display:none}
-        .comfort-zone + .chart-actions {grid-template-columns:1fr}
-        .comfort-zone + .chart-actions :nth-child(2) {display:none}
       </style>
     `;
 
@@ -752,8 +775,6 @@ function updateLists() {
       <div style="font-size:10px;text-align:center;color:#999;padding:10px">No zones</div> 
       <style>
         .comfort-zone {display:none}
-        .comfort-zone + .chart-actions {grid-template-columns:1fr}
-        .comfort-zone + .chart-actions :nth-child(2) {display:none}
       </style>
     `;
 }
@@ -765,7 +786,9 @@ function addPoint(t, w) {
   // PERUBAHAN: Tambahkan property 'name'
   const pt = {
     id: Date.now(),
-    name: `Point ${State.points.length + 1}`, // Default Name
+    // name: `Point ${State.points.length + 1}`,
+    name: `Point`,
+    color: "#cc1919",
     t,
     w,
     data,
@@ -852,7 +875,8 @@ function openEditModal(type, id) {
     if (!p) return;
     document.getElementById("editModalTitle").innerText = "Edit Point";
     nameInput.value = p.name;
-    colorContainer.style.display = "none"; // Point tidak punya setting warna (ikut default merah)
+    colorInput.value = p.color || "#ff0000";
+    colorContainer.style.display = "block";
   } else if (type === "zone") {
     const z = State.zones.find((item) => item.id === id);
     if (!z) return;
@@ -872,8 +896,12 @@ function saveSettings() {
   const newName = document.getElementById("editName").value;
 
   if (type === "point") {
+    const newColor = document.getElementById("editColor").value;
     const p = State.points.find((item) => item.id === id);
-    if (p) p.name = newName;
+    if (p) {
+      p.name = newName;
+      p.color = newColor;
+    }
   } else if (type === "zone") {
     const newColor = document.getElementById("editColor").value;
     const z = State.zones.find((item) => item.id === id);
@@ -909,8 +937,9 @@ function finishZone() {
   // Simpan Zone
   State.zones.push({
     id: Date.now(),
-    name: `Zone ${State.zones.length + 1}`,
-    color: "#4caf50",
+    // name: `Zone ${State.zones.length + 1}`,
+    name: `Zone`,
+    color: "#19cc2e",
     points: finalPoints,
   });
 
@@ -1005,7 +1034,7 @@ function calculateAbsoluteHumidity(t, w, Patm) {
 
 // Fungsi untuk menghitung W dari Absolute Humidity
 function getWFromAbsoluteHumidity(t, ah, Patm) {
-  // AH (g/m³) -> w (kg/kg)
+  // AH (g/m³) -> w (kg/kg')
   // v = (1 + w) * R_da * T_k / P_atm
   // AH = w / v * 1000
   // Kita selesaikan dengan iterasi
@@ -1255,7 +1284,7 @@ function drawChart() {
       .text(
         State.yAxisType === "absoluteHumidity"
           ? "Absolute Humidity (g/m³)"
-          : "Humidity Ratio (kg/kg)"
+          : "Humidity Ratio (kg/kg')"
       );
   } else {
     axesLayer
@@ -1266,7 +1295,7 @@ function drawChart() {
       .text(
         State.yAxisType === "absoluteHumidity"
           ? "Absolute Humidity (g/m³)"
-          : "Humidity Ratio (kg/kg)"
+          : "Humidity Ratio (kg/kg')"
       );
     axesLayer
       .append("text")
@@ -1413,7 +1442,8 @@ function drawChart() {
       .attr("class", isSelected ? "user-point selected" : "user-point")
       .attr("cx", cx)
       .attr("cy", cy)
-      .attr("r", 6);
+      .attr("r", 6)
+      .attr("fill", p.color || "#ff0000");
 
     // Posisi label
     const labelX = cx > w * 0.8 ? cx - 15 : cx + 10;
@@ -1428,8 +1458,6 @@ function drawChart() {
       .style("pointer-events", "none")
       .style("text-anchor", cx > w * 0.8 ? "end" : "start")
       .attr("onclick", "selectPoint(" + p.id + ")");
-
-      console.log(p)
   });
 
   // Interaksi mouse - sesuaikan dengan tipe chart
@@ -1441,24 +1469,24 @@ function drawChart() {
     .on("click", (e) => handleChartClick(e, x, y, minT, maxT, maxH, Patm));
 
   // ================= LEGEND =================
-  const legG = axesLayer.append("g");
+  const legG = axesLayer.append("g").attr("class", "chart-legend");
 
   // Tentukan posisi legend berdasarkan chart type
   if (State.chartType === "psychrometric") {
     // Psychrometric: legend di kiri atas
     legG.attr("transform", `translate(10, 10)`);
   } else {
-    // Mollier: legend di kanan atas
-    legG.attr("transform", `translate(${w - 120}, ${h - 95})`); // Ganti width dengan w
+    // Mollier: legend di kanan bawah
+    legG.attr("transform", `translate(${w - 130}, ${h - 115})`); // Ganti width dengan w
   }
 
   // Gambar Kotak Background
   legG
     .append("rect")
     .attr("class", "legend-box")
-    .attr("width", 110)
-    .attr("height", 85)
-    .attr("rx", 3);
+    .attr("width", 120)
+    .attr("height", 105)
+    .attr("rx", 1);
 
   // Data Item Legend
   const legItems = [
@@ -1466,21 +1494,19 @@ function drawChart() {
     { c: color_h, t: "Enthalpy", d: "0" },
     { c: color_twb, t: "Wet Bulb Temp", d: "4" },
     { c: color_v, t: "Spec. Volume", d: "0" },
-    { c: color_sat, t: "Saturation", d: "0", w: 2.5 },
+    { c: color_sat, t: "Saturation", d: "0"},
   ];
 
-  // if (State.yAxisType === "absoluteHumidity") {
-  //   legItems.push({
-  //     c: "#9C27B0", // Warna ungu untuk Absolute Humidity
-  //     t: "Absolute Humidity Mode",
-  //     d: "0",
-  //     w: 1.5
-  //   });
-  // }
+  legG
+    .append("text")
+    .text("Legend")
+    .attr("class", "legend-title")
+    .attr("x", "10")
+    .attr("y", "17.5")
 
   // Render Item Legend
   legItems.forEach((item, i) => {
-    const ly = 15 + i * 15;
+    const ly = 33 + i * 15;
     legG
       .append("line")
       .attr("x1", 10)
@@ -1488,7 +1514,7 @@ function drawChart() {
       .attr("y1", ly)
       .attr("y2", ly)
       .attr("stroke", item.c)
-      .attr("stroke-width", item.w || 1.5)
+      .attr("stroke-width", 2)
       .attr("stroke-dasharray", item.d);
     legG
       .append("text")
@@ -1596,7 +1622,7 @@ function generateHTMLGrid(d) {
             <span class="det-label"><span class="material-symbols-rounded"> water_do </span> Humidity Ratio</span>
             <span class="det-abbr">W</span>
             <span>:</span>
-            <span class="det-val">${d.W.toFixed(4)} kg/kg</span>
+            <span class="det-val">${d.W.toFixed(4)} kg/kg'</span>
         </div>
 
         <div class="detail-row">
@@ -1672,13 +1698,13 @@ function generateHTMLGrid(d) {
             <span class="det-label"><span class="material-symbols-rounded"> compare_arrows </span> Humidity Deficit</span>
             <span class="det-abbr">HD</span>
             <span>:</span>
-            <span class="det-val">${d.HD.toFixed(4)} kg/kg</span>
+            <span class="det-val">${d.HD.toFixed(4)} kg/kg'</span>
         </div>
 
 
         <!-- CONCENTRATIONS -->
         <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> water_drop </span> Absolute Humidity</span>
+            <span class="det-label"><span class="material-symbols-rounded"> salinity </span> Absolute Humidity</span>
             <span class="det-abbr">AH</span>
             <span>:</span>
             <span class="det-val">${d.AH.toFixed(2)} g/m³</span>
@@ -2207,8 +2233,8 @@ function renderSmartLabels(
 
   // Hindari tabrakan label
   for (let i = 1; i < labelData.length; i++) {
-    if (labelData[i].pos < labelData[i - 1].pos + 12) {
-      labelData[i].pos = labelData[i - 1].pos + 12;
+    if (labelData[i].pos < labelData[i - 1].pos + 15) {
+      labelData[i].pos = labelData[i - 1].pos + 15;
     }
   }
 
@@ -2384,4 +2410,27 @@ function downloadSvgAsPng(svgSelector, fileName = 'image.png', scale = 3) {
   img.src = url;
 }
 
-////////////////////////////////////////////////////
+////////////////////////////////////////////////////.chart-section
+
+const inputHandlers = {
+  "set-show-legend": (event) => {
+    if (event.target.checked) {
+      document.querySelector(".chart-legend").classList.remove("none");
+    } else {
+      document.querySelector(".chart-legend").classList.add("none");
+    }
+  },
+};
+
+function handleInputChange(event) {
+  const inputId = event.target.id;
+  if (inputHandlers[inputId]) {
+    inputHandlers[inputId](event);
+  }
+}
+
+const inputs = document.querySelectorAll("input");
+inputs.forEach((input) => {
+  input.addEventListener("input", handleInputChange);
+  input.addEventListener("change", handleInputChange);
+});
