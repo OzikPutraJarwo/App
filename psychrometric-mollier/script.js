@@ -15,6 +15,65 @@ const chart_margin_top = 35,
   color_sat = "#0056b3";
 
 // ==========================================
+// HISTORY MANAGER (UNDO/REDO)
+// ==========================================
+
+class HistoryManager {
+  constructor(maxStates = 50) {
+    this.history = [];
+    this.currentIndex = -1;
+    this.maxStates = maxStates;
+  }
+
+  push(state) {
+    // Remove any redo states after current index
+    this.history = this.history.slice(0, this.currentIndex + 1);
+    // Add new state
+    this.history.push(JSON.parse(JSON.stringify(state)));
+    this.currentIndex++;
+    // Maintain max history size
+    if (this.history.length > this.maxStates) {
+      this.history.shift();
+      this.currentIndex--;
+    }
+    this.updateButtons();
+  }
+
+  undo() {
+    if (this.currentIndex > 0) {
+      this.currentIndex--;
+      this.updateButtons();
+      return JSON.parse(JSON.stringify(this.history[this.currentIndex]));
+    }
+    return null;
+  }
+
+  redo() {
+    if (this.currentIndex < this.history.length - 1) {
+      this.currentIndex++;
+      this.updateButtons();
+      return JSON.parse(JSON.stringify(this.history[this.currentIndex]));
+    }
+    return null;
+  }
+
+  updateButtons() {
+    const undoBtn = document.getElementById('btn-undo');
+    const redoBtn = document.getElementById('btn-redo');
+    if (undoBtn) undoBtn.disabled = this.currentIndex <= 0;
+    if (redoBtn) redoBtn.disabled = this.currentIndex >= this.history.length - 1;
+  }
+
+  clear() {
+    this.history = [];
+    this.currentIndex = -1;
+    this.updateButtons();
+  }
+}
+
+const historyManager = new HistoryManager();
+
+// ==========================================
 // 1. STATE & MATH ENGINE (FINAL FIX)
 // ==========================================
 
@@ -31,7 +90,26 @@ const State = {
   pointSubMode: "manual",
   rangePreview: [], // Menyimpan 4 titik sementara dari slider
   yAxisType: "humidityRatio",
+  visibility: {
+    rh: true,
+    h: true,
+    twb: true,
+    v: true,
+    sat: true
+  },
+  comfortZone: {
+    visible: false,
+    preset: "ashrae-summer",
+    color: "#4caf50",
+    tMin: 22.5,
+    tMax: 26,
+    rhMin: 30,
+    rhMax: 60
+  }
 };
+
+// Initialize state history dengan state awal (baseline untuk undo)
+historyManager.push(State);
 
 const Psychro = {
   R_DA: 287.058, // Gas constant for dry air (J/kg·K)
@@ -345,7 +423,7 @@ function changeYAxisType(type) {
 }
 
 function syncHumidityInputs(source) {
-  const Patm = parseFloat(document.getElementById("pressure").value);
+  const Patm = getPressureInPa();
   const maxT = parseFloat(document.getElementById("maxTemp").value);
   const elMaxHum = document.getElementById("maxHum");
   const elMaxAbsHum = document.getElementById("maxAbsHum");
@@ -368,10 +446,65 @@ function syncHumidityInputs(source) {
   drawChart();
 }
 
+// Pressure Unit Conversion
+function updatePressureUnit() {
+  const pressureInput = document.getElementById("pressure");
+  const pressureUnit = document.getElementById("pressure-unit").value;
+  let currentValue = parseFloat(pressureInput.value);
+
+  if (isNaN(currentValue)) {
+    currentValue = 101325; // Default to standard atmospheric pressure
+  }
+
+  if (pressureUnit === "kPa") {
+    // Convert Pa to kPa
+    pressureInput.value = (currentValue / 1000).toFixed(2);
+    pressureInput.step = 0.1;
+  } else {
+    // Convert kPa to Pa
+    pressureInput.value = (currentValue * 1000).toFixed(0);
+    pressureInput.step = 100;
+  }
+
+  drawChart();
+}
+
+// Get pressure in Pa regardless of selected unit
+function getPressureInPa() {
+  const pressureInput = document.getElementById("pressure");
+  const pressureUnit = document.getElementById("pressure-unit").value;
+  let value = parseFloat(pressureInput.value);
+
+  if (isNaN(value)) {
+    value = 101325;
+  }
+
+  if (pressureUnit === "kPa") {
+    return value * 1000; // Convert kPa to Pa
+  }
+  return value; // Already in Pa
+}
+
+// Toggle Advanced Settings
+function toggleAdvancedSettings() {
+  const header = document.querySelector(".advanced-settings-header");
+  const icon = document.getElementById("advanced-settings-icon");
+  
+  header.classList.toggle("collapsed");
+  
+  if (header.classList.contains("collapsed")) {
+    icon.textContent = "expand_more";
+  } else {
+    icon.textContent = "expand_less";
+  }
+}
+
 // Konfigurasi batas slider untuk tiap parameter
 const RangeConfigs = {
   RH: { min: 0, max: 100, step: 1, defMin: 30, defMax: 70 },
   Twb: { min: -10, max: 50, step: 0.5, defMin: 15, defMax: 25 },
+  Tdp: { min: -10, max: 50, step: 0.5, defMin: 10, defMax: 20 },
+  W: { min: 0, max: 0.03, step: 0.001, defMin: 0.005, defMax: 0.015 },
   h: { min: 0, max: 150, step: 1, defMin: 40, defMax: 80 },
   v: { min: 0.75, max: 1.05, step: 0.01, defMin: 0.8, defMax: 0.9 },
 };
@@ -379,6 +512,7 @@ const RangeConfigs = {
 function setupRangeDefaults() {
   const type = document.getElementById("rangeParamType").value;
   const cfg = RangeConfigs[type];
+  if (!cfg) return;
 
   // Update atribut slider input HTML
   ["min", "max"].forEach((suffix) => {
@@ -409,6 +543,8 @@ function validateRangeInputs(minId, maxId, type = "Tdb") {
   const minSlider = document.getElementById(minId.replace("range", "slider"));
   const maxSlider = document.getElementById(maxId.replace("range", "slider"));
 
+  if (!minInput || !maxInput) return;
+
   let minVal = parseFloat(minInput.value);
   let maxVal = parseFloat(maxInput.value);
 
@@ -424,6 +560,10 @@ function validateRangeInputs(minId, maxId, type = "Tdb") {
     maxLimit = parseFloat(document.getElementById("maxTemp").value);
   } else {
     const cfg = RangeConfigs[type];
+    if (!cfg) {
+      console.warn("Unknown range type:", type);
+      return;
+    }
     minLimit = cfg.min;
     maxLimit = cfg.max;
   }
@@ -573,7 +713,7 @@ function updateRangeZone() {
   const pType = document.getElementById("rangeParamType").value;
   const pMin = parseFloat(document.getElementById("rangeP2min").value);
   const pMax = parseFloat(document.getElementById("rangeP2max").value);
-  const Patm = parseFloat(document.getElementById("pressure").value);
+  const Patm = getPressureInPa();
 
   if (tMin >= tMax || pMin >= pMax) {
     State.rangePreview = [];
@@ -629,6 +769,11 @@ function setMode(mode) {
   if (document.getElementById("btn-" + mode))
     document.getElementById("btn-" + mode).classList.add("active");
 
+  // Hide info panel ketika tidak di mode explore
+  if (mode !== "explore") {
+    document.getElementById("info-panel").style.display = "none";
+  }
+
   const zoneCtrl = document.getElementById("zone-controls");
   zoneCtrl.style.display = mode === "zone" ? "block" : "none";
 
@@ -668,7 +813,7 @@ function submitManualInput(target) {
   const p1Val = parseFloat(document.getElementById("p1Val-" + target).value);
   const p2Type = document.getElementById("p2Type-" + target).value;
   const p2Val = parseFloat(document.getElementById("p2Val-" + target).value);
-  const Patm = parseFloat(document.getElementById("pressure").value);
+  const Patm = getPressureInPa();
 
   if (isNaN(p1Val) || isNaN(p2Val)) {
     alert("Please enter valid numbers");
@@ -780,7 +925,7 @@ function updateLists() {
 }
 
 function addPoint(t, w) {
-  const Patm = parseFloat(document.getElementById("pressure").value);
+  const Patm = getPressureInPa();
   const data = calculateAllProperties(t, w, Patm);
 
   // PERUBAHAN: Tambahkan property 'name'
@@ -795,7 +940,539 @@ function addPoint(t, w) {
   };
 
   State.points.push(pt);
+  historyManager.push(State);
   selectPoint(pt.id);
+}
+
+// Helper untuk membuat snapshot state
+function saveStateSnapshot() {
+  historyManager.push(State);
+}
+
+// Fungsi Undo
+function undoAction() {
+  const previousState = historyManager.undo();
+  if (previousState) {
+    Object.assign(State, previousState);
+    updateLists();
+    drawChart();
+  }
+}
+
+// Fungsi Redo
+function redoAction() {
+  const nextState = historyManager.redo();
+  if (nextState) {
+    Object.assign(State, nextState);
+    updateLists();
+    drawChart();
+  }
+}
+
+// ==========================================
+// CONTEXT MENU SYSTEM
+// ==========================================
+
+let contextMenuPointId = null;
+
+function showContextMenu(event, pointId = null) {
+  event.preventDefault();
+  contextMenuPointId = pointId;
+
+  const menu = document.getElementById("context-menu");
+  const content = document.getElementById("context-menu-content");
+  
+  content.innerHTML = "";
+
+  if (pointId) {
+    // Context menu for point
+    const point = State.points.find(p => p.id === pointId);
+    if (!point) return;
+
+    addContextMenuItem(content, "edit_square", "Edit", () => {
+      hideContextMenu();
+      openEditModal("point", pointId);
+    });
+
+    addContextMenuItem(content, "delete", "Delete", () => {
+      hideContextMenu();
+      deletePoint({stopPropagation: () => {}}, pointId);
+    });
+  } else {
+    // Context menu for chart - simplified with floating windows
+    addContextMenuItem(content, "explore", "Explore", () => {
+      hideContextMenu();
+      setMode("view");
+    }, State.mode === "view");
+
+    // Point with submenu
+    addContextSubmenu(content, "pin_drop", "Point", (submenu) => {
+      addContextMenuItem(submenu, "ads_click", "Click", () => {
+        hideContextMenu();
+        setMode("point");
+        setPointSubMode("manual");
+      }, State.mode === "point" && State.pointSubMode === "manual");
+
+      addContextMenuItem(submenu, "edit_note", "Input", () => {
+        hideContextMenu();
+        setMode("point");
+        setPointSubMode("input");
+        openFloatingInputWindow("point");
+      }, State.mode === "point" && State.pointSubMode === "input");
+    }, State.mode === "point");
+
+    // Zone with submenu
+    addContextSubmenu(content, "add_triangle", "Zone", (submenu) => {
+      addContextMenuItem(submenu, "ads_click", "Click", () => {
+        hideContextMenu();
+        setMode("zone");
+        setZoneSubMode("manual");
+      }, State.mode === "zone" && State.zoneSubMode === "manual");
+
+      addContextMenuItem(submenu, "edit_note", "Input", () => {
+        hideContextMenu();
+        setMode("zone");
+        setZoneSubMode("input");
+        openFloatingInputWindow("zone");
+      }, State.mode === "zone" && State.zoneSubMode === "input");
+
+      addContextMenuItem(submenu, "tune", "Range", () => {
+        hideContextMenu();
+        setMode("zone");
+        setZoneSubMode("range");
+        openFloatingRangeWindow();
+      }, State.mode === "zone" && State.zoneSubMode === "range");
+    }, State.mode === "zone");
+
+    addContextMenuDivider(content);
+
+    // Undo/Redo
+    addContextMenuItem(content, "undo", "Undo", () => {
+      hideContextMenu();
+      undoAction();
+    });
+
+    addContextMenuItem(content, "redo", "Redo", () => {
+      hideContextMenu();
+      redoAction();
+    });
+
+    addContextMenuDivider(content);
+
+    // Download submenu
+    addContextSubmenu(content, "download", "Download", (submenu) => {
+      addContextMenuItem(submenu, "image", "PNG", () => {
+        hideContextMenu();
+        downloadSvgAsPng("#chart-container svg", "chart.png", 3);
+      });
+
+      addContextMenuItem(submenu, "description", "SVG", () => {
+        hideContextMenu();
+        downloadSvgAsSvg("#chart-container svg", "chart.svg");
+      });
+
+      addContextMenuItem(submenu, "table_chart", "CSV", () => {
+        hideContextMenu();
+        exportToCSV();
+      });
+
+      addContextMenuItem(submenu, "description", "Excel", () => {
+        hideContextMenu();
+        exportToExcel();
+      });
+    });
+  }
+
+  // Position menu at mouse cursor
+  menu.style.left = event.clientX + "px";
+  menu.style.top = event.clientY + "px";
+  menu.style.display = "block";
+}
+
+function addContextMenuItem(container, icon, label, callback, isActive = false) {
+  const item = document.createElement("div");
+  item.className = "context-menu-item" + (isActive ? " active" : "");
+  item.innerHTML = `<span class="material-symbols-rounded">${icon}</span><span>${label}</span>`;
+  item.onclick = callback;
+  container.appendChild(item);
+  return item;
+}
+
+function addContextMenuDivider(container) {
+  const divider = document.createElement("div");
+  divider.className = "context-menu-item divider";
+  container.appendChild(divider);
+}
+
+function addContextMenuGroup(container, title, builder) {
+  const group = document.createElement("div");
+  group.className = "context-menu-group";
+
+  const header = document.createElement("div");
+  header.className = "context-menu-group-title";
+  header.textContent = title;
+  group.appendChild(header);
+
+  builder(group);
+  container.appendChild(group);
+}
+
+// Submenu helper (Windows-like flyout)
+function addContextSubmenu(container, icon, label, builder, isActive = false) {
+  const item = document.createElement("div");
+  item.className = "context-menu-item has-submenu" + (isActive ? " active" : "");
+  item.innerHTML = `
+    <span class="material-symbols-rounded">${icon}</span>
+    <span>${label}</span>
+    <span class="submenu-arrow material-symbols-rounded">chevron_right</span>
+  `;
+
+  const submenu = document.createElement("div");
+  submenu.className = "context-submenu";
+  builder(submenu);
+  item.appendChild(submenu);
+
+  let hideTimeout = null;
+  const show = () => {
+    clearTimeout(hideTimeout);
+    // Position submenu relative to parent item
+    const rect = item.getBoundingClientRect();
+    submenu.style.left = rect.width - 4 + "px";
+    submenu.style.top = -4 + "px";
+    submenu.style.display = "block";
+  };
+  const hide = () => {
+    hideTimeout = setTimeout(() => {
+      submenu.style.display = "none";
+    }, 120);
+  };
+
+  item.addEventListener("mouseenter", show);
+  item.addEventListener("mouseleave", hide);
+  submenu.addEventListener("mouseenter", () => clearTimeout(hideTimeout));
+  submenu.addEventListener("mouseleave", hide);
+
+  container.appendChild(item);
+  return item;
+}
+
+function hideContextMenu() {
+  document.getElementById("context-menu").style.display = "none";
+  contextMenuPointId = null;
+}
+
+// Floating window functions
+function openFloatingInputWindow(target) {
+  const window = document.getElementById("floating-input-window");
+  document.getElementById("floating-target").value = target;
+  
+  // Sync with toolbar values if any
+  const p1Type = document.getElementById("p1Type-" + target);
+  const p1Val = document.getElementById("p1Val-" + target);
+  const p2Type = document.getElementById("p2Type-" + target);
+  const p2Val = document.getElementById("p2Val-" + target);
+  
+  if (p1Type) document.getElementById("floating-p1Type").value = p1Type.value;
+  if (p1Val) document.getElementById("floating-p1Val").value = p1Val.value;
+  if (p2Type) document.getElementById("floating-p2Type").value = p2Type.value;
+  if (p2Val) document.getElementById("floating-p2Val").value = p2Val.value;
+  
+  // Position window at center
+  window.style.left = "50%";
+  window.style.top = "50%";
+  window.style.transform = "translate(-50%, -50%)";
+  window.style.display = "block";
+  
+  makeWindowDraggable(window);
+}
+
+function openFloatingRangeWindow() {
+  const window = document.getElementById("floating-range-window");
+  
+  // Sync with toolbar values
+  const tMin = document.getElementById("rangeTmin").value;
+  const tMax = document.getElementById("rangeTmax").value;
+  const paramType = document.getElementById("rangeParamType").value;
+  const p2Min = document.getElementById("rangeP2min").value;
+  const p2Max = document.getElementById("rangeP2max").value;
+  
+  document.getElementById("floating-rangeTmin").value = tMin;
+  document.getElementById("floating-rangeTmax").value = tMax;
+  document.getElementById("floating-rangeParamType").value = paramType;
+  document.getElementById("floating-rangeP2min").value = p2Min;
+  document.getElementById("floating-rangeP2max").value = p2Max;
+  
+  // Sync sliders
+  document.getElementById("floating-sliderTmin").value = tMin;
+  document.getElementById("floating-sliderTmax").value = tMax;
+  document.getElementById("floating-sliderP2min").value = p2Min;
+  document.getElementById("floating-sliderP2max").value = p2Max;
+  
+  // Setup slider limits based on paramType
+  const minTemp = parseFloat(document.getElementById("minTemp").value);
+  const maxTemp = parseFloat(document.getElementById("maxTemp").value);
+  
+  document.getElementById("floating-sliderTmin").min = minTemp;
+  document.getElementById("floating-sliderTmin").max = maxTemp;
+  document.getElementById("floating-sliderTmax").min = minTemp;
+  document.getElementById("floating-sliderTmax").max = maxTemp;
+  
+  const cfgKey = paramType.charAt(0).toUpperCase() + paramType.slice(1).toLowerCase();
+  const cfg = RangeConfigs[cfgKey];
+  if (cfg) {
+    document.getElementById("floating-sliderP2min").min = cfg.min;
+    document.getElementById("floating-sliderP2min").max = cfg.max;
+    document.getElementById("floating-sliderP2min").step = cfg.step;
+    document.getElementById("floating-sliderP2max").min = cfg.min;
+    document.getElementById("floating-sliderP2max").max = cfg.max;
+    document.getElementById("floating-sliderP2max").step = cfg.step;
+  }
+  
+  // Position window at center
+  window.style.left = "50%";
+  window.style.top = "50%";
+  window.style.transform = "translate(-50%, -50%)";
+  window.style.display = "block";
+  
+  makeWindowDraggable(window);
+}
+
+function closeFloatingWindow(windowId) {
+  document.getElementById(windowId).style.display = "none";
+}
+
+function submitFloatingInput() {
+  const target = document.getElementById("floating-target").value;
+  const p1Type = document.getElementById("floating-p1Type").value;
+  const p1Val = parseFloat(document.getElementById("floating-p1Val").value);
+  const p2Type = document.getElementById("floating-p2Type").value;
+  const p2Val = parseFloat(document.getElementById("floating-p2Val").value);
+  const Patm = getPressureInPa();
+
+  if (isNaN(p1Val) || isNaN(p2Val)) {
+    alert("Please enter valid numbers");
+    return;
+  }
+  if (p1Type === p2Type) {
+    alert("Parameters must be different");
+    return;
+  }
+
+  const res = Psychro.solveRobust(p1Type, p1Val, p2Type, p2Val, Patm);
+
+  if (isNaN(res.t) || isNaN(res.w)) {
+    alert("Calculation error. Values might be out of range.");
+    return;
+  }
+
+  if (target === "point") {
+    addPoint(res.t, res.w);
+    closeFloatingWindow("floating-input-window");
+  } else if (target === "zone") {
+    if (State.mode !== "zone") setMode("zone");
+    State.tempZone.push({ t: res.t, w: res.w });
+    updateZonePtCount();
+    drawChart();
+  }
+
+  // Sync with toolbar
+  document.getElementById("p1Type-" + target).value = p1Type;
+  document.getElementById("p1Val-" + target).value = p1Val;
+  document.getElementById("p2Type-" + target).value = p2Type;
+  document.getElementById("p2Val-" + target).value = p2Val;
+}
+
+function applyFloatingRange() {
+  const tMin = parseFloat(document.getElementById("floating-rangeTmin").value);
+  const tMax = parseFloat(document.getElementById("floating-rangeTmax").value);
+  const paramType = document.getElementById("floating-rangeParamType").value;
+  const p2Min = parseFloat(document.getElementById("floating-rangeP2min").value);
+  const p2Max = parseFloat(document.getElementById("floating-rangeP2max").value);
+
+  // Sync with toolbar
+  document.getElementById("rangeTmin").value = tMin;
+  document.getElementById("rangeTmax").value = tMax;
+  document.getElementById("sliderTmin").value = tMin;
+  document.getElementById("sliderTmax").value = tMax;
+  document.getElementById("rangeParamType").value = paramType;
+  document.getElementById("rangeP2min").value = p2Min;
+  document.getElementById("rangeP2max").value = p2Max;
+  document.getElementById("sliderP2min").value = p2Min;
+  document.getElementById("sliderP2max").value = p2Max;
+
+  // Sync sliders in floating window
+  document.getElementById("floating-sliderTmin").value = tMin;
+  document.getElementById("floating-sliderTmax").value = tMax;
+  document.getElementById("floating-sliderP2min").value = p2Min;
+  document.getElementById("floating-sliderP2max").value = p2Max;
+
+  // Call same validation and update functions as toolbar
+  validateRangeInputs("rangeTmin", "rangeTmax", "Tdb");
+  validateRangeInputs("rangeP2min", "rangeP2max", paramType);
+  updateRangeZone();
+}
+
+// Fungsi untuk sync slider floating range (sama seperti syncRange di toolbar)
+function syncFloatingRange(id) {
+  const slider = document.getElementById("floating-slider" + id);
+  const input = document.getElementById("floating-range" + id);
+
+  input.value = slider.value;
+
+  // Panggil validasi berdasarkan tipe input
+  if (id.includes("Tmin") || id.includes("Tmax")) {
+    validateRangeInputs("floating-rangeTmin", "floating-rangeTmax", "Tdb");
+  } else if (id.includes("P2min") || id.includes("P2max")) {
+    const type = document.getElementById("floating-rangeParamType").value;
+    validateRangeInputs("floating-rangeP2min", "floating-rangeP2max", type);
+  }
+
+  applyFloatingRange();
+}
+
+// Make window draggable
+function makeWindowDraggable(window) {
+  const header = window.querySelector(".floating-window-header");
+  let isDragging = false;
+  let currentX, currentY, initialX, initialY;
+
+  header.addEventListener("mousedown", (e) => {
+    isDragging = true;
+    initialX = e.clientX - (window.offsetLeft || 0);
+    initialY = e.clientY - (window.offsetTop || 0);
+    window.style.transform = "none"; // Remove center transform
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (isDragging) {
+      e.preventDefault();
+      currentX = e.clientX - initialX;
+      currentY = e.clientY - initialY;
+      window.style.left = currentX + "px";
+      window.style.top = currentY + "px";
+    }
+  });
+
+  document.addEventListener("mouseup", () => {
+    isDragging = false;
+  });
+}
+
+// Close context menu when clicking elsewhere
+document.addEventListener("click", (event) => {
+  const menu = document.getElementById("context-menu");
+  if (menu && !menu.contains(event.target)) {
+    hideContextMenu();
+  }
+});
+
+// ==========================================
+// EXPORT FUNCTIONS (CSV & EXCEL)
+// ==========================================
+
+function exportToCSV() {
+  if (State.points.length === 0) {
+    alert("No points to export");
+    return;
+  }
+
+  // Prepare CSV header
+  const headers = [
+    "Name",
+    "Tdb (°C)",
+    "W (kg/kg')",
+    "RH (%)",
+    "Twb (°C)",
+    "Tdp (°C)",
+    "h (kJ/kg)",
+    "v (m³/kg)",
+    "AH (g/m³)",
+    "ρ (kg/m³)",
+    "Color"
+  ];
+
+  // Prepare CSV data
+  const data = State.points.map((p) => [
+    p.name,
+    p.t.toFixed(2),
+    p.w.toFixed(6),
+    p.data.RH.toFixed(2),
+    p.data.Twb.toFixed(2),
+    p.data.Tdp.toFixed(2),
+    p.data.h.toFixed(2),
+    p.data.v.toFixed(4),
+    p.data.AH.toFixed(2),
+    p.data.rho.toFixed(4),
+    p.color
+  ]);
+
+  // Convert to CSV format
+  let csv = headers.join(",") + "\n";
+  data.forEach((row) => {
+    csv += row.map((cell) => `"${cell}"`).join(",") + "\n";
+  });
+
+  // Download CSV
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "psychrometric-data.csv";
+  link.click();
+}
+
+function exportToExcel() {
+  if (State.points.length === 0) {
+    alert("No points to export");
+    return;
+  }
+
+  // Check if XLSX library is available
+  if (typeof XLSX === "undefined") {
+    alert("Excel export requires xlsx library. Please ensure assets/xlsx-0.18.5.js is loaded.");
+    return;
+  }
+
+  // Prepare data for Excel
+  const headers = [
+    "Name",
+    "Tdb (°C)",
+    "W (kg/kg')",
+    "RH (%)",
+    "Twb (°C)",
+    "Tdp (°C)",
+    "h (kJ/kg)",
+    "v (m³/kg)",
+    "AH (g/m³)",
+    "ρ (kg/m³)",
+    "Color"
+  ];
+
+  const data = State.points.map((p) => [
+    p.name,
+    parseFloat(p.t.toFixed(2)),
+    parseFloat(p.w.toFixed(6)),
+    parseFloat(p.data.RH.toFixed(2)),
+    parseFloat(p.data.Twb.toFixed(2)),
+    parseFloat(p.data.Tdp.toFixed(2)),
+    parseFloat(p.data.h.toFixed(2)),
+    parseFloat(p.data.v.toFixed(4)),
+    parseFloat(p.data.AH.toFixed(2)),
+    parseFloat(p.data.rho.toFixed(4)),
+    p.color
+  ]);
+
+  // Create workbook and worksheet
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Points");
+
+  // Style the header row (if possible)
+  if (ws["!rows"]) {
+    ws["!rows"][0] = { hpx: 20 };
+  }
+
+  // Download Excel file
+  XLSX.writeFile(wb, "psychrometric-data.xlsx");
 }
 
 function clearSelections() {
@@ -846,6 +1523,7 @@ function selectZone(id) {
 function deletePoint(e, id) {
   e.stopPropagation();
   State.points = State.points.filter((p) => p.id !== id);
+  historyManager.push(State);
   updateLists();
   drawChart();
 }
@@ -853,6 +1531,7 @@ function deletePoint(e, id) {
 function deleteZone(e, id) {
   e.stopPropagation();
   State.zones = State.zones.filter((z) => z.id !== id);
+  historyManager.push(State);
   updateLists();
   drawChart();
 }
@@ -911,6 +1590,7 @@ function saveSettings() {
     }
   }
 
+  historyManager.push(State);
   updateLists();
   drawChart();
 }
@@ -946,6 +1626,7 @@ function finishZone() {
   // Reset
   State.tempZone = [];
   State.rangePreview = [];
+  historyManager.push(State);
   updateLists();
   drawChart();
 
@@ -970,6 +1651,7 @@ function clearAllData() {
     State.points = [];
     State.zones = [];
     State.tempZone = [];
+    historyManager.push(State);
     updateLists();
     drawChart();
     updateZonePtCount();
@@ -1138,7 +1820,7 @@ function drawChart() {
   const minT = parseFloat(document.getElementById("minTemp").value);
   const maxT = parseFloat(maxTInput.value);
   const maxH = parseFloat(document.getElementById("maxHum").value);
-  const Patm = parseFloat(document.getElementById("pressure").value);
+  const Patm = getPressureInPa();
 
   syncZoneRangeLimits(minT, maxT);
 
@@ -1327,6 +2009,12 @@ function drawChart() {
 
   // ZONES - render dengan koordinat yang sesuai
   zoneLayer.selectAll("*").remove();
+  
+  // Draw comfort zone
+  if (State.comfortZone.visible) {
+    drawComfortZone(zoneLayer, x, y, minT, maxT, maxH, Patm);
+  }
+  
   State.zones.forEach((z) => {
     // Konversi titik zona ke koordinat yang benar
     const polyStr = z.points
@@ -1432,18 +2120,25 @@ function drawChart() {
     const pointGroup = pointLayer
       .append("g")
       .attr("class", "point-group")
+      .attr("data-point-id", p.id)
       .on("click", (e) => {
         e.stopPropagation();
         selectPoint(p.id);
+      })
+      .on("contextmenu", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        showContextMenu(e, p.id);
       });
 
-    pointGroup
+    const circle = pointGroup
       .append("circle")
       .attr("class", isSelected ? "user-point selected" : "user-point")
       .attr("cx", cx)
       .attr("cy", cy)
       .attr("r", 6)
-      .attr("fill", p.color || "#ff0000");
+      .attr("fill", p.color || "#ff0000")
+      .style("cursor", "pointer");
 
     // Posisi label
     const labelX = cx > w * 0.8 ? cx - 15 : cx + 10;
@@ -1463,77 +2158,94 @@ function drawChart() {
   // Interaksi mouse - sesuaikan dengan tipe chart
   overlay
     .on("mousemove", (e) => handleMouseMove(e, x, y, minT, maxT, maxH, Patm))
-    .on("mouseout", () => {
-      document.getElementById("info-panel").style.display = "none";
-    })
-    .on("click", (e) => handleChartClick(e, x, y, minT, maxT, maxH, Patm));
+    .on("click", (e) => handleChartClick(e, x, y, minT, maxT, maxH, Patm))
+    .on("contextmenu", (e) => showContextMenu(e));
 
   // ================= LEGEND =================
-  const legG = axesLayer.append("g").attr("class", "chart-legend");
+  const showLegend = document.getElementById("set-show-legend").checked;
+  if (showLegend) {
+    const legG = axesLayer.append("g").attr("class", "chart-legend");
 
-  // Tentukan posisi legend berdasarkan chart type
-  if (State.chartType === "psychrometric") {
-    // Psychrometric: legend di kiri atas
-    legG.attr("transform", `translate(10, 10)`);
-  } else {
-    // Mollier: legend di kanan bawah
-    legG.attr("transform", `translate(${w - 130}, ${h - 115})`); // Ganti width dengan w
-  }
+    // Tentukan posisi legend berdasarkan chart type
+    if (State.chartType === "psychrometric") {
+      // Psychrometric: legend di kiri atas
+      legG.attr("transform", `translate(10, 10)`);
+    } else {
+      // Mollier: legend di kanan bawah
+      legG.attr("transform", `translate(${w - 130}, ${h - 115})`); // Ganti width dengan w
+    }
 
-  // Gambar Kotak Background
-  legG
-    .append("rect")
-    .attr("class", "legend-box")
-    .attr("width", 120)
-    .attr("height", 105)
-    .attr("rx", 1);
-
-  // Data Item Legend
-  const legItems = [
-    { c: color_rh, t: "Rel. Humidity", d: "0" },
-    { c: color_h, t: "Enthalpy", d: "0" },
-    { c: color_twb, t: "Wet Bulb Temp", d: "4" },
-    { c: color_v, t: "Spec. Volume", d: "0" },
-    { c: color_sat, t: "Saturation", d: "0"},
-  ];
-
-  legG
-    .append("text")
-    .text("Legend")
-    .attr("class", "legend-title")
-    .attr("x", "10")
-    .attr("y", "17.5")
-
-  // Render Item Legend
-  legItems.forEach((item, i) => {
-    const ly = 33 + i * 15;
+    // Gambar Kotak Background
     legG
-      .append("line")
-      .attr("x1", 10)
-      .attr("x2", 30)
-      .attr("y1", ly)
-      .attr("y2", ly)
-      .attr("stroke", item.c)
-      .attr("stroke-width", 2)
-      .attr("stroke-dasharray", item.d);
+      .append("rect")
+      .attr("class", "legend-box")
+      .attr("width", 120)
+      .attr("height", 105)
+      .attr("rx", 1);
+
+    // Data Item Legend
+    const legItems = [
+      { c: color_rh, t: "Rel. Humidity", d: "0" },
+      { c: color_h, t: "Enthalpy", d: "0" },
+      { c: color_twb, t: "Wet Bulb Temp", d: "4" },
+      { c: color_v, t: "Spec. Volume", d: "0" },
+      { c: color_sat, t: "Saturation", d: "0"},
+    ];
+
     legG
       .append("text")
-      .attr("class", "legend-text")
-      .attr("x", 35)
-      .attr("y", ly + 4)
-      .text(item.t);
-  });
+      .text("Legend")
+      .attr("class", "legend-title")
+      .attr("x", "10")
+      .attr("y", "17.5")
+
+    // Render Item Legend
+    legItems.forEach((item, i) => {
+      const ly = 33 + i * 15;
+      legG
+        .append("line")
+        .attr("x1", 10)
+        .attr("x2", 30)
+        .attr("y1", ly)
+        .attr("y2", ly)
+        .attr("stroke", item.c)
+        .attr("stroke-width", 2)
+        .attr("stroke-dasharray", item.d);
+      legG
+        .append("text")
+        .attr("class", "legend-text")
+        .attr("x", 35)
+        .attr("y", ly + 4)
+        .text(item.t);
+    });
+  }
 }
 
 // Update fungsi handleMouseMove untuk Mollier
 function handleMouseMove(e, x, y, minT, maxT, maxH, Patm) {
   const [mx, my] = d3.pointer(e, svg.node());
 
+  // Update cursor berdasarkan mode aktif
+  const svgElement = svg.node();
+  if (State.mode === "point") {
+    svgElement.style.cursor = "crosshair";
+  } else if (State.mode === "zone") {
+    svgElement.style.cursor = "crosshair";
+  } else {
+    svgElement.style.cursor = "default";
+  }
+
   // Gunakan fungsi baru untuk mendapatkan t dan w
   const { t, w } = getTandWFromCoords(mx, my, x, y, minT, maxT, maxH, Patm);
 
   // Boundary check
   if (t < minT || t > maxT || w < 0 || w > maxH) {
+    document.getElementById("info-panel").style.display = "none";
+    return;
+  }
+
+  // Info panel hanya muncul di mode explore
+  if (State.mode !== "explore") {
     document.getElementById("info-panel").style.display = "none";
     return;
   }
@@ -1774,373 +2486,388 @@ function drawPsychroLines(
     });
   };
 
-  // 1. VOLUME LINES (Specific Volume)
-  for (let v = 0.75; v <= 1.11; v += 0.01) {
-    const ts = Psychro.solveIntersectionWithSaturation(
-      "volume",
-      v,
-      Patm,
-      minT,
-      maxT
-    );
-    const te = (v * Patm) / 287.058 - 273.15; // T saat W=0
+  // 1. VOLUME LINES (Specific Volume) - Only render if visibility.v is true
+  if (State.visibility.v) {
+    for (let v = 0.75; v <= 1.11; v += 0.01) {
+      const ts = Psychro.solveIntersectionWithSaturation(
+        "volume",
+        v,
+        Patm,
+        minT,
+        maxT
+      );
+      const te = (v * Patm) / 287.058 - 273.15; // T saat W=0
 
-    const d = [
-      { t: ts, w: Psychro.getWFromPw(Psychro.getSatVapPres(ts), Patm) },
-    ];
-    for (let t = Math.ceil(ts); t < te && t <= maxT; t += 2) {
-      d.push({ t: t, w: Psychro.getWFromVolLine(t, v, Patm) });
-    }
-    d.push({ t: te, w: 0 });
+      const d = [
+        { t: ts, w: Psychro.getWFromPw(Psychro.getSatVapPres(ts), Patm) },
+      ];
+      for (let t = Math.ceil(ts); t < te && t <= maxT; t += 2) {
+        d.push({ t: t, w: Psychro.getWFromVolLine(t, v, Patm) });
+      }
+      d.push({ t: te, w: 0 });
 
-    // Gambar garis
-    linesG.append("path").datum(d).attr("class", "v-line").attr("d", line);
+      // Gambar garis
+      linesG.append("path").datum(d).attr("class", "v-line").attr("d", line);
 
-    // Label setiap 0.05 m3/kg
-    if (Math.round(v * 100) % 5 === 0) {
-      const labelText = v.toFixed(2);
+      // Label setiap 0.05 m3/kg
+      if (Math.round(v * 100) % 5 === 0) {
+        const labelText = v.toFixed(2);
 
-      if (chartType === "psychrometric") {
-        // Psychrometric: label di bottom atau top
-        if (te >= minT && te <= maxT) {
-          if (State.yAxisType === "absoluteHumidity") {
-            const ah = calculateAbsoluteHumidity(te, 0, Patm);
-            // Untuk psychrometric dengan AH: label di bottom pada x = x(te)
-            addLabel(x(te), labelText, "lbl-v", "bottom", te, ah);
-          } else {
-            addLabel(x(te), labelText, "lbl-v", "bottom", te);
-          }
-        } else {
-          const tAtMaxH = Psychro.getTdbFromVolLine(v, maxH, Patm);
-          if (tAtMaxH >= minT && tAtMaxH <= maxT) {
+        if (chartType === "psychrometric") {
+          // Psychrometric: label di bottom atau top
+          if (te >= minT && te <= maxT) {
             if (State.yAxisType === "absoluteHumidity") {
-              const ah = calculateAbsoluteHumidity(tAtMaxH, maxH, Patm);
-              // Untuk psychrometric dengan AH: label di top pada x = x(tAtMaxH)
-              addLabel(x(tAtMaxH), labelText, "lbl-v", "top", tAtMaxH, ah);
+              const ah = calculateAbsoluteHumidity(te, 0, Patm);
+              // Untuk psychrometric dengan AH: label di bottom pada x = x(te)
+              addLabel(x(te), labelText, "lbl-v", "bottom", te, ah);
             } else {
-              addLabel(x(tAtMaxH), labelText, "lbl-v", "top", tAtMaxH);
+              addLabel(x(te), labelText, "lbl-v", "bottom", te);
+            }
+          } else {
+            const tAtMaxH = Psychro.getTdbFromVolLine(v, maxH, Patm);
+            if (tAtMaxH >= minT && tAtMaxH <= maxT) {
+              if (State.yAxisType === "absoluteHumidity") {
+                const ah = calculateAbsoluteHumidity(tAtMaxH, maxH, Patm);
+                // Untuk psychrometric dengan AH: label di top pada x = x(tAtMaxH)
+                addLabel(x(tAtMaxH), labelText, "lbl-v", "top", tAtMaxH, ah);
+              } else {
+                addLabel(x(tAtMaxH), labelText, "lbl-v", "top", tAtMaxH);
+              }
             }
           }
-        }
-      } else {
-        // Mollier: label di LEFT atau BOTTOM
-        const wAtMinT = Psychro.getWFromVolLine(minT, v, Patm);
-        if (wAtMinT >= 0 && wAtMinT <= maxH) {
-          if (State.yAxisType === "absoluteHumidity") {
-            const ah = calculateAbsoluteHumidity(minT, wAtMinT, Patm);
-            // Untuk mollier dengan AH: label di left pada y = y(minT)
-            addLabel(y(minT), labelText, "lbl-v", "left", minT, ah);
-          } else {
-            addLabel(y(minT), labelText, "lbl-v", "left", minT);
-          }
         } else {
-          if (State.yAxisType === "absoluteHumidity") {
-            const ah = calculateAbsoluteHumidity(te, 0, Patm);
-            // Untuk mollier dengan AH: label di bottom pada x = x(ah)
-            addLabel(x(ah), labelText, "lbl-v", "bottom", te, ah);
+          // Mollier: label di LEFT atau BOTTOM
+          const wAtMinT = Psychro.getWFromVolLine(minT, v, Patm);
+          if (wAtMinT >= 0 && wAtMinT <= maxH) {
+            if (State.yAxisType === "absoluteHumidity") {
+              const ah = calculateAbsoluteHumidity(minT, wAtMinT, Patm);
+              // Untuk mollier dengan AH: label di left pada y = y(minT)
+              addLabel(y(minT), labelText, "lbl-v", "left", minT, ah);
+            } else {
+              addLabel(y(minT), labelText, "lbl-v", "left", minT);
+            }
           } else {
-            addLabel(x(0), labelText, "lbl-v", "bottom", te);
+            if (State.yAxisType === "absoluteHumidity") {
+              const ah = calculateAbsoluteHumidity(te, 0, Patm);
+              // Untuk mollier dengan AH: label di bottom pada x = x(ah)
+              addLabel(x(ah), labelText, "lbl-v", "bottom", te, ah);
+            } else {
+              addLabel(x(0), labelText, "lbl-v", "bottom", te);
+            }
           }
         }
       }
     }
   }
 
-  // 2. ENTHALPY LINES
-  for (let h = -20; h <= 180; h += 5) {
-    const ts = Psychro.solveIntersectionWithSaturation(
-      "enthalpy",
-      h,
-      Patm,
-      minT,
-      maxT
-    );
-    const te = h / 1.006;
-    const d = [
-      { t: ts, w: Psychro.getWFromPw(Psychro.getSatVapPres(ts), Patm) },
-    ];
-    for (let t = Math.ceil(ts); t < te && t <= maxT; t += 2)
-      d.push({ t: t, w: Psychro.getWFromEnthalpyLine(t, h) });
-    d.push({ t: te, w: 0 });
+  // 2. ENTHALPY LINES - Only render if visibility.h is true
+  if (State.visibility.h) {
+    for (let h = -20; h <= 180; h += 5) {
+      const ts = Psychro.solveIntersectionWithSaturation(
+        "enthalpy",
+        h,
+        Patm,
+        minT,
+        maxT
+      );
+      const te = h / 1.006;
+      const d = [
+        { t: ts, w: Psychro.getWFromPw(Psychro.getSatVapPres(ts), Patm) },
+      ];
+      for (let t = Math.ceil(ts); t < te && t <= maxT; t += 2)
+        d.push({ t: t, w: Psychro.getWFromEnthalpyLine(t, h) });
+      d.push({ t: te, w: 0 });
 
-    linesG.append("path").datum(d).attr("class", "h-line").attr("d", line);
+      linesG.append("path").datum(d).attr("class", "h-line").attr("d", line);
 
-    // Label setiap 10 kJ/kg
-    if (h % 10 === 0) {
-      const wAtMaxT = Psychro.getWFromEnthalpyLine(maxT, h);
+      // Label setiap 10 kJ/kg
+      if (h % 10 === 0) {
+        const wAtMaxT = Psychro.getWFromEnthalpyLine(maxT, h);
+
+        if (chartType === "psychrometric") {
+          if (wAtMaxT >= 0 && wAtMaxT <= maxH) {
+            if (State.yAxisType === "absoluteHumidity") {
+              const ah = calculateAbsoluteHumidity(maxT, wAtMaxT, Patm);
+              addLabel(y(ah), h, "lbl-h", "right", maxT, ah);
+            } else {
+              addLabel(y(wAtMaxT), h, "lbl-h", "right", maxT);
+            }
+          } else if (wAtMaxT < 0 && te >= minT && te <= maxT) {
+            if (State.yAxisType === "absoluteHumidity") {
+              const ah = calculateAbsoluteHumidity(te, 0, Patm);
+              addLabel(x(te), h, "lbl-h", "bottom", te, ah);
+            } else {
+              addLabel(x(te), h, "lbl-h", "bottom", te);
+            }
+          } else {
+            const tAtMaxH = (h - 2501 * maxH) / (1.006 + 1.86 * maxH);
+            if (tAtMaxH >= minT && tAtMaxH <= maxT) {
+              if (State.yAxisType === "absoluteHumidity") {
+                const ah = calculateAbsoluteHumidity(tAtMaxH, maxH, Patm);
+                addLabel(x(tAtMaxH), h, "lbl-h", "top", tAtMaxH, ah);
+              } else {
+                addLabel(x(tAtMaxH), h, "lbl-h", "top", tAtMaxH);
+              }
+            }
+          }
+        } else {
+          // Mollier: enthalpy lines miring ke kanan bawah
+          if (te >= minT && te <= maxT) {
+            if (State.yAxisType === "absoluteHumidity") {
+              const ah = calculateAbsoluteHumidity(te, 0, Patm);
+              addLabel(y(te), h, "lbl-h", "left", te, ah);
+            } else {
+              addLabel(y(te), h, "lbl-h", "left", te);
+            }
+          } else {
+            if (State.yAxisType === "absoluteHumidity") {
+              const ah = calculateAbsoluteHumidity(maxT, wAtMaxT, Patm);
+              addLabel(x(ah), h, "lbl-h", "top", maxT, ah);
+            } else {
+              addLabel(x(wAtMaxT), h, "lbl-h", "top", maxT);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 3. WET BULB LINES - Only render if visibility.twb is true
+  if (State.visibility.twb) {
+    for (let wb = -10; wb <= maxT + 20; wb += 5) {
+      const Pws = Psychro.getSatVapPres(wb);
+      const Ws = Psychro.getWFromPw(Pws, Patm);
+      const d = [{ t: wb, w: Ws }];
+      for (let t = wb + 1; t <= maxT + 10; t++) {
+        const w = Psychro.getWFromTwbLine(t, wb, Patm);
+        if (w < -0.005) break;
+        d.push({ t, w });
+      }
+
+      linesG.append("path").datum(d).attr("class", "wb-line").attr("d", line);
+
+      const wAtMaxT = Psychro.getWFromTwbLine(maxT, wb, Patm);
 
       if (chartType === "psychrometric") {
         if (wAtMaxT >= 0 && wAtMaxT <= maxH) {
           if (State.yAxisType === "absoluteHumidity") {
             const ah = calculateAbsoluteHumidity(maxT, wAtMaxT, Patm);
-            addLabel(y(ah), h, "lbl-h", "right", maxT, ah);
+            addLabel(y(ah), wb, "lbl-wb", "right", maxT, ah);
           } else {
-            addLabel(y(wAtMaxT), h, "lbl-h", "right", maxT);
+            addLabel(y(wAtMaxT), wb, "lbl-wb", "right", maxT);
           }
-        } else if (wAtMaxT < 0 && te >= minT && te <= maxT) {
-          if (State.yAxisType === "absoluteHumidity") {
-            const ah = calculateAbsoluteHumidity(te, 0, Patm);
-            addLabel(x(te), h, "lbl-h", "bottom", te, ah);
-          } else {
-            addLabel(x(te), h, "lbl-h", "bottom", te);
-          }
-        } else {
-          const tAtMaxH = (h - 2501 * maxH) / (1.006 + 1.86 * maxH);
-          if (tAtMaxH >= minT && tAtMaxH <= maxT) {
-            if (State.yAxisType === "absoluteHumidity") {
-              const ah = calculateAbsoluteHumidity(tAtMaxH, maxH, Patm);
-              addLabel(x(tAtMaxH), h, "lbl-h", "top", tAtMaxH, ah);
-            } else {
-              addLabel(x(tAtMaxH), h, "lbl-h", "top", tAtMaxH);
-            }
+        } else if (wAtMaxT < 0) {
+          const tAtZeroW = Psychro.getTdbFromTwbZeroW(wb, Patm);
+          if (tAtZeroW >= minT && tAtZeroW <= maxT) {
+            addLabel(x(tAtZeroW), wb, "lbl-wb", "bottom", tAtZeroW);
           }
         }
       } else {
-        // Mollier: enthalpy lines miring ke kanan bawah
-        if (te >= minT && te <= maxT) {
-          if (State.yAxisType === "absoluteHumidity") {
-            const ah = calculateAbsoluteHumidity(te, 0, Patm);
-            addLabel(y(te), h, "lbl-h", "left", te, ah);
-          } else {
-            addLabel(y(te), h, "lbl-h", "left", te);
-          }
-        } else {
-          if (State.yAxisType === "absoluteHumidity") {
-            const ah = calculateAbsoluteHumidity(maxT, wAtMaxT, Patm);
-            addLabel(x(ah), h, "lbl-h", "top", maxT, ah);
-          } else {
-            addLabel(x(wAtMaxT), h, "lbl-h", "top", maxT);
-          }
-        }
-      }
-    }
-  }
-
-  // 3. WET BULB LINES
-  for (let wb = -10; wb <= maxT + 20; wb += 5) {
-    const Pws = Psychro.getSatVapPres(wb);
-    const Ws = Psychro.getWFromPw(Pws, Patm);
-    const d = [{ t: wb, w: Ws }];
-    for (let t = wb + 1; t <= maxT + 10; t++) {
-      const w = Psychro.getWFromTwbLine(t, wb, Patm);
-      if (w < -0.005) break;
-      d.push({ t, w });
-    }
-
-    linesG.append("path").datum(d).attr("class", "wb-line").attr("d", line);
-
-    const wAtMaxT = Psychro.getWFromTwbLine(maxT, wb, Patm);
-
-    if (chartType === "psychrometric") {
-      if (wAtMaxT >= 0 && wAtMaxT <= maxH) {
-        if (State.yAxisType === "absoluteHumidity") {
-          const ah = calculateAbsoluteHumidity(maxT, wAtMaxT, Patm);
-          addLabel(y(ah), wb, "lbl-wb", "right", maxT, ah);
-        } else {
-          addLabel(y(wAtMaxT), wb, "lbl-wb", "right", maxT);
-        }
-      } else if (wAtMaxT < 0) {
+        // Mollier: wet bulb lines
         const tAtZeroW = Psychro.getTdbFromTwbZeroW(wb, Patm);
         if (tAtZeroW >= minT && tAtZeroW <= maxT) {
-          addLabel(x(tAtZeroW), wb, "lbl-wb", "bottom", tAtZeroW);
-        }
-      }
-    } else {
-      // Mollier: wet bulb lines
-      const tAtZeroW = Psychro.getTdbFromTwbZeroW(wb, Patm);
-      if (tAtZeroW >= minT && tAtZeroW <= maxT) {
-        addLabel(y(tAtZeroW), wb, "lbl-wb", "left", tAtZeroW);
-      } else {
-        const Pws = Psychro.getSatVapPres(wb);
-        const Ws = Psychro.getWFromPw(Pws, Patm);
-        if (State.yAxisType === "absoluteHumidity") {
-          const ah = calculateAbsoluteHumidity(wb, Ws, Patm);
-          addLabel(x(ah), wb, "lbl-wb", "top", wb, ah);
+          addLabel(y(tAtZeroW), wb, "lbl-wb", "left", tAtZeroW);
         } else {
-          addLabel(x(Ws), wb, "lbl-wb", "top", wb);
+          const Pws = Psychro.getSatVapPres(wb);
+          const Ws = Psychro.getWFromPw(Pws, Patm);
+          if (State.yAxisType === "absoluteHumidity") {
+            const ah = calculateAbsoluteHumidity(wb, Ws, Patm);
+            addLabel(x(ah), wb, "lbl-wb", "top", wb, ah);
+          } else {
+            addLabel(x(Ws), wb, "lbl-wb", "top", wb);
+          }
         }
       }
     }
   }
 
-  // 4. RELATIVE HUMIDITY LINES
-  [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0].forEach((rh) => {
-    const d = [];
-    for (let t = minT; t <= maxT + 5; t += 0.25) {
-      d.push({ t, w: Psychro.getWFromPw(Psychro.getSatVapPres(t) * rh, Patm) });
-    }
+  // 4. RELATIVE HUMIDITY LINES - Only render if visibility.rh is true
+  // Saturation line (rh=1.0) is only rendered if visibility.sat is also true
+  if (State.visibility.rh || State.visibility.sat) {
+    [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0].forEach((rh) => {
+      // Skip saturation line if visibility.sat is false
+      if (rh === 1.0 && !State.visibility.sat) return;
+      
+      // Skip RH lines if visibility.rh is false (but still show saturation if enabled)
+      if (rh < 1.0 && !State.visibility.rh) return;
+      
+      const d = [];
+      for (let t = minT; t <= maxT + 5; t += 0.25) {
+        d.push({ t, w: Psychro.getWFromPw(Psychro.getSatVapPres(t) * rh, Patm) });
+      }
 
-    linesG
-      .append("path")
-      .datum(d)
-      .attr("class", rh === 1.0 ? "saturation-line" : "rh-line")
-      .attr("d", curve);
+      linesG
+        .append("path")
+        .datum(d)
+        .attr("class", rh === 1.0 ? "saturation-line" : "rh-line")
+        .attr("d", curve);
 
-    if (rh < 1) {
-      if (chartType === "psychrometric") {
-        // Psychrometric: label di kanan atau atas
-        const W_at_maxT = Psychro.getWFromPw(
-          Psychro.getSatVapPres(maxT) * rh,
-          Patm
-        );
-        if (W_at_maxT <= maxH && W_at_maxT >= 0) {
-          if (State.yAxisType === "absoluteHumidity") {
-            const ah = calculateAbsoluteHumidity(maxT, W_at_maxT, Patm);
-            addLabel(
-              y(ah),
-              (rh * 100).toFixed(0) + "%",
-              "lbl-rh",
-              "right",
-              maxT,
-              ah
-            );
-          } else {
-            addLabel(
-              y(W_at_maxT),
-              (rh * 100).toFixed(0) + "%",
-              "lbl-rh",
-              "right",
-              maxT
-            );
-          }
-        } else {
-          const Pw_target = Psychro.getPwFromW(maxH, Patm);
-          const T_at_maxH = Psychro.getTempFromSatPres(Pw_target / rh);
-          if (T_at_maxH >= minT && T_at_maxH <= maxT) {
-            addLabel(
-              x(T_at_maxH),
-              (rh * 100).toFixed(0) + "%",
-              "lbl-rh",
-              "top",
-              T_at_maxH
-            );
-          }
-        }
-      } else {
-        // Mollier: cari titik ujung garis
-        let exitPoint = null;
-        let exitType = null;
-
-        // Periksa ujung kanan (W = maxH)
-        const Pw_target = Psychro.getPwFromW(maxH, Patm);
-        const T_at_maxH = Psychro.getTempFromSatPres(Pw_target / rh);
-        if (T_at_maxH >= minT && T_at_maxH <= maxT) {
-          exitPoint = { t: T_at_maxH, w: maxH };
-          exitType = "right";
-        }
-
-        // Jika tidak keluar di kanan, periksa ujung atas (T = maxT)
-        if (!exitPoint) {
+      if (rh < 1) {
+        if (chartType === "psychrometric") {
+          // Psychrometric: label di kanan atau atas
           const W_at_maxT = Psychro.getWFromPw(
             Psychro.getSatVapPres(maxT) * rh,
             Patm
           );
-          if (W_at_maxT >= 0 && W_at_maxT <= maxH) {
-            exitPoint = { t: maxT, w: W_at_maxT };
-            exitType = "top";
-          }
-        }
-
-        // Jika tidak keluar di atas, periksa ujung kiri (W = 0 atau mendekati 0)
-        if (!exitPoint) {
-          let minW = Infinity;
-          let minWPoint = null;
-          for (let i = 0; i < d.length; i++) {
-            const point = d[i];
-            if (point.w > 0 && point.w < minW && point.w <= maxH) {
-              minW = point.w;
-              minWPoint = point;
-            }
-          }
-          if (minWPoint && minWPoint.w <= 0.001) {
-            exitPoint = minWPoint;
-            exitType = "left";
-          }
-        }
-
-        // Jika masih tidak ditemukan, gunakan titik terakhir yang valid
-        if (!exitPoint) {
-          for (let i = d.length - 1; i >= 0; i--) {
-            const point = d[i];
-            if (point.w >= 0 && point.w <= maxH) {
-              exitPoint = point;
-              exitType = "top";
-              break;
-            }
-          }
-        }
-
-        // Tambahkan label berdasarkan jenis exit
-        if (exitPoint && exitType) {
-          // PERUBAHAN UTAMA: Gunakan fungsi getYValue untuk mendapatkan nilai y yang benar
-          if (State.yAxisType === "absoluteHumidity") {
-            const ah = calculateAbsoluteHumidity(
-              exitPoint.t,
-              exitPoint.w,
-              Patm
-            );
-            if (exitType === "top") {
-              // Untuk top, gunakan posisi x berdasarkan nilai y (AH)
+          if (W_at_maxT <= maxH && W_at_maxT >= 0) {
+            if (State.yAxisType === "absoluteHumidity") {
+              const ah = calculateAbsoluteHumidity(maxT, W_at_maxT, Patm);
               addLabel(
-                x(getYValue(exitPoint.t, exitPoint.w, Patm)),
-                (rh * 100).toFixed(0) + "%",
-                "lbl-rh",
-                "top",
-                exitPoint.t,
-                ah
-              );
-            } else if (exitType === "right") {
-              // Untuk right, gunakan posisi y berdasarkan temperatur
-              addLabel(
-                y(exitPoint.t),
+                y(ah),
                 (rh * 100).toFixed(0) + "%",
                 "lbl-rh",
                 "right",
-                exitPoint.t,
+                maxT,
                 ah
               );
-            } else if (exitType === "left") {
-              // Untuk left, gunakan posisi y berdasarkan temperatur
+            } else {
               addLabel(
-                y(exitPoint.t),
+                y(W_at_maxT),
                 (rh * 100).toFixed(0) + "%",
                 "lbl-rh",
-                "left",
-                exitPoint.t,
-                ah
+                "right",
+                maxT
               );
             }
           } else {
-            if (exitType === "top") {
+            const Pw_target = Psychro.getPwFromW(maxH, Patm);
+            const T_at_maxH = Psychro.getTempFromSatPres(Pw_target / rh);
+            if (T_at_maxH >= minT && T_at_maxH <= maxT) {
               addLabel(
-                x(exitPoint.w),
+                x(T_at_maxH),
                 (rh * 100).toFixed(0) + "%",
                 "lbl-rh",
                 "top",
-                exitPoint.t
+                T_at_maxH
               );
-            } else if (exitType === "right") {
-              addLabel(
-                y(exitPoint.t),
-                (rh * 100).toFixed(0) + "%",
-                "lbl-rh",
-                "right",
-                exitPoint.t
+            }
+          }
+        } else {
+          // Mollier: cari titik ujung garis
+          let exitPoint = null;
+          let exitType = null;
+
+          // Periksa ujung kanan (W = maxH)
+          const Pw_target = Psychro.getPwFromW(maxH, Patm);
+          const T_at_maxH = Psychro.getTempFromSatPres(Pw_target / rh);
+          if (T_at_maxH >= minT && T_at_maxH <= maxT) {
+            exitPoint = { t: T_at_maxH, w: maxH };
+            exitType = "right";
+          }
+
+          // Jika tidak keluar di kanan, periksa ujung atas (T = maxT)
+          if (!exitPoint) {
+            const W_at_maxT = Psychro.getWFromPw(
+              Psychro.getSatVapPres(maxT) * rh,
+              Patm
+            );
+            if (W_at_maxT >= 0 && W_at_maxT <= maxH) {
+              exitPoint = { t: maxT, w: W_at_maxT };
+              exitType = "top";
+            }
+          }
+
+          // Jika tidak keluar di atas, periksa ujung kiri (W = 0 atau mendekati 0)
+          if (!exitPoint) {
+            let minW = Infinity;
+            let minWPoint = null;
+            for (let i = 0; i < d.length; i++) {
+              const point = d[i];
+              if (point.w > 0 && point.w < minW && point.w <= maxH) {
+                minW = point.w;
+                minWPoint = point;
+              }
+            }
+            if (minWPoint && minWPoint.w <= 0.001) {
+              exitPoint = minWPoint;
+              exitType = "left";
+            }
+          }
+
+          // Jika masih tidak ditemukan, gunakan titik terakhir yang valid
+          if (!exitPoint) {
+            for (let i = d.length - 1; i >= 0; i--) {
+              const point = d[i];
+              if (point.w >= 0 && point.w <= maxH) {
+                exitPoint = point;
+                exitType = "top";
+                break;
+              }
+            }
+          }
+
+          // Tambahkan label berdasarkan jenis exit
+          if (exitPoint && exitType) {
+            // PERUBAHAN UTAMA: Gunakan fungsi getYValue untuk mendapatkan nilai y yang benar
+            if (State.yAxisType === "absoluteHumidity") {
+              const ah = calculateAbsoluteHumidity(
+                exitPoint.t,
+                exitPoint.w,
+                Patm
               );
-            } else if (exitType === "left") {
-              addLabel(
-                y(exitPoint.t),
-                (rh * 100).toFixed(0) + "%",
-                "lbl-rh",
-                "left",
-                exitPoint.t
-              );
+              if (exitType === "top") {
+                // Untuk top, gunakan posisi x berdasarkan nilai y (AH)
+                addLabel(
+                  x(getYValue(exitPoint.t, exitPoint.w, Patm)),
+                  (rh * 100).toFixed(0) + "%",
+                  "lbl-rh",
+                  "top",
+                  exitPoint.t,
+                  ah
+                );
+              } else if (exitType === "right") {
+                // Untuk right, gunakan posisi y berdasarkan temperatur
+                addLabel(
+                  y(exitPoint.t),
+                  (rh * 100).toFixed(0) + "%",
+                  "lbl-rh",
+                  "right",
+                  exitPoint.t,
+                  ah
+                );
+              } else if (exitType === "left") {
+                // Untuk left, gunakan posisi y berdasarkan temperatur
+                addLabel(
+                  y(exitPoint.t),
+                  (rh * 100).toFixed(0) + "%",
+                  "lbl-rh",
+                  "left",
+                  exitPoint.t,
+                  ah
+                );
+              }
+            } else {
+              if (exitType === "top") {
+                addLabel(
+                  x(exitPoint.w),
+                  (rh * 100).toFixed(0) + "%",
+                  "lbl-rh",
+                  "top",
+                  exitPoint.t
+                );
+              } else if (exitType === "right") {
+                addLabel(
+                  y(exitPoint.t),
+                  (rh * 100).toFixed(0) + "%",
+                  "lbl-rh",
+                  "right",
+                  exitPoint.t
+                );
+              } else if (exitType === "left") {
+                addLabel(
+                  y(exitPoint.t),
+                  (rh * 100).toFixed(0) + "%",
+                  "lbl-rh",
+                  "left",
+                  exitPoint.t
+                );
+              }
             }
           }
         }
       }
-    }
-  });
+    });
+  }
 
   // Render smart labels dengan parameter yang diperlukan
   if (chartType === "psychrometric") {
@@ -2410,15 +3137,241 @@ function downloadSvgAsPng(svgSelector, fileName = 'image.png', scale = 3) {
   img.src = url;
 }
 
-////////////////////////////////////////////////////.chart-section
+function downloadSvgAsSvg(svgSelector, fileName = 'chart.svg') {
+  const originalSvg = document.querySelector(svgSelector);
+  const clonedSvg = originalSvg.cloneNode(true);
+
+  // Add styles to SVG
+  const styleElement = document.createElement('style');
+  let cssRules = '';
+  [...document.styleSheets].forEach(sheet => {
+    try {
+      [...sheet.cssRules].forEach(rule => { cssRules += rule.cssText; });
+    } catch (e) {}
+  });
+  styleElement.textContent = cssRules;
+  clonedSvg.prepend(styleElement);
+
+  const svgData = new XMLSerializer().serializeToString(clonedSvg);
+  const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.click();
+
+  URL.revokeObjectURL(url);
+}
+
+////////////////////////////////////////////////////
+
+// ==========================================
+// COMFORT ZONE FUNCTIONS
+// ==========================================
+
+// Preset configurations for comfort zones
+const comfortZonePresets = {
+  "ashrae-summer": {
+    name: "ASHRAE 55 Summer",
+    tMin: 22.5,
+    tMax: 26,
+    rhMin: 30,
+    rhMax: 60
+  },
+  "ashrae-winter": {
+    name: "ASHRAE 55 Winter",
+    tMin: 20,
+    tMax: 25.5,
+    rhMin: 30,
+    rhMax: 60
+  },
+  "en15251-category-ii": {
+    name: "EN 15251 Cat II",
+    tMin: 22,
+    tMax: 26,
+    rhMin: 25,
+    rhMax: 60
+  },
+  "custom": {
+    name: "Custom",
+    tMin: 20,
+    tMax: 26,
+    rhMin: 30,
+    rhMax: 60
+  }
+};
+
+function toggleComfortZone() {
+  const checkbox = document.getElementById("set-show-comfort-zone");
+  const optionsDiv = document.getElementById("comfort-zone-options");
+  
+  State.comfortZone.visible = checkbox.checked;
+  optionsDiv.style.display = checkbox.checked ? "block" : "none";
+  
+  drawChart();
+}
+
+function changeComfortZonePreset() {
+  const preset = document.getElementById("comfort-zone-preset").value;
+  const customDiv = document.getElementById("comfort-zone-custom");
+  const config = comfortZonePresets[preset];
+  
+  State.comfortZone.preset = preset;
+  State.comfortZone.tMin = config.tMin;
+  State.comfortZone.tMax = config.tMax;
+  State.comfortZone.rhMin = config.rhMin;
+  State.comfortZone.rhMax = config.rhMax;
+  
+  // Show custom inputs if custom preset selected
+  customDiv.style.display = preset === "custom" ? "block" : "none";
+  
+  // Update input fields
+  if (preset === "custom") {
+    document.getElementById("comfort-tmin").value = config.tMin;
+    document.getElementById("comfort-tmax").value = config.tMax;
+    document.getElementById("comfort-rhmin").value = config.rhMin;
+    document.getElementById("comfort-rhmax").value = config.rhMax;
+  }
+  
+  drawChart();
+}
+
+function updateComfortZone() {
+  const tMin = parseFloat(document.getElementById("comfort-tmin").value) || 20;
+  const tMax = parseFloat(document.getElementById("comfort-tmax").value) || 26;
+  const rhMin = parseFloat(document.getElementById("comfort-rhmin").value) || 30;
+  const rhMax = parseFloat(document.getElementById("comfort-rhmax").value) || 60;
+  const color = document.getElementById("comfort-zone-color").value;
+  
+  State.comfortZone.tMin = tMin;
+  State.comfortZone.tMax = tMax;
+  State.comfortZone.rhMin = rhMin;
+  State.comfortZone.rhMax = rhMax;
+  State.comfortZone.color = color;
+  
+  drawChart();
+}
+
+function drawComfortZone(linesG, x, y, minT, maxT, maxH, Patm) {
+  const { tMin, tMax, rhMin, rhMax, color } = State.comfortZone;
+  
+  // Create polygon points for the comfort zone
+  // The zone is bounded by T_min, T_max, RH_min, RH_max
+  const polyPoints = [];
+  const step = 0.5;
+  
+  // Helper to get W from T and RH
+  const getWFromTAndRH = (t, rh) => {
+    const Pws = Psychro.getSatVapPres(t);
+    const Pw = Pws * (rh / 100);
+    return Psychro.getWFromPw(Pw, Patm);
+  };
+  
+  // Create points along the top edge (T = tMin, RH from rhMin to rhMax)
+  for (let t = tMin; t <= tMax; t += step) {
+    const w = getWFromTAndRH(t, rhMax);
+    if (w >= 0 && w <= maxH * 1.5) {
+      polyPoints.push({ t: t, w: w });
+    }
+  }
+  
+  // Add corner point at (tMax, rhMax)
+  const wAtTMaxRhMax = getWFromTAndRH(tMax, rhMax);
+  if (wAtTMaxRhMax >= 0 && wAtTMaxRhMax <= maxH * 1.5) {
+    polyPoints.push({ t: tMax, w: wAtTMaxRhMax });
+  }
+  
+  // Create points along the bottom edge (T = tMax, RH from rhMax down to rhMin) in reverse
+  for (let t = tMax; t >= tMin; t -= step) {
+    const w = getWFromTAndRH(t, rhMin);
+    if (w >= 0 && w <= maxH * 1.5) {
+      polyPoints.push({ t: t, w: w });
+    }
+  }
+  
+  // Add corner point at (tMin, rhMin)
+  const wAtTMinRhMin = getWFromTAndRH(tMin, rhMin);
+  if (wAtTMinRhMin >= 0 && wAtTMinRhMin <= maxH * 1.5) {
+    polyPoints.push({ t: tMin, w: wAtTMinRhMin });
+  }
+  
+  // Draw the comfort zone polygon
+  if (polyPoints.length > 2) {
+    const polyStr = polyPoints
+      .map((p) => {
+        if (State.chartType === "psychrometric") {
+          return [x(p.t), y(getYValue(p.t, p.w, Patm))].join(",");
+        } else {
+          return [x(getYValue(p.t, p.w, Patm)), y(p.t)].join(",");
+        }
+      })
+      .join(" ");
+    
+    const rgb = hexToRgb(color);
+    
+    // Add filled polygon
+    linesG
+      .append("polygon")
+      .attr("points", polyStr)
+      .attr("fill", `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.25)`)
+      .attr("stroke", color)
+      .attr("stroke-width", 2)
+      .attr("stroke-dasharray", "5,3");
+    
+    // Add label
+    const cx = d3.mean(polyPoints, p => x(p.t));
+    const cy = d3.mean(polyPoints, p => y(getYValue(p.t, p.w, Patm)));
+    
+    linesG
+      .append("text")
+      .attr("x", cx)
+      .attr("y", cy)
+      .attr("text-anchor", "middle")
+      .attr("fill", color)
+      .attr("font-size", "11px")
+      .attr("font-weight", "bold")
+      .text("Comfort Zone");
+  }
+}
 
 const inputHandlers = {
   "set-show-legend": (event) => {
+    const legend = document.querySelector(".chart-legend");
     if (event.target.checked) {
-      document.querySelector(".chart-legend").classList.remove("none");
+      if (legend) {
+        legend.classList.remove("none");
+      } else {
+        drawChart(); // Redraw to show legend
+      }
     } else {
-      document.querySelector(".chart-legend").classList.add("none");
+      if (legend) {
+        legend.classList.add("none");
+      }
     }
+  },
+  "set-show-rh": (event) => {
+    State.visibility.rh = event.target.checked;
+    drawChart();
+  },
+  "set-show-h": (event) => {
+    State.visibility.h = event.target.checked;
+    drawChart();
+  },
+  "set-show-twb": (event) => {
+    State.visibility.twb = event.target.checked;
+    drawChart();
+  },
+  "set-show-v": (event) => {
+    State.visibility.v = event.target.checked;
+    drawChart();
+  },
+  "set-show-sat": (event) => {
+    State.visibility.sat = event.target.checked;
+    drawChart();
+  },
+  "set-show-comfort-zone": (event) => {
+    toggleComfortZone();
   },
 };
 
@@ -2433,4 +3386,21 @@ const inputs = document.querySelectorAll("input");
 inputs.forEach((input) => {
   input.addEventListener("input", handleInputChange);
   input.addEventListener("change", handleInputChange);
+});
+
+// ==========================================
+// KEYBOARD SHORTCUTS
+// ==========================================
+
+document.addEventListener("keydown", (event) => {
+  // Ctrl+Z atau Cmd+Z untuk Undo
+  if ((event.ctrlKey || event.metaKey) && event.key === "z" && !event.shiftKey) {
+    event.preventDefault();
+    undoAction();
+  }
+  // Ctrl+Y atau Ctrl+Shift+Z untuk Redo
+  if ((event.ctrlKey || event.metaKey) && (event.key === "y" || (event.key === "z" && event.shiftKey))) {
+    event.preventDefault();
+    redoAction();
+  }
 });

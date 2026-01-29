@@ -1,0 +1,260 @@
+/* ==========================================
+   INFO PAGE STYLES
+   ========================================== */
+
+.main {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 2rem;
+}
+
+/* ==========================================
+   CONTENT SECTION - Formula Items
+   ========================================== */
+
+.content-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.content-section .formula-section {
+  background: white;
+  border: 1px solid #eceff1;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease;
+}
+
+.content-section .formula-section:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.content-section .formula-section h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #37474f;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #eceff1;
+  padding-bottom: 0.5rem;
+  scroll-margin-top: 95px;
+}
+
+.content-section .formula-section h3 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #546e7a;
+  margin-bottom: 1rem;
+}
+
+.content-section .formula-section p {
+  line-height: 1.6;
+  color: #37474f;
+  margin-bottom: 1rem;
+}
+
+.content-section .formula-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.content-section .formula-section li {
+  margin-bottom: 0.75rem;
+  padding-left: 1rem;
+  position: relative;
+}
+
+.content-section .formula-section li::before {
+  content: "•";
+  color: #2196f3;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+.content-section .formula-section p[style*="font-size: 1.2em"] {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 0.25rem;
+  border-left: 4px solid #2196f3;
+  font-family: 'Times New Roman', serif;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+/* ==========================================
+   TOC SECTION - Enhanced Styling
+   ========================================== */
+
+.toc-section {
+  position: sticky;
+  top: 75px;
+  height: fit-content;
+}
+
+.toc-section .item {
+  background: white;
+  border: 1px solid #eceff1;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 75px;
+}
+
+.toc-section .item h3 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #37474f;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #eceff1;
+  padding-bottom: 0.5rem;
+}
+
+.toc-section .item ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Custom scrollbar for TOC */
+.toc-section .item ul::-webkit-scrollbar {
+  width: 4px;
+}
+
+.toc-section .item ul::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+
+.toc-section .item ul::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 2px;
+}
+
+.toc-section .item ul::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+.toc-section .item li {
+  margin-bottom: 0.25rem;
+}
+
+.toc-section .item a {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0rem;
+  color: #546e7a;
+  text-decoration: none;
+  border-radius: 0.35rem;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  gap: .5rem
+}
+
+.toc-section .item a:hover {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding-left: 1rem;
+}
+
+.toc-section .item a:hover::before {
+  color: #2196f3;
+}
+
+/* Highlight active TOC item */
+.toc-section .item a.active {
+  background: #2196f3;
+  color: white;
+  padding-left: 0.75rem;
+}
+
+.toc-section .item a.active::before {
+  content: "check_circle";
+  color: white;
+}
+
+/* ==========================================
+   REFERENCES SECTION
+   ========================================== */
+
+.references-section {
+  background: white;
+  border: 1px solid #eceff1;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.references-section h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #37474f;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #eceff1;
+  padding-bottom: 0.5rem;
+  scroll-margin-top: 85px;
+}
+
+.references-section ol {
+  padding-left: 1.5rem;
+  margin: 0;
+}
+
+.references-section li {
+  line-height: 1.6;
+  color: #37474f;
+  padding-left: 0.5rem;
+}
+
+.references-section li a {
+  color: #2196f3;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.references-section li a:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================
+   RESPONSIVE DESIGN
+   ========================================== */
+
+@media (max-width: 1200px) {
+  .main {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .toc-section {
+    position: static;
+    order: -1;
+  }
+  
+  .toc-section .item ul {
+    max-height: none;
+    overflow-y: visible;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.5rem;
+    padding-right: 0;
+  }
+  
+  .toc-section .item a {
+    justify-content: center;
+    text-align: center;
+    padding: 0.5rem;
+  }
+  
+  .toc-section .item a:hover {
+    padding-left: 0.5rem;
+  }
+}
+

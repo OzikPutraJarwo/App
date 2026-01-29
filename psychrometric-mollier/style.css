@@ -1,7 +1,9 @@
-/* --- CORE LAYOUT --- */
+/* ==========================================
+   CORE LAYOUT
+   ========================================== */
 
 body {
-  padding-toP: 65px
+  padding-top: 65px
 }
 
 body .wrap {
@@ -14,17 +16,31 @@ body .wrap {
   gap: 1.5rem;
 }
 
+/* ==========================================
+   CHART SECTION
+   ========================================== */
+
 .chart-section {
   aspect-ratio: 3 / 2;
   position: sticky;
   top: calc(65px + 2rem);
   max-height: calc(100dvh - 65px - 4rem);
-      float: right;
-    right: 0;
-    width: 100%;
+  float: right;
+  right: 0;
+  width: 100%;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  border-radius: .5rem;
 }
 
-/* SIDEBAR & CONTROLS */
+/* ==========================================
+   CONTROLS SECTION
+   ========================================== */
 
 .controls-section {
   width: 400px;
@@ -34,7 +50,9 @@ body .wrap {
   gap: 1.5rem;
 }
 
-/* Typography & Inputs */
+/* ==========================================
+   TYPOGRAPHY & INPUTS
+   ========================================== */
 
 .controls-scroll h3 {
   font-size: 1.2rem;
@@ -51,9 +69,15 @@ label {
 input,
 select {
   font-size: .8rem;
+  padding: 0.4rem;
+  border-radius: 0.25rem;
+  border: 1px solid #ccc;
+  background: white;
 }
 
-/* INPUT GROUPS */
+/* ==========================================
+   INPUT GROUPS
+   ========================================== */
 
 .input-group {
   display: flex;
@@ -64,13 +88,31 @@ select {
   margin-top: 1rem;
 }
 
+.input-item {
+  display: flex;
+  flex-direction: column;
+}
+
 .input-item.grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-/* TOOLBAR BUTTONS */
+.input-item > label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.input-item > label span {
+  font-size: 1.1rem;
+  opacity: .6;
+}
+
+/* ==========================================
+   TOOLBAR BUTTONS
+   ========================================== */
 
 .toolbar {
   border-top: 2px solid #eceff1;
@@ -94,6 +136,46 @@ select {
   grid-template-columns: 1fr 1fr;
 }
 
+.tool-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.tool-btn:hover {
+  background: #f5f5f5;
+}
+
+.tool-btn.active {
+  background: #2196f3;
+  color: white;
+  border-color: #2196f3;
+}
+
+.tool-btn > span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.tool-btn > span .material-symbols-rounded {
+  font-size: 18px;
+}
+
+.tool-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f5f5f5;
+}
+
+/* Button Colors */
 .btn-danger {
   color: #d32f2f !important;
   border-color: #ffcdd2 !important;
@@ -124,15 +206,9 @@ select {
   background: var(--green) !important;
 }
 
-.tool-btn>span {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.tool-btn>span .material-symbols-rounded {
-  font-size: 18px;
-}
+/* ==========================================
+   CHART ACTIONS
+   ========================================== */
 
 .chart-actions {
   display: grid;
@@ -140,9 +216,12 @@ select {
   gap: 1rem;
 }
 
-/* Chart Type */
+/* ==========================================
+   CHART TYPE & Y-AXIS TYPE
+   ========================================== */
 
-.chart-type, .yAxis-type {
+.chart-type,
+.yAxis-type {
   margin-top: 0;
 }
 
@@ -155,26 +234,18 @@ select {
   width: 20px;
 }
 
-/* Y Axis Type */
-
 .yAxis-type .tool-btn > span {
   flex-direction: column;
 }
 
-/* Tabs */
+/* ==========================================
+   TABS (ZONE & POINT)
+   ========================================== */
 
 .zone-tabs,
 .point-tabs {
   display: flex;
   gap: .5rem;
-}
-
-.toolbar-controls {
-  padding: 1rem;
-  border: 1px solid #eceff1;
-  border-radius: .5rem;
-  margin-top: 1rem;
-  overflow: hidden;
 }
 
 .toolbar-tabs {
@@ -197,6 +268,18 @@ select {
   color: white;
 }
 
+/* ==========================================
+   TOOLBAR CONTROLS
+   ========================================== */
+
+.toolbar-controls {
+  padding: 1rem;
+  border: 1px solid #eceff1;
+  border-radius: .5rem;
+  margin-top: 1rem;
+  overflow: hidden;
+}
+
 .toolbar-desc {
   font-size: .75rem;
   color: #666;
@@ -212,14 +295,9 @@ select {
   grid-template-columns: 1fr 1fr;
 }
 
-/* --- Point --- */
-
-#list-points,
-#list-zones {
-  margin-top: 1rem;
-}
-
-/* --- Input --- */
+/* ==========================================
+   TOOLBAR TYPE INPUT
+   ========================================== */
 
 .toolbar-type-input {
   display: grid;
@@ -241,7 +319,9 @@ select {
   font-size: .7rem
 }
 
-/* --- Range --- */
+/* ==========================================
+   TOOLBAR TYPE RANGE
+   ========================================== */
 
 .toolbar-type-range {
   display: grid;
@@ -288,7 +368,9 @@ select {
   border-radius: .3rem;
 }
 
-/* --- Zone --- */
+/* ==========================================
+   ZONE POINT COUNT
+   ========================================== */
 
 #zonePtCount {
   font-weight: bold;
@@ -296,7 +378,9 @@ select {
   margin-top: 1rem;
 }
 
-/* LIST ITEMS (Points & Zones) */
+/* ==========================================
+   LIST ITEMS (Points & Zones)
+   ========================================== */
 
 .marked-point,
 .comfort-zone,
@@ -372,6 +456,7 @@ select {
   line-height: 0;
 }
 
+/* Icon Buttons */
 .icon-btn {
   background: none;
   border: none;
@@ -393,7 +478,10 @@ select {
   color: var(--red-hover);
 }
 
-/* Expanded Details */
+/* ==========================================
+   ITEM DETAILS & DETAIL ROW
+   ========================================== */
+
 .item-details {
   display: none;
   padding: 10px;
@@ -414,17 +502,6 @@ select {
   grid-template-columns: 200px 8px 1fr;
 }
 
-.input-item>label {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.input-item>label span {
-  font-size: 1.1rem;
-  opacity: .6;
-}
-
 .det-label {
   display: flex;
   align-items: center;
@@ -437,6 +514,11 @@ select {
 
 .det-abbr {
   display: none;
+  font-weight: 500;
+}
+
+.det-val {
+  font-weight: 700
 }
 
 #info-panel .detail-row {
@@ -451,29 +533,9 @@ select {
   display: block;
 }
 
-.det-abbr {
-  font-weight: 500;
-}
-
-.det-val {
-  font-weight: 700
-}
-
-/* .detail-row {
-  grid-template-columns: 180px 8px 1fr;
-} */
-
-/* CHART AREA */
-.chart-section {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  background: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-  border-radius: .5rem;
-}
+/* ==========================================
+   CHART WRAPPER & CONTAINER
+   ========================================== */
 
 #chart-wrapper {
   width: 100%;
@@ -481,13 +543,15 @@ select {
   position: relative;
 }
 
-/* FIX 1: CSS agar chart full height */
 #chart-container {
   height: 100%;
   width: 100%;
 }
 
-/* SVG & Lines */
+/* ==========================================
+   SVG & LINES
+   ========================================== */
+
 #chart-container svg {
   background-color: white;
 }
@@ -555,7 +619,10 @@ select {
   fill: #fb8c00;
 }
 
-/* User Interaction */
+/* ==========================================
+   USER INTERACTION (Points & Zones)
+   ========================================== */
+
 .user-point {
   stroke: white;
   stroke-width: 2;
@@ -603,7 +670,10 @@ select {
   fill: none;
 }
 
-/* MODAL & TOOLTIP */
+/* ==========================================
+   MODAL & TOOLTIP
+   ========================================== */
+
 #info-panel {
   position: absolute;
   top: 0;
@@ -620,8 +690,10 @@ select {
   font-size: .7rem;
 }
 
+/* ==========================================
+   SMART LABELS
+   ========================================== */
 
-/* Smart Labels Styles */
 .smart-label {
   font-size: 10px;
   font-family: sans-serif;
@@ -647,7 +719,10 @@ select {
   fill: #fb8c00;
 }
 
-/* Styling Preview Range Box */
+/* ==========================================
+   PREVIEW RANGE BOX
+   ========================================== */
+
 .temp-zone-poly {
   fill: rgba(33, 150, 243, 0.2);
   stroke: #2196f3;
@@ -656,7 +731,10 @@ select {
   pointer-events: none;
 }
 
-/* LEGEND STYLES */
+/* ==========================================
+   LEGEND STYLES
+   ========================================== */
+
 .legend-box {
   fill: rgba(255, 255, 255, 0.9);
   stroke: #cfd8dc;
@@ -676,16 +754,50 @@ select {
   pointer-events: none;
 }
 
-/* ADVANCED SETTINGS */
+/* ==========================================
+   ADVANCED SETTINGS
+   ========================================== */
 
 .advanced-settings h4 {
-  margin-bottom: 1rem;
+  margin: 0;
+}
+
+.advanced-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.advanced-settings-header:hover h4 {
+  color: #2196f3;
+}
+
+.advanced-settings-header .material-symbols-rounded {
+  font-size: 20px;
+  color: #666;
+  transition: transform 0.2s ease;
+}
+
+/* When collapsed: expand_more (▼) - no rotation needed */
+/* When expanded: expand_less (▲) - no rotation needed since it's already pointing up */
+
+/* When collapsed, show expand_more (no rotation) */
+.advanced-settings-header.collapsed + #setting-legend {
+  display: none;
+}
+
+/* When expanded, show the settings */
+.advanced-settings-header:not(.collapsed) + #setting-legend {
+  display: flex;
 }
 
 .setting-legend {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  margin-top: 1rem;
 }
 
 .settype-checkbox {
@@ -704,6 +816,11 @@ select {
   cursor: pointer;
 }
 
+.settype-checkbox.child {
+  margin-left: 1.5rem;
+  margin-top: -.25rem;
+}
+
 .settype-ratio div {
   display: grid;
   grid-template-columns: 1fr 3rem 1fr;
@@ -712,7 +829,380 @@ select {
   text-align: center;
 }
 
-.settype-checkbox.child {
-  margin-left: 1.5rem;
-  margin-top: -.25rem;
+/* ==========================================
+   COMFORT ZONE
+   ========================================== */
+
+.settype-comfort-zone {
+  border-top: 1px solid #eceff1;
+  padding-top: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.comfort-zone-options {
+  margin-top: 0.75rem;
+  padding-left: 1.5rem;
+}
+
+.settype-select {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.settype-select label {
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.settype-select select {
+  padding: 0.3rem;
+  border-radius: 0.25rem;
+  border: 1px solid #ccc;
+  font-size: 0.75rem;
+}
+
+.comfort-zone-custom {
+  margin-top: 0.5rem;
+}
+
+.comfort-zone-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.comfort-zone-inputs .input-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.comfort-zone-inputs .input-row label {
+  font-size: 0.7rem;
+  margin: 0;
+}
+
+.comfort-zone-inputs .input-row input {
+  padding: 0.25rem;
+  font-size: 0.7rem;
+  width: 60px;
+}
+
+.comfort-zone-color {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.comfort-zone-color label {
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+.comfort-zone-color input[type="color"] {
+  width: 40px;
+  height: 25px;
+  padding: 0;
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+  cursor: pointer;
+}
+
+/* ==========================================
+   PRESSURE INPUT WITH UNIT SELECTOR
+   ========================================== */
+
+.pressure-input .pressure-input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pressure-input .pressure-input-row input {
+  flex: 2;
+}
+
+.pressure-input .pressure-input-row select {
+  width: 5rem;
+}
+
+/* ==========================================
+   CONTEXT MENU
+   ========================================== */
+
+.context-menu {
+  position: fixed;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #b0bec5;
+  border-radius: .25rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 160px;
+  overflow: visible; /* allow flyout submenus */
+  padding: 4px 0;
+}
+
+.context-menu-item {
+  position: relative;
+  padding: .35rem .6rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.12s ease;
+}
+
+.context-menu-item:last-child {
+  border-bottom: none;
+}
+
+.context-menu-item:hover,
+.context-menu-item.active {
+  background-color: #eceff1;
+  color: #1565c0;
+  font-weight: 500;
+}
+
+.context-menu-item.divider {
+  cursor: default;
+  border-bottom: 1px solid #cfd8dc;
+  height: 0;
+}
+
+.context-menu-item.divider:hover {
+  background-color: transparent;
+}
+
+.context-menu-item span {
+  font-size: .8rem;
+  flex-shrink: 0;
+  opacity: 0.75;
+  display: flex;
+  align-items: center;
+}
+
+.context-menu-item.has-submenu {
+  justify-content: space-between;
+}
+
+.submenu-arrow {
+  opacity: 0.6;
+  font-size: 1rem;
+}
+
+.context-submenu {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 100%;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid #b0bec5;
+  border-radius: .25rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.18);
+  min-width: 180px;
+  padding: 4px 0;
+  z-index: 1001;
+}
+
+.context-menu-form {
+  padding: 8px 10px;
+  background: #f8f9fa;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 4px;
+}
+
+.context-menu-form .form-row {
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.context-menu-form label {
+  font-size: 0.7rem;
+  color: #546e7a;
+  font-weight: 500;
+}
+
+.context-menu-form select,
+.context-menu-form input {
+  padding: 4px 6px;
+  font-size: 0.75rem;
+  border: 1px solid #cfd8dc;
+  border-radius: 3px;
+  background: white;
+}
+
+.context-menu-form input:focus,
+.context-menu-form select:focus {
+  outline: none;
+  border-color: #1565c0;
+}
+
+.context-menu-form .ctx-btn {
+  width: 100%;
+  padding: 6px;
+  margin-top: 6px;
+  background: #1565c0;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.context-menu-form .ctx-btn:hover {
+  background: #0d47a1;
+}
+/* Floating windows */
+.floating-window {
+  position: fixed;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid #b0bec5;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  z-index: 2000;
+  min-width: 320px;
+  max-width: 400px;
+  display: none;
+}
+
+.floating-window-header {
+  background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: move;
+  user-select: none;
+}
+
+.floating-window-title {
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.floating-window-close {
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  line-height: 1;
+}
+
+.floating-window-close:hover {
+  opacity: 1;
+}
+
+.floating-window-content {
+  padding: 20px;
+}
+
+.floating-window label {
+  display: block;
+  font-size: 13px;
+  color: #424242;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.floating-window input,
+.floating-window select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #cfd8dc;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.floating-window input[type="range"] {
+  padding: 0;
+  height: 6px;
+  margin-bottom: 8px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(to right, #1e88e5 0%, #64b5f6 100%);
+  outline: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.floating-window input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border: 2px solid #1e88e5;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: all 0.2s;
+}
+
+.floating-window input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+}
+
+.floating-window input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: white;
+  border: 2px solid #1e88e5;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: all 0.2s;
+}
+
+.floating-window input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+}
+
+.floating-window input[type="number"] {
+  margin-bottom: 16px;
+}
+
+.floating-window input:focus,
+.floating-window select:focus {
+  outline: none;
+  border-color: #1e88e5;
+}
+
+.floating-btn {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.2s;
+  margin-top: 8px;
+}
+
+.floating-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(30, 136, 229, 0.3);
+}
+
+.floating-btn:active {
+  transform: translateY(0);
 }
