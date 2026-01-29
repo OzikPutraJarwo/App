@@ -424,6 +424,7 @@ function changeYAxisType(type) {
 
 function syncHumidityInputs(source) {
   const Patm = getPressureInPa();
+  const minT = parseFloat(document.getElementById("minTemp").value);
   const maxT = parseFloat(document.getElementById("maxTemp").value);
   const elMaxHum = document.getElementById("maxHum");
   const elMaxAbsHum = document.getElementById("maxAbsHum");
@@ -431,13 +432,17 @@ function syncHumidityInputs(source) {
   if (source === 'ratio') {
     const valW = parseFloat(elMaxHum.value);
     if (!isNaN(valW)) {
-      const valAH = calculateAbsoluteHumidity(maxT, valW, Patm);
-      elMaxAbsHum.value = valAH.toFixed(3);
+      // Hitung AH di suhu rata-rata range untuk representasi yang lebih akurat
+      const avgT = (minT + maxT) / 2;
+      const valAH = calculateAbsoluteHumidity(avgT, valW, Patm);
+      elMaxAbsHum.value = valAH.toFixed(1);
     }
   } else if (source === 'absolute') {
     const valAH = parseFloat(elMaxAbsHum.value);
     if (!isNaN(valAH)) {
-      const valW = getWFromAbsoluteHumidity(maxT, valAH, Patm);
+      // Konversi AH ke W menggunakan suhu rata-rata
+      const avgT = (minT + maxT) / 2;
+      const valW = getWFromAbsoluteHumidity(avgT, valAH, Patm);
       elMaxHum.value = valW.toFixed(4);
     }
   }
@@ -1163,6 +1168,10 @@ function hideContextMenu() {
 
 // Floating window functions
 function openFloatingInputWindow(target) {
+  // Close range window if open
+  const rangeWindow = document.getElementById("floating-range-window");
+  if (rangeWindow) rangeWindow.style.display = "none";
+  
   const window = document.getElementById("floating-input-window");
   document.getElementById("floating-target").value = target;
   
@@ -1172,10 +1181,33 @@ function openFloatingInputWindow(target) {
   const p2Type = document.getElementById("p2Type-" + target);
   const p2Val = document.getElementById("p2Val-" + target);
   
-  if (p1Type) document.getElementById("floating-p1Type").value = p1Type.value;
-  if (p1Val) document.getElementById("floating-p1Val").value = p1Val.value;
-  if (p2Type) document.getElementById("floating-p2Type").value = p2Type.value;
-  if (p2Val) document.getElementById("floating-p2Val").value = p2Val.value;
+  // Map uppercase toolbar values to lowercase floating values
+  const reverseValueMap = {
+    'Tdb': 't',
+    'Twb': 'twb',
+    'RH': 'rh',
+    'W': 'w',
+    'h': 'h'
+  };
+  
+  if (p1Type) {
+    const mappedValue = reverseValueMap[p1Type.value] || p1Type.value;
+    const floatingP1Type = document.getElementById("floating-p1Type");
+    if (floatingP1Type) floatingP1Type.value = mappedValue;
+  }
+  if (p1Val) {
+    const floatingP1Val = document.getElementById("floating-p1Val");
+    if (floatingP1Val) floatingP1Val.value = p1Val.value;
+  }
+  if (p2Type) {
+    const mappedValue = reverseValueMap[p2Type.value] || p2Type.value;
+    const floatingP2Type = document.getElementById("floating-p2Type");
+    if (floatingP2Type) floatingP2Type.value = mappedValue;
+  }
+  if (p2Val) {
+    const floatingP2Val = document.getElementById("floating-p2Val");
+    if (floatingP2Val) floatingP2Val.value = p2Val.value;
+  }
   
   // Position window at center
   window.style.left = "50%";
@@ -1186,7 +1218,99 @@ function openFloatingInputWindow(target) {
   makeWindowDraggable(window);
 }
 
+// Sync floating input selects with toolbar in real-time
+function syncFloatingInputWithToolbar(fieldType) {
+  const target = document.getElementById("floating-target").value;
+  if (!target) return;
+  
+  const fieldMap = {
+    'p1Type': 'p1Type-' + target,
+    'p1Val': 'p1Val-' + target,
+    'p2Type': 'p2Type-' + target,
+    'p2Val': 'p2Val-' + target
+  };
+  
+  const toolbarId = fieldMap[fieldType];
+  const floatingId = 'floating-' + fieldType;
+  
+  const toolbarEl = document.getElementById(toolbarId);
+  const floatingEl = document.getElementById(floatingId);
+  
+  if (toolbarEl && floatingEl) {
+    // Map lowercase floating values to uppercase toolbar values
+    const valueMap = {
+      't': 'Tdb',
+      'tdb': 'Tdb',
+      'w': 'W',
+      'rh': 'RH',
+      'h': 'h',
+      'twb': 'Twb',
+      'tdp': 'Tdp',
+      'v': 'v'
+    };
+    
+    let value = floatingEl.value;
+    
+    // If it's a select (parameter type), map the value
+    if (floatingEl.tagName === 'SELECT') {
+      value = valueMap[value.toLowerCase()] || value;
+    }
+    
+    toolbarEl.value = value;
+  }
+}
+
+// Sync toolbar inputs with floating window in real-time (bidirectional)
+function syncToolbarInputWithFloating(target, fieldType) {
+  // Check if floating window is open
+  const floatingWindow = document.getElementById("floating-input-window");
+  if (floatingWindow.style.display !== "block") return;
+  
+  // Check if floating window is for this target
+  const floatingTarget = document.getElementById("floating-target").value;
+  if (floatingTarget !== target) return;
+  
+  const fieldMap = {
+    'p1Type': 'p1Type-' + target,
+    'p1Val': 'p1Val-' + target,
+    'p2Type': 'p2Type-' + target,
+    'p2Val': 'p2Val-' + target
+  };
+  
+  const toolbarId = fieldMap[fieldType];
+  const floatingId = 'floating-' + fieldType;
+  
+  const toolbarEl = document.getElementById(toolbarId);
+  const floatingEl = document.getElementById(floatingId);
+  
+  if (toolbarEl && floatingEl) {
+    // Map uppercase toolbar values to lowercase floating values
+    const reverseValueMap = {
+      'Tdb': 't',
+      'Twb': 'twb',
+      'RH': 'rh',
+      'W': 'w',
+      'h': 'h',
+      'Tdp': 'tdp',
+      'v': 'v'
+    };
+    
+    let value = toolbarEl.value;
+    
+    // If it's a select (parameter type), map the value
+    if (toolbarEl.tagName === 'SELECT') {
+      value = reverseValueMap[value] || value;
+    }
+    
+    floatingEl.value = value;
+  }
+}
+
 function openFloatingRangeWindow() {
+  // Close input window if open
+  const inputWindow = document.getElementById("floating-input-window");
+  if (inputWindow) inputWindow.style.display = "none";
+  
   const window = document.getElementById("floating-range-window");
   
   // Sync with toolbar values
@@ -1243,11 +1367,26 @@ function closeFloatingWindow(windowId) {
 
 function submitFloatingInput() {
   const target = document.getElementById("floating-target").value;
-  const p1Type = document.getElementById("floating-p1Type").value;
+  let p1Type = document.getElementById("floating-p1Type").value;
   const p1Val = parseFloat(document.getElementById("floating-p1Val").value);
-  const p2Type = document.getElementById("floating-p2Type").value;
+  let p2Type = document.getElementById("floating-p2Type").value;
   const p2Val = parseFloat(document.getElementById("floating-p2Val").value);
   const Patm = getPressureInPa();
+
+  // Map lowercase floating values to uppercase Psychro library values
+  const valueMap = {
+    't': 'Tdb',
+    'tdb': 'Tdb',
+    'w': 'W',
+    'rh': 'RH',
+    'h': 'h',
+    'twb': 'Twb',
+    'tdp': 'Tdp',
+    'v': 'v'
+  };
+  
+  p1Type = valueMap[p1Type.toLowerCase()] || p1Type;
+  p2Type = valueMap[p2Type.toLowerCase()] || p2Type;
 
   if (isNaN(p1Val) || isNaN(p2Val)) {
     alert("Please enter valid numbers");
@@ -1338,9 +1477,20 @@ function makeWindowDraggable(window) {
 
   header.addEventListener("mousedown", (e) => {
     isDragging = true;
-    initialX = e.clientX - (window.offsetLeft || 0);
-    initialY = e.clientY - (window.offsetTop || 0);
-    window.style.transform = "none"; // Remove center transform
+    
+    // Get actual position before removing transform
+    const rect = window.getBoundingClientRect();
+    
+    // Remove center transform first
+    window.style.transform = "none";
+    
+    // Set absolute position based on current visual position
+    window.style.left = rect.left + "px";
+    window.style.top = rect.top + "px";
+    
+    // Calculate offset from mouse to window edge
+    initialX = e.clientX - rect.left;
+    initialY = e.clientY - rect.top;
   });
 
   document.addEventListener("mousemove", (e) => {
@@ -1831,24 +1981,8 @@ function drawChart() {
     x = d3.scaleLinear().domain([minT, maxT]).range([0, w]);
 
     if (State.yAxisType === "absoluteHumidity") {
-      // Hitung range untuk Absolute Humidity
-      // Cari nilai maksimum AH dalam rentang yang ditampilkan
-      let maxAH = 0;
-
-      // Cek di beberapa titik untuk mendapatkan AH maksimum
-      // Di suhu maksimum dengan RH 100% akan memberikan AH tertinggi
-      const tStep = (maxT - minT) / 50;
-      for (let t = minT; t <= maxT; t += tStep) {
-        const Pws = Psychro.getSatVapPres(t);
-        const Wsat = Psychro.getWFromPw(Pws, Patm);
-        if (Wsat <= maxH) {
-          const ah = calculateAbsoluteHumidity(t, Wsat, Patm);
-          if (ah > maxAH) maxAH = ah;
-        }
-      }
-
-      // Tambahkan margin 10%
-      maxAH = maxAH * 1.1;
+      // Gunakan nilai maxAbsHum dari input user
+      const maxAH = parseFloat(document.getElementById("maxAbsHum").value);
       y = d3.scaleLinear().domain([0, maxAH]).range([h, 0]);
     } else {
       y = d3.scaleLinear().domain([0, maxH]).range([h, 0]);
@@ -1856,17 +1990,8 @@ function drawChart() {
   } else {
     // Mollier: x = Humidity, y = DBT
     if (State.yAxisType === "absoluteHumidity") {
-      let maxAH = 0;
-      const tStep = (maxT - minT) / 50;
-      for (let t = minT; t <= maxT; t += tStep) {
-        const Pws = Psychro.getSatVapPres(t);
-        const Wsat = Psychro.getWFromPw(Pws, Patm);
-        if (Wsat <= maxH) {
-          const ah = calculateAbsoluteHumidity(t, Wsat, Patm);
-          if (ah > maxAH) maxAH = ah;
-        }
-      }
-      maxAH = maxAH * 1.1;
+      // Gunakan nilai maxAbsHum dari input user
+      const maxAH = parseFloat(document.getElementById("maxAbsHum").value);
       x = d3.scaleLinear().domain([0, maxAH]).range([0, w]);
     } else {
       x = d3.scaleLinear().domain([0, maxH]).range([0, w]);

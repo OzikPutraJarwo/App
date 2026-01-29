@@ -245,19 +245,6 @@
             <div class="toolbar">
               <div class="toolbar-group">
                 <div class="toolbar-button">
-                  <button class="tool-btn" id="btn-undo" onclick="undoAction()" title="Undo (Ctrl+Z)">
-                    <span><span class="material-symbols-rounded"> undo </span> Undo</span>
-                  </button>
-                  <button class="tool-btn" id="btn-redo" onclick="redoAction()" title="Redo (Ctrl+Y)">
-                    <span><span class="material-symbols-rounded"> redo </span> Redo</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div class="toolbar">
-              <div class="toolbar-group">
-                <div class="toolbar-button">
                   <button class="tool-btn active" id="btn-view" onclick="setMode('view')">
                     <span><span class="material-symbols-rounded"> explore </span> Explore</span>
                   </button>
@@ -299,26 +286,26 @@
                 <div class="toolbar-type-input">
                   <div>
                     <label>1st Parameter</label>
-                    <select id="p1Type-zone">
+                    <select id="p1Type-zone" oninput="syncToolbarInputWithFloating('zone', 'p1Type')">
                       <option value="Tdb">Dry Bulb Temp (°C)</option>
                       <option value="Twb">Wet Bulb Temp (°C)</option>
                       <option value="RH">Rel. Humidity (%)</option>
                       <option value="W">Humidity Ratio (kg/kg')</option>
                       <option value="h">Enthalpy (kJ/kg)</option>
                     </select>
-                    <input type="number" id="p1Val-zone" step="0.1" placeholder="Value">
+                    <input type="number" id="p1Val-zone" step="0.1" placeholder="Value" oninput="syncToolbarInputWithFloating('zone', 'p1Val')">
                   </div>
 
                   <div>
                     <label>2nd Parameter</label>
-                    <select id="p2Type-zone">
+                    <select id="p2Type-zone" oninput="syncToolbarInputWithFloating('zone', 'p2Type')">
                       <option value="RH" selected="">Rel. Humidity (%)</option>
                       <option value="Tdb">Dry Bulb Temp (°C)</option>
                       <option value="Twb">Wet Bulb Temp (°C)</option>
                       <option value="W">Humidity Ratio (kg/kg')</option>
                       <option value="h">Enthalpy (kJ/kg)</option>
                     </select>
-                    <input type="number" id="p2Val-zone" step="0.1" placeholder="Value">
+                    <input type="number" id="p2Val-zone" step="0.1" placeholder="Value" oninput="syncToolbarInputWithFloating('zone', 'p2Val')">
                   </div>
                 </div>
 
@@ -407,26 +394,26 @@
                 <div class="toolbar-type-input">
                   <div>
                     <label>1st Parameter</label>
-                    <select id="p1Type-point">
+                    <select id="p1Type-point" oninput="syncToolbarInputWithFloating('point', 'p1Type')">
                       <option value="Tdb">Dry Bulb Temp (°C)</option>
                       <option value="Twb">Wet Bulb Temp (°C)</option>
                       <option value="RH">Rel. Humidity (%)</option>
                       <option value="W">Humidity Ratio (kg/kg')</option>
                       <option value="h">Enthalpy (kJ/kg)</option>
                     </select>
-                    <input type="number" id="p1Val-point" step="0.1" placeholder="Value">
+                    <input type="number" id="p1Val-point" step="0.1" placeholder="Value" oninput="syncToolbarInputWithFloating('point', 'p1Val')">
                   </div>
 
                   <div>
                     <label>2nd Parameter</label>
-                    <select id="p2Type-point">
+                    <select id="p2Type-point" oninput="syncToolbarInputWithFloating('point', 'p2Type')">
                       <option value="RH" selected="">Rel. Humidity (%)</option>
                       <option value="Tdb">Dry Bulb Temp (°C)</option>
                       <option value="Twb">Wet Bulb Temp (°C)</option>
                       <option value="W">Humidity Ratio (kg/kg')</option>
                       <option value="h">Enthalpy (kJ/kg)</option>
                     </select>
-                    <input type="number" id="p2Val-point" step="0.1" placeholder="Value">
+                    <input type="number" id="p2Val-point" step="0.1" placeholder="Value" oninput="syncToolbarInputWithFloating('point', 'p2Val')">
                   </div>
                 </div>
 
@@ -456,23 +443,6 @@
           </div>
 
           <div class="chart-actions">
-            <div class="toolbar-button c2">
-              <button class="tool-btn btn-secondary" onclick="exportToCSV()">
-                <span>
-                  <span class="material-symbols-rounded"> table_chart </span> CSV
-                </span>
-              </button>
-              <button class="tool-btn btn-secondary" onclick="exportToExcel()">
-                <span>
-                  <span class="material-symbols-rounded"> description </span> Excel
-                </span>
-              </button>
-            </div>
-            <button class="tool-btn btn-primary" onclick="downloadSvgAsPng('#chart-container svg', 'chart.png', 3)">
-              <span>
-                <span class="material-symbols-rounded"> download </span> Download Chart
-              </span>
-            </button>
             <!-- <button class="tool-btn btn-danger" onclick="clearAllData()">
               <span>
                 <span class="material-symbols-rounded"> delete_forever </span> Clear All
@@ -546,27 +516,24 @@
           <input type="hidden" id="floating-target">
           
           <label>1st Parameter:</label>
-          <select id="floating-p1Type">
-            <option value="t">Dry-bulb (°C)</option>
-            <option value="w">Humidity ratio (kg/kg)</option>
-            <option value="rh">RH (%)</option>
+          <select id="floating-p1Type" oninput="syncFloatingInputWithToolbar('p1Type')">
+            <option value="t">Dry Bulb Temp (°C)</option>
+            <option value="twb">Wet Bulb Temp (°C)</option>
+            <option value="rh">Rel. Humidity (%)</option>
+            <option value="w">Humidity Ratio (kg/kg')</option>
             <option value="h">Enthalpy (kJ/kg)</option>
-            <option value="twb">Wet-bulb (°C)</option>
-            <option value="tdp">Dew point (°C)</option>
-            <option value="v">Specific vol (m³/kg)</option>
           </select>
-          <input type="number" id="floating-p1Val" step="any" placeholder="Value">
+          <input type="number" id="floating-p1Val" step="any" placeholder="Value" oninput="syncFloatingInputWithToolbar('p1Val')">
           
           <label>2nd Parameter:</label>
-          <select id="floating-p2Type">
-            <option value="w">Humidity ratio (kg/kg)</option>
-            <option value="rh">RH (%)</option>
+          <select id="floating-p2Type" oninput="syncFloatingInputWithToolbar('p2Type')">
+            <option value="rh">Rel. Humidity (%)</option>
+            <option value="t">Dry Bulb Temp (°C)</option>
+            <option value="twb">Wet Bulb Temp (°C)</option>
+            <option value="w">Humidity Ratio (kg/kg')</option>
             <option value="h">Enthalpy (kJ/kg)</option>
-            <option value="twb">Wet-bulb (°C)</option>
-            <option value="tdp">Dew point (°C)</option>
-            <option value="v">Specific vol (m³/kg)</option>
           </select>
-          <input type="number" id="floating-p2Val" step="any" placeholder="Value">
+          <input type="number" id="floating-p2Val" step="any" placeholder="Value" oninput="syncFloatingInputWithToolbar('p2Val')">
           
           <button class="floating-btn" onclick="submitFloatingInput()">Add</button>
         </div>

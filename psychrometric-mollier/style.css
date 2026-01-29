@@ -387,7 +387,7 @@ select {
 .item-border {
   border-top: 2px solid #eceff1;
   padding-top: 1.25rem;
-  margin-top: 1.25rem;
+  margin-top: .75rem;
 }
 
 .count-badge {
@@ -770,7 +770,7 @@ select {
   user-select: none;
 }
 
-.advanced-settings-header:hover h4 {
+.advanced-settings-header:hover h4, .advanced-settings-header:hover span {
   color: #2196f3;
 }
 
@@ -943,8 +943,7 @@ select {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   min-width: 160px;
-  overflow: visible; /* allow flyout submenus */
-  padding: 4px 0;
+  overflow: visible;
 }
 
 .context-menu-item {
@@ -964,14 +963,14 @@ select {
 .context-menu-item:hover,
 .context-menu-item.active {
   background-color: #eceff1;
-  color: #1565c0;
   font-weight: 500;
 }
 
 .context-menu-item.divider {
   cursor: default;
-  border-bottom: 1px solid #cfd8dc;
-  height: 0;
+  height: 1px;
+  background: #cfd8dc;
+  padding: 0;
 }
 
 .context-menu-item.divider:hover {
@@ -986,8 +985,8 @@ select {
   align-items: center;
 }
 
-.context-menu-item.has-submenu {
-  justify-content: space-between;
+.context-menu-item.has-submenu span.submenu-arrow {
+  margin-left: auto;
 }
 
 .submenu-arrow {
@@ -1005,7 +1004,6 @@ select {
   border-radius: .25rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.18);
   min-width: 180px;
-  padding: 4px 0;
   z-index: 1001;
 }
 
@@ -1105,77 +1103,43 @@ select {
 }
 
 .floating-window-content {
-  padding: 20px;
+  padding: 16px;
 }
 
 .floating-window label {
   display: block;
-  font-size: 13px;
-  color: #424242;
-  margin-bottom: 6px;
+  font-size: .7rem;
+  color: #666;
+  margin-bottom: 4px;
   font-weight: 500;
 }
 
-.floating-window input,
 .floating-window select {
   width: 100%;
-  padding: 8px 12px;
+  padding: .4rem .2rem;
   border: 1px solid #cfd8dc;
-  border-radius: 4px;
-  font-size: 14px;
+  border-radius: .25rem;
+  font-size: .7rem;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.floating-window input[type="number"] {
+  width: 100%;
+  padding: .4rem;
+  border: 1px solid #cfd8dc;
+  border-radius: .25rem;
+  font-size: .7rem;
   margin-bottom: 12px;
   box-sizing: border-box;
   transition: border-color 0.2s;
 }
 
 .floating-window input[type="range"] {
-  padding: 0;
-  height: 6px;
-  margin-bottom: 8px;
-  -webkit-appearance: none;
-  appearance: none;
-  background: linear-gradient(to right, #1e88e5 0%, #64b5f6 100%);
-  outline: none;
-  border-radius: 3px;
-  cursor: pointer;
-}
-
-.floating-window input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  background: white;
-  border: 2px solid #1e88e5;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  transition: all 0.2s;
-}
-
-.floating-window input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-}
-
-.floating-window input[type="range"]::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  background: white;
-  border: 2px solid #1e88e5;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  transition: all 0.2s;
-}
-
-.floating-window input[type="range"]::-moz-range-thumb:hover {
-  transform: scale(1.15);
-  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-}
-
-.floating-window input[type="number"] {
-  margin-bottom: 16px;
+padding: 0;
+    background: unset;
+    box-shadow: none !important;
 }
 
 .floating-window input:focus,
@@ -1186,21 +1150,21 @@ select {
 
 .floating-btn {
   width: 100%;
-  padding: 10px;
+  padding: .5rem;
   background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
   color: white;
   border: none;
-  border-radius: 4px;
-  font-size: 14px;
+  border-radius: .25rem;
+  font-size: .7rem;
   font-weight: 500;
   cursor: pointer;
   transition: transform 0.1s, box-shadow 0.2s;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .floating-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(30, 136, 229, 0.3);
+  box-shadow: 0 3px 8px rgba(30, 136, 229, 0.3);
 }
 
 .floating-btn:active {
