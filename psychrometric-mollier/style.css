@@ -399,7 +399,7 @@ select {
 .item-border {
   border-top: 2px solid #eceff1;
   padding-top: 1.25rem;
-  margin-top: 1.5rem;
+  margin-top: 1.25rem;
 }
 
 .count-badge {
@@ -833,14 +833,6 @@ select {
   margin-top: -.25rem;
 }
 
-.settype-ratio div {
-  display: grid;
-  grid-template-columns: 1fr 3rem 1fr;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
 /* ==========================================
    COMFORT ZONE
    ========================================== */
@@ -1076,18 +1068,10 @@ select {
 .context-menu-form .ctx-btn:hover {
   background: #0d47a1;
 }
-/* Floating windows */
-.floating-window {
-  position: fixed;
-  background: rgba(255, 255, 255, 0.98);
-  border: 1px solid #b0bec5;
-  border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  z-index: 2000;
-  min-width: 320px;
-  max-width: 400px;
-  display: none;
-}
+
+/* ==========================================
+   FLOATING WINDOWS
+   ========================================== */
 
 .floating-window {
   position: fixed;
@@ -1471,10 +1455,5 @@ select {
   .settype-select {
     grid-template-columns: 1fr;
     gap: .25rem;
-  }
-
-  /* Advanced Settings - Small Mobile */
-  .settype-ratio div {
-    grid-template-columns: 1fr 2rem 1fr;
   }
 }

@@ -596,18 +596,25 @@ function validateRangeInputs(minId, maxId, type = "Tdb") {
 // Panggil ini sekali saat init atau saat masuk mode range
 // (Tambahkan panggilan ini di dalam setZoneSubMode)
 
-// Mengatur Sub-Mode (Manual vs Range)
-function setZoneSubMode(subMode) {
-  State.zoneSubMode = subMode;
-  document.querySelectorAll(".z-tab").forEach((t) => {
+// Helper function to update tab styles
+function updateTabStyles(tabsSelector, activeTabId) {
+  document.querySelectorAll(tabsSelector).forEach((t) => {
     t.style.background = "rgba(255,255,255,0.5)";
     t.style.color = "#1565c0";
     t.classList.remove("active");
   });
-  document.querySelector(".zone-tabs #tab-" + subMode).style.background =
-    "#2196f3";
-  document.querySelector(".zone-tabs #tab-" + subMode).style.color = "white";
-  document.querySelector(".zone-tabs #tab-" + subMode).classList.add("active");
+  const activeTab = document.querySelector(activeTabId);
+  if (activeTab) {
+    activeTab.style.background = "#2196f3";
+    activeTab.style.color = "white";
+    activeTab.classList.add("active");
+  }
+}
+
+// Mengatur Sub-Mode (Manual vs Range)
+function setZoneSubMode(subMode) {
+  State.zoneSubMode = subMode;
+  updateTabStyles(".z-tab", ".zone-tabs #tab-" + subMode);
 
   document.getElementById("zone-manual-ui").style.display =
     subMode === "manual" ? "block" : "none";
@@ -632,15 +639,7 @@ function setZoneSubMode(subMode) {
 
 function setPointSubMode(subMode) {
   State.pointSubMode = subMode;
-  document.querySelectorAll(".p-tab").forEach((t) => {
-    t.style.background = "rgba(255,255,255,0.5)";
-    t.style.color = "#1565c0";
-    t.classList.remove("active");
-  });
-  document.querySelector(".point-tabs #tab-" + subMode).style.background =
-    "#2196f3";
-  document.querySelector(".point-tabs #tab-" + subMode).style.color = "white";
-  document.querySelector(".point-tabs #tab-" + subMode).classList.add("active");
+  updateTabStyles(".p-tab", ".point-tabs #tab-" + subMode);
 
   document.getElementById("point-manual-ui").style.display =
     subMode === "manual" ? "block" : "none";
