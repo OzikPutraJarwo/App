@@ -114,6 +114,18 @@ select {
    TOOLBAR BUTTONS
    ========================================== */
 
+.toolbars {
+  display: none;
+}
+
+.toolbars.is-visible {
+  display: block;
+}
+
+.toolbars h3, .toolbar, #zone-controls, #point-controls {
+  display: none !important;
+}
+
 .toolbar {
   border-top: 2px solid #eceff1;
   padding-top: 1.25rem;
@@ -124,6 +136,7 @@ select {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
 .toolbar-button {
@@ -382,12 +395,11 @@ select {
    LIST ITEMS (Points & Zones)
    ========================================== */
 
-.marked-point,
 .comfort-zone,
 .item-border {
   border-top: 2px solid #eceff1;
   padding-top: 1.25rem;
-  margin-top: .75rem;
+  margin-top: 1.5rem;
 }
 
 .count-badge {
@@ -939,11 +951,15 @@ select {
   position: fixed;
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid #b0bec5;
-  border-radius: .25rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   min-width: 160px;
   overflow: visible;
+  border-radius: .25rem;
+}
+
+.context-menu-item:first-child {
+  border-radius: .25rem .25rem 0 0;
 }
 
 .context-menu-item {
@@ -958,6 +974,7 @@ select {
 
 .context-menu-item:last-child {
   border-bottom: none;
+  border-radius: 0 0 .25rem 0;
 }
 
 .context-menu-item:hover,
@@ -1001,7 +1018,7 @@ select {
   left: 100%;
   background: rgba(255, 255, 255, 0.98);
   border: 1px solid #b0bec5;
-  border-radius: .25rem;
+  border-radius: 0 .25rem .25rem 0;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.18);
   min-width: 180px;
   z-index: 1001;
@@ -1072,6 +1089,29 @@ select {
   display: none;
 }
 
+.floating-window {
+  position: fixed;
+  display: none;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  z-index: 10000;
+  min-width: 320px;
+  max-width: 90vw;
+}
+
+#floating-finish-zone-btn {
+  display: none;
+}
+
+.color-picker {
+  width: 100%;
+  height: 40px;
+  cursor: pointer;
+  border-radius: .3rem;
+  border: 2px solid #e0e0e0;
+}
+
 .floating-window-header {
   background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
   color: white;
@@ -1106,46 +1146,102 @@ select {
   padding: 16px;
 }
 
+.field-section {
+  margin-bottom: .75rem;
+}
+
+.field-section:last-child {
+  margin-bottom: 0;
+}
+
 .floating-window label {
   display: block;
   font-size: .7rem;
-  color: #666;
-  margin-bottom: 4px;
-  font-weight: 500;
+  color: #37474f;
+  margin-bottom: 5px;
+  margin-top: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+.floating-window label:first-of-type {
+  margin-top: 0;
+}
+
+.param-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: .75rem;
 }
 
 .floating-window select {
-  width: 100%;
-  padding: .4rem .2rem;
-  border: 1px solid #cfd8dc;
-  border-radius: .25rem;
+  padding: .45rem .5rem;
   font-size: .7rem;
-  margin-bottom: 8px;
-  box-sizing: border-box;
-  transition: border-color 0.2s;
 }
 
 .floating-window input[type="number"] {
-  width: 100%;
-  padding: .4rem;
-  border: 1px solid #cfd8dc;
-  border-radius: .25rem;
-  font-size: .7rem;
-  margin-bottom: 12px;
-  box-sizing: border-box;
-  transition: border-color 0.2s;
+  padding: .45rem .5rem;
+  font-size: .75rem;
+  background: #fff;
+  font-weight: 500;
 }
 
 .floating-window input[type="range"] {
-padding: 0;
-    background: unset;
-    box-shadow: none !important;
+  width: 100%;
+  padding: 0;
+  height: 5px;
+  margin-bottom: 8px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(to right, #e3f2fd 0%, #90caf9 100%);
+  outline: none;
+  border-radius: 3px;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.floating-window input:focus,
-.floating-window select:focus {
-  outline: none;
-  border-color: #1e88e5;
+.floating-window input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border: 3px solid #1e88e5;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  transition: all 0.2s;
+}
+
+.floating-window input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+  border-width: 4px;
+}
+
+.floating-window input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: white;
+  border: 3px solid #1e88e5;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.floating-btn-group {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.floating-btn-group.cols-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.floating-btn-group.cols-3 {
+  grid-template-columns: 1fr 1fr 1fr;
 }
 
 .floating-btn {
@@ -1159,14 +1255,226 @@ padding: 0;
   font-weight: 500;
   cursor: pointer;
   transition: transform 0.1s, box-shadow 0.2s;
-  margin-top: 6px;
+  margin: 0;
+}
+
+.floating-btn.btn-primary {
+  background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+}
+
+.floating-btn.btn-success {
+  background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+}
+
+.floating-btn.btn-danger {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
 }
 
 .floating-btn:hover {
   transform: translateY(-1px);
+}
+
+.floating-btn.btn-primary:hover {
   box-shadow: 0 3px 8px rgba(30, 136, 229, 0.3);
+}
+
+.floating-btn.btn-success:hover {
+  box-shadow: 0 3px 8px rgba(76, 175, 80, 0.3);
+}
+
+.floating-btn.btn-danger:hover {
+  box-shadow: 0 3px 8px rgba(244, 67, 54, 0.3);
 }
 
 .floating-btn:active {
   transform: translateY(0);
+}
+
+/* ==========================================
+   RESPONSIVE - MOBILE (< 1200px)
+   ========================================== */
+
+@media (max-width: 1199px) {
+  /* Core Layout */
+  .main {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Chart Section - Mobile */
+  .chart-section {
+    position: relative;
+    top: auto;
+    max-height: none;
+    float: none;
+    right: auto;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    order: 1;
+  }
+
+  /* Controls Section - Mobile */
+  .controls-section {
+    width: 100%;
+    order: 2;
+    gap: 1rem;
+  }
+
+  /* Show toolbars elements on mobile */
+  .toolbars h3,
+  .toolbar,
+  #zone-controls,
+  #point-controls {
+    display: block !important;
+  }
+
+  /* Toolbar Button Grid - Mobile */
+  .toolbar-button {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .toolbar-button.c2 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Input Groups - Mobile */
+  .input-item.grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Chart Actions - Mobile */
+  .chart-actions {
+    grid-template-columns: 1fr;
+  }
+
+  /* yAxis Type Buttons - Mobile */
+  .yAxis-type .toolbar-button {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Context Menu - Mobile */
+  .context-menu {
+    max-width: 90vw;
+  }
+
+  /* Floating Windows - Mobile */
+  .floating-window {
+    min-width: 280px;
+    max-width: calc(100vw - 20px);
+    left: 10px !important;
+    right: 10px !important;
+    width: calc(100% - 20px) !important;
+  }
+
+  /* Info Panel - Mobile */
+  #info-panel {
+    font-size: .65rem;
+    min-width: 200px;
+    max-width: 280px;
+  }
+}
+
+/* ==========================================
+   RESPONSIVE - SMALL MOBILE (< 600px)
+   ========================================== */
+
+@media (max-width: 599px) {
+
+  /* Chart Section - Small Mobile */
+  .chart-section {
+    aspect-ratio: 3 / 2;
+  }
+
+  /* Typography - Small Mobile */
+  .controls-scroll h3 {
+    font-size: 1rem;
+  }
+
+  /* Toolbar Buttons - Small Mobile */
+  .toolbar-button {
+    grid-template-columns: 1fr;
+    gap: .75rem;
+  }
+
+  .toolbar-button.c2 {
+    grid-template-columns: 1fr;
+  }
+
+  .tool-btn {
+    padding: 0.6rem 1rem;
+    font-size: 0.75rem;
+  }
+
+  /* Toolbar Type Input - Small Mobile */
+  .toolbar-type-input {
+    grid-template-columns: 1fr;
+  }
+
+  /* Toolbar Type Range - Small Mobile */
+  .title-row {
+    grid-template-columns: 1fr;
+    gap: .5rem;
+  }
+
+  .range-row {
+    grid-template-columns: 25px 1fr 45px;
+  }
+
+  /* Param Row - Small Mobile */
+  .param-row {
+    grid-template-columns: 1fr;
+    gap: .5rem;
+  }
+
+  /* Comfort Zone Inputs - Small Mobile */
+  .comfort-zone-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  /* List Items - Small Mobile */
+  .detail-row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .det-label {
+    font-weight: 500;
+  }
+
+  .det-val {
+    padding-left: 1rem;
+  }
+
+  /* Floating Window - Small Mobile */
+  .floating-window {
+    min-width: unset;
+  }
+
+  .floating-window-header {
+    padding: 10px 14px;
+  }
+
+  .floating-window-title {
+    font-size: 14px;
+  }
+
+  .floating-window-content {
+    padding: 12px;
+  }
+
+  .floating-btn-group.cols-3 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Settype Select - Small Mobile */
+  .settype-select {
+    grid-template-columns: 1fr;
+    gap: .25rem;
+  }
+
+  /* Advanced Settings - Small Mobile */
+  .settype-ratio div {
+    grid-template-columns: 1fr 2rem 1fr;
+  }
 }

@@ -774,10 +774,7 @@ function setMode(mode) {
   if (document.getElementById("btn-" + mode))
     document.getElementById("btn-" + mode).classList.add("active");
 
-  // Hide info panel ketika tidak di mode explore
-  if (mode !== "explore") {
-    document.getElementById("info-panel").style.display = "none";
-  }
+  // Info panel handled by mousemove across all modes
 
   const zoneCtrl = document.getElementById("zone-controls");
   zoneCtrl.style.display = mode === "zone" ? "block" : "none";
@@ -927,6 +924,15 @@ function updateLists() {
         .comfort-zone {display:none}
       </style>
     `;
+
+  updateToolbarsVisibility();
+}
+
+function updateToolbarsVisibility() {
+  const toolbars = document.querySelector(".toolbars");
+  if (!toolbars) return;
+  const hasData = State.points.length > 0 || State.zones.length > 0;
+  toolbars.classList.toggle("is-visible", hasData);
 }
 
 function addPoint(t, w) {
@@ -980,9 +986,12 @@ function redoAction() {
 
 let contextMenuPointId = null;
 
-function showContextMenu(event, pointId = null) {
+function showContextMenu(event, pointId = null, zoneId = null) {
   event.preventDefault();
   contextMenuPointId = pointId;
+
+  // Hide info panel when context menu opens
+  document.getElementById("info-panel").style.display = "none";
 
   const menu = document.getElementById("context-menu");
   const content = document.getElementById("context-menu-content");
@@ -1003,8 +1012,38 @@ function showContextMenu(event, pointId = null) {
       hideContextMenu();
       deletePoint({stopPropagation: () => {}}, pointId);
     });
+  } else if (zoneId) {
+    // Context menu for zone
+    const zone = State.zones.find(z => z.id === zoneId);
+    if (!zone) return;
+
+    addContextMenuItem(content, "edit_square", "Edit", () => {
+      hideContextMenu();
+      openEditModal("zone", zoneId);
+    });
+
+    addContextMenuItem(content, "delete", "Delete", () => {
+      hideContextMenu();
+      deleteZone({stopPropagation: () => {}}, zoneId);
+    });
   } else {
     // Context menu for chart - simplified with floating windows
+    
+    // Show Finish Zone and Cancel when in zone mode with >= 3 points
+    if (State.mode === "zone" && State.tempZone.length >= 3) {
+      addContextMenuItem(content, "check_circle", "Finish Zone", () => {
+        hideContextMenu();
+        finishZone();
+      });
+      
+      addContextMenuItem(content, "cancel", "Cancel", () => {
+        hideContextMenu();
+        cancelZone();
+      });
+      
+      addContextMenuDivider(content);
+    }
+    
     addContextMenuItem(content, "explore", "Explore", () => {
       hideContextMenu();
       setMode("view");
@@ -1142,14 +1181,14 @@ function addContextSubmenu(container, icon, label, builder, isActive = false) {
     clearTimeout(hideTimeout);
     // Position submenu relative to parent item
     const rect = item.getBoundingClientRect();
-    submenu.style.left = rect.width - 4 + "px";
-    submenu.style.top = -4 + "px";
+    submenu.style.left = rect.width + "px";
+    submenu.style.top = 0 + "px";
     submenu.style.display = "block";
   };
   const hide = () => {
     hideTimeout = setTimeout(() => {
       submenu.style.display = "none";
-    }, 120);
+    }, 0);
   };
 
   item.addEventListener("mouseenter", show);
@@ -1164,6 +1203,9 @@ function addContextSubmenu(container, icon, label, builder, isActive = false) {
 function hideContextMenu() {
   document.getElementById("context-menu").style.display = "none";
   contextMenuPointId = null;
+  
+  // Info panel will be shown again by mousemove if in view mode
+  // No need to explicitly show it here as handleMouseMove will handle it
 }
 
 // Floating window functions
@@ -1207,6 +1249,15 @@ function openFloatingInputWindow(target) {
   if (p2Val) {
     const floatingP2Val = document.getElementById("floating-p2Val");
     if (floatingP2Val) floatingP2Val.value = p2Val.value;
+  }
+  
+  // Show/hide Finish Zone button based on target and point count
+  const finishBtn = document.getElementById("floating-finish-zone-btn");
+  const btnGroup = document.getElementById("floating-input-btn-group");
+  if (finishBtn && btnGroup) {
+    const shouldShow = target === "zone" && State.tempZone.length >= 3;
+    finishBtn.style.display = shouldShow ? "block" : "none";
+    btnGroup.className = shouldShow ? "floating-btn-group cols-2" : "floating-btn-group";
   }
   
   // Position window at center
@@ -1411,6 +1462,16 @@ function submitFloatingInput() {
     if (State.mode !== "zone") setMode("zone");
     State.tempZone.push({ t: res.t, w: res.w });
     updateZonePtCount();
+    
+    // Show Finish Zone button if >= 3 points
+    const finishBtn = document.getElementById("floating-finish-zone-btn");
+    const btnGroup = document.getElementById("floating-input-btn-group");
+    if (finishBtn && btnGroup) {
+      const shouldShow = State.tempZone.length >= 3;
+      finishBtn.style.display = shouldShow ? "block" : "none";
+      btnGroup.className = shouldShow ? "floating-btn-group cols-2" : "floating-btn-group";
+    }
+    
     drawChart();
   }
 
@@ -1692,6 +1753,7 @@ function openEditModal(type, id) {
   // Stop propagasi agar tidak men-trigger select item di background
   if (window.event) window.event.stopPropagation();
 
+  const editWindow = document.getElementById("floating-edit-window");
   document.getElementById("editId").value = id;
   document.getElementById("editType").value = type;
 
@@ -1715,11 +1777,16 @@ function openEditModal(type, id) {
     colorContainer.style.display = "block";
   }
 
-  document.querySelector(".editModal").style.display = "grid";
-  document.querySelector(".editModal").style.opacity = "1";
+  // Position window at center
+  editWindow.style.left = "50%";
+  editWindow.style.top = "50%";
+  editWindow.style.transform = "translate(-50%, -50%)";
+  editWindow.style.display = "block";
+  
+  makeWindowDraggable(editWindow);
 }
 
-function saveSettings() {
+function saveEditSettings() {
   const id = parseInt(document.getElementById("editId").value);
   const type = document.getElementById("editType").value;
   const newName = document.getElementById("editName").value;
@@ -1743,6 +1810,7 @@ function saveSettings() {
   historyManager.push(State);
   updateLists();
   drawChart();
+  closeFloatingWindow("floating-edit-window");
 }
 
 function finishZone() {
@@ -1839,7 +1907,6 @@ const gridLayer = svg.append("g");
 
 // 2. Layer Kurva & Data
 const linesLayer = svg.append("g").attr("clip-path", "url(#chart-clip)").attr("id", "lines-layer");
-const zoneLayer = svg.append("g").attr("clip-path", "url(#chart-clip)").attr("id", "zones-layer");
 const labelLayer = svg.append("g");
 
 // 3. Layer Axis/Border (Paling Atas - agar garis tepi menimpa kurva)
@@ -1852,6 +1919,7 @@ const overlay = svg
   .attr("fill", "transparent")
   .style("pointer-events", "all");
 
+const zoneLayer = svg.append("g").attr("clip-path", "url(#chart-clip)").attr("id", "zones-layer");
   const pointLayer = svg.append("g").attr("clip-path", "url(#chart-clip)").attr("id", "points-layer");
 
 // FUNGSI KONVERSI ABSOLUTE HUMIDITY
@@ -2157,12 +2225,19 @@ function drawChart() {
       .append("polygon")
       .attr("points", polyStr)
       .attr("class", "user-zone")
+      .attr("data-zone-id", z.id)
       .attr("fill", `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.3)`)
       .attr("stroke", z.color)
       .on("click", (e) => {
         e.stopPropagation();
         selectZone(z.id);
-      });
+      })
+      .on("contextmenu", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        showContextMenu(e, null, z.id);
+      })
+      .style("cursor", "pointer");
 
     if (z.id === State.selectedZoneId) poly.classed("selected", true);
 
@@ -2300,22 +2375,28 @@ function drawChart() {
       legG.attr("transform", `translate(${w - 130}, ${h - 115})`); // Ganti width dengan w
     }
 
+    // Data Item Legend - hanya tampilkan yang visible
+    const allLegItems = [
+      { c: color_rh, t: "Rel. Humidity", d: "0", key: "rh" },
+      { c: color_h, t: "Enthalpy", d: "0", key: "h" },
+      { c: color_twb, t: "Wet Bulb Temp", d: "4", key: "twb" },
+      { c: color_v, t: "Spec. Volume", d: "0", key: "v" },
+      { c: color_sat, t: "Saturation", d: "0", key: "sat" },
+    ];
+    
+    // Filter hanya yang visible
+    const legItems = allLegItems.filter(item => State.visibility[item.key]);
+    
+    // Hitung tinggi legend box berdasarkan jumlah item
+    const legendHeight = 25 + legItems.length * 15;
+
     // Gambar Kotak Background
     legG
       .append("rect")
       .attr("class", "legend-box")
       .attr("width", 120)
-      .attr("height", 105)
+      .attr("height", legendHeight + 7)
       .attr("rx", 1);
-
-    // Data Item Legend
-    const legItems = [
-      { c: color_rh, t: "Rel. Humidity", d: "0" },
-      { c: color_h, t: "Enthalpy", d: "0" },
-      { c: color_twb, t: "Wet Bulb Temp", d: "4" },
-      { c: color_v, t: "Spec. Volume", d: "0" },
-      { c: color_sat, t: "Saturation", d: "0"},
-    ];
 
     legG
       .append("text")
@@ -2369,8 +2450,16 @@ function handleMouseMove(e, x, y, minT, maxT, maxH, Patm) {
     return;
   }
 
-  // Info panel hanya muncul di mode explore
-  if (State.mode !== "explore") {
+  // Hide info panel if setting is disabled
+  const showInfoPanel = document.getElementById("set-show-info-panel");
+  if (showInfoPanel && !showInfoPanel.checked) {
+    document.getElementById("info-panel").style.display = "none";
+    return;
+  }
+
+  // Hide info panel jika context menu sedang terbuka
+  const contextMenu = document.getElementById("context-menu");
+  if (contextMenu && contextMenu.style.display === "block") {
     document.getElementById("info-panel").style.display = "none";
     return;
   }
@@ -3494,6 +3583,12 @@ const inputHandlers = {
   "set-show-sat": (event) => {
     State.visibility.sat = event.target.checked;
     drawChart();
+  },
+  "set-show-info-panel": (event) => {
+    if (!event.target.checked) {
+      const panel = document.getElementById("info-panel");
+      if (panel) panel.style.display = "none";
+    }
   },
   "set-show-comfort-zone": (event) => {
     toggleComfortZone();
