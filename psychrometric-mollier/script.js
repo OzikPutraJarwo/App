@@ -1581,46 +1581,64 @@ document.addEventListener("click", (event) => {
 // ==========================================
 
 function exportToCSV() {
-  if (State.points.length === 0) {
-    alert("No points to export");
+  if (State.points.length === 0 && State.zones.length === 0) {
+    alert("No data to export");
     return;
   }
 
-  // Prepare CSV header
-  const headers = [
-    "Name",
-    "Tdb (°C)",
-    "W (kg/kg')",
-    "RH (%)",
-    "Twb (°C)",
-    "Tdp (°C)",
-    "h (kJ/kg)",
-    "v (m³/kg)",
-    "AH (g/m³)",
-    "ρ (kg/m³)",
-    "Color"
-  ];
+  const Patm = getPressureInPa();
+  let csv = "";
 
-  // Prepare CSV data
-  const data = State.points.map((p) => [
-    p.name,
-    p.t.toFixed(2),
-    p.w.toFixed(6),
-    p.data.RH.toFixed(2),
-    p.data.Twb.toFixed(2),
-    p.data.Tdp.toFixed(2),
-    p.data.h.toFixed(2),
-    p.data.v.toFixed(4),
-    p.data.AH.toFixed(2),
-    p.data.rho.toFixed(4),
-    p.color
-  ]);
+  // SECTION 1: POINTS
+  if (State.points.length > 0) {
+    csv += "POINTS\n";
+    const pointHeaders = [
+      "Name", "Color", "Tdb (°C)", "Twb (°C)", "Tdp (°C)", "Tf (°C)",
+      "W (kg/kg')", "RH (%)", "μ (%)", "h (kJ/kg)", "Cp (kJ/kg·°C)",
+      "v (m³/kg)", "ρ (kg/m³)", "Pw (Pa)", "Pws (Pa)", "VPD (Pa)",
+      "HD (kg/kg')", "AH (g/m³)", "Dvs (g/m³)", "VMR (ppm)", "PD (°C)"
+    ];
+    csv += pointHeaders.join(",") + "\n";
 
-  // Convert to CSV format
-  let csv = headers.join(",") + "\n";
-  data.forEach((row) => {
-    csv += row.map((cell) => `"${cell}"`).join(",") + "\n";
-  });
+    State.points.forEach((p) => {
+      const d = calculateAllProperties(p.t, p.w, Patm);
+      const row = [
+        p.name, p.color, d.Tdb.toFixed(2), d.Twb.toFixed(2), d.Tdp.toFixed(2), d.Tf.toFixed(2),
+        d.W.toFixed(6), d.RH.toFixed(2), d.mu.toFixed(2), d.h.toFixed(2), d.cp.toFixed(3),
+        d.v.toFixed(4), d.rho.toFixed(2), d.Pw.toFixed(0), d.Pws.toFixed(0), d.VPD.toFixed(2),
+        d.HD.toFixed(6), d.AH.toFixed(2), d.Dvs.toFixed(2), d.VMR.toFixed(2), d.PD.toFixed(2)
+      ];
+      csv += row.map((cell) => `"${cell}"`).join(",") + "\n";
+    });
+    csv += "\n";
+  }
+
+  // SECTION 2: ZONES
+  if (State.zones.length > 0) {
+    csv += "ZONES\n";
+    State.zones.forEach((zone, idx) => {
+      csv += `"Zone: ${zone.name}","Color: ${zone.color}","Points: ${zone.points.length}"\n`;
+      const zoneHeaders = [
+        "Point #", "Tdb (°C)", "Twb (°C)", "Tdp (°C)", "Tf (°C)",
+        "W (kg/kg')", "RH (%)", "μ (%)", "h (kJ/kg)", "Cp (kJ/kg·°C)",
+        "v (m³/kg)", "ρ (kg/m³)", "Pw (Pa)", "Pws (Pa)", "VPD (Pa)",
+        "HD (kg/kg')", "AH (g/m³)", "Dvs (g/m³)", "VMR (ppm)", "PD (°C)"
+      ];
+      csv += zoneHeaders.join(",") + "\n";
+
+      zone.points.forEach((pt, i) => {
+        const d = calculateAllProperties(pt.t, pt.w, Patm);
+        const row = [
+          i + 1, d.Tdb.toFixed(2), d.Twb.toFixed(2), d.Tdp.toFixed(2), d.Tf.toFixed(2),
+          d.W.toFixed(6), d.RH.toFixed(2), d.mu.toFixed(2), d.h.toFixed(2), d.cp.toFixed(3),
+          d.v.toFixed(4), d.rho.toFixed(2), d.Pw.toFixed(0), d.Pws.toFixed(0), d.VPD.toFixed(2),
+          d.HD.toFixed(6), d.AH.toFixed(2), d.Dvs.toFixed(2), d.VMR.toFixed(2), d.PD.toFixed(2)
+        ];
+        csv += row.map((cell) => `"${cell}"`).join(",") + "\n";
+      });
+      csv += "\n";
+    });
+  }
 
   // Download CSV
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -1631,55 +1649,82 @@ function exportToCSV() {
 }
 
 function exportToExcel() {
-  if (State.points.length === 0) {
-    alert("No points to export");
+  if (State.points.length === 0 && State.zones.length === 0) {
+    alert("No data to export");
     return;
   }
 
   // Check if XLSX library is available
   if (typeof XLSX === "undefined") {
-    alert("Excel export requires xlsx library. Please ensure assets/xlsx-0.18.5.js is loaded.");
+    alert("Excel export requires XLSX library. Please ensure assets/xlsx-0.18.5.js is loaded.");
     return;
   }
 
-  // Prepare data for Excel
-  const headers = [
-    "Name",
-    "Tdb (°C)",
-    "W (kg/kg')",
-    "RH (%)",
-    "Twb (°C)",
-    "Tdp (°C)",
-    "h (kJ/kg)",
-    "v (m³/kg)",
-    "AH (g/m³)",
-    "ρ (kg/m³)",
-    "Color"
-  ];
-
-  const data = State.points.map((p) => [
-    p.name,
-    parseFloat(p.t.toFixed(2)),
-    parseFloat(p.w.toFixed(6)),
-    parseFloat(p.data.RH.toFixed(2)),
-    parseFloat(p.data.Twb.toFixed(2)),
-    parseFloat(p.data.Tdp.toFixed(2)),
-    parseFloat(p.data.h.toFixed(2)),
-    parseFloat(p.data.v.toFixed(4)),
-    parseFloat(p.data.AH.toFixed(2)),
-    parseFloat(p.data.rho.toFixed(4)),
-    p.color
-  ]);
-
-  // Create workbook and worksheet
-  const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
+  const Patm = getPressureInPa();
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Points");
 
-  // Style the header row (if possible)
-  if (ws["!rows"]) {
-    ws["!rows"][0] = { hpx: 20 };
+  // SHEET 1: POINTS
+  if (State.points.length > 0) {
+    const pointHeaders = [
+      "Name", "Color", "Tdb (°C)", "Twb (°C)", "Tdp (°C)", "Tf (°C)",
+      "W (kg/kg')", "RH (%)", "μ (%)", "h (kJ/kg)", "Cp (kJ/kg·°C)",
+      "v (m³/kg)", "ρ (kg/m³)", "Pw (Pa)", "Pws (Pa)", "VPD (Pa)",
+      "HD (kg/kg')", "AH (g/m³)", "Dvs (g/m³)", "VMR (ppm)", "PD (°C)"
+    ];
+
+    const pointData = State.points.map((p) => {
+      const d = calculateAllProperties(p.t, p.w, Patm);
+      return [
+        p.name, p.color, parseFloat(d.Tdb.toFixed(2)), parseFloat(d.Twb.toFixed(2)),
+        parseFloat(d.Tdp.toFixed(2)), parseFloat(d.Tf.toFixed(2)), parseFloat(d.W.toFixed(6)),
+        parseFloat(d.RH.toFixed(2)), parseFloat(d.mu.toFixed(2)), parseFloat(d.h.toFixed(2)),
+        parseFloat(d.cp.toFixed(3)), parseFloat(d.v.toFixed(4)), parseFloat(d.rho.toFixed(2)),
+        parseFloat(d.Pw.toFixed(0)), parseFloat(d.Pws.toFixed(0)), parseFloat(d.VPD.toFixed(2)),
+        parseFloat(d.HD.toFixed(6)), parseFloat(d.AH.toFixed(2)), parseFloat(d.Dvs.toFixed(2)),
+        parseFloat(d.VMR.toFixed(2)), parseFloat(d.PD.toFixed(2))
+      ];
+    });
+
+    const wsPoints = XLSX.utils.aoa_to_sheet([pointHeaders, ...pointData]);
+    wsPoints['!cols'] = pointHeaders.map(() => ({ wch: 12 }));
+    XLSX.utils.book_append_sheet(wb, wsPoints, "Points");
   }
+
+  // SHEET 2+: ZONES (each zone gets its own sheet)
+  State.zones.forEach((zone, idx) => {
+    const zoneHeaders = [
+      "Point #", "Tdb (°C)", "Twb (°C)", "Tdp (°C)", "Tf (°C)",
+      "W (kg/kg')", "RH (%)", "μ (%)", "h (kJ/kg)", "Cp (kJ/kg·°C)",
+      "v (m³/kg)", "ρ (kg/m³)", "Pw (Pa)", "Pws (Pa)", "VPD (Pa)",
+      "HD (kg/kg')", "AH (g/m³)", "Dvs (g/m³)", "VMR (ppm)", "PD (°C)"
+    ];
+
+    const zoneData = zone.points.map((pt, i) => {
+      const d = calculateAllProperties(pt.t, pt.w, Patm);
+      return [
+        i + 1, parseFloat(d.Tdb.toFixed(2)), parseFloat(d.Twb.toFixed(2)),
+        parseFloat(d.Tdp.toFixed(2)), parseFloat(d.Tf.toFixed(2)), parseFloat(d.W.toFixed(6)),
+        parseFloat(d.RH.toFixed(2)), parseFloat(d.mu.toFixed(2)), parseFloat(d.h.toFixed(2)),
+        parseFloat(d.cp.toFixed(3)), parseFloat(d.v.toFixed(4)), parseFloat(d.rho.toFixed(2)),
+        parseFloat(d.Pw.toFixed(0)), parseFloat(d.Pws.toFixed(0)), parseFloat(d.VPD.toFixed(2)),
+        parseFloat(d.HD.toFixed(6)), parseFloat(d.AH.toFixed(2)), parseFloat(d.Dvs.toFixed(2)),
+        parseFloat(d.VMR.toFixed(2)), parseFloat(d.PD.toFixed(2))
+      ];
+    });
+
+    // Add zone info at top
+    const zoneInfo = [
+      [`Zone: ${zone.name}`, `Color: ${zone.color}`, `Points: ${zone.points.length}`],
+      [],
+      zoneHeaders,
+      ...zoneData
+    ];
+
+    const wsZone = XLSX.utils.aoa_to_sheet(zoneInfo);
+    wsZone['!cols'] = zoneHeaders.map(() => ({ wch: 12 }));
+    const sheetName = `Zone ${idx + 1}`;
+    XLSX.utils.book_append_sheet(wb, wsZone, sheetName);
+  });
 
   // Download Excel file
   XLSX.writeFile(wb, "psychrometric-data.xlsx");
