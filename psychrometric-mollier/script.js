@@ -1102,8 +1102,8 @@ function showContextMenu(event, pointId = null, zoneId = null) {
 
     addContextMenuDivider(content);
 
-    // Download submenu
-    addContextSubmenu(content, "download", "Download", (submenu) => {
+    // Export submenu
+    addContextSubmenu(content, "download", "Export to...", (submenu) => {
       addContextMenuItem(submenu, "image", "PNG", () => {
         hideContextMenu();
         downloadSvgAsPng("#chart-container svg", "chart.png", 3);
@@ -1122,6 +1122,14 @@ function showContextMenu(event, pointId = null, zoneId = null) {
       addContextMenuItem(submenu, "description", "Excel", () => {
         hideContextMenu();
         exportToExcel();
+      });
+    });
+
+    // Import submenu
+    addContextSubmenu(content, "upload_file", "Import data", (submenu) => {
+      addContextMenuItem(submenu, "upload_file", "CSV / Excel", () => {
+        hideContextMenu();
+        openImportDialog();
       });
     });
   }
@@ -1577,70 +1585,75 @@ document.addEventListener("click", (event) => {
 });
 
 // ==========================================
-// EXPORT FUNCTIONS (CSV & EXCEL)
+// EXPORT/IMPORT FUNCTIONS (CSV & EXCEL)
 // ==========================================
 
+function getCheckboxValue(id) {
+  const el = document.getElementById(id);
+  return el ? el.checked : false;
+}
+
+function getInputValue(id) {
+  const el = document.getElementById(id);
+  return el ? el.value : "";
+}
+
+function buildKeyValueExportRows() {
+  const rows = [];
+  rows.push(["meta.version", "1"]);
+  rows.push(["settings.chartType", State.chartType]);
+  rows.push(["settings.mode", State.mode]);
+  rows.push(["settings.yAxisType", State.yAxisType]);
+  rows.push(["settings.pressure", getInputValue("pressure")]);
+  rows.push(["settings.pressureUnit", getInputValue("pressure-unit")]);
+  rows.push(["settings.minTemp", getInputValue("minTemp")]);
+  rows.push(["settings.maxTemp", getInputValue("maxTemp")]);
+  rows.push(["settings.maxHum", getInputValue("maxHum")]);
+  rows.push(["settings.maxAbsHum", getInputValue("maxAbsHum")]);
+  rows.push(["settings.showInfoPanel", getCheckboxValue("set-show-info-panel")]);
+  rows.push(["settings.showLegend", getCheckboxValue("set-show-legend")]);
+  rows.push(["settings.showRh", getCheckboxValue("set-show-rh")]);
+  rows.push(["settings.showH", getCheckboxValue("set-show-h")]);
+  rows.push(["settings.showTwb", getCheckboxValue("set-show-twb")]);
+  rows.push(["settings.showV", getCheckboxValue("set-show-v")]);
+  rows.push(["settings.showSat", getCheckboxValue("set-show-sat")]);
+  rows.push(["settings.comfortZone.visible", getCheckboxValue("set-show-comfort-zone")]);
+  rows.push(["settings.comfortZone.preset", getInputValue("comfort-zone-preset")]);
+  rows.push(["settings.comfortZone.color", getInputValue("comfort-zone-color")]);
+  rows.push(["settings.comfortZone.tMin", getInputValue("comfort-tmin")]);
+  rows.push(["settings.comfortZone.tMax", getInputValue("comfort-tmax")]);
+  rows.push(["settings.comfortZone.rhMin", getInputValue("comfort-rhmin")]);
+  rows.push(["settings.comfortZone.rhMax", getInputValue("comfort-rhmax")]);
+
+  State.points.forEach((p, i) => {
+    rows.push([`points.${i}.name`, p.name || "Point"]);
+    rows.push([`points.${i}.color`, p.color || "#cc1919"]);
+    rows.push([`points.${i}.t`, p.t]);
+    rows.push([`points.${i}.w`, p.w]);
+  });
+
+  State.zones.forEach((z, zi) => {
+    rows.push([`zones.${zi}.name`, z.name || "Zone"]);
+    rows.push([`zones.${zi}.color`, z.color || "#19cc2e"]);
+    z.points.forEach((pt, pi) => {
+      rows.push([`zones.${zi}.points.${pi}.t`, pt.t]);
+      rows.push([`zones.${zi}.points.${pi}.w`, pt.w]);
+    });
+  });
+
+  return rows;
+}
+
 function exportToCSV() {
-  if (State.points.length === 0 && State.zones.length === 0) {
-    alert("No data to export");
-    return;
-  }
+  const rows = buildKeyValueExportRows();
+  const csv = rows
+    .map((row) => row.map((cell) => {
+      const value = cell === null || cell === undefined ? "" : String(cell);
+      const escaped = value.replace(/"/g, '""');
+      return `"${escaped}"`;
+    }).join(","))
+    .join("\n");
 
-  const Patm = getPressureInPa();
-  let csv = "";
-
-  // SECTION 1: POINTS
-  if (State.points.length > 0) {
-    csv += "POINTS\n";
-    const pointHeaders = [
-      "Name", "Color", "Tdb (°C)", "Twb (°C)", "Tdp (°C)", "Tf (°C)",
-      "W (kg/kg')", "RH (%)", "μ (%)", "h (kJ/kg)", "Cp (kJ/kg·°C)",
-      "v (m³/kg)", "ρ (kg/m³)", "Pw (Pa)", "Pws (Pa)", "VPD (Pa)",
-      "HD (kg/kg')", "AH (g/m³)", "Dvs (g/m³)", "VMR (ppm)", "PD (°C)"
-    ];
-    csv += pointHeaders.join(",") + "\n";
-
-    State.points.forEach((p) => {
-      const d = calculateAllProperties(p.t, p.w, Patm);
-      const row = [
-        p.name, p.color, d.Tdb.toFixed(2), d.Twb.toFixed(2), d.Tdp.toFixed(2), d.Tf.toFixed(2),
-        d.W.toFixed(6), d.RH.toFixed(2), d.mu.toFixed(2), d.h.toFixed(2), d.cp.toFixed(3),
-        d.v.toFixed(4), d.rho.toFixed(2), d.Pw.toFixed(0), d.Pws.toFixed(0), d.VPD.toFixed(2),
-        d.HD.toFixed(6), d.AH.toFixed(2), d.Dvs.toFixed(2), d.VMR.toFixed(2), d.PD.toFixed(2)
-      ];
-      csv += row.map((cell) => `"${cell}"`).join(",") + "\n";
-    });
-    csv += "\n";
-  }
-
-  // SECTION 2: ZONES
-  if (State.zones.length > 0) {
-    csv += "ZONES\n";
-    State.zones.forEach((zone, idx) => {
-      csv += `"Zone: ${zone.name}","Color: ${zone.color}","Points: ${zone.points.length}"\n`;
-      const zoneHeaders = [
-        "Point #", "Tdb (°C)", "Twb (°C)", "Tdp (°C)", "Tf (°C)",
-        "W (kg/kg')", "RH (%)", "μ (%)", "h (kJ/kg)", "Cp (kJ/kg·°C)",
-        "v (m³/kg)", "ρ (kg/m³)", "Pw (Pa)", "Pws (Pa)", "VPD (Pa)",
-        "HD (kg/kg')", "AH (g/m³)", "Dvs (g/m³)", "VMR (ppm)", "PD (°C)"
-      ];
-      csv += zoneHeaders.join(",") + "\n";
-
-      zone.points.forEach((pt, i) => {
-        const d = calculateAllProperties(pt.t, pt.w, Patm);
-        const row = [
-          i + 1, d.Tdb.toFixed(2), d.Twb.toFixed(2), d.Tdp.toFixed(2), d.Tf.toFixed(2),
-          d.W.toFixed(6), d.RH.toFixed(2), d.mu.toFixed(2), d.h.toFixed(2), d.cp.toFixed(3),
-          d.v.toFixed(4), d.rho.toFixed(2), d.Pw.toFixed(0), d.Pws.toFixed(0), d.VPD.toFixed(2),
-          d.HD.toFixed(6), d.AH.toFixed(2), d.Dvs.toFixed(2), d.VMR.toFixed(2), d.PD.toFixed(2)
-        ];
-        csv += row.map((cell) => `"${cell}"`).join(",") + "\n";
-      });
-      csv += "\n";
-    });
-  }
-
-  // Download CSV
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
@@ -1649,85 +1662,284 @@ function exportToCSV() {
 }
 
 function exportToExcel() {
-  if (State.points.length === 0 && State.zones.length === 0) {
-    alert("No data to export");
-    return;
-  }
-
-  // Check if XLSX library is available
   if (typeof XLSX === "undefined") {
     alert("Excel export requires XLSX library. Please ensure assets/xlsx-0.18.5.js is loaded.");
     return;
   }
 
-  const Patm = getPressureInPa();
+  const rows = buildKeyValueExportRows();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws["!cols"] = [{ wch: 40 }, { wch: 30 }];
   const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Data");
+  XLSX.writeFile(wb, "psychrometric-data.xlsx");
+}
 
-  // SHEET 1: POINTS
-  if (State.points.length > 0) {
-    const pointHeaders = [
-      "Name", "Color", "Tdb (°C)", "Twb (°C)", "Tdp (°C)", "Tf (°C)",
-      "W (kg/kg')", "RH (%)", "μ (%)", "h (kJ/kg)", "Cp (kJ/kg·°C)",
-      "v (m³/kg)", "ρ (kg/m³)", "Pw (Pa)", "Pws (Pa)", "VPD (Pa)",
-      "HD (kg/kg')", "AH (g/m³)", "Dvs (g/m³)", "VMR (ppm)", "PD (°C)"
-    ];
+function openImportDialog() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".csv,.xlsx,.xls";
+  input.onchange = (event) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    importFromFile(file);
+  };
+  input.click();
+}
 
-    const pointData = State.points.map((p) => {
-      const d = calculateAllProperties(p.t, p.w, Patm);
-      return [
-        p.name, p.color, parseFloat(d.Tdb.toFixed(2)), parseFloat(d.Twb.toFixed(2)),
-        parseFloat(d.Tdp.toFixed(2)), parseFloat(d.Tf.toFixed(2)), parseFloat(d.W.toFixed(6)),
-        parseFloat(d.RH.toFixed(2)), parseFloat(d.mu.toFixed(2)), parseFloat(d.h.toFixed(2)),
-        parseFloat(d.cp.toFixed(3)), parseFloat(d.v.toFixed(4)), parseFloat(d.rho.toFixed(2)),
-        parseFloat(d.Pw.toFixed(0)), parseFloat(d.Pws.toFixed(0)), parseFloat(d.VPD.toFixed(2)),
-        parseFloat(d.HD.toFixed(6)), parseFloat(d.AH.toFixed(2)), parseFloat(d.Dvs.toFixed(2)),
-        parseFloat(d.VMR.toFixed(2)), parseFloat(d.PD.toFixed(2))
-      ];
-    });
+function parseCSVRows(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let inQuotes = false;
 
-    const wsPoints = XLSX.utils.aoa_to_sheet([pointHeaders, ...pointData]);
-    wsPoints['!cols'] = pointHeaders.map(() => ({ wch: 12 }));
-    XLSX.utils.book_append_sheet(wb, wsPoints, "Points");
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const next = text[i + 1];
+
+    if (char === '"') {
+      if (inQuotes && next === '"') {
+        cell += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === "," && !inQuotes) {
+      row.push(cell);
+      cell = "";
+    } else if ((char === "\n" || char === "\r") && !inQuotes) {
+      if (char === "\r" && next === "\n") i++;
+      row.push(cell);
+      if (row.length > 0) rows.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += char;
+    }
   }
 
-  // SHEET 2+: ZONES (each zone gets its own sheet)
-  State.zones.forEach((zone, idx) => {
-    const zoneHeaders = [
-      "Point #", "Tdb (°C)", "Twb (°C)", "Tdp (°C)", "Tf (°C)",
-      "W (kg/kg')", "RH (%)", "μ (%)", "h (kJ/kg)", "Cp (kJ/kg·°C)",
-      "v (m³/kg)", "ρ (kg/m³)", "Pw (Pa)", "Pws (Pa)", "VPD (Pa)",
-      "HD (kg/kg')", "AH (g/m³)", "Dvs (g/m³)", "VMR (ppm)", "PD (°C)"
-    ];
+  if (cell.length > 0 || row.length > 0) {
+    row.push(cell);
+    rows.push(row);
+  }
 
-    const zoneData = zone.points.map((pt, i) => {
-      const d = calculateAllProperties(pt.t, pt.w, Patm);
-      return [
-        i + 1, parseFloat(d.Tdb.toFixed(2)), parseFloat(d.Twb.toFixed(2)),
-        parseFloat(d.Tdp.toFixed(2)), parseFloat(d.Tf.toFixed(2)), parseFloat(d.W.toFixed(6)),
-        parseFloat(d.RH.toFixed(2)), parseFloat(d.mu.toFixed(2)), parseFloat(d.h.toFixed(2)),
-        parseFloat(d.cp.toFixed(3)), parseFloat(d.v.toFixed(4)), parseFloat(d.rho.toFixed(2)),
-        parseFloat(d.Pw.toFixed(0)), parseFloat(d.Pws.toFixed(0)), parseFloat(d.VPD.toFixed(2)),
-        parseFloat(d.HD.toFixed(6)), parseFloat(d.AH.toFixed(2)), parseFloat(d.Dvs.toFixed(2)),
-        parseFloat(d.VMR.toFixed(2)), parseFloat(d.PD.toFixed(2))
-      ];
-    });
+  return rows
+    .map((r) => [r[0], r[1]])
+    .filter((r) => r[0] !== undefined && String(r[0]).trim() !== "");
+}
 
-    // Add zone info at top
-    const zoneInfo = [
-      [`Zone: ${zone.name}`, `Color: ${zone.color}`, `Points: ${zone.points.length}`],
-      [],
-      zoneHeaders,
-      ...zoneData
-    ];
+function parseBool(value) {
+  const val = String(value).trim().toLowerCase();
+  return val === "true" || val === "1" || val === "yes" || val === "on";
+}
 
-    const wsZone = XLSX.utils.aoa_to_sheet(zoneInfo);
-    wsZone['!cols'] = zoneHeaders.map(() => ({ wch: 12 }));
-    const sheetName = `Zone ${idx + 1}`;
-    XLSX.utils.book_append_sheet(wb, wsZone, sheetName);
+function importFromFile(file) {
+  const ext = file.name.split(".").pop().toLowerCase();
+
+  if (ext === "csv") {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const rows = parseCSVRows(reader.result || "");
+      applyImportedRows(rows);
+    };
+    reader.readAsText(file);
+    return;
+  }
+
+  if (ext === "xlsx" || ext === "xls") {
+    if (typeof XLSX === "undefined") {
+      alert("Excel import requires XLSX library. Please ensure assets/xlsx-0.18.5.js is loaded.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const data = new Uint8Array(reader.result);
+      const wb = XLSX.read(data, { type: "array" });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+      const rows = raw
+        .map((r) => [r[0], r[1]])
+        .filter((r) => r[0] !== undefined && String(r[0]).trim() !== "");
+      applyImportedRows(rows);
+    };
+    reader.readAsArrayBuffer(file);
+    return;
+  }
+
+  alert("Unsupported file format. Please use CSV or Excel.");
+}
+
+function applyImportedRows(rows) {
+  const settings = {};
+  const points = [];
+  const zones = [];
+
+  rows.forEach(([rawKey, rawValue]) => {
+    const key = String(rawKey || "").replace(/^\uFEFF/, "").trim();
+    const value = rawValue === undefined || rawValue === null ? "" : String(rawValue).trim();
+    if (!key) return;
+
+    if (key.startsWith("settings.")) {
+      settings[key.replace("settings.", "")] = value;
+      return;
+    }
+
+    const pointMatch = key.match(/^points\.(\d+)\.(name|color|t|w)$/);
+    if (pointMatch) {
+      const idx = parseInt(pointMatch[1], 10);
+      const field = pointMatch[2];
+      points[idx] = points[idx] || {};
+      points[idx][field] = value;
+      return;
+    }
+
+    const zoneMatch = key.match(/^zones\.(\d+)\.(name|color)$/);
+    if (zoneMatch) {
+      const idx = parseInt(zoneMatch[1], 10);
+      const field = zoneMatch[2];
+      zones[idx] = zones[idx] || { points: [] };
+      zones[idx][field] = value;
+      return;
+    }
+
+    const zonePointMatch = key.match(/^zones\.(\d+)\.points\.(\d+)\.(t|w)$/);
+    if (zonePointMatch) {
+      const zIdx = parseInt(zonePointMatch[1], 10);
+      const pIdx = parseInt(zonePointMatch[2], 10);
+      const field = zonePointMatch[3];
+      zones[zIdx] = zones[zIdx] || { points: [] };
+      zones[zIdx].points[pIdx] = zones[zIdx].points[pIdx] || {};
+      zones[zIdx].points[pIdx][field] = value;
+    }
   });
 
-  // Download Excel file
-  XLSX.writeFile(wb, "psychrometric-data.xlsx");
+  applyImportedSettings(settings);
+  applyImportedData(points, zones);
+}
+
+function applyImportedSettings(settings) {
+  if (settings.chartType) changeChartType(settings.chartType);
+  if (settings.yAxisType) changeYAxisType(settings.yAxisType);
+
+  if (settings.pressureUnit) {
+    const unit = document.getElementById("pressure-unit");
+    if (unit) {
+      unit.value = settings.pressureUnit;
+    }
+  }
+  if (settings.pressure !== undefined) {
+    const pressureInput = document.getElementById("pressure");
+    if (pressureInput) {
+      pressureInput.value = settings.pressure;
+      const unitValue = getInputValue("pressure-unit");
+      pressureInput.step = unitValue === "kPa" ? 0.1 : 100;
+    }
+  }
+
+  const minTemp = document.getElementById("minTemp");
+  if (minTemp && settings.minTemp !== undefined) minTemp.value = settings.minTemp;
+  const maxTemp = document.getElementById("maxTemp");
+  if (maxTemp && settings.maxTemp !== undefined) maxTemp.value = settings.maxTemp;
+  const maxHum = document.getElementById("maxHum");
+  if (maxHum && settings.maxHum !== undefined) maxHum.value = settings.maxHum;
+  const maxAbsHum = document.getElementById("maxAbsHum");
+  if (maxAbsHum && settings.maxAbsHum !== undefined) maxAbsHum.value = settings.maxAbsHum;
+
+  const checkboxMap = {
+    "set-show-info-panel": settings.showInfoPanel,
+    "set-show-legend": settings.showLegend,
+    "set-show-rh": settings.showRh,
+    "set-show-h": settings.showH,
+    "set-show-twb": settings.showTwb,
+    "set-show-v": settings.showV,
+    "set-show-sat": settings.showSat,
+    "set-show-comfort-zone": settings["comfortZone.visible"],
+  };
+
+  Object.keys(checkboxMap).forEach((id) => {
+    if (checkboxMap[id] === undefined) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.checked = parseBool(checkboxMap[id]);
+    if (inputHandlers[id]) {
+      inputHandlers[id]({ target: el });
+    }
+  });
+
+  if (settings["comfortZone.preset"]) {
+    const preset = document.getElementById("comfort-zone-preset");
+    if (preset) {
+      preset.value = settings["comfortZone.preset"];
+      changeComfortZonePreset();
+    }
+  }
+
+  if (settings["comfortZone.color"]) {
+    const color = document.getElementById("comfort-zone-color");
+    if (color) color.value = settings["comfortZone.color"];
+  }
+
+  const tMin = document.getElementById("comfort-tmin");
+  if (tMin && settings["comfortZone.tMin"] !== undefined) tMin.value = settings["comfortZone.tMin"];
+  const tMax = document.getElementById("comfort-tmax");
+  if (tMax && settings["comfortZone.tMax"] !== undefined) tMax.value = settings["comfortZone.tMax"];
+  const rhMin = document.getElementById("comfort-rhmin");
+  if (rhMin && settings["comfortZone.rhMin"] !== undefined) rhMin.value = settings["comfortZone.rhMin"];
+  const rhMax = document.getElementById("comfort-rhmax");
+  if (rhMax && settings["comfortZone.rhMax"] !== undefined) rhMax.value = settings["comfortZone.rhMax"];
+
+  updateComfortZone();
+  drawChart();
+}
+
+function applyImportedData(points, zones) {
+  State.points = [];
+  State.zones = [];
+
+  const Patm = getPressureInPa();
+
+  points.forEach((p) => {
+    if (!p || p.t === undefined || p.w === undefined) return;
+    const t = parseFloat(p.t);
+    const w = parseFloat(p.w);
+    if (isNaN(t) || isNaN(w)) return;
+    const data = calculateAllProperties(t, w, Patm);
+    State.points.push({
+      id: Date.now() + Math.random(),
+      name: p.name || "Point",
+      color: p.color || "#cc1919",
+      t,
+      w,
+      data
+    });
+  });
+
+  zones.forEach((z) => {
+    if (!z || !Array.isArray(z.points)) return;
+    const zonePoints = z.points
+      .map((pt) => {
+        const t = parseFloat(pt.t);
+        const w = parseFloat(pt.w);
+        if (isNaN(t) || isNaN(w)) return null;
+        return { t, w };
+      })
+      .filter(Boolean);
+
+    if (zonePoints.length > 0) {
+      State.zones.push({
+        id: Date.now() + Math.random(),
+        name: z.name || "Zone",
+        color: z.color || "#19cc2e",
+        points: zonePoints
+      });
+    }
+  });
+
+  historyManager.push(State);
+  updateLists();
+  updateToolbarsVisibility();
+  drawChart();
 }
 
 function clearSelections() {

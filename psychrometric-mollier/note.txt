@@ -1,12 +1,8 @@
 https://www.processsensing.com/en-us/humidity-calculator/rotronic/
 
 Next:
-- Input data via excel/txt and show in graph
-- Fix added zone in mollier's chart type
+- Custom text/shape/image inside chart
 - Fix point and zone not moved following the changing of atm pressure
-
-Plan:
-- Custom aspect ratio
 - Customizable parameters
 
 Proposal:
