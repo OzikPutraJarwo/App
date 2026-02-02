@@ -1,0 +1,1189 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+      :root {
+        --bg-body: #0f172a;
+        --bg-glass: rgba(30, 41, 59, 0.7);
+        --bg-card: rgba(30, 41, 59, 0.4);
+        --bg-input: #1e293b;
+        --bg-hover: #334155;
+        --border-color: rgba(255, 255, 255, 0.1);
+        --border-focus: #3b82f6;
+
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --text-danger: #ef4444;
+
+        --primary: #2563eb;
+        --primary-hover: #1d4ed8;
+        --success: #16a34a;
+        --danger: #dc2626;
+
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --radius-xl: 16px;
+
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      /* Utilities */
+      .hidden {
+        display: none !important;
+      }
+
+      .glass {
+        background: var(--bg-glass);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--border-color);
+      }
+
+      .custom-scroll {
+        overflow-y: auto;
+      }
+
+      .custom-scroll::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .custom-scroll::-webkit-scrollbar-thumb {
+        background: var(--bg-hover);
+        border-radius: 10px;
+      }
+
+      .flex {
+        display: flex;
+      }
+
+      .flex-col {
+        flex-direction: column;
+      }
+
+      .items-center {
+        align-items: center;
+      }
+
+      .justify-between {
+        justify-content: space-between;
+      }
+
+      .justify-center {
+        justify-content: center;
+      }
+
+      .gap-2 {
+        gap: 0.5rem;
+      }
+
+      .gap-4 {
+        gap: 1rem;
+      }
+
+      .w-full {
+        width: 100%;
+      }
+
+      /* Typography */
+      h1,
+      h2,
+      h3 {
+        font-weight: 700;
+        letter-spacing: -0.025em;
+      }
+
+      h1 {
+        font-size: 1.875rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      h3 {
+        font-size: 1.25rem;
+      }
+
+      p {
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+
+      .text-sm {
+        font-size: 0.875rem;
+      }
+
+      .text-xs {
+        font-size: 0.75rem;
+      }
+
+      .font-mono {
+        font-family: monospace;
+      }
+
+      .uppercase {
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+      }
+
+      /* Components: Buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.625rem 1rem;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.2s;
+        background: transparent;
+        color: var(--text-main);
+        font-size: 0.875rem;
+        gap: 0.5rem;
+      }
+
+      .btn:hover {
+        background: var(--bg-hover);
+      }
+
+      .btn-primary {
+        background-color: var(--primary);
+        color: white;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+      }
+
+      .btn-primary:hover {
+        background-color: var(--primary-hover);
+      }
+
+      .btn-danger {
+        color: var(--text-danger);
+      }
+
+      .btn-danger:hover {
+        background: rgba(239, 68, 68, 0.1);
+      }
+
+      .btn-success {
+        background-color: var(--success);
+        color: white;
+      }
+
+      .btn-outline {
+        border: 1px dashed var(--bg-hover);
+        color: var(--text-muted);
+        width: 100%;
+      }
+
+      .btn-icon {
+        padding: 0.5rem;
+        color: var(--text-muted);
+      }
+
+      .btn-icon:hover {
+        color: white;
+      }
+
+      /* Components: Inputs */
+      input[type="text"],
+      input[type="password"] {
+        width: 100%;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        color: white;
+        padding: 0.625rem;
+        border-radius: var(--radius-md);
+        outline: none;
+        transition: border-color 0.2s;
+        font-size: 0.875rem;
+      }
+
+      input:focus {
+        border-color: var(--border-focus);
+      }
+
+      .field-group label {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+
+      /* Structure: Header */
+      header {
+        height: 64px;
+        padding: 0 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(10px);
+        z-index: 10;
+      }
+
+      .logo {
+        font-size: 1.25rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .status-badge {
+        font-size: 0.625rem;
+        padding: 0.25rem 0.5rem;
+        background: var(--bg-hover);
+        border-radius: 4px;
+        color: var(--text-muted);
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+
+      /* Structure: Layout */
+      main {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      aside {
+        width: 260px;
+        background: rgba(15, 23, 42, 0.3);
+        border-right: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+        gap: 1rem;
+      }
+
+      .content-area {
+        flex: 1;
+        padding: 2rem;
+        overflow-y: auto;
+        position: relative;
+      }
+
+      /* Sidebar Nav */
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.625rem;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: 0.2s;
+        user-select: none;
+      }
+
+      .nav-item:hover {
+        background: var(--bg-hover);
+      }
+
+      .nav-item.active {
+        background: rgba(37, 99, 235, 0.15);
+        color: #60a5fa;
+      }
+
+      .nav-item img {
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        object-fit: cover;
+      }
+
+      .nav-item .count {
+        margin-left: auto;
+        font-size: 0.7rem;
+        background: var(--bg-input);
+        padding: 2px 6px;
+        border-radius: 10px;
+        color: var(--text-muted);
+      }
+
+      /* Grid System */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1rem;
+        margin-top: 1.5rem;
+      }
+
+      /* Cards */
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+        position: relative;
+        transition: border-color 0.2s;
+      }
+
+      .card:hover {
+        border-color: rgba(59, 130, 246, 0.5);
+      }
+
+      .item-header {
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .item-title {
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-right: 3rem;
+      }
+
+      .field-row {
+        margin-bottom: 0.75rem;
+      }
+
+      .field-label {
+        font-size: 0.65rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-weight: 700;
+        margin-bottom: 2px;
+      }
+
+      .field-value-container {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .field-value {
+        background: transparent;
+        border: none;
+        font-family: monospace;
+        color: #cbd5e1;
+        width: 100%;
+        font-size: 0.85rem;
+      }
+
+      .card-actions {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        display: flex;
+        gap: 0.5rem;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+
+      .card:hover .card-actions {
+        opacity: 1;
+      }
+
+      .action-link {
+        font-size: 0.75rem;
+        cursor: pointer;
+      }
+
+      .link-edit {
+        color: #60a5fa;
+      }
+
+      .link-delete {
+        color: var(--text-danger);
+      }
+
+      /* Dashboard Card */
+      .dashboard-card {
+        border-left: 4px solid var(--primary);
+        overflow: hidden;
+      }
+
+      .dash-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
+
+      .dash-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 600;
+      }
+
+      .dash-items {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        border-top: 1px solid var(--border-color);
+        margin-top: 0.5rem;
+      }
+
+      .dash-items.open {
+        max-height: 300px;
+        overflow-y: auto;
+        padding-top: 0.5rem;
+      }
+
+      .dash-item-row {
+        font-size: 0.85rem;
+        padding: 0.25rem 0.5rem;
+        color: var(--text-muted);
+        border-left: 2px solid var(--bg-hover);
+        margin-bottom: 2px;
+      }
+
+      /* Modals */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        backdrop-filter: blur(4px);
+      }
+
+      .modal-content {
+        width: 100%;
+        max-width: 450px;
+        max-height: 90vh;
+        border-radius: var(--radius-xl);
+        padding: 1.5rem;
+        box-shadow: var(--shadow-lg);
+        overflow-y: auto;
+      }
+
+      /* Auth Screen */
+      .auth-container {
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+        border-radius: var(--radius-xl);
+        padding: 2rem;
+      }
+
+      .separator {
+        height: 1px;
+        background: var(--border-color);
+        margin: 1.5rem 0;
+        width: 100%;
+      }
+
+      /* Toast */
+      #toast {
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--primary);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 500;
+        box-shadow: var(--shadow-lg);
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+        z-index: 100;
+      }
+
+      /* Dragging */
+      .dragging {
+        opacity: 0.4;
+      }
+
+      /* Dynamic Field Row */
+      .dynamic-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: flex-end;
+        margin-bottom: 0.5rem;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 0.75rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+      }
+
+      /* File Upload */
+      .file-upload-wrapper {
+        display: flex;
+        gap: 0.5rem;
+      }
+
+      .file-btn {
+        padding: 0.625rem;
+        background: var(--bg-hover);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+      }
+
+      .file-btn:hover {
+        background: #475569;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <!-- Login/Auth Screen -->
+    <div id="login-screen" class="modal-overlay" style="z-index: 100;">
+      <div class="glass auth-container">
+        <h1>Vault</h1>
+        <p style="margin-bottom: 1rem;">Secure your data in your private Google Drive</p>
+
+        <div id="setup-api" class="hidden" style="display: flex; flex-direction: column; gap: 1rem;">
+          <input type="text" id="api-key" placeholder="Google API Key">
+          <input type="text" id="client-id" placeholder="Google Client ID">
+          <button onclick="saveConfig()" class="btn btn-primary w-full">Save Configuration</button>
+        </div>
+
+        <div id="auth-actions" style="display: flex; flex-direction: column; gap: 1rem;">
+          <button id="btn-login" class="btn" style="background: white; color: #0f172a; width: 100%;">
+            <svg style="width: 20px; height: 20px;" viewBox="0 0 24 24">
+              <path fill="currentColor"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+              <path fill="currentColor"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+              <path fill="currentColor"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
+              <path fill="currentColor"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+            </svg>
+            Continue with Google
+          </button>
+          <button id="btn-config" class="btn text-xs"
+            style="color: var(--text-muted); text-decoration: underline;">Change API Config</button>
+        </div>
+
+        <div id="master-key-area" class="hidden" style="margin-top: 1.5rem; text-align: left;">
+          <div class="separator"></div>
+          <label class="text-xs"
+            style="color: #60a5fa; font-weight: 500; display: block; margin-bottom: 0.5rem;">Authentication successful.
+            Unlock your vault:</label>
+          <input type="password" id="master-password" placeholder="Master Password" style="margin-bottom: 1rem;"
+            onkeydown="if(event.key==='Enter') unlockVault()">
+          <button onclick="unlockVault()" class="btn btn-success w-full">Unlock Vault</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Header -->
+    <header>
+      <div class="flex items-center gap-4">
+        <span class="logo" onclick="showDashboard()">Vault</span>
+        <div id="sync-status" class="status-badge">Waiting...</div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="showDashboard()" class="btn btn-icon" title="Dashboard">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg>
+        </button>
+        <button onclick="logout()" class="btn btn-icon" style="color: #f87171;" title="Logout">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Sidebar -->
+      <aside>
+        <button onclick="showNewSectionModal()" class="btn btn-primary"
+          style="background: rgba(37, 99, 235, 0.1); color: #60a5fa; border: 1px solid rgba(37, 99, 235, 0.2);">
+          <span>+</span> New Section
+        </button>
+        <div class="text-xs uppercase" style="color: var(--text-muted); padding-left: 0.5rem;">Sections</div>
+        <nav id="section-list" class="custom-scroll" style="flex: 1; display: flex; flex-direction: column; gap: 4px;"
+          ondrop="drop(event, 'section')" ondragover="allowDrop(event)"></nav>
+      </aside>
+
+      <!-- Content Area -->
+      <section class="content-area custom-scroll">
+
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="hidden">
+          <h2 style="margin-bottom: 0.5rem;">Dashboard</h2>
+          <p class="text-sm" style="margin-bottom: 2rem;">Summary of your vault contents</p>
+          <div id="dashboard-stats" class="grid"></div>
+        </div>
+
+        <!-- Items View -->
+        <div id="items-view">
+          <div
+            style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+            <div>
+              <div class="flex items-center gap-2">
+                <h2 id="active-section-name">Select Section</h2>
+                <button id="edit-section-btn" class="btn btn-icon hidden" title="Edit Section">
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+              </div>
+              <p id="active-section-desc" class="text-sm" style="margin-top: 0.25rem;">Pick a category to view items</p>
+            </div>
+            <div>
+              <button id="add-item-btn" onclick="showNewItemModal()" class="btn btn-primary hidden">
+                + Add Item
+              </button>
+            </div>
+          </div>
+          <div id="items-grid" class="grid" ondrop="drop(event, 'item')" ondragover="allowDrop(event)"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal Section -->
+    <div id="modal-section" class="modal-overlay hidden">
+      <div class="glass modal-content">
+        <h3 id="modal-section-title" style="margin-bottom: 1rem;">Create New Section</h3>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <input type="hidden" id="edit-section-index">
+          <div class="field-group">
+            <label>Section Name</label>
+            <input type="text" id="new-section-name">
+          </div>
+          <div class="field-group">
+            <label>Icon (URL or Image Upload)</label>
+            <div class="file-upload-wrapper">
+              <input type="text" id="new-section-icon" placeholder="https://..." style="flex: 1;">
+              <label class="file-btn">
+                📁 <input type="file" class="hidden" onchange="handleIconUpload(this)">
+              </label>
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+            <button onclick="closeModal('modal-section')" class="btn"
+              style="flex: 1; background: var(--bg-hover);">Cancel</button>
+            <button id="save-section-btn" onclick="addSection()" class="btn btn-primary" style="flex: 1;">Save
+              Section</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Item -->
+    <div id="modal-item" class="modal-overlay hidden">
+      <div class="glass modal-content" style="max-width: 550px;">
+        <h3 id="modal-item-title" style="margin-bottom: 1rem;">New Item</h3>
+        <div id="dynamic-fields" style="display: flex; flex-direction: column; gap: 1rem;">
+          <div class="field-group">
+            <label>Item Title</label>
+            <input type="text" id="item-main-name" placeholder="e.g. My Personal Account">
+          </div>
+          <div class="separator" style="margin: 0.5rem 0;"></div>
+        </div>
+        <button onclick="addDynamicField()" class="btn btn-outline" style="margin-top: 1rem;">+ Add Custom
+          Field</button>
+        <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
+          <button onclick="closeModal('modal-item')" class="btn"
+            style="flex: 1; background: var(--bg-hover);">Cancel</button>
+          <button id="save-item-btn" onclick="saveItem()" class="btn btn-primary" style="flex: 1;">Save Item</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+      const CLIENT_ID = localStorage.getItem('sv_client_id') || '';
+      const API_KEY = localStorage.getItem('sv_api_key') || '';
+      const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
+      const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+
+      let tokenClient;
+      let fileId = null;
+      let vaultData = { sections: [] };
+      let activeSectionIndex = null;
+      let encryptionKey = null;
+      let dragSrcIndex = null;
+
+      // Auto-login logic
+      window.onload = () => {
+        if (!CLIENT_ID || !API_KEY) {
+          document.getElementById('setup-api').classList.remove('hidden');
+          document.getElementById('auth-actions').classList.add('hidden');
+        } else {
+          gapi.load('client', async () => {
+            await gapi.client.init({ apiKey: API_KEY, discoveryDocs: [DISCOVERY_DOC] });
+
+            const savedToken = localStorage.getItem('sv_access_token');
+            if (savedToken) {
+              gapi.client.setToken({ access_token: savedToken });
+              gapi.client.drive.about.get({ fields: 'user' }).then(() => {
+                document.getElementById('btn-login').classList.add('hidden');
+                document.getElementById('master-key-area').classList.remove('hidden');
+                document.getElementById('master-password').focus();
+              }).catch(err => {
+                localStorage.removeItem('sv_access_token');
+                initGoogleAuth();
+              });
+            } else {
+              initGoogleAuth();
+            }
+          });
+        }
+      };
+
+      function initGoogleAuth() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: (resp) => {
+            if (resp.access_token) {
+              localStorage.setItem('sv_access_token', resp.access_token);
+              document.getElementById('btn-login').classList.add('hidden');
+              document.getElementById('master-key-area').classList.remove('hidden');
+            }
+          },
+        });
+      }
+
+      document.getElementById('btn-login').onclick = () => {
+        if (!tokenClient) initGoogleAuth();
+        tokenClient.requestAccessToken({ prompt: '' });
+      };
+
+      document.getElementById('btn-config').onclick = () => {
+        document.getElementById('setup-api').classList.remove('hidden');
+        document.getElementById('auth-actions').classList.add('hidden');
+      };
+
+      function saveConfig() {
+        localStorage.setItem('sv_api_key', document.getElementById('api-key').value);
+        localStorage.setItem('sv_client_id', document.getElementById('client-id').value);
+        location.reload();
+      }
+
+      async function unlockVault() {
+        const pass = document.getElementById('master-password').value;
+        if (!pass) return notify("Enter master password!");
+
+        try {
+          encryptionKey = await deriveKey(pass);
+
+          await loadFromCloud();
+
+          document.getElementById('login-screen').classList.add('hidden');
+          notify("Vault Unlocked");
+          showDashboard();
+        } catch (e) {
+          console.error(e);
+          if (e.status === 401 || (e.result && e.result.error && e.result.error.code === 401)) {
+            notify("Session expired. Please login again.");
+            localStorage.removeItem('sv_access_token');
+            setTimeout(() => location.reload(), 1500);
+          } else {
+            notify("Failed to unlock. Wrong password or connection issue.");
+          }
+        }
+      }
+
+      async function deriveKey(password) {
+        const encoder = new TextEncoder();
+        const baseKey = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveKey"]);
+        return crypto.subtle.deriveKey(
+          { name: "PBKDF2", salt: encoder.encode("sv-salt-v2"), iterations: 100000, hash: "SHA-256" },
+          baseKey,
+          { name: "AES-GCM", length: 256 },
+          false,
+          ["encrypt", "decrypt"]
+        );
+      }
+
+      async function encrypt(data) {
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const encoded = new TextEncoder().encode(JSON.stringify(data));
+        const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, encryptionKey, encoded);
+        const combined = new Uint8Array(iv.length + encrypted.byteLength);
+        combined.set(iv);
+        combined.set(new Uint8Array(encrypted), iv.length);
+        return btoa(String.fromCharCode(...combined));
+      }
+
+      async function decrypt(cipherBase64) {
+        const combined = new Uint8Array(atob(cipherBase64).split("").map(c => c.charCodeAt(0)));
+        const iv = combined.slice(0, 12);
+        const data = combined.slice(12);
+        const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, encryptionKey, data);
+        return JSON.parse(new TextDecoder().decode(decrypted));
+      }
+
+      // Cloud Operations
+      async function loadFromCloud() {
+        document.getElementById('sync-status').textContent = "Syncing...";
+
+        const response = await gapi.client.drive.files.list({
+          q: "name = 'sv_vault_v2.json' and trashed = false"
+        });
+
+        const files = response.result.files;
+        if (files && files.length > 0) {
+          fileId = files[0].id;
+          const resp = await gapi.client.drive.files.get({
+            fileId: fileId,
+            alt: 'media'
+          });
+
+          try {
+            vaultData = await decrypt(resp.body);
+            document.getElementById('sync-status').textContent = "Synced";
+          } catch (decryptError) {
+            throw new Error("DECRYPTION_FAILED");
+          }
+        } else {
+          vaultData = { sections: [] };
+          document.getElementById('sync-status').textContent = "New Vault";
+        }
+        renderSections();
+      }
+
+      async function saveToCloud() {
+        document.getElementById('sync-status').textContent = "Saving...";
+        const encrypted = await encrypt(vaultData);
+        const metadata = { name: 'sv_vault_v2.json', mimeType: 'application/json' };
+        const boundary = 'foo_bar_baz';
+        const delimiter = "\r\n--" + boundary + "\r\n";
+        const body = delimiter + 'Content-Type: application/json; charset=UTF-8\r\n\r\n' + JSON.stringify(metadata) +
+          delimiter + 'Content-Type: application/json\r\n\r\n' + encrypted + "\r\n--" + boundary + "--";
+
+        const path = fileId ? `/upload/drive/v3/files/${fileId}?uploadType=multipart` : '/upload/drive/v3/files?uploadType=multipart';
+        const method = fileId ? 'PATCH' : 'POST';
+
+        await gapi.client.request({
+          path: path,
+          method: method,
+          params: { uploadType: 'multipart' },
+          headers: { 'Content-Type': `multipart/related; boundary=${boundary}` },
+          body: body
+        });
+        document.getElementById('sync-status').textContent = "Synced";
+      }
+
+      // UI Rendering
+      function renderSections() {
+        const list = document.getElementById('section-list');
+        list.innerHTML = '';
+        vaultData.sections.forEach((s, i) => {
+          const btn = document.createElement('div');
+          btn.className = `nav-item ${activeSectionIndex === i ? 'active' : ''}`;
+          btn.draggable = true;
+          btn.ondragstart = (e) => { dragSrcIndex = i; e.target.classList.add('dragging'); };
+          btn.ondragend = (e) => e.target.classList.remove('dragging');
+          btn.onclick = () => selectSection(i);
+
+          btn.innerHTML = `
+                    <img src="${s.icon || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + s.name}">
+                    <span style="flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${s.name}</span>
+                    <span class="count">${s.items.length}</span>
+                `;
+          list.appendChild(btn);
+        });
+      }
+
+      function selectSection(index) {
+        activeSectionIndex = index;
+        const s = vaultData.sections[index];
+        document.getElementById('dashboard-view').classList.add('hidden');
+        document.getElementById('items-view').classList.remove('hidden');
+        document.getElementById('active-section-name').textContent = s.name;
+        document.getElementById('active-section-desc').textContent = `${s.items.length} items in this category`;
+        document.getElementById('add-item-btn').classList.remove('hidden');
+        document.getElementById('edit-section-btn').classList.remove('hidden');
+        document.getElementById('edit-section-btn').onclick = () => showEditSectionModal(index);
+        renderItems();
+        renderSections();
+      }
+
+      function renderItems() {
+        const grid = document.getElementById('items-grid');
+        grid.innerHTML = '';
+        const items = vaultData.sections[activeSectionIndex].items;
+        items.forEach((item, idx) => {
+          const card = document.createElement('div');
+          card.className = 'card item-card';
+          card.draggable = true;
+          card.ondragstart = (e) => { dragSrcIndex = idx; e.target.classList.add('dragging'); };
+          card.ondragend = (e) => e.target.classList.remove('dragging');
+
+          let fieldsHtml = `
+                    <div class="item-header">
+                        <div class="item-title" title="${item.mainName}">${item.mainName}</div>
+                    </div>
+                `;
+
+          item.fields.forEach(f => {
+            fieldsHtml += `
+                        <div class="field-row">
+                            <label class="field-label">${f.label}</label>
+                            <div class="field-value-container">
+                                <input type="text" value="${f.value}" readonly class="field-value">
+                                <button onclick="copyText('${f.value}')" class="action-link link-edit" style="border: none; background: none; font-size: 0.75rem;">📋</button>
+                            </div>
+                        </div>
+                    `;
+          });
+
+          card.innerHTML = fieldsHtml + `
+                    <div class="card-actions">
+                        <span onclick="showEditItemModal(${idx})" class="action-link link-edit"><svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path> </svg></span>
+                        <span onclick="deleteItem(${idx})" class="action-link link-delete">🗑️</span>
+                    </div>
+                `;
+          grid.appendChild(card);
+        });
+      }
+
+      function showDashboard() {
+        activeSectionIndex = null;
+        document.getElementById('items-view').classList.add('hidden');
+        document.getElementById('dashboard-view').classList.remove('hidden');
+        document.getElementById('add-item-btn').classList.add('hidden');
+        document.getElementById('edit-section-btn').classList.add('hidden');
+
+        const container = document.getElementById('dashboard-stats');
+        container.innerHTML = '';
+
+        vaultData.sections.forEach((s, i) => {
+          const card = document.createElement('div');
+          card.className = 'card dashboard-card';
+          card.innerHTML = `
+                    <div class="dash-header">
+                        <div class="dash-title">
+                            <img src="${s.icon || 'https://api.dicebear.com/7.x/identicon/svg?seed=' + s.name}" style="width: 32px; height: 32px; border-radius: 6px;">
+                            <span>${s.name}</span>
+                        </div>
+                        <button onclick="toggleCollapse(this)" class="btn btn-icon">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: transform 0.3s;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                    </div>
+                    <div class="dash-items">
+                        ${s.items.length ? s.items.map(it => `<div class="dash-item-row">${it.mainName}</div>`).join('') : '<div class="text-xs italic text-muted" style="padding: 0.5rem;">No items</div>'}
+                        <button onclick="selectSection(${i})" class="btn btn-outline" style="margin-top: 1rem; font-size: 0.75rem;">View Section</button>
+                    </div>
+                    <div class="text-xs" style="color: var(--text-muted); margin-top: 0.5rem;">${s.items.length} Total Items</div>
+                `;
+          container.appendChild(card);
+        });
+        renderSections();
+      }
+
+      function toggleCollapse(btn) {
+        const list = btn.parentElement.nextElementSibling;
+        const svg = btn.querySelector('svg');
+        list.classList.toggle('open');
+        if (list.classList.contains('open')) {
+          svg.style.transform = 'rotate(180deg)';
+        } else {
+          svg.style.transform = 'rotate(0deg)';
+        }
+      }
+
+      // Modals & CRUD
+      function showNewSectionModal() {
+        document.getElementById('modal-section-title').textContent = "Create New Section";
+        document.getElementById('new-section-name').value = '';
+        document.getElementById('new-section-icon').value = '';
+        document.getElementById('edit-section-index').value = '';
+        document.getElementById('save-section-btn').onclick = () => addSection();
+        document.getElementById('modal-section').classList.remove('hidden');
+      }
+
+      function showEditSectionModal(index) {
+        const s = vaultData.sections[index];
+        document.getElementById('modal-section-title').textContent = "Edit Section";
+        document.getElementById('new-section-name').value = s.name;
+        document.getElementById('new-section-icon').value = s.icon || '';
+        document.getElementById('edit-section-index').value = index;
+        document.getElementById('save-section-btn').onclick = () => editSection(index);
+        document.getElementById('modal-section').classList.remove('hidden');
+      }
+
+      function showNewItemModal() {
+        document.getElementById('modal-item-title').textContent = "New Item";
+
+        document.getElementById('dynamic-fields').innerHTML = `
+                <div class="field-group">
+                    <label>Item Title</label>
+                    <input type="text" id="item-main-name" placeholder="e.g. My Personal Account">
+                </div>
+                <div class="separator" style="margin: 0.5rem 0;"></div>
+            `;
+
+        document.getElementById('save-item-btn').onclick = () => saveItem();
+        document.getElementById('modal-item').classList.remove('hidden');
+      }
+
+      function showEditItemModal(idx) {
+        const item = vaultData.sections[activeSectionIndex].items[idx];
+        document.getElementById('modal-item-title').textContent = "Edit Item";
+        document.getElementById('modal-item').classList.remove('hidden');
+        document.getElementById('dynamic-fields').innerHTML = `
+                <div class="field-group">
+                    <label>Item Title</label>
+                    <input type="text" id="item-main-name" value="${item.mainName}">
+                </div>
+                <div class="separator" style="margin: 0.5rem 0;"></div>
+            `;
+        item.fields.forEach(f => addDynamicField(f.label, f.value));
+        document.getElementById('save-item-btn').onclick = () => saveItem(idx);
+      }
+
+      function addDynamicField(label = '', value = '') {
+        const div = document.createElement('div');
+        div.className = 'dynamic-row';
+        div.innerHTML = `
+                <div style="flex: 1;">
+                    <input type="text" placeholder="Label (e.g. Email)" class="field-label-input" value="${label}" style="border: none; border-bottom: 1px solid var(--border-color); background: transparent; padding: 4px 0; margin-bottom: 4px; width: 100%; font-size: 0.75rem; color: var(--text-muted);">
+                    <input type="text" placeholder="Value" class="field-value-input" value="${value}" style="width: 100%;">
+                </div>
+                <button onclick="this.parentElement.remove()" class="btn btn-icon" style="color: var(--text-muted); padding: 0.25rem;">✕</button>
+            `;
+        document.getElementById('dynamic-fields').appendChild(div);
+      }
+
+      function addSection() {
+        const name = document.getElementById('new-section-name').value;
+        const icon = document.getElementById('new-section-icon').value;
+        if (!name) return;
+        vaultData.sections.push({ name, icon, items: [] });
+        closeModal('modal-section');
+        renderSections();
+        saveToCloud();
+      }
+
+      function editSection(index) {
+        vaultData.sections[index].name = document.getElementById('new-section-name').value;
+        vaultData.sections[index].icon = document.getElementById('new-section-icon').value;
+        closeModal('modal-section');
+        selectSection(index);
+        saveToCloud();
+      }
+
+      function saveItem(editIdx = null) {
+        const mainName = document.getElementById('item-main-name').value || 'Untitled';
+        const rows = [...document.querySelectorAll('.dynamic-row')];
+
+        const fields = rows.map(row => ({
+          label: row.querySelector('.field-label-input').value || 'Field',
+          value: row.querySelector('.field-value-input').value
+        }));
+
+        if (editIdx !== null) {
+          vaultData.sections[activeSectionIndex].items[editIdx] = { mainName, fields };
+        } else {
+          vaultData.sections[activeSectionIndex].items.push({ mainName, fields });
+        }
+
+        closeModal('modal-item');
+        renderItems();
+        renderSections();
+        saveToCloud();
+      }
+
+      function deleteItem(idx) {
+        if (confirm('Permanently delete this item?')) {
+          vaultData.sections[activeSectionIndex].items.splice(idx, 1);
+          renderItems();
+          renderSections();
+          saveToCloud();
+        }
+      }
+
+      // Sort / Drag & Drop
+      function allowDrop(e) { e.preventDefault(); }
+
+      function drop(e, type) {
+        e.preventDefault();
+        let targetIndex;
+
+        if (type === 'section') {
+          const target = e.target.closest('.nav-item');
+          if (!target) return;
+          targetIndex = Array.from(target.parentNode.children).indexOf(target);
+          const moved = vaultData.sections.splice(dragSrcIndex, 1)[0];
+          vaultData.sections.splice(targetIndex, 0, moved);
+          renderSections();
+        } else if (type === 'item') {
+          const target = e.target.closest('.item-card');
+          if (!target) return;
+          targetIndex = Array.from(target.parentNode.children).indexOf(target);
+          const moved = vaultData.sections[activeSectionIndex].items.splice(dragSrcIndex, 1)[0];
+          vaultData.sections[activeSectionIndex].items.splice(targetIndex, 0, moved);
+          renderItems();
+        }
+        saveToCloud();
+      }
+
+      // Utilities
+      function copyText(text) {
+        const el = document.createElement('textarea');
+        el.value = text;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        notify("Copied to clipboard!");
+      }
+
+      function handleIconUpload(input) {
+        const file = input.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => document.getElementById('new-section-icon').value = e.target.result;
+          reader.readAsDataURL(file);
+        }
+      }
+
+      function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+      function notify(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.style.opacity = '1';
+        setTimeout(() => t.style.opacity = '0', 2500);
+      }
+
+      function logout() {
+        localStorage.removeItem('sv_access_token');
+        location.reload();
+      }
+    </script>
+  </body>
+
+</html>
