@@ -10,10 +10,9 @@
     <link rel="stylesheet" href="../main.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
     <script src="https://unpkg.com/leaflet@latest/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-providers@latest/leaflet-providers.js"></script>
-
-    <script src="./L.Control.Geonames.js"></script>
 
   </head>
 
@@ -83,13 +82,47 @@
       </div>
     </header>
 
-    <div id="map"></div>
+    <div class="app-layout">
+      <aside id="sidebar">
+        <div class="sidebar-hero">
+          <div class="hero-title"><span class="material-symbols-rounded icon">eco</span>Agri Decision Support</div>
+          <div class="hero-subtitle">Real-time soil & climate insights for smarter field decisions.</div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-title"><span class="material-symbols-rounded icon">search</span>Search</div>
+          <form id="search-form" class="search-form">
+            <input id="search-input" type="search" placeholder="Search place or address" autocomplete="off" />
+            <button type="submit" class="btn">Search</button>
+          </form>
+          <ul id="search-results" class="list"></ul>
+        </div>
 
-    <script src="script.js"></script>
+        <div class="sidebar-section">
+          <div class="sidebar-title"><span class="material-symbols-rounded icon">bookmark</span>Saved Points</div>
+          <div class="sidebar-actions">
+            <button id="save-point-btn" class="btn">Rename current</button>
+            <button id="clear-points-btn" class="btn ghost">Clear</button>
+          </div>
+          <ul id="points-list" class="list"></ul>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-title"><span class="material-symbols-rounded icon">explore</span>Details</div>
+          <div id="point-details" class="details">
+            <div class="details-empty">Click on the map to view details.</div>
+          </div>
+        </div>
+
+      </aside>
+
+      <div id="map"></div>
+    </div>
+
+    <script src="script.js?v=6.0"></script>
 
     <div id="notification"></div>
 
-    <script src="../main.js"></script>
+    <script src="../main.js?v=6.0"></script>
     <script src="https://accounts.google.com/gsi/client" async defer onload="gisLoaded()"></script>
     <script src="https://apis.google.com/js/api.js" async defer onload="gapiLoaded()"></script>
 

@@ -112,11 +112,14 @@ function onLogout() {
 
 const popupElement = document.querySelector('#popup');
 
-if (popupElement.classList.contains('no-click-close') === false) {
+if (popupElement && popupElement.classList && popupElement.classList.contains('no-click-close') === false) {
   popupElement.setAttribute("onclick", "popupClose(this)");
-  document.querySelector('.popup').addEventListener('click', (e) => {
-    e.stopPropagation();
-  });
+  const popupInner = popupElement.querySelector('.popup') || document.querySelector('.popup');
+  if (popupInner) {
+    popupInner.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
 }
 
 function popupShow(e) {
