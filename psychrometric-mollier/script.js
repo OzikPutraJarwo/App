@@ -26,12 +26,9 @@ class HistoryManager {
   }
 
   push(state) {
-    // Remove any redo states after current index
     this.history = this.history.slice(0, this.currentIndex + 1);
-    // Add new state
     this.history.push(JSON.parse(JSON.stringify(state)));
     this.currentIndex++;
-    // Maintain max history size
     if (this.history.length > this.maxStates) {
       this.history.shift();
       this.currentIndex--;
@@ -78,7 +75,7 @@ const historyManager = new HistoryManager();
 // ==========================================
 
 const State = {
-  chartType: "psychrometric", // 'psychrometric' atau 'mollier'
+  chartType: "psychrometric",
   mode: "view",
   points: [],
   zones: [],
@@ -86,9 +83,9 @@ const State = {
   selectedPointId: null,
   selectedZoneId: null,
   targetForManual: null,
-  zoneSubMode: "manual", // 'manual' atau 'range'
+  zoneSubMode: "manual",
   pointSubMode: "manual",
-  rangePreview: [], // Menyimpan 4 titik sementara dari slider
+  rangePreview: [],
   yAxisType: "humidityRatio",
   visibility: {
     rh: true,
@@ -108,13 +105,11 @@ const State = {
   }
 };
 
-// Initialize state history dengan state awal (baseline untuk undo)
 historyManager.push(State);
 
 const Psychro = {
-  R_DA: 287.058, // Gas constant for dry air (J/kg·K)
+  R_DA: 287.058,
 
-  // Core Formulas
   getSatVapPres: (t) => 610.94 * Math.exp((17.625 * t) / (t + 243.04)),
   getTempFromSatPres: (Pws) =>
     (243.04 * Math.log(Pws / 610.94)) / (17.625 - Math.log(Pws / 610.94)),
@@ -145,38 +140,27 @@ const Psychro = {
     return Twb;
   },
 
-  // --- TAMBAHKAN FUNGSI INI ---
-  // Mencari Tdb pada Volume (v) dan Humidity Ratio (W) tertentu
-  // Rumus: T = (v * P) / (R_da * (1 + 1.6078 * W)) - 273.15
   getTdbFromVolLine: (v, W, Patm) => {
     return (v * Patm) / (287.058 * (1 + 1.6078 * W)) - 273.15;
   },
 
-  // --- SOLVER MANUAL INPUT (FIXED for Volume) ---
   solveRobust: (type1, val1, type2, val2, Patm) => {
-    // 1. Normalisasi: Pastikan Tdb atau W ada di parameter 1
     if (type2 === "Tdb" || type2 === "W") {
       [type1, type2] = [type2, type1];
       [val1, val2] = [val2, val1];
     }
 
-    // KASUS A: Dry Bulb (Tdb) diketahui
     if (type1 === "Tdb") {
       const t = val1;
 
-      // 1. Tdb + W (Langsung)
       if (type2 === "W") return { t, w: val2 };
 
-      // 2. Tdb + RH
       if (type2 === "RH") {
         const Pws = Psychro.getSatVapPres(t);
         const w = Psychro.getWFromPw(Pws * (val2 / 100), Patm);
         return { t, w };
       }
 
-      // 3. Tdb + Volume (v) -> RUMUS LANGSUNG (BARU)
-      // Rumus: v = R_da * T_k * (1 + 1.6078 * W) / P
-      // Diubah menjadi: W = [ (v * P) / (R_da * T_k) - 1 ] / 1.6078
       if (type2 === "v") {
         const Tk = t + 273.15;
         const numerator = (val2 * Patm) / (Psychro.R_DA * Tk) - 1;
@@ -184,7 +168,6 @@ const Psychro = {
         return { t, w };
       }
 
-      // 4. Iterasi W untuk parameter lain (h, Twb)
       let wLow = 0,
         wHigh = 0.15,
         wMid = 0;
@@ -200,14 +183,12 @@ const Psychro = {
       return { t, w: wMid };
     }
 
-    // KASUS B: Humidity Ratio (W) diketahui
     if (type1 === "W") {
       const w = val1;
       let tLow = -50,
         tHigh = 100,
         tMid = 0;
 
-      // Iterasi Tdb
       for (let i = 0; i < 40; i++) {
         tMid = (tLow + tHigh) / 2;
         let calc = 0;
@@ -217,20 +198,18 @@ const Psychro = {
           const Pw = Psychro.getPwFromW(w, Patm);
           calc = (Pw / Pws) * 100;
           if (calc < val2) tHigh = tMid;
-          else tLow = tMid; // Inverse
+          else tLow = tMid;
           continue;
         } else if (type2 === "h") calc = Psychro.getEnthalpy(tMid, w);
         else if (type2 === "Twb") calc = Psychro.getTwbFromState(tMid, w, Patm);
         else if (type2 === "v") calc = Psychro.getSpecificVolume(tMid, w, Patm);
 
-        // h, Twb, dan v naik saat T naik
         if (calc > val2) tHigh = tMid;
         else tLow = tMid;
       }
       return { t: tMid, w };
     }
 
-    // KASUS C: Fallback Iterasi Global (misal h + RH)
     let tLow = -20,
       tHigh = 100,
       tMid = 0;
@@ -243,12 +222,11 @@ const Psychro = {
       for (let j = 0; j < 15; j++) {
         wM = (wL + wH) / 2;
         let v1Calc = 0;
-        // Hitung v1Calc berdasarkan jenis parameter 1
         if (type1 === "h") v1Calc = Psychro.getEnthalpy(tMid, wM);
         else if (type1 === "Twb")
           v1Calc = Psychro.getTwbFromState(tMid, wM, Patm);
         else if (type1 === "v")
-          v1Calc = Psychro.getSpecificVolume(tMid, wM, Patm); // Tambahan support v
+          v1Calc = Psychro.getSpecificVolume(tMid, wM, Patm);
 
         if (v1Calc > val1) wH = wM;
         else wL = wM;
@@ -275,7 +253,6 @@ const Psychro = {
     return { t: tMid, w: 0.01 };
   },
 
-  // Line Helpers
   getWFromTwbLine: (Tdb, Twb, Patm) => {
     const Pws = Psychro.getSatVapPres(Twb);
     const Ws = Psychro.getWFromPw(Pws, Patm);
@@ -361,7 +338,6 @@ function changeChartType(type) {
   State.chartType = type;
   drawChart();
 
-  // Update label sumbu sesuai tipe chart
   updateAxisLabels();
 
   if (State.chartType === "psychrometric") {
@@ -432,7 +408,6 @@ function syncHumidityInputs(source) {
   if (source === 'ratio') {
     const valW = parseFloat(elMaxHum.value);
     if (!isNaN(valW)) {
-      // Hitung AH di suhu rata-rata range untuk representasi yang lebih akurat
       const avgT = (minT + maxT) / 2;
       const valAH = calculateAbsoluteHumidity(avgT, valW, Patm);
       elMaxAbsHum.value = valAH.toFixed(1);
@@ -440,33 +415,28 @@ function syncHumidityInputs(source) {
   } else if (source === 'absolute') {
     const valAH = parseFloat(elMaxAbsHum.value);
     if (!isNaN(valAH)) {
-      // Konversi AH ke W menggunakan suhu rata-rata
       const avgT = (minT + maxT) / 2;
       const valW = getWFromAbsoluteHumidity(avgT, valAH, Patm);
       elMaxHum.value = valW.toFixed(4);
     }
   }
 
-  // Gambar ulang chart dengan nilai baru
   drawChart();
 }
 
-// Pressure Unit Conversion
 function updatePressureUnit() {
   const pressureInput = document.getElementById("pressure");
   const pressureUnit = document.getElementById("pressure-unit").value;
   let currentValue = parseFloat(pressureInput.value);
 
   if (isNaN(currentValue)) {
-    currentValue = 101325; // Default to standard atmospheric pressure
+    currentValue = 101325;
   }
 
   if (pressureUnit === "kPa") {
-    // Convert Pa to kPa
     pressureInput.value = (currentValue / 1000).toFixed(2);
     pressureInput.step = 0.1;
   } else {
-    // Convert kPa to Pa
     pressureInput.value = (currentValue * 1000).toFixed(0);
     pressureInput.step = 100;
   }
@@ -474,7 +444,6 @@ function updatePressureUnit() {
   drawChart();
 }
 
-// Get pressure in Pa regardless of selected unit
 function getPressureInPa() {
   const pressureInput = document.getElementById("pressure");
   const pressureUnit = document.getElementById("pressure-unit").value;
@@ -485,12 +454,11 @@ function getPressureInPa() {
   }
 
   if (pressureUnit === "kPa") {
-    return value * 1000; // Convert kPa to Pa
+    return value * 1000;
   }
-  return value; // Already in Pa
+  return value;
 }
 
-// Toggle Advanced Settings
 function toggleAdvancedSettings() {
   const header = document.querySelector(".advanced-settings-header");
   const icon = document.getElementById("advanced-settings-icon");
@@ -504,7 +472,6 @@ function toggleAdvancedSettings() {
   }
 }
 
-// Konfigurasi batas slider untuk tiap parameter
 const RangeConfigs = {
   RH: { min: 0, max: 100, step: 1, defMin: 30, defMax: 70 },
   Twb: { min: -10, max: 50, step: 0.5, defMin: 15, defMax: 25 },
@@ -519,7 +486,6 @@ function setupRangeDefaults() {
   const cfg = RangeConfigs[type];
   if (!cfg) return;
 
-  // Update atribut slider input HTML
   ["min", "max"].forEach((suffix) => {
     const elSlider = document.getElementById("sliderP2" + suffix);
     const elInput = document.getElementById("rangeP2" + suffix);
@@ -529,7 +495,6 @@ function setupRangeDefaults() {
     elSlider.step = cfg.step;
     elInput.step = cfg.step;
 
-    // Set default values saat ganti tipe
     if (suffix === "min") {
       elSlider.value = cfg.defMin;
       elInput.value = cfg.defMin;
@@ -553,11 +518,9 @@ function validateRangeInputs(minId, maxId, type = "Tdb") {
   let minVal = parseFloat(minInput.value);
   let maxVal = parseFloat(maxInput.value);
 
-  // Urutan min ≤ max
   if (minVal > maxVal) minVal = maxVal;
   if (maxVal < minVal) maxVal = minVal;
 
-  // Tentukan batas berdasarkan tipe
   let minLimit, maxLimit;
 
   if (type === "Tdb") {
@@ -573,7 +536,6 @@ function validateRangeInputs(minId, maxId, type = "Tdb") {
     maxLimit = cfg.max;
   }
 
-  // Clamp ke batas yang benar
   minVal = Math.max(minLimit, Math.min(minVal, maxLimit));
   maxVal = Math.max(minLimit, Math.min(maxVal, maxLimit));
 
@@ -593,10 +555,6 @@ function validateRangeInputs(minId, maxId, type = "Tdb") {
   }
 }
 
-// Panggil ini sekali saat init atau saat masuk mode range
-// (Tambahkan panggilan ini di dalam setZoneSubMode)
-
-// Helper function to update tab styles
 function updateTabStyles(tabsSelector, activeTabId) {
   document.querySelectorAll(tabsSelector).forEach((t) => {
     t.style.background = "rgba(255,255,255,0.5)";
@@ -611,7 +569,6 @@ function updateTabStyles(tabsSelector, activeTabId) {
   }
 }
 
-// Mengatur Sub-Mode (Manual vs Range)
 function setZoneSubMode(subMode) {
   State.zoneSubMode = subMode;
   updateTabStyles(".z-tab", ".zone-tabs #tab-" + subMode);
@@ -647,14 +604,12 @@ function setPointSubMode(subMode) {
     subMode === "input" ? "block" : "none";
 }
 
-// Sinkronisasi Slider <-> Input Angka
 function syncRange(id) {
   const slider = document.getElementById("slider" + id);
   const input = document.getElementById("range" + id);
 
   input.value = slider.value;
 
-  // Panggil validasi berdasarkan tipe input
   if (id.includes("Tmin") || id.includes("Tmax")) {
     validateRangeInputs("rangeTmin", "rangeTmax", "Tdb");
   } else if (id.includes("P2min") || id.includes("P2max")) {
@@ -665,47 +620,30 @@ function syncRange(id) {
   updateRangeZone();
 }
 
-// Fungsi Sinkronisasi Batas Slider Zone dengan Global Chart Settings
 function syncZoneRangeLimits(globalMin, globalMax) {
   const ids = ["rangeTmin", "sliderTmin", "rangeTmax", "sliderTmax"];
 
   ids.forEach((id) => {
     const el = document.getElementById(id);
-    // 1. Update batas slider (HTML attributes)
     el.min = globalMin;
     el.max = globalMax;
 
-    // 2. Koreksi nilai jika saat ini nilainya di luar batas baru
     let val = parseFloat(el.value);
     if (val < globalMin) el.value = globalMin;
     if (val > globalMax) el.value = globalMax;
   });
-
-  // Update preview jika sedang dalam mode range
-  if (State.zoneSubMode === "range") {
-    // Kita panggil updateRangeZone agar polygon preview menyesuaikan diri
-    // Tapi kita panggil secara 'silent' agar tidak loop infinite drawChart
-    // Cukup update variable State.rangePreview nya saja lewat logika di dalamnya
-    // Namun, cara teraman adalah membiarkan drawChart menanganinya di frame berikutnya
-    // atau cukup biarkan visual slidernya berubah.
-  }
 }
 
-// Menghitung 4 Titik Sudut berdasarkan Range
-// Menghitung Polygon Zona dengan Sisi Melengkung (RH Curve)
 function updateRangeZone() {
-  // Validasi semua input range terlebih dahulu
   validateRangeInputs("rangeTmin", "rangeTmax", "Tdb");
   const type = document.getElementById("rangeParamType").value;
   validateRangeInputs("rangeP2min", "rangeP2max", type);
 
-  // 1. Sync Inputs Tdb
   ["Tmin", "Tmax"].forEach((k) => {
     const val = parseFloat(document.getElementById("range" + k).value);
     document.getElementById("slider" + k).value = val;
   });
 
-  // 2. Sync Inputs Parameter 2
   ["P2min", "P2max"].forEach((k) => {
     const val = parseFloat(document.getElementById("range" + k).value);
     document.getElementById("slider" + k).value = val;
@@ -728,36 +666,29 @@ function updateRangeZone() {
   const polyPoints = [];
   const step = 0.5;
 
-  // Helper untuk membatasi W agar tidak tembus Saturation Line
   const getClampedW = (t, type, val) => {
     const res = Psychro.solveRobust("Tdb", t, type, val, Patm);
     if (isNaN(res.w)) return null;
 
-    // Hitung W max pada RH 100% di suhu ini
     const Pws = Psychro.getSatVapPres(t);
     const Wmax = Psychro.getWFromPw(Pws, Patm);
 
-    // Jika hasil hitungan melebihi batas jenuh, paksa ke batas jenuh
     if (res.w > Wmax) res.w = Wmax;
 
     return res.w;
   };
 
-  // A. Garis Bawah (Param Min)
   for (let t = tMin; t <= tMax; t += step) {
     const w = getClampedW(t, pType, pMin);
     if (w !== null) polyPoints.push({ t: t, w: w });
   }
-  // Sudut Kanan Bawah
   const wBR = getClampedW(tMax, pType, pMin);
   if (wBR !== null) polyPoints.push({ t: tMax, w: wBR });
 
-  // B. Garis Atas (Param Max) - Balik Arah
   for (let t = tMax; t >= tMin; t -= step) {
     const w = getClampedW(t, pType, pMax);
     if (w !== null) polyPoints.push({ t: t, w: w });
   }
-  // Sudut Kiri Atas
   const wTL = getClampedW(tMin, pType, pMax);
   if (wTL !== null) polyPoints.push({ t: tMin, w: wTL });
 
@@ -773,21 +704,17 @@ function setMode(mode) {
   if (document.getElementById("btn-" + mode))
     document.getElementById("btn-" + mode).classList.add("active");
 
-  // Info panel handled by mousemove across all modes
-
   const zoneCtrl = document.getElementById("zone-controls");
   zoneCtrl.style.display = mode === "zone" ? "block" : "none";
 
   const pointCtrl = document.getElementById("point-controls");
   pointCtrl.style.display = mode === "point" ? "block" : "none";
 
-  // TAMBAHAN: Init submode jika masuk ke zone
   if (mode === "zone") {
     if (!State.zoneSubMode) setZoneSubMode("manual");
     else setZoneSubMode(State.zoneSubMode);
   }
 
-  // Clear temp data jika keluar mode zone
   if (mode !== "zone") {
     cancelZone();
     State.rangePreview = [];
@@ -800,7 +727,6 @@ function updateZonePtCount() {
     State.tempZone.length + " pts";
 }
 
-// --- MANUAL INPUT HANDLER ---
 function openManualModal(target) {
   State.targetForManual = target;
   document.getElementById("modalTitle").innerText =
@@ -842,9 +768,9 @@ function submitManualInput(target) {
   }
 }
 
-// --- LIST & CRUD ---
+// === LIST & CRUD ===
+
 function updateLists() {
-  // 1. RENDER POINTS
   const pl = document.getElementById("list-points");
   document.getElementById("count-points").innerText = State.points.length;
 
@@ -883,7 +809,6 @@ function updateLists() {
       </style>
     `;
 
-  // 2. RENDER ZONES (Update onclick ke openEditModal)
   const zl = document.getElementById("list-zones");
   document.getElementById("count-zones").innerText = State.zones.length;
 
@@ -938,10 +863,8 @@ function addPoint(t, w) {
   const Patm = getPressureInPa();
   const data = calculateAllProperties(t, w, Patm);
 
-  // PERUBAHAN: Tambahkan property 'name'
   const pt = {
     id: Date.now(),
-    // name: `Point ${State.points.length + 1}`,
     name: `Point`,
     color: "#cc1919",
     t,
@@ -954,12 +877,10 @@ function addPoint(t, w) {
   selectPoint(pt.id);
 }
 
-// Helper untuk membuat snapshot state
 function saveStateSnapshot() {
   historyManager.push(State);
 }
 
-// Fungsi Undo
 function undoAction() {
   const previousState = historyManager.undo();
   if (previousState) {
@@ -969,7 +890,6 @@ function undoAction() {
   }
 }
 
-// Fungsi Redo
 function redoAction() {
   const nextState = historyManager.redo();
   if (nextState) {
@@ -979,9 +899,7 @@ function redoAction() {
   }
 }
 
-// ==========================================
-// CONTEXT MENU SYSTEM
-// ==========================================
+// === CONTEXT MENU ===
 
 let contextMenuPointId = null;
 
@@ -989,7 +907,6 @@ function showContextMenu(event, pointId = null, zoneId = null) {
   event.preventDefault();
   contextMenuPointId = pointId;
 
-  // Hide info panel when context menu opens
   document.getElementById("info-panel").style.display = "none";
 
   const menu = document.getElementById("context-menu");
@@ -998,7 +915,6 @@ function showContextMenu(event, pointId = null, zoneId = null) {
   content.innerHTML = "";
 
   if (pointId) {
-    // Context menu for point
     const point = State.points.find(p => p.id === pointId);
     if (!point) return;
 
@@ -1012,7 +928,6 @@ function showContextMenu(event, pointId = null, zoneId = null) {
       deletePoint({stopPropagation: () => {}}, pointId);
     });
   } else if (zoneId) {
-    // Context menu for zone
     const zone = State.zones.find(z => z.id === zoneId);
     if (!zone) return;
 
@@ -1026,9 +941,6 @@ function showContextMenu(event, pointId = null, zoneId = null) {
       deleteZone({stopPropagation: () => {}}, zoneId);
     });
   } else {
-    // Context menu for chart - simplified with floating windows
-    
-    // Show Finish Zone and Cancel when in zone mode with >= 3 points
     if (State.mode === "zone" && State.tempZone.length >= 3) {
       addContextMenuItem(content, "check_circle", "Finish Zone", () => {
         hideContextMenu();
@@ -1134,7 +1046,6 @@ function showContextMenu(event, pointId = null, zoneId = null) {
     });
   }
 
-  // Position menu at mouse cursor
   menu.style.left = event.clientX + "px";
   menu.style.top = event.clientY + "px";
   menu.style.display = "block";
@@ -1186,7 +1097,6 @@ function addContextSubmenu(container, icon, label, builder, isActive = false) {
   let hideTimeout = null;
   const show = () => {
     clearTimeout(hideTimeout);
-    // Position submenu relative to parent item
     const rect = item.getBoundingClientRect();
     submenu.style.left = rect.width + "px";
     submenu.style.top = 0 + "px";
@@ -1210,9 +1120,6 @@ function addContextSubmenu(container, icon, label, builder, isActive = false) {
 function hideContextMenu() {
   document.getElementById("context-menu").style.display = "none";
   contextMenuPointId = null;
-  
-  // Info panel will be shown again by mousemove if in view mode
-  // No need to explicitly show it here as handleMouseMove will handle it
 }
 
 // Floating window functions
@@ -1519,14 +1426,12 @@ function applyFloatingRange() {
   updateRangeZone();
 }
 
-// Fungsi untuk sync slider floating range (sama seperti syncRange di toolbar)
 function syncFloatingRange(id) {
   const slider = document.getElementById("floating-slider" + id);
   const input = document.getElementById("floating-range" + id);
 
   input.value = slider.value;
 
-  // Panggil validasi berdasarkan tipe input
   if (id.includes("Tmin") || id.includes("Tmax")) {
     validateRangeInputs("floating-rangeTmin", "floating-rangeTmax", "Tdb");
   } else if (id.includes("P2min") || id.includes("P2max")) {
@@ -1584,9 +1489,7 @@ document.addEventListener("click", (event) => {
   }
 });
 
-// ==========================================
-// EXPORT/IMPORT FUNCTIONS (CSV & EXCEL)
-// ==========================================
+// === EXPORT/IMPORT ===
 
 function getCheckboxValue(id) {
   const el = document.getElementById(id);
@@ -2003,10 +1906,9 @@ function deleteZone(e, id) {
   drawChart();
 }
 
-// --- UNIFIED EDIT MODAL ---
+// === UNIFIED EDIT MODAL ===
 
 function openEditModal(type, id) {
-  // Stop propagasi agar tidak men-trigger select item di background
   if (window.event) window.event.stopPropagation();
 
   const editWindow = document.getElementById("floating-edit-window");
@@ -2033,7 +1935,6 @@ function openEditModal(type, id) {
     colorContainer.style.display = "block";
   }
 
-  // Position window at center
   editWindow.style.left = "50%";
   editWindow.style.top = "50%";
   editWindow.style.transform = "translate(-50%, -50%)";
@@ -2072,15 +1973,13 @@ function saveEditSettings() {
 function finishZone() {
   let finalPoints = [];
 
-  // Cek kita sedang pakai mode apa
   if (State.zoneSubMode === "range") {
     if (State.rangePreview.length < 3) {
       alert("Invalid Range Zone");
       return;
     }
-    finalPoints = [...State.rangePreview]; // Copy dari preview
+    finalPoints = [...State.rangePreview];
   } else {
-    // Mode Manual
     if (State.tempZone.length < 3) {
       alert("Min 3 points required.");
       return;
@@ -2088,23 +1987,19 @@ function finishZone() {
     finalPoints = [...State.tempZone];
   }
 
-  // Simpan Zone
   State.zones.push({
     id: Date.now(),
-    // name: `Zone ${State.zones.length + 1}`,
     name: `Zone`,
     color: "#19cc2e",
     points: finalPoints,
   });
 
-  // Reset
   State.tempZone = [];
   State.rangePreview = [];
   historyManager.push(State);
   updateLists();
   drawChart();
 
-  // Update counter text manual jadi 0
   if (document.getElementById("zonePtCount"))
     document.getElementById("zonePtCount").innerText = "0 pts";
 }
@@ -2112,7 +2007,6 @@ function finishZone() {
 function cancelZone() {
   State.tempZone = [];
   State.rangePreview = [];
-  // Jika sedang di mode range, kembalikan posisi preview ke current slider
   if (State.zoneSubMode === "range") updateRangeZone();
 
   drawChart();
@@ -2132,9 +2026,7 @@ function clearAllData() {
   }
 }
 
-// ==========================================
-// 3. CHART RENDERING
-// ==========================================
+// === CHART RENDERING ===
 
 const margin = {
   top: chart_margin_top,
@@ -2158,14 +2050,11 @@ const svg = svgContainer
   .append("g")
   .attr("transform", `translate(${margin.left},${margin.top})`);
 
-// 1. Layer Grid (Paling Bawah - agar garis grid ada di belakang kurva)
 const gridLayer = svg.append("g"); 
 
-// 2. Layer Kurva & Data
 const linesLayer = svg.append("g").attr("clip-path", "url(#chart-clip)").attr("id", "lines-layer");
 const labelLayer = svg.append("g");
 
-// 3. Layer Axis/Border (Paling Atas - agar garis tepi menimpa kurva)
 const axesLayer = svg.append("g");
 
 const overlay = svg
@@ -2176,26 +2065,15 @@ const overlay = svg
   .style("pointer-events", "all");
 
 const zoneLayer = svg.append("g").attr("clip-path", "url(#chart-clip)").attr("id", "zones-layer");
-  const pointLayer = svg.append("g").attr("clip-path", "url(#chart-clip)").attr("id", "points-layer");
-
-// FUNGSI KONVERSI ABSOLUTE HUMIDITY
-
-// Fungsi untuk menghitung Absolute Humidity (g/m³) dari t, w, dan Patm
+const pointLayer = svg.append("g").attr("clip-path", "url(#chart-clip)").attr("id", "points-layer");
 function calculateAbsoluteHumidity(t, w, Patm) {
-  const v = Psychro.getSpecificVolume(t, w, Patm); // m³/kg udara kering
-  // Absolute Humidity = massa uap air (kg) / volume udara basah (m³)
-  // AH = w / v, dengan satuan kg/m³, dikonversi ke g/m³
-  return (w / v) * 1000; // g/m³
+  const v = Psychro.getSpecificVolume(t, w, Patm);
+  return (w / v) * 1000;
 }
 
-// Fungsi untuk menghitung W dari Absolute Humidity
 function getWFromAbsoluteHumidity(t, ah, Patm) {
-  // AH (g/m³) -> w (kg/kg')
-  // v = (1 + w) * R_da * T_k / P_atm
-  // AH = w / v * 1000
-  // Kita selesaikan dengan iterasi
   let wLow = 0;
-  let wHigh = 0.1; // Batas atas reasonable
+  let wHigh = 0.1;
   let wMid = 0;
 
   for (let i = 0; i < 50; i++) {
@@ -2212,17 +2090,13 @@ function getWFromAbsoluteHumidity(t, ah, Patm) {
   return wMid;
 }
 
-// UPDATE FUNGSI RENDERING CHART
-
-// Fungsi untuk mendapatkan nilai Y berdasarkan tipe sumbu Y
 function getYValue(t, w, Patm) {
   if (State.yAxisType === "absoluteHumidity") {
     return calculateAbsoluteHumidity(t, w, Patm);
   }
-  return w; // humidityRatio
+  return w;
 }
 
-// Fungsi untuk mengubah koordinat mouse ke t dan w dengan memperhitungkan tipe sumbu Y
 function getTandWFromCoords(mx, my, x, y, minT, maxT, maxH, Patm) {
   let t, w;
 
@@ -2231,19 +2105,15 @@ function getTandWFromCoords(mx, my, x, y, minT, maxT, maxH, Patm) {
 
     if (State.yAxisType === "absoluteHumidity") {
       const ah = y.invert(my);
-      // Cari w yang sesuai dengan AH ini
       w = getWFromAbsoluteHumidity(t, ah, Patm);
-      // Batasi w agar tidak negatif
       w = Math.max(0, Math.min(w, maxH));
     } else {
       w = y.invert(my);
     }
   } else {
-    // Mollier chart
     if (State.yAxisType === "absoluteHumidity") {
       const ah = x.invert(mx);
       t = y.invert(my);
-      // Cari w yang sesuai
       w = getWFromAbsoluteHumidity(t, ah, Patm);
       w = Math.max(0, Math.min(w, maxH));
     } else {
@@ -2252,7 +2122,6 @@ function getTandWFromCoords(mx, my, x, y, minT, maxT, maxH, Patm) {
     }
   }
 
-  // Batasi nilai dalam range
   t = Math.max(minT, Math.min(maxT, t));
   w = Math.max(0, Math.min(maxH, w));
 
@@ -2298,14 +2167,11 @@ function drawChart() {
 
   syncZoneRangeLimits(minT, maxT);
 
-  // Tentukan skala berdasarkan tipe chart
   let x, y;
   if (State.chartType === "psychrometric") {
-    // Psychrometric: x = DBT, y = Humidity (Ratio atau Absolute)
     x = d3.scaleLinear().domain([minT, maxT]).range([0, w]);
 
     if (State.yAxisType === "absoluteHumidity") {
-      // Gunakan nilai maxAbsHum dari input user
       const maxAH = parseFloat(document.getElementById("maxAbsHum").value);
       y = d3.scaleLinear().domain([0, maxAH]).range([h, 0]);
     } else {
@@ -2314,7 +2180,6 @@ function drawChart() {
   } else {
     // Mollier: x = Humidity, y = DBT
     if (State.yAxisType === "absoluteHumidity") {
-      // Gunakan nilai maxAbsHum dari input user
       const maxAH = parseFloat(document.getElementById("maxAbsHum").value);
       x = d3.scaleLinear().domain([0, maxAH]).range([0, w]);
     } else {
@@ -2323,7 +2188,6 @@ function drawChart() {
     y = d3.scaleLinear().domain([minT, maxT]).range([h, 0]);
   }
 
-  // Update fungsi line untuk menggunakan tipe Y yang benar
   const line =
     State.chartType === "psychrometric"
       ? d3
@@ -2348,55 +2212,39 @@ function drawChart() {
           .y((d) => y(d.t))
           .curve(d3.curveMonotoneX);
 
-  // Update label sumbu Y
   updateAxisLabels();
 
-  // GRID & AXES
   gridLayer.selectAll("*").remove();
 
-  // Grid X (Vertikal)
   gridLayer
     .append("g")
     .attr("transform", `translate(0,${h})`)
     .call(
-      d3.axisBottom(x).ticks(10).tickSize(-h).tickFormat("") // Kosongkan teks agar tidak duplikat/tebal
+      d3.axisBottom(x).ticks(10).tickSize(-h).tickFormat("")
     )
-    .call((g) => g.select(".domain").remove()) // Hapus garis border di layer grid (biar tidak dobel)
-    .selectAll("line")
-    .attr("class", "grid-line")
-    .attr("stroke-opacity", 0.5); // Opsional: buat grid sedikit transparan
-
-  // Grid Y (Horizontal)
-  gridLayer
-    .append("g")
-    .call(
-      d3.axisLeft(y).ticks(10).tickSize(-w).tickFormat("") // Kosongkan teks
-    )
-    .call((g) => g.select(".domain").remove()) // Hapus garis border di layer grid
+    .call((g) => g.select(".domain").remove())
     .selectAll("line")
     .attr("class", "grid-line")
     .attr("stroke-opacity", 0.5);
 
-  // 2. GAMBAR AXIS & BORDER (Di Layer Depan)
+  gridLayer
+    .append("g")
+    .call(
+      d3.axisLeft(y).ticks(10).tickSize(-w).tickFormat("")
+    )
+    .call((g) => g.select(".domain").remove())
+    .selectAll("line")
+    .attr("class", "grid-line")
+    .attr("stroke-opacity", 0.5);
+
   axesLayer.selectAll("*").remove();
 
-  // Axis X (Border Bawah & Angka)
   axesLayer
     .append("g")
     .attr("transform", `translate(0,${h})`)
-    .call(d3.axisBottom(x).ticks(10)); // Tick size default, border (.domain) akan muncul
+    .call(d3.axisBottom(x).ticks(10));
 
-  // Axis Y (Border Kiri & Angka)
   axesLayer.append("g").call(d3.axisLeft(y).ticks(10));
-
-  // Tambahan: Border Atas dan Kanan (agar chart tertutup kotak sempurna)
-  // axesLayer
-  //   .append("rect")
-  //   .attr("width", w)
-  //   .attr("height", h)
-  //   .attr("fill", "none")
-  //   .attr("stroke", "black")
-  //   .style("pointer-events", "none");
 
   // LABEL SUMBU (Tetap di axesLayer agar paling atas)
   if (State.chartType === "psychrometric") {
@@ -2456,16 +2304,13 @@ function drawChart() {
     State.chartType
   );
 
-  // ZONES - render dengan koordinat yang sesuai
   zoneLayer.selectAll("*").remove();
   
-  // Draw comfort zone
   if (State.comfortZone.visible) {
     drawComfortZone(zoneLayer, x, y, minT, maxT, maxH, Patm);
   }
   
   State.zones.forEach((z) => {
-    // Konversi titik zona ke koordinat yang benar
     const polyStr = z.points
       .map((p) => {
         if (State.chartType === "psychrometric") {
@@ -2497,7 +2342,6 @@ function drawChart() {
 
     if (z.id === State.selectedZoneId) poly.classed("selected", true);
 
-    // Hitung posisi tengah untuk label
     const cx =
       State.chartType === "psychrometric"
         ? d3.mean(z.points, (p) => x(p.t))
@@ -2558,7 +2402,6 @@ function drawChart() {
       .attr("class", "temp-zone-poly");
   }
 
-  // POINTS - render dengan koordinat yang sesuai
   pointLayer.selectAll("*").remove();
   State.points.forEach((p) => {
     let cx, cy;
@@ -2617,21 +2460,17 @@ function drawChart() {
     .on("click", (e) => handleChartClick(e, x, y, minT, maxT, maxH, Patm))
     .on("contextmenu", (e) => showContextMenu(e));
 
-  // ================= LEGEND =================
+  // LEGEND
   const showLegend = document.getElementById("set-show-legend").checked;
   if (showLegend) {
     const legG = axesLayer.append("g").attr("class", "chart-legend");
 
-    // Tentukan posisi legend berdasarkan chart type
     if (State.chartType === "psychrometric") {
-      // Psychrometric: legend di kiri atas
       legG.attr("transform", `translate(10, 10)`);
     } else {
-      // Mollier: legend di kanan bawah
-      legG.attr("transform", `translate(${w - 130}, ${h - 115})`); // Ganti width dengan w
+      legG.attr("transform", `translate(${w - 130}, ${h - 115})`);
     }
 
-    // Data Item Legend - hanya tampilkan yang visible
     const allLegItems = [
       { c: color_rh, t: "Rel. Humidity", d: "0", key: "rh" },
       { c: color_h, t: "Enthalpy", d: "0", key: "h" },
@@ -2640,13 +2479,10 @@ function drawChart() {
       { c: color_sat, t: "Saturation", d: "0", key: "sat" },
     ];
     
-    // Filter hanya yang visible
     const legItems = allLegItems.filter(item => State.visibility[item.key]);
     
-    // Hitung tinggi legend box berdasarkan jumlah item
     const legendHeight = 25 + legItems.length * 15;
 
-    // Gambar Kotak Background
     legG
       .append("rect")
       .attr("class", "legend-box")
@@ -2661,7 +2497,6 @@ function drawChart() {
       .attr("x", "10")
       .attr("y", "17.5")
 
-    // Render Item Legend
     legItems.forEach((item, i) => {
       const ly = 33 + i * 15;
       legG
@@ -2683,11 +2518,9 @@ function drawChart() {
   }
 }
 
-// Update fungsi handleMouseMove untuk Mollier
 function handleMouseMove(e, x, y, minT, maxT, maxH, Patm) {
   const [mx, my] = d3.pointer(e, svg.node());
 
-  // Update cursor berdasarkan mode aktif
   const svgElement = svg.node();
   if (State.mode === "point") {
     svgElement.style.cursor = "crosshair";
@@ -2697,23 +2530,19 @@ function handleMouseMove(e, x, y, minT, maxT, maxH, Patm) {
     svgElement.style.cursor = "default";
   }
 
-  // Gunakan fungsi baru untuk mendapatkan t dan w
   const { t, w } = getTandWFromCoords(mx, my, x, y, minT, maxT, maxH, Patm);
 
-  // Boundary check
   if (t < minT || t > maxT || w < 0 || w > maxH) {
     document.getElementById("info-panel").style.display = "none";
     return;
   }
 
-  // Hide info panel if setting is disabled
   const showInfoPanel = document.getElementById("set-show-info-panel");
   if (showInfoPanel && !showInfoPanel.checked) {
     document.getElementById("info-panel").style.display = "none";
     return;
   }
 
-  // Hide info panel jika context menu sedang terbuka
   const contextMenu = document.getElementById("context-menu");
   if (contextMenu && contextMenu.style.display === "block") {
     document.getElementById("info-panel").style.display = "none";
@@ -2726,7 +2555,6 @@ function handleMouseMove(e, x, y, minT, maxT, maxH, Patm) {
   panel.style.display = "block";
   document.getElementById("tooltip-grid").innerHTML = generateHTMLGrid(d);
 
-  // Positioning panel info
   const panelW = panel.offsetWidth;
   const panelH = panel.offsetHeight;
   const wrapperW = chartWrapper.clientWidth;
@@ -2750,7 +2578,6 @@ function handleMouseMove(e, x, y, minT, maxT, maxH, Patm) {
 function handleChartClick(e, x, y, minT, maxT, maxH, Patm) {
   const [mx, my] = d3.pointer(e, svg.node());
 
-  // Gunakan fungsi baru untuk mendapatkan t dan w
   const { t, w } = getTandWFromCoords(mx, my, x, y, minT, maxT, maxH, Patm);
 
   if (t < minT || t > maxT || w < 0 || w > maxH) return;
@@ -2768,8 +2595,6 @@ function handleChartClick(e, x, y, minT, maxT, maxH, Patm) {
 
 function generateHTMLGrid(d) {
   return `
-
-        <!-- TEMPERATURES -->
         <div class="detail-row">
             <span class="det-label"><span class="material-symbols-rounded"> thermometer </span> Dry Bulb Temperature</span>
             <span class="det-abbr">Tdb</span>
@@ -2798,8 +2623,6 @@ function generateHTMLGrid(d) {
             <span class="det-val">${d.Tf.toFixed(2)} °C</span>
         </div>
 
-
-        <!-- MOISTURE -->
         <div class="detail-row">
             <span class="det-label"><span class="material-symbols-rounded"> water_do </span> Humidity Ratio</span>
             <span class="det-abbr">W</span>
@@ -2821,8 +2644,6 @@ function generateHTMLGrid(d) {
             <span class="det-val">${d.mu.toFixed(2)} %</span>
         </div>
 
-
-        <!-- ENERGY & THERMOPHYSICAL -->
         <div class="detail-row">
             <span class="det-label"><span class="material-symbols-rounded"> local_fire_department </span> Enthalpy</span>
             <span class="det-abbr">h</span>
@@ -2851,8 +2672,6 @@ function generateHTMLGrid(d) {
             <span class="det-val">${d.rho.toFixed(2)} kg/m³</span>
         </div>
 
-
-        <!-- PRESSURE -->
         <div class="detail-row">
             <span class="det-label"><span class="material-symbols-rounded"> speed </span> Vapor Partial Pressure</span>
             <span class="det-abbr">Pw</span>
@@ -2867,8 +2686,6 @@ function generateHTMLGrid(d) {
             <span class="det-val">${d.Pws.toFixed(0)} Pa</span>
         </div>
 
-
-        <!-- DEFICITS -->
         <div class="detail-row">
             <span class="det-label"><span class="material-symbols-rounded"> trending_down </span> Vapor Pressure Deficit</span>
             <span class="det-abbr">VPD</span>
@@ -2883,8 +2700,6 @@ function generateHTMLGrid(d) {
             <span class="det-val">${d.HD.toFixed(4)} kg/kg'</span>
         </div>
 
-
-        <!-- CONCENTRATIONS -->
         <div class="detail-row">
             <span class="det-label"><span class="material-symbols-rounded"> salinity </span> Absolute Humidity</span>
             <span class="det-abbr">AH</span>
@@ -2906,8 +2721,6 @@ function generateHTMLGrid(d) {
             <span class="det-val">${d.VMR.toFixed(2)} ppm</span>
         </div>
 
-
-        <!-- DIFFERENCE -->
         <div class="detail-row">
             <span class="det-label"><span class="material-symbols-rounded"> difference </span> Psychrometric Difference</span>
             <span class="det-abbr">PD</span>
@@ -2945,14 +2758,13 @@ function drawPsychroLines(
 ) {
   const labels = { left: [], right: [], top: [], bottom: [] };
 
-  // Helper function untuk menambahkan label dengan data yang lengkap
   const addLabel = (pos, text, cls, loc, tValue = null, ahValue = null) => {
     labels[loc].push({
       pos,
       text,
       class: cls,
-      tValue, // Nilai T untuk referensi
-      ahValue, // Nilai AH (jika mode AH)
+      tValue,
+      ahValue,
     });
   };
 
@@ -2966,7 +2778,7 @@ function drawPsychroLines(
         minT,
         maxT
       );
-      const te = (v * Patm) / 287.058 - 273.15; // T saat W=0
+      const te = (v * Patm) / 287.058 - 273.15;
 
       const d = [
         { t: ts, w: Psychro.getWFromPw(Psychro.getSatVapPres(ts), Patm) },
@@ -2988,7 +2800,6 @@ function drawPsychroLines(
           if (te >= minT && te <= maxT) {
             if (State.yAxisType === "absoluteHumidity") {
               const ah = calculateAbsoluteHumidity(te, 0, Patm);
-              // Untuk psychrometric dengan AH: label di bottom pada x = x(te)
               addLabel(x(te), labelText, "lbl-v", "bottom", te, ah);
             } else {
               addLabel(x(te), labelText, "lbl-v", "bottom", te);
@@ -2998,7 +2809,6 @@ function drawPsychroLines(
             if (tAtMaxH >= minT && tAtMaxH <= maxT) {
               if (State.yAxisType === "absoluteHumidity") {
                 const ah = calculateAbsoluteHumidity(tAtMaxH, maxH, Patm);
-                // Untuk psychrometric dengan AH: label di top pada x = x(tAtMaxH)
                 addLabel(x(tAtMaxH), labelText, "lbl-v", "top", tAtMaxH, ah);
               } else {
                 addLabel(x(tAtMaxH), labelText, "lbl-v", "top", tAtMaxH);
@@ -3011,7 +2821,6 @@ function drawPsychroLines(
           if (wAtMinT >= 0 && wAtMinT <= maxH) {
             if (State.yAxisType === "absoluteHumidity") {
               const ah = calculateAbsoluteHumidity(minT, wAtMinT, Patm);
-              // Untuk mollier dengan AH: label di left pada y = y(minT)
               addLabel(y(minT), labelText, "lbl-v", "left", minT, ah);
             } else {
               addLabel(y(minT), labelText, "lbl-v", "left", minT);
@@ -3019,7 +2828,6 @@ function drawPsychroLines(
           } else {
             if (State.yAxisType === "absoluteHumidity") {
               const ah = calculateAbsoluteHumidity(te, 0, Patm);
-              // Untuk mollier dengan AH: label di bottom pada x = x(ah)
               addLabel(x(ah), labelText, "lbl-v", "bottom", te, ah);
             } else {
               addLabel(x(0), labelText, "lbl-v", "bottom", te);
@@ -3225,7 +3033,6 @@ function drawPsychroLines(
             exitType = "right";
           }
 
-          // Jika tidak keluar di kanan, periksa ujung atas (T = maxT)
           if (!exitPoint) {
             const W_at_maxT = Psychro.getWFromPw(
               Psychro.getSatVapPres(maxT) * rh,
@@ -3237,7 +3044,6 @@ function drawPsychroLines(
             }
           }
 
-          // Jika tidak keluar di atas, periksa ujung kiri (W = 0 atau mendekati 0)
           if (!exitPoint) {
             let minW = Infinity;
             let minWPoint = null;
@@ -3254,7 +3060,6 @@ function drawPsychroLines(
             }
           }
 
-          // Jika masih tidak ditemukan, gunakan titik terakhir yang valid
           if (!exitPoint) {
             for (let i = d.length - 1; i >= 0; i--) {
               const point = d[i];
@@ -3266,9 +3071,7 @@ function drawPsychroLines(
             }
           }
 
-          // Tambahkan label berdasarkan jenis exit
           if (exitPoint && exitType) {
-            // PERUBAHAN UTAMA: Gunakan fungsi getYValue untuk mendapatkan nilai y yang benar
             if (State.yAxisType === "absoluteHumidity") {
               const ah = calculateAbsoluteHumidity(
                 exitPoint.t,
@@ -3276,7 +3079,6 @@ function drawPsychroLines(
                 Patm
               );
               if (exitType === "top") {
-                // Untuk top, gunakan posisi x berdasarkan nilai y (AH)
                 addLabel(
                   x(getYValue(exitPoint.t, exitPoint.w, Patm)),
                   (rh * 100).toFixed(0) + "%",
@@ -3286,7 +3088,6 @@ function drawPsychroLines(
                   ah
                 );
               } else if (exitType === "right") {
-                // Untuk right, gunakan posisi y berdasarkan temperatur
                 addLabel(
                   y(exitPoint.t),
                   (rh * 100).toFixed(0) + "%",
@@ -3296,7 +3097,6 @@ function drawPsychroLines(
                   ah
                 );
               } else if (exitType === "left") {
-                // Untuk left, gunakan posisi y berdasarkan temperatur
                 addLabel(
                   y(exitPoint.t),
                   (rh * 100).toFixed(0) + "%",
@@ -3339,7 +3139,6 @@ function drawPsychroLines(
     });
   }
 
-  // Render smart labels dengan parameter yang diperlukan
   if (chartType === "psychrometric") {
     renderSmartLabels(
       labelsG,
@@ -3425,10 +3224,8 @@ function renderSmartLabels(
 ) {
   if (labelData.length === 0) return;
 
-  // Urutkan label berdasarkan posisinya
   labelData.sort((a, b) => a.pos - b.pos);
 
-  // Hindari tabrakan label
   for (let i = 1; i < labelData.length; i++) {
     if (labelData[i].pos < labelData[i - 1].pos + 15) {
       labelData[i].pos = labelData[i - 1].pos + 15;
@@ -3477,7 +3274,7 @@ function renderSmartLabels(
           anchor = "start";
           alignment = "middle";
         } else if (position === "top") {
-          xPos = d.pos; // d.pos adalah x(ah) untuk specific volume, atau x(w) untuk yang lain
+          xPos = d.pos;
           yPos = -10;
           anchor = "middle";
           alignment = "baseline";
@@ -3488,14 +3285,13 @@ function renderSmartLabels(
           alignment = "middle";
           rotate = true;
         } else if (position === "bottom") {
-          xPos = d.pos; // d.pos adalah x(ah) untuk specific volume
+          xPos = d.pos;
           yPos = height + bottom;
           anchor = "middle";
           alignment = "hanging";
         }
       }
     } else {
-      // Mode Humidity Ratio (normal)
       if (position === "right") {
         xPos = width + 8;
         yPos = d.pos;
@@ -3522,13 +3318,11 @@ function renderSmartLabels(
       }
     }
 
-    // Filter label yang berada di luar area chart
     const isVisible =
       xPos >= -20 && xPos <= width + 20 && yPos >= -20 && yPos <= height + 20;
 
     if (!isVisible) return;
 
-    // Gambar teks label
     const textElem = container
       .append("text")
       .attr("class", "smart-label " + d.class)
@@ -3538,7 +3332,6 @@ function renderSmartLabels(
       .attr("dominant-baseline", alignment)
       .text(d.text);
 
-    // Rotasi untuk label di kiri (mollier)
     if (rotate) {
       textElem
         // .attr("transform", `rotate(-90, ${xPos}, ${yPos})`)
@@ -3552,10 +3345,6 @@ function renderSmartLabels(
 updateLists();
 drawChart();
 window.addEventListener("resize", drawChart);
-
-// ==========================================
-// 4. DOWNLOAD
-// ==========================================
 
 function downloadSvgAsPng(svgSelector, fileName = 'image.png', scale = 3) {
   const originalSvg = document.querySelector(svgSelector);
@@ -3634,13 +3423,10 @@ function downloadSvgAsSvg(svgSelector, fileName = 'chart.svg') {
   URL.revokeObjectURL(url);
 }
 
-////////////////////////////////////////////////////
-
 // ==========================================
-// COMFORT ZONE FUNCTIONS
+// COMFORT ZONE
 // ==========================================
 
-// Preset configurations for comfort zones
 const comfortZonePresets = {
   "ashrae-summer": {
     name: "ASHRAE 55 Summer",
@@ -3726,19 +3512,15 @@ function updateComfortZone() {
 function drawComfortZone(linesG, x, y, minT, maxT, maxH, Patm) {
   const { tMin, tMax, rhMin, rhMax, color } = State.comfortZone;
   
-  // Create polygon points for the comfort zone
-  // The zone is bounded by T_min, T_max, RH_min, RH_max
   const polyPoints = [];
   const step = 0.5;
   
-  // Helper to get W from T and RH
   const getWFromTAndRH = (t, rh) => {
     const Pws = Psychro.getSatVapPres(t);
     const Pw = Pws * (rh / 100);
     return Psychro.getWFromPw(Pw, Patm);
   };
   
-  // Create points along the top edge (T = tMin, RH from rhMin to rhMax)
   for (let t = tMin; t <= tMax; t += step) {
     const w = getWFromTAndRH(t, rhMax);
     if (w >= 0 && w <= maxH * 1.5) {
@@ -3746,13 +3528,11 @@ function drawComfortZone(linesG, x, y, minT, maxT, maxH, Patm) {
     }
   }
   
-  // Add corner point at (tMax, rhMax)
   const wAtTMaxRhMax = getWFromTAndRH(tMax, rhMax);
   if (wAtTMaxRhMax >= 0 && wAtTMaxRhMax <= maxH * 1.5) {
     polyPoints.push({ t: tMax, w: wAtTMaxRhMax });
   }
   
-  // Create points along the bottom edge (T = tMax, RH from rhMax down to rhMin) in reverse
   for (let t = tMax; t >= tMin; t -= step) {
     const w = getWFromTAndRH(t, rhMin);
     if (w >= 0 && w <= maxH * 1.5) {
@@ -3760,13 +3540,11 @@ function drawComfortZone(linesG, x, y, minT, maxT, maxH, Patm) {
     }
   }
   
-  // Add corner point at (tMin, rhMin)
   const wAtTMinRhMin = getWFromTAndRH(tMin, rhMin);
   if (wAtTMinRhMin >= 0 && wAtTMinRhMin <= maxH * 1.5) {
     polyPoints.push({ t: tMin, w: wAtTMinRhMin });
   }
   
-  // Draw the comfort zone polygon
   if (polyPoints.length > 2) {
     const polyStr = polyPoints
       .map((p) => {
@@ -3780,7 +3558,6 @@ function drawComfortZone(linesG, x, y, minT, maxT, maxH, Patm) {
     
     const rgb = hexToRgb(color);
     
-    // Add filled polygon
     linesG
       .append("polygon")
       .attr("points", polyStr)
@@ -3789,7 +3566,6 @@ function drawComfortZone(linesG, x, y, minT, maxT, maxH, Patm) {
       .attr("stroke-width", 2)
       .attr("stroke-dasharray", "5,3");
     
-    // Add label
     const cx = d3.mean(polyPoints, p => x(p.t));
     const cy = d3.mean(polyPoints, p => y(getYValue(p.t, p.w, Patm)));
     
@@ -3864,17 +3640,13 @@ inputs.forEach((input) => {
   input.addEventListener("change", handleInputChange);
 });
 
-// ==========================================
-// KEYBOARD SHORTCUTS
-// ==========================================
+// === KEYBOARD SHORTCUTS ===
 
 document.addEventListener("keydown", (event) => {
-  // Ctrl+Z atau Cmd+Z untuk Undo
   if ((event.ctrlKey || event.metaKey) && event.key === "z" && !event.shiftKey) {
     event.preventDefault();
     undoAction();
   }
-  // Ctrl+Y atau Ctrl+Shift+Z untuk Redo
   if ((event.ctrlKey || event.metaKey) && (event.key === "y" || (event.key === "z" && event.shiftKey))) {
     event.preventDefault();
     redoAction();

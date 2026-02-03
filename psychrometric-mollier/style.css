@@ -188,7 +188,6 @@ select {
   background: #f5f5f5;
 }
 
-/* Button Colors */
 .btn-danger {
   color: #d32f2f !important;
   border-color: #ffcdd2 !important;
@@ -468,7 +467,6 @@ select {
   line-height: 0;
 }
 
-/* Icon Buttons */
 .icon-btn {
   background: none;
   border: none;
@@ -792,15 +790,10 @@ select {
   transition: transform 0.2s ease;
 }
 
-/* When collapsed: expand_more (▼) - no rotation needed */
-/* When expanded: expand_less (▲) - no rotation needed since it's already pointing up */
-
-/* When collapsed, show expand_more (no rotation) */
 .advanced-settings-header.collapsed + #setting-legend {
   display: none;
 }
 
-/* When expanded, show the settings */
 .advanced-settings-header:not(.collapsed) + #setting-legend {
   display: flex;
 }
