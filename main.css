@@ -214,8 +214,6 @@ body {
   margin: auto
 }
 
-/* ----- HEADER ----- */
-
 header {
   background-color: #ffffff;
   padding: 1rem 2rem;
@@ -266,6 +264,10 @@ header {
 
 .logged-in .header.wrap .site-cloud {
   display: flex;
+}
+
+.header.wrap.title-only {
+  grid-template-columns: 31px 1fr !important;
 }
 
 .cloud-success {

@@ -248,6 +248,19 @@ function initializeEventListeners() {
   const collectionIconInput = document.getElementById('collectionIconInput');
   if (collectionIconInput) collectionIconInput.addEventListener('change', handleCollectionIconUpload);
   
+  // Uncheck transparent when color picker is used
+  const collectionColor = document.getElementById('collectionColor');
+  if (collectionColor) {
+    collectionColor.addEventListener('input', () => {
+      const transparentRadio = document.querySelector('input[name="collectionColorRadio"]');
+      if (transparentRadio) transparentRadio.checked = false;
+    });
+    collectionColor.addEventListener('click', () => {
+      const transparentRadio = document.querySelector('input[name="collectionColorRadio"]');
+      if (transparentRadio) transparentRadio.checked = false;
+    });
+  }
+  
   // Delete Collection
   const deleteCollectionBtn = document.getElementById('deleteCollectionBtn');
   if (deleteCollectionBtn) deleteCollectionBtn.addEventListener('click', deleteCurrentCollection);
@@ -470,57 +483,103 @@ async function loadVaultData() {
   }
 }
 
-async function saveVaultData() {
+// Background save queue system
+let saveQueue = [];
+let isSaving = false;
+
+function queueSave() {
+  saveQueue.push(Date.now());
+  processSaveQueue();
+}
+
+async function processSaveQueue() {
+  if (isSaving || saveQueue.length === 0) return;
+  
+  isSaving = true;
+  setSyncStatus('syncing');
+  
+  // Take all queued saves and process only the latest state
+  saveQueue = [];
+  
   try {
-    setSyncStatus('syncing');
+    await saveVaultDataToCloud();
     
-    state.vault.lastModified = Date.now();
-    const encryptedData = await encrypt(JSON.stringify(state.vault));
-    
-    const metadata = {
-      name: 'vault-data.enc',
-      mimeType: 'application/octet-stream'
-    };
-    
-    const boundary = '-------314159265358979323846';
-    const delimiter = "\r\n--" + boundary + "\r\n";
-    const closeDelimiter = "\r\n--" + boundary + "--";
-    
-    const multipartBody =
-      delimiter +
-      'Content-Type: application/json\r\n\r\n' +
-      JSON.stringify(metadata) +
-      delimiter +
-      'Content-Type: application/octet-stream\r\n\r\n' +
-      encryptedData +
-      closeDelimiter;
-    
-    if (state.driveFileId) {
-      await gapi.client.request({
-        path: `/upload/drive/v3/files/${state.driveFileId}`,
-        method: 'PATCH',
-        params: { uploadType: 'multipart' },
-        headers: { 'Content-Type': `multipart/related; boundary="${boundary}"` },
-        body: multipartBody
-      });
+    // Check if more saves were queued while we were saving
+    if (saveQueue.length > 0) {
+      isSaving = false;
+      processSaveQueue();
     } else {
-      const response = await gapi.client.request({
-        path: '/upload/drive/v3/files',
-        method: 'POST',
-        params: { uploadType: 'multipart' },
-        headers: { 'Content-Type': `multipart/related; boundary="${boundary}"` },
-        body: multipartBody
-      });
-      state.driveFileId = response.result.id;
+      setSyncStatus('synced');
+      isSaving = false;
     }
-    
-    setSyncStatus('synced');
   } catch (error) {
     console.error('Save vault error:', error);
     setSyncStatus('error');
+    isSaving = false;
     showToast('Failed to save vault', 'danger');
   }
 }
+
+async function saveVaultDataToCloud() {
+  state.vault.lastModified = Date.now();
+  const encryptedData = await encrypt(JSON.stringify(state.vault));
+  
+  const metadata = {
+    name: 'vault-data.enc',
+    mimeType: 'application/octet-stream'
+  };
+  
+  const boundary = '-------314159265358979323846';
+  const delimiter = "\r\n--" + boundary + "\r\n";
+  const closeDelimiter = "\r\n--" + boundary + "--";
+  
+  const multipartBody =
+    delimiter +
+    'Content-Type: application/json\r\n\r\n' +
+    JSON.stringify(metadata) +
+    delimiter +
+    'Content-Type: application/octet-stream\r\n\r\n' +
+    encryptedData +
+    closeDelimiter;
+  
+  if (state.driveFileId) {
+    await gapi.client.request({
+      path: `/upload/drive/v3/files/${state.driveFileId}`,
+      method: 'PATCH',
+      params: { uploadType: 'multipart' },
+      headers: { 'Content-Type': `multipart/related; boundary="${boundary}"` },
+      body: multipartBody
+    });
+  } else {
+    const response = await gapi.client.request({
+      path: '/upload/drive/v3/files',
+      method: 'POST',
+      params: { uploadType: 'multipart' },
+      headers: { 'Content-Type': `multipart/related; boundary="${boundary}"` },
+      body: multipartBody
+    });
+    state.driveFileId = response.result.id;
+  }
+}
+
+// For backward compatibility - now just queues a save
+function saveVaultData() {
+  queueSave();
+}
+
+// Check if there are unsaved changes
+function hasUnsavedChanges() {
+  return isSaving || saveQueue.length > 0;
+}
+
+// Warn user before leaving if there are unsaved changes
+window.addEventListener('beforeunload', (e) => {
+  if (hasUnsavedChanges()) {
+    e.preventDefault();
+    e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+    return e.returnValue;
+  }
+});
 
 function setSyncStatus(status) {
   const indicator = document.getElementById('syncStatus');
@@ -845,7 +904,7 @@ function renderItems() {
         </div>
       </div>
       <div class="item-card-fields">
-        ${item.fields.slice(0, 3).map(field => `
+        ${item.fields.map(field => `
           <div class="item-field">
             ${field.label ? `<span class="item-field-label">${escapeHtml(field.label)}</span>` : ''}
             <span class="item-field-value">
@@ -863,7 +922,6 @@ function renderItems() {
             ` : ''}
           </div>
         `).join('')}
-        ${item.fields.length > 3 ? `<div class="item-field" style="color: var(--text-muted); font-size: 0.8rem;">+${item.fields.length - 3} more fields</div>` : ''}
       </div>
     </div>
   `).join('');
@@ -928,7 +986,7 @@ function closeAllModals() {
 }
 
 // Collection Operations
-async function saveCollection() {
+function saveCollection() {
   const id = document.getElementById('collectionId').value;
   const category = document.getElementById('collectionCategory').value.trim() || 'Uncategorized';
   const name = document.getElementById('collectionName').value.trim();
@@ -963,7 +1021,7 @@ async function saveCollection() {
     });
   }
   
-  await saveVaultData();
+  saveVaultData();
   renderVault();
   closeModal('collectionModal');
   showToast(id ? 'Collection updated' : 'Collection created', 'success');
@@ -974,13 +1032,13 @@ function editCurrentCollection() {
   openModal('collectionModal', state.currentCollection);
 }
 
-async function deleteCollection(collectionId) {
+function deleteCollection(collectionId) {
   const collection = state.vault.collections.find(c => c.id === collectionId);
   if (!collection) return;
   
   if (confirm(`Delete collection "${collection.name}" and all its items?`)) {
     state.vault.collections = state.vault.collections.filter(c => c.id !== collectionId);
-    await saveVaultData();
+    saveVaultData();
     
     if (state.currentCollection?.id === collectionId) {
       showView('dashboard');
@@ -1121,7 +1179,7 @@ function removeField(index) {
   }
 }
 
-async function saveItem() {
+function saveItem() {
   const id = document.getElementById('itemId').value;
   const name = document.getElementById('itemName').value.trim();
   
@@ -1151,14 +1209,14 @@ async function saveItem() {
     });
   }
   
-  await saveVaultData();
+  saveVaultData();
   renderItems();
   updateItemCount();
   closeModal('itemModal');
   showToast(id ? 'Item updated' : 'Item created', 'success');
 }
 
-async function deleteItem(itemId) {
+function deleteItem(itemId) {
   if (!state.currentCollection) return;
   
   const item = state.currentCollection.items.find(i => i.id === itemId);
@@ -1166,7 +1224,7 @@ async function deleteItem(itemId) {
   
   if (confirm(`Delete item "${item.name}"?`)) {
     state.currentCollection.items = state.currentCollection.items.filter(i => i.id !== itemId);
-    await saveVaultData();
+    saveVaultData();
     renderItems();
     updateItemCount();
     showToast('Item deleted', 'success');
@@ -1191,6 +1249,26 @@ function copyToClipboard(text) {
   }).catch(() => {
     showToast('Failed to copy', 'danger');
   });
+}
+
+// Button loading state helper
+function setButtonLoading(button, isLoading) {
+  if (!button) return;
+  
+  if (isLoading) {
+    button.dataset.originalText = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = `
+      <svg class="btn-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10" stroke-opacity="0.25"/>
+        <path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"/>
+      </svg>
+      Saving...
+    `;
+  } else {
+    button.disabled = false;
+    button.innerHTML = button.dataset.originalText || 'Save';
+  }
 }
 
 function showToast(message, type = 'info') {
