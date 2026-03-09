@@ -1,601 +1,888 @@
+/* =============================================
+   Task Planner — tp- namespaced styles
+   All classes use tp- prefix to avoid
+   conflicts with main.css
+   ============================================= */
+
+/* ----- Layout ----- */
+
 .main.wrap {
-  font-size: .9rem;
-  max-width: 1000px;
+  font-size: 0.9rem;
 }
 
-.announcement {
+/* ----- Announcement ----- */
+
+.tp-announce {
   text-align: center;
-  background-color: #fff;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  box-shadow: var(--box-shadow);
-  margin-bottom: 1.5rem;
+  background: #fff;
+  padding: 3rem 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.view-controls {
-  background: white;
-  padding: 1rem 1.5rem;
-  border-radius: 0.5rem;
-  box-shadow: var(--box-shadow);
-  margin-bottom: 1.5rem;
+.tp-announce p {
+  color: #999;
+  font-size: 0.95rem;
 }
 
-.navigation {
+/* ----- Toolbar ----- */
+
+.tp-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
-  width: 100%;
-}
-
-.view-title {
-  font-size: 1.4rem;
-  font-weight: bold;
-  text-align: center;
-  flex-grow: 1;
-}
-
-.nav-btn {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nav-btn img {
-  filter: invert(1);
-}
-
-#prev-btn img {
-  transform: rotate(90deg)
-}
-
-#next-btn img {
-  transform: rotate(-90deg)
-}
-
-.view-switch {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  width: 100%;
-}
-
-.view-switch button {
-  flex: 1;
-  max-width: 150px;
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  background: #e7e9eb;
-  color: #373737;
-}
-
-.view-switch button:hover {
-  color: white;
-}
-
-.view-switch button.active {
-  background-color: var(--blue);
-  color: white;
-}
-
-.main-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
 }
 
-.view-container {
-  background-color: #fff;
-  border-radius: 0.5rem;
-  overflow: hidden;
+.tp-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
-/* Floating Action Button */
-.fab {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  z-index: 100;
-}
-
-.fab button {
-  width: 60px;
-  height: 60px;
+.tp-nav-arrow {
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background-color: var(--blue);
-  color: white;
-  border: none;
-  font-size: 1.8rem;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
+  background: #fff;
+  color: #555;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-.fab button:hover {
-  background-color: var(--blue-hover);
-  transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+.tp-nav-arrow:hover {
+  background: #f0f1f3;
+  color: #222;
 }
 
-/* Month View - Table Layout */
-.month-table-container {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.month-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.month-table thead {
-  background-color: var(--blue);
-  color: white;
-}
-
-.month-table th {
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
+.tp-nav-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  padding: 0.4rem 0.75rem;
+  color: #292929;
+  user-select: none;
   white-space: nowrap;
 }
 
-/* .month-table tr td:nth-child(1) {width: 10px;}
-.month-table tr td:nth-child(2) { width: 10px; }
-.month-table th:nth-child(1) { width: 20px; }
-.month-table th:nth-child(2) { width: 100%; }
-.month-table th:nth-child(3) { width: 60px; }
-.month-table th:nth-child(4) { width: 100px; } */
-
-.month-table thead tr {
-  display: grid;
-  grid-template-columns: 120px 1fr 70px 75px;
-  width: 100%;
+.tp-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.month-table tbody tr {
-  display: grid;
-  grid-template-columns: 70px 50px 1fr 70px 75px;
+/* ----- View Switcher ----- */
+
+.tp-switcher {
+  display: flex;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-.month-table tbody tr {
-  border-bottom: 1px solid #eee;
-  transition: background-color 0.2s;
-}
-
-.month-table tbody tr:hover :not(.date-cell) {
-  background-color: #f8f9fa;
-}
-
-.month-table td {
-  padding: .75rem;
-  vertical-align: middle;
-}
-
-.date-cell {
-  font-weight: 600;
-  border-right: 2px solid #eee;
-}
-
-.date-cell.today {
-  color: var(--blue);
-  font-weight: bold;
-}
-
-.task-name-cell {
-  font-weight: 500;
-}
-
-.task-time-cell {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.status-cell {
-  text-align: center;
-  line-height: 0;
-}
-
-.task-checkbox {
-  width: 20px;
-  height: 20px;
+.tp-switch {
+  padding: 0.45rem 1rem;
+  background: transparent;
+  color: #888;
+  font-weight: 700;
+  font-size: 0.8rem;
+  border: none;
   cursor: pointer;
+  transition: 0.2s;
+  box-shadow: none;
+  border-radius: 0;
 }
 
-/* Completed task styling */
-
-.task-row.weekend .date-cell {
-  color: #e9241d;
+.tp-switch:hover {
+  color: #555;
+  background: #f5f5f5;
 }
 
-.task-row.completed .task-name-cell {
-  opacity: 0.6;
-  color: #888;
+.tp-switch.active {
+  background: var(--blue);
+  color: #fff;
 }
 
-.task-row.completed .task-time-cell {
-  opacity: 0.6;
-  color: #888;
+.tp-switch.active:hover {
+  background: var(--blue-hover);
 }
 
-/* Year View Styles */
+/* ----- Icon Button ----- */
 
-#year-container {
-  background-color: unset;
+.tp-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #fff;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
 }
 
-.year-calendar {
+.tp-icon-btn:hover {
+  background: #f0f1f3;
+  color: #333;
+}
+
+/* ===== MONTH VIEW ===== */
+
+.tp-month-view {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+/* Agenda Header */
+
+.tp-agenda-head {
+  display: grid;
+  grid-template-columns: 80px 1fr 70px 44px;
+  padding: 0.65rem 1rem;
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #aaa;
+  border-bottom: 2px solid #f0f0f0;
+  background: #fafbfc;
+}
+
+.tp-agenda-head > div {
+  padding: 0 0.25rem;
+}
+
+.tp-agenda-head > div:nth-child(3),
+.tp-agenda-head > div:nth-child(4) {
+  text-align: center;
+}
+
+/* Day Row */
+
+.tp-row {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  border-bottom: 1px solid #f0f0f0;
+  min-height: 38px;
+}
+
+.tp-row:last-child {
+  border-bottom: none;
+}
+
+/* Date Column */
+
+.tp-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 0.5rem 0.5rem;
+  border-right: 2px solid #f0f0f0;
+  gap: .2rem;
+  user-select: none;
+}
+
+.tp-date-day {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #bbb;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  line-height: 1.2;
+}
+
+.tp-date-num {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #555;
+  line-height: 1.3;
+}
+
+/* Today */
+
+.tp-row.tp-today .tp-date-num {
+  color: #fff;
+  background: var(--blue);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.tp-row.tp-today .tp-date-day {
+  color: var(--blue);
+}
+
+/* Weekend */
+
+.tp-row.tp-weekend .tp-date-day,
+.tp-row.tp-weekend .tp-date-num {
+  color: var(--red);
+}
+
+.tp-row.tp-today.tp-weekend .tp-date-num {
+  background: var(--red);
+  color: #fff;
+}
+
+/* Tasks Column */
+
+.tp-tasks {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Individual Task */
+
+.tp-task {
+  display: grid;
+  grid-template-columns: 1fr 70px 44px;
+  align-items: center;
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.tp-task:hover {
+  background: #f8f9fb;
+}
+
+.tp-task + .tp-task {
+  border-top: 1px dashed #eee;
+}
+
+.tp-task-name {
+  font-weight: 500;
+  font-size: 0.88rem;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tp-task-time {
+  font-size: 0.78rem;
+  color: #999;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.tp-task-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tp-task-check input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  cursor: pointer;
+  accent-color: var(--green);
+  box-shadow: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Completed Task */
+
+.tp-task.tp-done .tp-task-name {
+  text-decoration: line-through;
+  color: #ccc;
+}
+
+.tp-task.tp-done .tp-task-time {
+  color: #ddd;
+}
+
+/* Empty Day */
+
+.tp-empty-day {
+  padding: 0.4rem 0.75rem;
+  color: #e0e0e0;
+  font-size: 0.82rem;
+}
+
+/* ===== YEAR VIEW ===== */
+
+.tp-year-view {
+  min-height: 0;
+}
+
+.tp-year-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
-  padding: 5px 0;
 }
 
-.year-month {
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+.tp-year-card {
+  background: #fff;
+  border-radius: 12px;
   padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid #eee;
+  transition: 0.2s;
+  border: 2px solid transparent;
 }
 
-.year-month:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+.tp-year-card:hover {
   border-color: var(--blue);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.month-title {
-  font-weight: bold;
+.tp-year-month-name {
+  font-weight: 800;
   text-align: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.6rem;
   color: var(--blue);
-  font-size: 1.1rem;
-  padding-bottom: 0.5rem;
+  font-size: 0.9rem;
+  padding-bottom: 0.4rem;
   border-bottom: 2px solid #f0f0f0;
 }
 
-.year-month-grid {
+.tp-year-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 0.125rem;
-  margin-top: 0.5rem;
+  gap: 1px;
+  margin-top: 0.4rem;
 }
 
-.year-day-header {
-  font-size: 0.7rem;
+.tp-year-dh {
+  font-size: 0.6rem;
   text-align: center;
-  color: #666;
-  padding: 0.25rem 0;
-  font-weight: 600;
+  color: #bbb;
+  padding: 0.2rem 0;
+  font-weight: 700;
 }
 
-.year-day-cell {
+.tp-year-dc {
   aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
-  border-radius: 0.25rem;
+  font-size: 0.68rem;
+  border-radius: 4px;
   position: relative;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: 0.15s;
+  color: #777;
 }
 
-.year-day-cell:hover {
-  background-color: #e4e4e4;
+.tp-year-dc:hover {
+  background: #f0f1f3;
 }
 
-.year-day-cell.empty {
-  background-color: transparent;
+.tp-year-dc.tp-empty {
   cursor: default;
 }
 
-.year-day-cell.empty:hover {
-  background-color: transparent;
+.tp-year-dc.tp-empty:hover {
+  background: transparent;
 }
 
-.year-day-cell.has-tasks {
+.tp-year-dc.tp-has-task {
   color: var(--blue);
-  font-weight: 600;
+  font-weight: 700;
 }
 
-.year-day-cell.today {
-  background-color: var(--blue);
-  color: white;
-  font-weight: bold;
+.tp-year-dc.tp-today-cell {
+  background: var(--blue);
+  color: #fff;
+  font-weight: 800;
 }
 
-.year-day-cell.has-tasks.today {
-  background-color: var(--blue);
-  color: white;
+.tp-year-dc.tp-has-task.tp-today-cell {
+  background: var(--blue);
+  color: #fff;
 }
 
-.task-dot {
+.tp-year-dot {
   position: absolute;
-  bottom: 1.5px;
+  bottom: 2px;
   width: 3px;
   height: 3px;
-  background-color: var(--green);
   border-radius: 50%;
+  background: var(--green);
 }
 
-.year-day-cell.has-tasks .task-dot {
-  background-color: var(--green);
+.tp-year-dc.tp-today-cell .tp-year-dot {
+  background: #fff;
 }
 
-.year-day-cell.today .task-dot {
-  background-color: white;
-}
-
-.month-task-count {
-  font-size: 0.8rem;
-  color: #666;
+.tp-year-task-count {
+  font-size: 0.72rem;
+  color: #aaa;
   text-align: center;
-  margin-top: 0.75rem;
-  padding-top: 0.5rem;
+  margin-top: 0.6rem;
+  padding-top: 0.4rem;
   border-top: 1px solid #f0f0f0;
 }
 
-/* Modal Styles */
-.modal {
+/* ===== FAB ===== */
+
+#tp-fab {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #000000a8;
-  z-index: 1000;
-  display: none;
-}
-
-.modal.show {
-  display: block;
-}
-
-.modal .modal-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  background: white;
-  max-width: 500px;
-  width: calc(100% - 4rem);
-  max-height: calc(100% - 4rem);
-  overflow: auto;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  padding: 2rem;
-  border-radius: 1rem;
-}
-
-#modal-title {
-  font-size: 1.6rem;
-  font-weight: bold;
-}
-
-textarea#task-notes {
-  transition: unset;
-  display: block;
-  width: 100%;
-  min-width: 100%;
-  min-height: 90px;
-  background: var(--bg-color);
-  outline: 0px;
-  border-width: initial;
-  border-style: none;
-  border-color: initial;
-  border-image: initial;
-  padding: 0.7rem 1rem;
-  border-radius: 0.7rem;
-}
-
-.modal-actions {
-  display: grid;
-  gap: 2rem;
-  grid-template-columns: 1fr 40px 40px;
-}
-
-.modal-actions button {
-  flex: 1;
-  font-weight: bold;
-  min-width: 100px;
-}
-
-.modal-actions div {
-  cursor: pointer;
-  display: grid;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal-actions img {
-  width: 30px;
-  transition: .2s all;
-}
-
-.modal-actions div:hover img {
-  scale: 1.2;
-}
-
-.modal-actions .ok {
-  background-color: var(--green);
-}
-
-.modal-actions .ok:hover {
-  background-color: var(--green-hover);
-}
-
-.modal-actions .cancel {
-  background-color: var(--red);
-}
-
-.modal-actions .cancel:hover {
-  background-color: var(--red-hover);
-}
-
-.modal-actions .close-modal {
-  position: absolute;
-  top: 2rem;
+  bottom: 2rem;
   right: 2rem;
-  width: 25px;
-  cursor: pointer;
+  z-index: 50;
 }
 
-/* Task Detail Styles */
-.task-detail-title {
-  font-size: 1.4rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.task-detail-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 0.5rem;
-}
-
-.task-detail-info div {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.task-detail-info strong {
-  min-width: 80px;
-}
-
-.task-detail-info span {
-  color: #555;
-}
-
-.task-detail-info textarea {
-  width: 100%;
-  overflow: auto;
-  transition: unset;
-  background: #ffffffbd;
-  outline: none;
+#tp-fab button {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
   border: none;
-  padding: 0.6rem 0.9rem;
-  border-radius: .5rem;
-  field-sizing: content;
-  resize: none;
-  cursor: unset;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(30, 144, 255, 0.35);
+  transition: 0.25s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  animation: tp-fab-pop 0.3s ease;
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .year-calendar {
-    grid-template-columns: repeat(3, 1fr);
+#tp-fab button:hover {
+  background: var(--blue-hover);
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(30, 144, 255, 0.4);
+}
+
+@keyframes tp-fab-pop {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
-@media (max-width: 900px) {
-  .year-calendar {
-    grid-template-columns: repeat(2, 1fr);
+/* ===== MODAL OVERLAY ===== */
+
+.tp-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+
+.tp-overlay.tp-show {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Dialog */
+
+.tp-dialog {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 440px;
+  max-height: calc(100dvh - 3rem);
+  overflow: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  animation: tp-dialog-in 0.25s ease;
+}
+
+@keyframes tp-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.tp-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.tp-dialog-head h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #292929;
+  margin: 0;
+}
+
+.tp-dialog-x {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: transparent;
+  color: #999;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: 0.2s;
+  box-shadow: none;
+  flex-shrink: 0;
+}
+
+.tp-dialog-x:hover {
+  background: #f0f0f0;
+  color: #555;
+}
+
+.tp-dialog-body {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Form Fields */
+
+.tp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.tp-field label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #999;
+}
+
+.tp-field textarea {
+  min-height: 70px;
+  resize: vertical;
+  background: var(--bg-color);
+  border: none;
+  border-radius: 0.7rem;
+  padding: 0.7rem 1rem;
+  outline: none;
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: 0.2s;
+}
+
+.tp-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* Dialog Footer */
+
+.tp-dialog-foot {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.tp-btn-save {
+  flex: 1;
+  background: var(--green);
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1.25rem;
+  cursor: pointer;
+  transition: 0.2s;
+  font-size: 0.88rem;
+}
+
+.tp-btn-save:hover {
+  background: var(--green-hover);
+}
+
+.tp-btn-cancel {
+  flex: 1;
+  background: transparent;
+  color: #888;
+  font-weight: 700;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 0.7rem 1.25rem;
+  cursor: pointer;
+  transition: 0.2s;
+  font-size: 0.88rem;
+  box-shadow: none;
+}
+
+.tp-btn-cancel:hover {
+  background: #f5f5f5;
+  color: #555;
+  border-color: #ccc;
+}
+
+/* ===== DETAIL MODAL ===== */
+
+.tp-detail-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.tp-detail-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.tp-detail-row svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.tp-detail-notes-row span {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.tp-detail-foot {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.tp-btn-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #f5f5f5;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: 0.2s;
+  box-shadow: none;
+}
+
+.tp-btn-icon img {
+  width: 20px;
+  height: 20px;
+  transition: 0.15s;
+}
+
+.tp-btn-icon:hover {
+  background: #eee;
+}
+
+.tp-btn-icon:hover img {
+  transform: scale(1.1);
+}
+
+.tp-btn-del:hover {
+  background: #fde8e8;
+}
+
+/* ===== PDF AREA ===== */
+
+#tp-pdf-area {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 1200px) {
+  .tp-year-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
 @media (max-width: 768px) {
   main {
-    padding: 1.5rem 0 !important;
+    padding: 1rem !important;
   }
 
-  .year-calendar {
+  .tp-year-grid {
     grid-template-columns: repeat(2, 1fr);
-    padding: 0 1rem;
-  }
-
-  .month-table {
-    font-size: 0.9rem;
-  }
-
-  .month-table th,
-  .month-table td {
-    padding: 0.75rem 0.5rem;
-  }
-
-  .view-switch button {
-    max-width: none;
-  }
-
-  .fab {
-    bottom: 1.5rem;
-    right: 1.5rem;
-  }
-
-  .fab button {
-    width: 56px;
-    height: 56px;
-    font-size: 1.6rem;
   }
 }
 
 @media (max-width: 600px) {
-  .month-table thead tr {
-    grid-template-columns: 85px 1fr 60px;
+  .tp-toolbar {
+    flex-direction: column;
+    gap: 0.6rem;
+    align-items: stretch;
+  }
+
+  .tp-nav {
     width: 100%;
+    justify-content: space-between;
   }
 
-  .month-table tbody tr {
-    grid-template-columns: 50px 35px 1fr 60px;
+  .tp-nav-title {
+    font-size: 1.15rem;
   }
 
-  .month-table th:nth-child(4),
-  .status-cell {
+  .tp-actions {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Month view — card layout */
+  .tp-agenda-head {
     display: none;
   }
 
-  .main-actions {
+  .tp-row {
     grid-template-columns: 1fr;
   }
 
-  .fab {
-    bottom: 1rem;
-    right: 1rem;
+  .tp-date {
+    flex-direction: row;
+    border-right: none;
+    border-bottom: 1px solid #f0f0f0;
+    background: #fafbfc;
+    padding: 0.35rem 1rem;
+    gap: 0.5rem;
+    justify-content: flex-start;
   }
 
-  .fab button {
-    width: 52px;
-    height: 52px;
-    font-size: 1.5rem;
+  .tp-date-day {
+    font-size: 0.72rem;
+  }
+
+  .tp-date-num {
+    font-size: 0.92rem;
+  }
+
+  .tp-row.tp-today .tp-date-num {
+    width: 26px;
+    height: 26px;
+    font-size: 0.78rem;
+  }
+
+  .tp-task {
+    grid-template-columns: 1fr auto 40px;
+    padding: 0.5rem 1rem;
+  }
+
+  .tp-task-time {
+    font-size: 0.75rem;
+    padding-right: 0.25rem;
+  }
+
+  .tp-empty-day {
+    padding: 0.35rem 1rem;
+    font-size: 0.78rem;
+  }
+
+  /* FAB */
+  #tp-fab {
+    bottom: 1.25rem;
+    right: 1.25rem;
+  }
+
+  #tp-fab button {
+    width: 48px;
+    height: 48px;
+  }
+
+  #tp-fab button svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Modal — bottom sheet */
+  .tp-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .tp-dialog {
+    max-width: 100%;
+    border-radius: 16px 16px 0 0;
+    max-height: 88dvh;
+    animation: tp-sheet-up 0.3s ease;
+  }
+
+  @keyframes tp-sheet-up {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
   }
 }
 
 @media (max-width: 480px) {
-  .view-controls {
-    padding: 0.75rem 1rem;
+  main {
+    padding: 0.75rem !important;
   }
 
-  .view-title {
-    font-size: 1.2rem;
+  .tp-toolbar {
+    margin-bottom: 0.75rem;
   }
 
-  .nav-btn {
-    width: 36px;
-    height: 36px;
+  .tp-year-grid {
+    gap: 0.65rem;
   }
 
-  .modal .modal-content {
-    width: calc(100% - 2rem);
-    padding: 1.5rem;
-  }
-
-  .year-month {
+  .tp-year-card {
     padding: 0.75rem;
+    border-radius: 10px;
+  }
+
+  .tp-dialog-head {
+    padding: 1rem 1.25rem;
+  }
+
+  .tp-dialog-body {
+    padding: 1rem 1.25rem;
+  }
+
+  .tp-dialog-foot {
+    padding: 0.85rem 1.25rem;
   }
 }

@@ -1,42 +1,37 @@
-// ----- PWA -----
+// ===== PWA =====
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    // Mendaftarkan sw.js yang ada di folder yang sama
     navigator.serviceWorker
       .register("./sw.js", { scope: "./" })
-      .then((registration) => {
-        console.log("SW active with scope: ", registration.scope);
-      })
-      .catch((error) => {
-        console.error("SW registration failed: ", error);
-      });
+      .then((reg) => console.log("SW active:", reg.scope))
+      .catch((err) => console.error("SW failed:", err));
   });
 }
 
-// ------ GLOBAL ------
+// ===== GLOBALS =====
 
 let fileId = null;
 let data = {};
-let currentView = "month"; // 'month' or 'year'
+let currentView = "month";
 let currentYear = new Date().getFullYear();
-let currentMonth = new Date().getMonth() + 1; // 1-12
+let currentMonth = new Date().getMonth() + 1;
 
-let cloudSuccess = document.querySelector(".cloud-success");
-let cloudSync = document.querySelector(".cloud-sync");
-let cloudFailed = document.querySelector(".cloud-failed");
-let announcement = document.querySelector(".announcement");
-let fab = document.getElementById("fab");
+const cloudSuccess = document.querySelector(".cloud-success");
+const cloudSync = document.querySelector(".cloud-sync");
+const cloudFailed = document.querySelector(".cloud-failed");
+const tpAnnounce = document.querySelector(".tp-announce");
+const tpFab = document.getElementById("tp-fab");
+const tpToolbar = document.querySelector(".tp-toolbar");
 
-// ------ UTILITIES ------
+// ===== UTILITIES =====
 
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
 function formatDate(dateStr) {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("en-US", {
+  return new Date(dateStr).toLocaleDateString("en-US", {
     weekday: "short",
     month: "short",
     day: "numeric",
@@ -45,35 +40,24 @@ function formatDate(dateStr) {
 }
 
 function formatDateForTable_WeekDay(dateStr) {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("en-US", { weekday: "short" });
+  return new Date(dateStr).toLocaleDateString("en-US", { weekday: "short" });
 }
 
 function formatDateForTable_Day(dateStr) {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("en-US", { day: "numeric" });
+  return new Date(dateStr).toLocaleDateString("en-US", { day: "numeric" });
 }
 
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
 function formatMonth(month) {
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-  return monthNames[month - 1];
+  return MONTH_NAMES[month - 1];
 }
 
 function getShortMonth(month) {
-  return formatMonth(month).substring(0, 3);
+  return MONTH_NAMES[month - 1].substring(0, 3);
 }
 
 function getDaysInMonth(year, month) {
@@ -85,60 +69,44 @@ function getFirstDayOfMonth(year, month) {
 }
 
 function isToday(year, month, day) {
-  const today = new Date();
-  return (
-    today.getFullYear() === year &&
-    today.getMonth() + 1 === month &&
-    today.getDate() === day
-  );
+  const t = new Date();
+  return t.getFullYear() === year && t.getMonth() + 1 === month && t.getDate() === day;
 }
 
 function compareTasksByTime(a, b) {
-  // Sort tasks: first by time (if available), then by creation (id)
-  if (a.time && b.time) {
-    return a.time.localeCompare(b.time);
-  } else if (a.time && !b.time) {
-    return -1; // a has time, b doesn't - a comes first
-  } else if (!a.time && b.time) {
-    return 1; // b has time, a doesn't - b comes first
-  } else {
-    return a.id.localeCompare(b.id); // both have no time, sort by id
-  }
+  if (a.time && b.time) return a.time.localeCompare(b.time);
+  if (a.time && !b.time) return -1;
+  if (!a.time && b.time) return 1;
+  return a.id.localeCompare(b.id);
 }
 
 function sortTasks(tasks) {
   return tasks.sort(compareTasksByTime);
 }
 
-// ------ GOOGLE API ------
+// ===== AUTH CALLBACKS =====
 
 function appOnLogin() {
-  ["add-task-btn", "today-btn"].forEach(
-    (id) => (document.getElementById(id).style.display = "")
-  );
-  fab.style.display = "block";
-  document.querySelector(".view-controls").style.display = "grid";
-  announcement.classList.add("none");
+  tpFab.style.display = "block";
+  tpToolbar.style.display = "flex";
+  tpAnnounce.classList.add("none");
   loadDataFromDrive();
 }
 
 function appOnLogout() {
-  ["add-task-btn", "today-btn"].forEach(
-    (id) => (document.getElementById(id).style.display = "none")
-  );
-  fab.style.display = "none";
-  document.querySelector(".view-controls").style.display = "none";
+  tpFab.style.display = "none";
+  tpToolbar.style.display = "none";
   document.getElementById("month-container").innerHTML = "";
   document.getElementById("year-container").innerHTML = "";
   data = {};
   fileId = null;
-  announcement.classList.remove("none");
+  tpAnnounce.classList.remove("none");
 }
 
 loginCallbacks.push(appOnLogin);
 logoutCallbacks.push(appOnLogout);
 
-// ------ DATA MANAGEMENT ------
+// ===== DATA MANAGEMENT =====
 
 function addTask(task) {
   const date = new Date(task.date);
@@ -154,10 +122,7 @@ function addTask(task) {
   task.completed = false;
   task.createdAt = new Date().toISOString();
   data[year][month][day].push(task);
-
-  // Sort tasks for this day
   data[year][month][day] = sortTasks(data[year][month][day]);
-
   return task.id;
 }
 
@@ -165,57 +130,33 @@ function updateTask(taskId, updatedTask) {
   for (const year in data) {
     for (const month in data[year]) {
       for (const day in data[year][month]) {
-        const index = data[year][month][day].findIndex(
-          (task) => task.id === taskId
-        );
-        if (index !== -1) {
-          const oldDate = data[year][month][day][index].date;
-          const newDate = updatedTask.date || oldDate;
+        const index = data[year][month][day].findIndex((t) => t.id === taskId);
+        if (index === -1) continue;
 
-          // If date changed, move task to new date
-          if (newDate !== oldDate) {
-            const taskToMove = {
-              ...data[year][month][day][index],
-              ...updatedTask,
-            };
-            data[year][month][day].splice(index, 1);
+        const oldDate = data[year][month][day][index].date;
+        const newDate = updatedTask.date || oldDate;
 
-            // Remove empty day/month/year
-            if (data[year][month][day].length === 0) {
-              delete data[year][month][day];
-            }
-            if (Object.keys(data[year][month]).length === 0) {
-              delete data[year][month];
-            }
-            if (Object.keys(data[year]).length === 0) {
-              delete data[year];
-            }
+        if (newDate !== oldDate) {
+          const taskToMove = { ...data[year][month][day][index], ...updatedTask };
+          data[year][month][day].splice(index, 1);
+          if (!data[year][month][day].length) delete data[year][month][day];
+          if (!Object.keys(data[year][month]).length) delete data[year][month];
+          if (!Object.keys(data[year]).length) delete data[year];
 
-            // Add to new date
-            const newDateObj = new Date(newDate);
-            const newYear = newDateObj.getFullYear();
-            const newMonth = String(newDateObj.getMonth() + 1).padStart(2, "0");
-            const newDay = String(newDateObj.getDate()).padStart(2, "0");
-
-            if (!data[newYear]) data[newYear] = {};
-            if (!data[newYear][newMonth]) data[newYear][newMonth] = {};
-            if (!data[newYear][newMonth][newDay])
-              data[newYear][newMonth][newDay] = [];
-
-            data[newYear][newMonth][newDay].push(taskToMove);
-            data[newYear][newMonth][newDay] = sortTasks(
-              data[newYear][newMonth][newDay]
-            );
-          } else {
-            // Update in place
-            data[year][month][day][index] = {
-              ...data[year][month][day][index],
-              ...updatedTask,
-            };
-            data[year][month][day] = sortTasks(data[year][month][day]);
-          }
-          return true;
+          const nd = new Date(newDate);
+          const ny = nd.getFullYear();
+          const nm = String(nd.getMonth() + 1).padStart(2, "0");
+          const nd2 = String(nd.getDate()).padStart(2, "0");
+          if (!data[ny]) data[ny] = {};
+          if (!data[ny][nm]) data[ny][nm] = {};
+          if (!data[ny][nm][nd2]) data[ny][nm][nd2] = [];
+          data[ny][nm][nd2].push(taskToMove);
+          data[ny][nm][nd2] = sortTasks(data[ny][nm][nd2]);
+        } else {
+          data[year][month][day][index] = { ...data[year][month][day][index], ...updatedTask };
+          data[year][month][day] = sortTasks(data[year][month][day]);
         }
+        return true;
       }
     }
   }
@@ -226,22 +167,13 @@ function deleteTask(taskId) {
   for (const year in data) {
     for (const month in data[year]) {
       for (const day in data[year][month]) {
-        const index = data[year][month][day].findIndex(
-          (task) => task.id === taskId
-        );
-        if (index !== -1) {
-          data[year][month][day].splice(index, 1);
-          if (data[year][month][day].length === 0) {
-            delete data[year][month][day];
-          }
-          if (Object.keys(data[year][month]).length === 0) {
-            delete data[year][month];
-          }
-          if (Object.keys(data[year]).length === 0) {
-            delete data[year];
-          }
-          return true;
-        }
+        const index = data[year][month][day].findIndex((t) => t.id === taskId);
+        if (index === -1) continue;
+        data[year][month][day].splice(index, 1);
+        if (!data[year][month][day].length) delete data[year][month][day];
+        if (!Object.keys(data[year][month]).length) delete data[year][month];
+        if (!Object.keys(data[year]).length) delete data[year];
+        return true;
       }
     }
   }
@@ -252,7 +184,7 @@ function getTaskById(taskId) {
   for (const year in data) {
     for (const month in data[year]) {
       for (const day in data[year][month]) {
-        const task = data[year][month][day].find((task) => task.id === taskId);
+        const task = data[year][month][day].find((t) => t.id === taskId);
         if (task) return { task, year, month, day };
       }
     }
@@ -261,45 +193,31 @@ function getTaskById(taskId) {
 }
 
 function toggleTaskComplete(taskId) {
-  const taskInfo = getTaskById(taskId);
-  if (taskInfo) {
-    taskInfo.task.completed = !taskInfo.task.completed;
+  const info = getTaskById(taskId);
+  if (info) {
+    info.task.completed = !info.task.completed;
     return true;
   }
   return false;
 }
 
-// ------ RENDER FUNCTIONS ------
+// ===== RENDER — MONTH VIEW =====
 
 function renderMonthView() {
   const container = document.getElementById("month-container");
   container.innerHTML = "";
 
-  // Update title
-  document.getElementById("view-title").textContent = `${formatMonth(
-    currentMonth
-  )} ${currentYear}`;
+  document.getElementById("view-title").textContent =
+    `${formatMonth(currentMonth)} ${currentYear}`;
 
-  const tableContainer = document.createElement("div");
-  tableContainer.className = "month-table-container";
+  const agenda = document.createElement("div");
+  agenda.className = "tp-agenda";
 
-  const table = document.createElement("table");
-  table.className = "month-table";
-
-  // Table header
-  const thead = document.createElement("thead");
-  thead.innerHTML = `
-    <tr>
-      <th colspan="2">Date</th>
-      <th>Task Name</th>
-      <th>Time</th>
-      <th>Status</th>
-    </tr>
-  `;
-  table.appendChild(thead);
-
-  // Table body
-  const tbody = document.createElement("tbody");
+  // Header row
+  const head = document.createElement("div");
+  head.className = "tp-agenda-head";
+  head.innerHTML = "<div>Date</div><div>Task</div><div>Time</div><div></div>";
+  agenda.appendChild(head);
 
   const yearStr = currentYear.toString();
   const monthStr = String(currentMonth).padStart(2, "0");
@@ -307,235 +225,172 @@ function renderMonthView() {
 
   for (let day = 1; day <= daysInMonth; day++) {
     const dayStr = String(day).padStart(2, "0");
-    const tasks = data[yearStr]?.[monthStr]?.[dayStr] || [];
     const dateStr = `${currentYear}-${monthStr}-${dayStr}`;
+    const tasks = data[yearStr]?.[monthStr]?.[dayStr] || [];
+    const weekday = new Date(currentYear, currentMonth - 1, day).getDay();
+
+    const row = document.createElement("div");
+    row.className = "tp-row";
+    if (isToday(currentYear, currentMonth, day)) row.classList.add("tp-today");
+    if (weekday === 0 || weekday === 6) row.classList.add("tp-weekend");
+
+    // Date column
+    const dateCol = document.createElement("div");
+    dateCol.className = "tp-date";
+    dateCol.innerHTML = `
+      <span class="tp-date-day">${formatDateForTable_WeekDay(dateStr)}</span>
+      <span class="tp-date-num">${day}</span>
+    `;
+    row.appendChild(dateCol);
+
+    // Tasks column
+    const tasksCol = document.createElement("div");
+    tasksCol.className = "tp-tasks";
 
     if (tasks.length === 0) {
-      // Empty day - still show row
-      const row = document.createElement("tr");
-      row.className = "task-row";
-
-      const dateCell = document.createElement("td");
-      dateCell.className = "date-cell";
-      if (isToday(currentYear, currentMonth, day)) {
-        dateCell.classList.add("today");
-      }
-      dateCell.textContent = formatDateForTable_WeekDay(dateStr);
-      row.appendChild(dateCell);
-      if (dateCell.textContent === "Sat" || dateCell.textContent === "Sun") {
-        dateCell.parentNode.classList.add("weekend");
-      }
-
-      const dayCell = document.createElement("td");
-      dayCell.className = "date-cell";
-      if (isToday(currentYear, currentMonth, day)) {
-        dayCell.classList.add("today");
-      }
-      dayCell.textContent = formatDateForTable_Day(dateStr);
-      row.appendChild(dayCell);
-
-      const taskNameCell = document.createElement("td");
-      taskNameCell.className = "task-name-cell";
-      taskNameCell.textContent = "No tasks";
-      taskNameCell.style.color = "#999";
-      taskNameCell.style.fontStyle = "italic";
-      row.appendChild(taskNameCell);
-
-      const timeCell = document.createElement("td");
-      timeCell.className = "task-time-cell";
-      timeCell.textContent = "-";
-      row.appendChild(timeCell);
-
-      const statusCell = document.createElement("td");
-      statusCell.className = "status-cell";
-      row.appendChild(statusCell);
-
-      tbody.appendChild(row);
+      const empty = document.createElement("div");
+      empty.className = "tp-empty-day";
+      empty.textContent = "—";
+      tasksCol.appendChild(empty);
     } else {
-      // Create a row for each task
-      tasks.forEach((task, index) => {
-        const row = document.createElement("tr");
-        row.className = "task-row";
-        if (task.completed) {
-          row.classList.add("completed");
-        }
+      tasks.forEach((task) => {
+        const taskEl = document.createElement("div");
+        taskEl.className = "tp-task";
+        if (task.completed) taskEl.classList.add("tp-done");
 
-        // Date cell (only show date for first task of the day)
-        const dateCell = document.createElement("td");
-        dateCell.className = "date-cell";
-        if (isToday(currentYear, currentMonth, day)) {
-          dateCell.classList.add("today");
-        }
-        if (index === 0) {
-          dateCell.textContent = formatDateForTable_WeekDay(dateStr);
-          dateCell.rowSpan = tasks.length;
-        }
-        row.appendChild(dateCell);
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "tp-task-name";
+        nameSpan.textContent = task.title;
 
-        const dayCell = document.createElement("td");
-        dayCell.className = "date-cell";
-        if (isToday(currentYear, currentMonth, day)) {
-          dayCell.classList.add("today");
-        }
-        if (index === 0) {
-          dayCell.textContent = formatDateForTable_Day(dateStr);
-          dayCell.rowSpan = tasks.length;
-        }
-        row.appendChild(dayCell);
+        const timeSpan = document.createElement("span");
+        timeSpan.className = "tp-task-time";
+        timeSpan.textContent = task.time || "—";
 
-        // Task name cell
-        const taskNameCell = document.createElement("td");
-        taskNameCell.className = "task-name-cell";
-        taskNameCell.textContent = task.title;
-        taskNameCell.style.cursor = "pointer";
-        taskNameCell.onclick = () => openDetailModal(task.id);
-        row.appendChild(taskNameCell);
-
-        // Time cell
-        const timeCell = document.createElement("td");
-        timeCell.className = "task-time-cell";
-        timeCell.textContent = task.time || "-";
-        timeCell.style.cursor = "pointer";
-        timeCell.onclick = () => openDetailModal(task.id);
-        row.appendChild(timeCell);
-
-        // Status cell with checkbox
-        const statusCell = document.createElement("td");
-        statusCell.className = "status-cell";
+        const checkLabel = document.createElement("label");
+        checkLabel.className = "tp-task-check";
+        checkLabel.onclick = (e) => e.stopPropagation();
 
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
-        checkbox.className = "task-checkbox";
         checkbox.checked = task.completed;
-        checkbox.onclick = (e) => {
-          e.stopPropagation();
+        checkbox.addEventListener("change", () => {
           toggleTaskComplete(task.id);
           saveDataToDrive();
           renderCurrentView();
-        };
+        });
 
-        statusCell.appendChild(checkbox);
-        row.appendChild(statusCell);
+        checkLabel.appendChild(checkbox);
+        taskEl.appendChild(nameSpan);
+        taskEl.appendChild(timeSpan);
+        taskEl.appendChild(checkLabel);
 
-        tbody.appendChild(row);
+        taskEl.addEventListener("click", (e) => {
+          if (e.target.type !== "checkbox") openDetailModal(task.id);
+        });
+
+        tasksCol.appendChild(taskEl);
       });
     }
+
+    row.appendChild(tasksCol);
+    agenda.appendChild(row);
   }
 
-  table.appendChild(tbody);
-  tableContainer.appendChild(table);
-  container.appendChild(tableContainer);
-  document
-    .querySelectorAll(".date-cell:empty")
-    .forEach((el) => el.classList.add("empty"));
+  container.appendChild(agenda);
 }
+
+// ===== RENDER — YEAR VIEW =====
 
 function renderYearView() {
   const container = document.getElementById("year-container");
   container.innerHTML = "";
 
-  // Update title
   document.getElementById("view-title").textContent = currentYear;
 
-  const yearDiv = document.createElement("div");
-  yearDiv.className = "year-calendar";
+  const grid = document.createElement("div");
+  grid.className = "tp-year-grid";
+
+  const yearStr = currentYear.toString();
 
   for (let month = 1; month <= 12; month++) {
-    const monthDiv = document.createElement("div");
-    monthDiv.className = "year-month";
+    const card = document.createElement("div");
+    card.className = "tp-year-card";
 
-    const monthTitle = document.createElement("div");
-    monthTitle.className = "month-title";
-    // monthTitle.textContent = getShortMonth(month);
-    monthTitle.textContent = formatMonth(month);
+    const title = document.createElement("div");
+    title.className = "tp-year-month-name";
+    title.textContent = formatMonth(month);
 
-    // Month grid
-    const monthGrid = document.createElement("div");
-    monthGrid.className = "year-month-grid";
+    const days = document.createElement("div");
+    days.className = "tp-year-days";
 
     // Day headers
-    const dayHeaders = ["S", "M", "T", "W", "T", "F", "S"];
-    dayHeaders.forEach((day) => {
-      const dayHeader = document.createElement("div");
-      dayHeader.className = "year-day-header";
-      dayHeader.textContent = day;
-      monthGrid.appendChild(dayHeader);
+    ["S", "M", "T", "W", "T", "F", "S"].forEach((d) => {
+      const dh = document.createElement("div");
+      dh.className = "tp-year-dh";
+      dh.textContent = d;
+      days.appendChild(dh);
     });
 
-    // Get first day of month and days in month
     const firstDay = getFirstDayOfMonth(currentYear, month);
     const daysInMonth = getDaysInMonth(currentYear, month);
 
-    // Empty cells for days before first day of month
     for (let i = 0; i < firstDay; i++) {
-      const emptyCell = document.createElement("div");
-      emptyCell.className = "year-day-cell empty";
-      monthGrid.appendChild(emptyCell);
+      const ec = document.createElement("div");
+      ec.className = "tp-year-dc tp-empty";
+      days.appendChild(ec);
     }
 
     const monthStr = String(month).padStart(2, "0");
-    const yearStr = currentYear.toString();
 
-    // Day cells
     for (let day = 1; day <= daysInMonth; day++) {
-      const dayCell = document.createElement("div");
-      dayCell.className = "year-day-cell";
+      const dc = document.createElement("div");
+      dc.className = "tp-year-dc";
+      dc.textContent = day;
+
+      if (isToday(currentYear, month, day)) dc.classList.add("tp-today-cell");
+
       const dayStr = String(day).padStart(2, "0");
-
-      dayCell.textContent = day;
-
-      // Check if today
-      if (isToday(currentYear, month, day)) {
-        dayCell.classList.add("today");
-      }
-
-      // Check if has tasks
       const hasTasks = data[yearStr]?.[monthStr]?.[dayStr]?.length > 0;
       if (hasTasks) {
-        dayCell.classList.add("has-tasks");
-
-        // Add task dot indicator
-        const taskDot = document.createElement("div");
-        taskDot.className = "task-dot";
-        dayCell.appendChild(taskDot);
+        dc.classList.add("tp-has-task");
+        const dot = document.createElement("div");
+        dot.className = "tp-year-dot";
+        dc.appendChild(dot);
       }
 
-      monthGrid.appendChild(dayCell);
+      days.appendChild(dc);
     }
 
-    // Task count for month
-    // const monthTaskCount = document.createElement('div');
-    // monthTaskCount.className = 'month-task-count';
-    // let totalTasks = 0;
-    // let completedTasks = 0;
+    // Task count
+    let total = 0, done = 0;
+    if (data[yearStr]?.[monthStr]) {
+      for (const d in data[yearStr][monthStr]) {
+        const dayTasks = data[yearStr][monthStr][d];
+        total += dayTasks.length;
+        done += dayTasks.filter((t) => t.completed).length;
+      }
+    }
 
-    // if (data[yearStr] && data[yearStr][monthStr]) {
-    //   for (const day in data[yearStr][monthStr]) {
-    //     const dayTasks = data[yearStr][monthStr][day];
-    //     totalTasks += dayTasks.length;
-    //     completedTasks += dayTasks.filter(task => task.completed).length;
-    //   }
-    // }
+    const count = document.createElement("div");
+    count.className = "tp-year-task-count";
+    count.textContent = total > 0 ? `${done}/${total} done` : "No tasks";
 
-    // monthTaskCount.textContent = `${completedTasks}/${totalTasks} done`;
-    // monthDiv.appendChild(monthTaskCount);
+    card.appendChild(title);
+    card.appendChild(days);
+    card.appendChild(count);
 
-    monthDiv.appendChild(monthTitle);
-    monthDiv.appendChild(monthGrid);
-
-    // Click on month to switch to month view
-    monthDiv.onclick = () => {
+    card.onclick = () => {
       currentMonth = month;
       switchToMonthView();
     };
 
-    yearDiv.appendChild(monthDiv);
+    grid.appendChild(card);
   }
 
-  container.appendChild(yearDiv);
+  container.appendChild(grid);
 }
 
-// ------ VIEW CONTROLS ------
+// ===== VIEW CONTROLS =====
 
 function switchToMonthView() {
   currentView = "month";
@@ -556,20 +411,14 @@ function switchToYearView() {
 }
 
 function renderCurrentView() {
-  if (currentView === "month") {
-    renderMonthView();
-  } else {
-    renderYearView();
-  }
+  if (currentView === "month") renderMonthView();
+  else renderYearView();
 }
 
 function navigatePrev() {
   if (currentView === "month") {
     currentMonth--;
-    if (currentMonth < 1) {
-      currentMonth = 12;
-      currentYear--;
-    }
+    if (currentMonth < 1) { currentMonth = 12; currentYear--; }
     renderMonthView();
   } else {
     currentYear--;
@@ -580,10 +429,7 @@ function navigatePrev() {
 function navigateNext() {
   if (currentView === "month") {
     currentMonth++;
-    if (currentMonth > 12) {
-      currentMonth = 1;
-      currentYear++;
-    }
+    if (currentMonth > 12) { currentMonth = 1; currentYear++; }
     renderMonthView();
   } else {
     currentYear++;
@@ -592,54 +438,44 @@ function navigateNext() {
 }
 
 function goToToday() {
-  const today = new Date();
-  currentYear = today.getFullYear();
-  currentMonth = today.getMonth() + 1;
-
-  if (currentView === "year") {
-    switchToMonthView();
-  } else {
-    renderMonthView();
-  }
+  const t = new Date();
+  currentYear = t.getFullYear();
+  currentMonth = t.getMonth() + 1;
+  if (currentView === "year") switchToMonthView();
+  else renderMonthView();
 }
 
-// ------ MODAL FUNCTIONS ------
+// ===== MODAL — TASK =====
 
 function openTaskModal() {
   document.getElementById("edit-task-id").value = "";
   document.getElementById("task-title").value = "";
-  document.getElementById("task-date").value = new Date()
-    .toISOString()
-    .split("T")[0];
+  document.getElementById("task-date").value = new Date().toISOString().split("T")[0];
   document.getElementById("task-time").value = "";
   document.getElementById("task-location").value = "";
   document.getElementById("task-notes").value = "";
-  document.getElementById("modal-title").textContent = "Add Task";
-  document.getElementById("task-modal").style.display = "block";
-}
-
-function openTaskModalWithDate(date) {
-  openTaskModal();
-  document.getElementById("task-date").value = date;
+  document.getElementById("tp-dialog-title").textContent = "Add Task";
+  document.getElementById("tp-task-overlay").classList.add("tp-show");
+  setTimeout(() => document.getElementById("task-title").focus(), 100);
 }
 
 function openTaskModalForEdit(taskId) {
-  const taskInfo = getTaskById(taskId);
-  if (!taskInfo) return;
-
-  const task = taskInfo.task;
+  const info = getTaskById(taskId);
+  if (!info) return;
+  const task = info.task;
   document.getElementById("edit-task-id").value = task.id;
   document.getElementById("task-title").value = task.title;
   document.getElementById("task-date").value = task.date;
   document.getElementById("task-time").value = task.time || "";
   document.getElementById("task-location").value = task.location || "";
   document.getElementById("task-notes").value = task.notes || "";
-  document.getElementById("modal-title").textContent = "Edit Task";
-  document.getElementById("task-modal").style.display = "block";
+  document.getElementById("tp-dialog-title").textContent = "Edit Task";
+  document.getElementById("tp-task-overlay").classList.add("tp-show");
+  setTimeout(() => document.getElementById("task-title").focus(), 100);
 }
 
 function closeTaskModal() {
-  document.getElementById("task-modal").style.display = "none";
+  document.getElementById("tp-task-overlay").classList.remove("tp-show");
 }
 
 function saveTask() {
@@ -652,23 +488,12 @@ function saveTask() {
     notes: document.getElementById("task-notes").value.trim() || null,
   };
 
-  if (!task.title) {
-    showNotification("Task name is required", "error");
-    return;
-  }
-
-  if (!task.date) {
-    showNotification("Date is required", "error");
-    return;
-  }
+  if (!task.title) { showNotification("Task name is required", "error"); return; }
+  if (!task.date) { showNotification("Date is required", "error"); return; }
 
   if (taskId) {
-    // Update existing task
-    if (updateTask(taskId, task)) {
-      showNotification("Task updated", "success");
-    }
+    if (updateTask(taskId, task)) showNotification("Task updated", "success");
   } else {
-    // Add new task
     addTask(task);
     showNotification("Task added", "success");
   }
@@ -678,41 +503,37 @@ function saveTask() {
   saveDataToDrive();
 }
 
+// ===== MODAL — DETAIL =====
+
 function openDetailModal(taskId) {
-  const taskInfo = getTaskById(taskId);
-  if (!taskInfo) return;
+  const info = getTaskById(taskId);
+  if (!info) return;
+  const task = info.task;
 
-  const task = taskInfo.task;
-  document.getElementById("detail-title").textContent = task.title;
-  document.getElementById("detail-date").textContent = formatDate(task.date);
-  document.getElementById("detail-time").textContent = task.time || "-";
-  document.getElementById("detail-location").textContent = task.location || "-";
-  document.getElementById("detail-notes").textContent = task.notes || "-";
-  document.getElementById("detail-status").textContent = task.completed
-    ? "Completed"
-    : "Pending";
+  document.getElementById("tp-detail-title").textContent = task.title;
+  document.getElementById("tp-detail-date").textContent = formatDate(task.date);
+  document.getElementById("tp-detail-time").textContent = task.time || "—";
+  document.getElementById("tp-detail-location").textContent = task.location || "—";
+  document.getElementById("tp-detail-notes").textContent = task.notes || "—";
 
-  const toggleBtn = document.getElementById("toggle-status-btn");
-  toggleBtn.textContent = task.completed
-    ? "Set as Pending ⏳"
-    : "Set as Complete ✅";
-  toggleBtn.className = `button ${task.completed ? "cancel" : "ok"}`;
+  const toggleBtn = document.getElementById("tp-toggle-status");
+  toggleBtn.textContent = task.completed ? "Set Pending ⏳" : "Complete ✓";
+  toggleBtn.style.background = task.completed ? "var(--red)" : "var(--green)";
 
-  // Set up button actions
   toggleBtn.onclick = () => {
     toggleTaskComplete(taskId);
     saveDataToDrive();
-    openDetailModal(taskId); // Refresh modal
+    openDetailModal(taskId);
     renderCurrentView();
   };
 
-  document.getElementById("edit-detail-btn").onclick = () => {
+  document.getElementById("tp-edit-btn").onclick = () => {
     closeDetailModal();
     openTaskModalForEdit(taskId);
   };
 
-  document.getElementById("delete-detail-btn").onclick = () => {
-    if (confirm("Are you sure you want to delete this task?")) {
+  document.getElementById("tp-delete-btn").onclick = () => {
+    if (confirm("Delete this task?")) {
       deleteTask(taskId);
       showNotification("Task deleted", "success");
       closeDetailModal();
@@ -721,14 +542,120 @@ function openDetailModal(taskId) {
     }
   };
 
-  document.getElementById("detail-modal").style.display = "block";
+  document.getElementById("tp-detail-overlay").classList.add("tp-show");
 }
 
 function closeDetailModal() {
-  document.getElementById("detail-modal").style.display = "none";
+  document.getElementById("tp-detail-overlay").classList.remove("tp-show");
 }
 
-// ------ DRIVE FUNCTIONS ------
+// ===== PDF DOWNLOAD =====
+
+function downloadPDF() {
+  const area = document.getElementById("tp-pdf-area");
+  const yearStr = currentYear.toString();
+  const monthStr = String(currentMonth).padStart(2, "0");
+  const daysInMonth = getDaysInMonth(currentYear, currentMonth);
+
+  // Count total rows to determine font size
+  let totalRows = 0;
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayStr = String(day).padStart(2, "0");
+    const tasks = data[yearStr]?.[monthStr]?.[dayStr] || [];
+    totalRows += Math.max(tasks.length, 1);
+  }
+
+  const fontSize = totalRows <= 35 ? "9pt" : totalRows <= 50 ? "8pt" : "7pt";
+  const cellPad = totalRows <= 35 ? "5px 7px" : "3px 5px";
+
+  let rows = "";
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayStr = String(day).padStart(2, "0");
+    const dateStr = `${currentYear}-${monthStr}-${dayStr}`;
+    const tasks = data[yearStr]?.[monthStr]?.[dayStr] || [];
+    const wd = formatDateForTable_WeekDay(dateStr);
+    const isWeekend = [0, 6].includes(new Date(currentYear, currentMonth - 1, day).getDay());
+    const wdColor = isWeekend ? "color:#c0392b;" : "";
+    const borderB = "border-bottom:1px solid #ddd;";
+
+    if (tasks.length === 0) {
+      rows += `<tr>
+        <td style="${borderB}padding:${cellPad};text-align:center;font-weight:600;${wdColor}">${wd}</td>
+        <td style="${borderB}padding:${cellPad};text-align:center;font-weight:700;${wdColor}">${day}</td>
+        <td style="${borderB}padding:${cellPad};color:#bbb;font-style:italic;" colspan="4">—</td>
+      </tr>`;
+    } else {
+      tasks.forEach((task, i) => {
+        const dateCell = i === 0
+          ? `<td style="${borderB}padding:${cellPad};text-align:center;font-weight:600;${wdColor}" rowspan="${tasks.length}">${wd}</td>
+             <td style="${borderB}padding:${cellPad};text-align:center;font-weight:700;${wdColor}" rowspan="${tasks.length}">${day}</td>`
+          : "";
+        const deco = task.completed ? "text-decoration:line-through;color:#aaa;" : "";
+        rows += `<tr>
+          ${dateCell}
+          <td style="${borderB}padding:${cellPad};${deco}">${task.title}</td>
+          <td style="${borderB}padding:${cellPad};text-align:center;color:#666;">${task.time || "—"}</td>
+          <td style="${borderB}padding:${cellPad};text-align:center;color:#666;">${task.location || "—"}</td>
+          <td style="${borderB}padding:${cellPad};text-align:center;">${task.completed ? "✓" : ""}</td>
+        </tr>`;
+      });
+    }
+  }
+
+  area.innerHTML = `
+    <div style="font-family:Arial,Helvetica,sans-serif;width:190mm;margin:auto;padding:8mm 0;">
+      <h2 style="text-align:center;font-size:13pt;margin:-16pt 0 4px 0;color:#222;">
+        Task Planner
+      </h2>
+      <p style="text-align:center;font-size:10pt;margin:0 0 12px;color:#666;">
+        ${formatMonth(currentMonth)} ${currentYear}
+      </p>
+      <table style="width:100%;border-collapse:collapse;font-size:${fontSize};">
+        <thead>
+          <tr style="background:#f5f5f5;">
+            <th style="padding:${cellPad};border:1px solid #ddd;text-align:center;width:36px;">Day</th>
+            <th style="padding:${cellPad};border:1px solid #ddd;text-align:center;width:24px;">#</th>
+            <th style="padding:${cellPad};border:1px solid #ddd;text-align:left;">Task</th>
+            <th style="padding:${cellPad};border:1px solid #ddd;text-align:center;width:42px;">Time</th>
+            <th style="padding:${cellPad};border:1px solid #ddd;text-align:center;width:60px;">Location</th>
+            <th style="padding:${cellPad};border:1px solid #ddd;text-align:center;width:22px;">✓</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+
+  const el = area.firstElementChild;
+
+  if (typeof html2pdf !== "undefined") {
+    html2pdf()
+      .set({
+        margin: [8, 8, 16, 10],
+        filename: `Tasks_${formatMonth(currentMonth)}_${currentYear}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      })
+      .from(el)
+      .save()
+      .then(() => {
+        area.innerHTML = "";
+        showNotification("PDF downloaded", "success");
+      });
+  } else {
+    // Fallback: open print dialog
+    const w = window.open("", "_blank");
+    w.document.write(`<!DOCTYPE html><html><head><title>Tasks ${formatMonth(currentMonth)} ${currentYear}</title>
+      <style>@page{size:A4;margin:10mm;}body{margin:0;}</style></head><body>${el.outerHTML}</body></html>`);
+    w.document.close();
+    w.focus();
+    w.print();
+    area.innerHTML = "";
+  }
+}
+
+// ===== GOOGLE DRIVE =====
 
 async function loadDataFromDrive() {
   showNotification("Loading...");
@@ -745,21 +672,13 @@ async function loadDataFromDrive() {
 
     if (res.result.files && res.result.files.length > 0) {
       fileId = res.result.files[0].id;
-      const file = await gapi.client.drive.files.get({
-        fileId: fileId,
-        alt: "media",
-      });
-      const json = file.result;
-      data = json.data || {};
+      const file = await gapi.client.drive.files.get({ fileId, alt: "media" });
+      data = file.result?.data || {};
 
-      // Ensure all tasks are sorted by time
-      for (const year in data) {
-        for (const month in data[year]) {
-          for (const day in data[year][month]) {
+      for (const year in data)
+        for (const month in data[year])
+          for (const day in data[year][month])
             data[year][month][day] = sortTasks(data[year][month][day]);
-          }
-        }
-      }
 
       renderCurrentView();
     } else {
@@ -786,36 +705,25 @@ async function saveDataToDrive() {
   cloudFailed.classList.add("none");
 
   try {
-    const fileContent = JSON.stringify({ data });
-    const file = new Blob([fileContent], { type: "application/json" });
-    const metadata = {
-      name: "taskplanner-kodejarwo.json",
-      mimeType: "application/json",
-    };
-
-    const accessToken = gapi.auth.getToken().access_token;
+    const blob = new Blob([JSON.stringify({ data })], { type: "application/json" });
+    const metadata = { name: "taskplanner-kodejarwo.json", mimeType: "application/json" };
     const form = new FormData();
-    form.append(
-      "metadata",
-      new Blob([JSON.stringify(metadata)], { type: "application/json" })
-    );
-    form.append("file", file);
+    form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
+    form.append("file", blob);
 
-    const res = await fetch(
-      fileId
-        ? `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart&fields=id`
-        : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id`,
-      {
-        method: fileId ? "PATCH" : "POST",
-        headers: new Headers({ Authorization: "Bearer " + accessToken }),
-        body: form,
-      }
-    );
+    const token = gapi.auth.getToken().access_token;
+    const url = fileId
+      ? `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart&fields=id`
+      : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id`;
+
+    const res = await fetch(url, {
+      method: fileId ? "PATCH" : "POST",
+      headers: { Authorization: "Bearer " + token },
+      body: form,
+    });
 
     if (!res.ok) throw new Error("Save failed");
-
-    const result = await res.json();
-    fileId = result.id;
+    fileId = (await res.json()).id;
 
     cloudSync.classList.add("none");
     cloudSuccess.classList.remove("none");
@@ -828,27 +736,47 @@ async function saveDataToDrive() {
   }
 }
 
-// ------ INITIALIZATION ------
+// ===== INITIALIZATION =====
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Set current date
   const today = new Date();
   currentYear = today.getFullYear();
   currentMonth = today.getMonth() + 1;
 
-  // Event Listeners
-  document.getElementById("add-task-btn").onclick = openTaskModal;
-  document.getElementById("today-btn").onclick = goToToday;
-  document.getElementById("save-task-btn").onclick = saveTask;
-  document.getElementById("month-view-btn").onclick = switchToMonthView;
-  document.getElementById("year-view-btn").onclick = switchToYearView;
+  // Navigation
   document.getElementById("prev-btn").onclick = navigatePrev;
   document.getElementById("next-btn").onclick = navigateNext;
+  document.getElementById("today-btn").onclick = goToToday;
 
-  // Close modals when clicking outside
-  window.onclick = (event) => {
-    if (event.target.classList.contains("modal")) {
-      event.target.style.display = "none";
+  // View switch
+  document.getElementById("month-view-btn").onclick = switchToMonthView;
+  document.getElementById("year-view-btn").onclick = switchToYearView;
+
+  // Task modal
+  document.getElementById("save-task-btn").onclick = saveTask;
+
+  // PDF
+  document.getElementById("download-pdf-btn").onclick = downloadPDF;
+
+  // Close overlays on backdrop click
+  document.querySelectorAll(".tp-overlay").forEach((overlay) => {
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) overlay.classList.remove("tp-show");
+    });
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeTaskModal();
+      closeDetailModal();
     }
-  };
+  });
+
+  // Enter to save in task modal
+  ["task-title", "task-date", "task-time", "task-location"].forEach((id) => {
+    document.getElementById(id).addEventListener("keydown", (e) => {
+      if (e.key === "Enter") saveTask();
+    });
+  });
 });

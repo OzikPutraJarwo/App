@@ -873,6 +873,7 @@ input[type="color"]:hover {
   padding: 1.5rem;
   cursor: pointer;
   transition: all 0.3s;
+  backdrop-filter: blur(4px);
 }
 
 .dashboard-card:hover {
