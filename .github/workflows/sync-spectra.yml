@@ -2,7 +2,8 @@ name: Sync Advanta-v3 to SPECTRA
 
 on:
 repository_dispatch:
-types: [sync-advanta]
+types:
+- sync-advanta
 
 permissions:
 contents: write
@@ -12,22 +13,19 @@ sync:
 runs-on: ubuntu-latest
 
 steps:
-  - name: Checkout repo App
+  - name: Checkout repo
     uses: actions/checkout@v4
 
   - name: Clone repo Privo
     run: git clone --depth=1 https://github.com/OzikPutraJarwo/Privo.git privo
 
-  - name: Replace SPECTRA with Advanta-v3
+  - name: Copy folder
     run: |
       rm -rf SPECTRA
       mkdir -p SPECTRA
       cp -r privo/Advanta-v3/. SPECTRA/
 
-  - name: Remove .git if exists
-    run: rm -rf SPECTRA/.git
-
-  - name: Commit & Push
+  - name: Commit changes
     run: |
       git config user.name "github-actions[bot]"
       git config user.email "github-actions@users.noreply.github.com"
@@ -37,6 +35,6 @@ steps:
       if git diff --cached --quiet; then
         echo "No changes"
       else
-        git commit -m "Auto sync Advanta-v3 → SPECTRA"
+        git commit -m "Auto sync Advanta-v3"
         git push
       fi
