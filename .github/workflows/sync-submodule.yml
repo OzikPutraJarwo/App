@@ -1,0 +1,30 @@
+name: Sync Submodule Advanta-v3
+
+on:
+  repository_dispatch:
+    types: [update-submodule]
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout SPECTRA with submodules
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.SUBMODULE_PAT }}
+          submodules: recursive
+
+      - name: Update submodule Advanta-v3
+        run: |
+          git submodule update --remote Advanta-v3
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit & Push jika ada perubahan
+        run: |
+          git diff --quiet && git diff --staged --quiet || (
+            git add Advanta-v3
+            git commit -m "chore: auto-update submodule Advanta-v3"
+            git push
+          )
