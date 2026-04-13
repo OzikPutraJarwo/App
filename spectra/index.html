@@ -533,7 +533,7 @@
             <div id="moveToFolderModal" class="folder-modal-overlay hidden">
               <div class="folder-modal folder-modal-sm">
                 <div class="folder-modal-header">
-                  <h3>Move to Folder</h3>
+                  <h3>Assign to Folders</h3>
                   <button class="btn-icon-close" id="moveToFolderCloseBtn">
                     <span class="material-symbols-rounded">close</span>
                   </button>
@@ -1174,6 +1174,7 @@
                     <span class="material-symbols-rounded">upload_file</span>
                     <span>Re-upload</span>
                   </button>
+                  <select id="analysisSheetSelect" class="analysis-datasource-select" onchange="handleAnalysisSheetChange(this.value)" title="Select sheet" style="display:none;"></select>
                   <input type="file" id="analysisCustomFileInput" accept=".xlsx,.xls,.csv" hidden>
                   <button type="button" id="analysisColumnsTrigger" class="analysis-columns-trigger" onclick="toggleAnalysisColumnVisibilityMenu(event)" aria-haspopup="true" aria-expanded="false">
                     <span class="material-symbols-rounded">view_column</span>

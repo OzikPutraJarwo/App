@@ -5,6 +5,41 @@
 // Depends on: inventoryState (inventory.js), trialState (trial.js), escapeHtml (inventory.js)
 
 /**
+ * Check if a formula parameter is "completed" for a given area.
+ * A formula is complete when all non-formula variable params it references
+ * have response data collected in that area.
+ */
+function _isFormulaCompletedForArea(trial, areaIndex, formulaParam, allTrialParams) {
+  const formula = String(formulaParam.formula || "").trim();
+  if (!formula) return false;
+
+  // Extract variable tokens from formula
+  const tokens = formula.match(/[A-Za-z_][A-Za-z0-9_]*/g);
+  if (!tokens || tokens.length === 0) return false;
+
+  const uniqueTokens = [...new Set(tokens)];
+  const areaResponses = trial.responses && trial.responses[areaIndex];
+  if (!areaResponses) return false;
+
+  // For each token, find the non-formula param that matches (by initial or name)
+  const nonFormulaParams = allTrialParams.filter(p => (p.type || "").toLowerCase() !== "formula");
+
+  for (const token of uniqueTokens) {
+    const dep = nonFormulaParams.find(p => {
+      if (p.initial && String(p.initial).trim() === token) return true;
+      if (p.name && String(p.name).trim().replace(/\s+/g, "_") === token) return true;
+      return false;
+    });
+    if (!dep) continue; // unknown token (could be a math constant); skip
+    // Check if this dependency has response data
+    const hasData = areaResponses[dep.id] && Object.keys(areaResponses[dep.id]).length > 0;
+    if (!hasData) return false;
+  }
+
+  return true;
+}
+
+/**
  * Build observation reminder items for all active trials.
  * Returns array of trial groups, each containing area sub-groups.
  *
@@ -68,8 +103,15 @@ function buildObservationReminders() {
           done = false;
           status = "not-loaded";
         } else {
-          done = !!(trial.responses && trial.responses[areaIndex] && trial.responses[areaIndex][param.id] &&
-            Object.keys(trial.responses[areaIndex][param.id]).length > 0);
+          const isFormula = (param.type || "").toLowerCase() === "formula";
+
+          if (isFormula && param.formula) {
+            // Formula parameter: check if all referenced non-formula params have data in this area
+            done = _isFormulaCompletedForArea(trial, areaIndex, param, params);
+          } else {
+            done = !!(trial.responses && trial.responses[areaIndex] && trial.responses[areaIndex][param.id] &&
+              Object.keys(trial.responses[areaIndex][param.id]).length > 0);
+          }
 
           // Status: past, today, upcoming, no-date
           if (dateMin && dateMax) {

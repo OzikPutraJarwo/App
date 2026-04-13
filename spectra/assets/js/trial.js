@@ -2041,10 +2041,42 @@ function populateTrialParameters(selectedIds = []) {
       return;
     }
 
-    availableList.innerHTML = filtered
-      .map(
-        (param) => `
-          <div class="picklist-item" draggable="true" data-id="${param.id}">
+    // Group parameters by folder
+    const paramFolders = inventoryState.folders?.parameters || [];
+    const folderMap = new Map(); // folderId -> { folder, params[] }
+    const unfolderedParams = [];
+
+    filtered.forEach(param => {
+      const fIds = typeof _getItemFolderIds === "function" ? _getItemFolderIds(param) : (param.folderIds || (param.folderId ? [param.folderId] : []));
+      if (fIds.length > 0) {
+        fIds.forEach(fId => {
+          if (!folderMap.has(fId)) {
+            const folder = paramFolders.find(f => f.id === fId);
+            if (folder) folderMap.set(fId, { folder, params: [] });
+          }
+          if (folderMap.has(fId)) folderMap.get(fId).params.push(param);
+        });
+      } else {
+        unfolderedParams.push(param);
+      }
+    });
+
+    let html = "";
+
+    // Render folder groups
+    folderMap.forEach(({ folder, params: folderParams }) => {
+      const allChecked = folderParams.every(p => checkedState.available.has(p.id));
+      const iconName = folder.icon || "folder";
+      const colorStyle = folder.color ? `color:${folder.color};` : "";
+      html += `<div class="picklist-folder-group" data-folder-id="${folder.id}">
+        <div class="picklist-folder-header" data-folder-id="${folder.id}">
+          <span class="material-symbols-rounded picklist-folder-check">${allChecked ? "check_box" : "check_box_outline_blank"}</span>
+          <span class="material-symbols-rounded" style="${colorStyle};font-size:18px">${escapeHtml(iconName)}</span>
+          <span class="picklist-folder-name">${escapeHtml(folder.name)}</span>
+          <span class="picklist-folder-count">${folderParams.length}</span>
+        </div>`;
+      folderParams.forEach(param => {
+        html += `<div class="picklist-item" draggable="true" data-id="${param.id}">
             <input type="checkbox" class="picklist-item-checkbox" data-id="${param.id}" ${checkedState.available.has(param.id) ? "checked" : ""}>
             <div class="picklist-item-content">
               <div class="picklist-item-title">${escapeHtml(param.name)}</div>
@@ -2052,10 +2084,45 @@ function populateTrialParameters(selectedIds = []) {
                 ${escapeHtml(param.initial || "")} · ${escapeHtml(param.type || "")} · ${escapeHtml(param.unit || "")}
               </div>
             </div>
-          </div>
-        `,
-      )
-      .join("");
+          </div>`;
+      });
+      html += `</div>`;
+    });
+
+    // Render unfoldered parameters
+    unfolderedParams.forEach(param => {
+      html += `<div class="picklist-item" draggable="true" data-id="${param.id}">
+            <input type="checkbox" class="picklist-item-checkbox" data-id="${param.id}" ${checkedState.available.has(param.id) ? "checked" : ""}>
+            <div class="picklist-item-content">
+              <div class="picklist-item-title">${escapeHtml(param.name)}</div>
+              <div class="picklist-item-meta">
+                ${escapeHtml(param.initial || "")} · ${escapeHtml(param.type || "")} · ${escapeHtml(param.unit || "")}
+              </div>
+            </div>
+          </div>`;
+    });
+
+    availableList.innerHTML = html;
+
+    // Folder header click: toggle all params in folder
+    availableList.querySelectorAll(".picklist-folder-header").forEach(header => {
+      header.addEventListener("click", () => {
+        setActiveListType("available");
+        const group = header.closest(".picklist-folder-group");
+        const itemCheckboxes = group.querySelectorAll(".picklist-item-checkbox");
+        const allChecked = [...itemCheckboxes].every(cb => cb.checked);
+        itemCheckboxes.forEach(cb => {
+          cb.checked = !allChecked;
+          if (cb.checked) {
+            checkedState.available.add(cb.dataset.id);
+          } else {
+            checkedState.available.delete(cb.dataset.id);
+          }
+        });
+        header.querySelector(".picklist-folder-check").textContent = !allChecked ? "check_box" : "check_box_outline_blank";
+        updateCheckedIndicators();
+      });
+    });
 
     availableList.querySelectorAll(".picklist-item").forEach((item) => {
       const itemId = item.dataset.id;
@@ -2546,21 +2613,72 @@ function populateTrialAgronomy(selectedIds = []) {
       return;
     }
 
-    availableList.innerHTML = filtered.map((item) => {
-      const dapText = item.dapMin != null
-        ? (item.dapMax != null && item.dapMax !== "" && item.dapMax !== item.dapMin
-          ? `DAP ${item.dapMin}-${item.dapMax}`
-          : `DAP ${item.dapMin}`)
-        : "";
-      return `
-        <div class="picklist-item" draggable="true" data-id="${item.id}">
+    // Group agronomy items by folder
+    const agroFolders = inventoryState.folders?.agronomy || [];
+    const folderMap = new Map();
+    const unfolderedItems = [];
+
+    filtered.forEach(item => {
+      const fIds = typeof _getItemFolderIds === "function" ? _getItemFolderIds(item) : (item.folderIds || (item.folderId ? [item.folderId] : []));
+      if (fIds.length > 0) {
+        fIds.forEach(fId => {
+          if (!folderMap.has(fId)) {
+            const folder = agroFolders.find(f => f.id === fId);
+            if (folder) folderMap.set(fId, { folder, items: [] });
+          }
+          if (folderMap.has(fId)) folderMap.get(fId).items.push(item);
+        });
+      } else {
+        unfolderedItems.push(item);
+      }
+    });
+
+    const renderAgroItem = (item) => {
+      return `<div class="picklist-item" draggable="true" data-id="${item.id}">
           <input type="checkbox" class="picklist-item-checkbox" data-id="${item.id}" ${checkedState.available.has(item.id) ? "checked" : ""}>
           <div class="picklist-item-content">
             <div class="picklist-item-title">${escapeHtml(item.activity || item.name || "")}</div>
           </div>
-        </div>
-      `;
-    }).join("");
+        </div>`;
+    };
+
+    let html = "";
+
+    folderMap.forEach(({ folder, items: folderItems }) => {
+      const allChecked = folderItems.every(it => checkedState.available.has(it.id));
+      const iconName = folder.icon || "folder";
+      const colorStyle = folder.color ? `color:${folder.color};` : "";
+      html += `<div class="picklist-folder-group" data-folder-id="${folder.id}">
+        <div class="picklist-folder-header" data-folder-id="${folder.id}">
+          <span class="material-symbols-rounded picklist-folder-check">${allChecked ? "check_box" : "check_box_outline_blank"}</span>
+          <span class="material-symbols-rounded" style="${colorStyle};font-size:18px">${escapeHtml(iconName)}</span>
+          <span class="picklist-folder-name">${escapeHtml(folder.name)}</span>
+          <span class="picklist-folder-count">${folderItems.length}</span>
+        </div>`;
+      folderItems.forEach(it => { html += renderAgroItem(it); });
+      html += `</div>`;
+    });
+
+    unfolderedItems.forEach(it => { html += renderAgroItem(it); });
+
+    availableList.innerHTML = html;
+
+    // Folder header click: toggle all items in folder
+    availableList.querySelectorAll(".picklist-folder-header").forEach(header => {
+      header.addEventListener("click", () => {
+        setActiveListType("available");
+        const group = header.closest(".picklist-folder-group");
+        const itemCheckboxes = group.querySelectorAll(".picklist-item-checkbox");
+        const allChecked = [...itemCheckboxes].every(cb => cb.checked);
+        itemCheckboxes.forEach(cb => {
+          cb.checked = !allChecked;
+          if (cb.checked) checkedState.available.add(cb.dataset.id);
+          else checkedState.available.delete(cb.dataset.id);
+        });
+        header.querySelector(".picklist-folder-check").textContent = !allChecked ? "check_box" : "check_box_outline_blank";
+        updateCheckedIndicators();
+      });
+    });
 
     availableList.querySelectorAll(".picklist-item").forEach((el) => {
       const itemId = el.dataset.id;
@@ -5597,21 +5715,33 @@ async function loadExternalPhotos(containerSelector) {
   if (!container) return;
 
   const imgs = container.querySelectorAll("img[data-photo-fileid]");
-  const token = getAccessToken();
-  if (!token || imgs.length === 0) return;
+  if (imgs.length === 0) return;
 
-  for (const img of imgs) {
+  let token = getAccessToken();
+  if (!token) return;
+
+  const BATCH_SIZE = 100;
+
+  async function fetchPhoto(img) {
     const fileId = img.dataset.photoFileid;
-    if (!fileId) continue;
+    if (!fileId) return;
     if (_photoBlobCache[fileId]) {
       img.src = _photoBlobCache[fileId];
-      continue;
+      return;
     }
     try {
-      const resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+      let resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!resp.ok) continue;
+      if ((resp.status === 401 || resp.status === 403) && typeof getAccessToken === "function") {
+        // Refresh token and retry once
+        token = getAccessToken();
+        if (!token) return;
+        resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+      if (!resp.ok) return;
       const blob = await resp.blob();
       const url = URL.createObjectURL(blob);
       _photoBlobCache[fileId] = url;
@@ -5619,6 +5749,13 @@ async function loadExternalPhotos(containerSelector) {
     } catch (e) {
       console.warn("Failed to load external photo:", e);
     }
+  }
+
+  // Load in parallel batches
+  const imgArr = Array.from(imgs);
+  for (let i = 0; i < imgArr.length; i += BATCH_SIZE) {
+    const batch = imgArr.slice(i, i + BATCH_SIZE);
+    await Promise.all(batch.map(fetchPhoto));
   }
 }
 
@@ -9399,7 +9536,13 @@ function handlePhotoUpload(event) {
     const photoId = (typeof crypto !== "undefined" && crypto.randomUUID)
       ? crypto.randomUUID()
       : `photo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const fileName = `${photoId}.webp`;
+
+    // Build meaningful filename: ParamName_RepX_PlotName_SampleY_uuid.webp
+    const paramNameSafe = (param.name || paramId).replace(/[^a-zA-Z0-9_-]/g, "-").substring(0, 40);
+    const line = runTrialState.currentTrial?.areas?.[areaIndex]?.layout?.result
+      ?.flat(2)?.find(c => c && c.id === lineId);
+    const lineNameSafe = (line?.name || lineId).replace(/[^a-zA-Z0-9_-]/g, "-").substring(0, 40);
+    const fileName = `${paramNameSafe}_Rep${repIndex + 1}_${lineNameSafe}_Sample${sampleIndex + 1}_${photoId}.webp`;
 
     // Insert a temporary placeholder so the UI shows a spinner immediately
     const placeholderIdx = runTrialState.responses[areaIndex][paramId][photoKey].photos.length;

@@ -24,8 +24,8 @@ let tokenRefreshTimer = null;
 let tokenCountdownTimer = null;
 let authExpiryHandlingInProgress = false;
 
-// Token refresh interval: 50 minutes (tokens expire at ~60min)
-const TOKEN_REFRESH_INTERVAL = 50 * 60 * 1000;
+// Token refresh interval: 45 minutes (tokens expire at ~60min)
+const TOKEN_REFRESH_INTERVAL = 45 * 60 * 1000;
 
 // Initialize Google APIs
 function initializeGoogleAPIs() {
@@ -124,7 +124,7 @@ function scheduleTokenRefresh() {
   }
 
   const timeUntilRefresh = tokenExpiresAt
-    ? Math.max(tokenExpiresAt - Date.now() - 10 * 60 * 1000, 60000) // 10 min before expiry, minimum 1 min
+    ? Math.max(tokenExpiresAt - Date.now() - 15 * 60 * 1000, 60000) // 15 min before expiry, minimum 1 min
     : TOKEN_REFRESH_INTERVAL;
 
   tokenRefreshTimer = setTimeout(async () => {
@@ -175,7 +175,7 @@ function stopTokenCountdown() {
 function formatRemainingTime(ms) {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
   const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60) - 10;
+  const minutes = Math.floor((totalSeconds % 3600) / 60) - 15;
   const seconds = totalSeconds % 60;
   return `Auto relogin in: ${String(minutes).padStart(2, "0")}m ${String(seconds).padStart(2, "0")}s`;
 }

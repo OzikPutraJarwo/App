@@ -154,6 +154,16 @@
 - [x] `Trial > Report` Right toolbar bug
 - [x] `Trial > Report` Redesign
 
+# Apr 12, 2026
+- [x] `All` Responsiveness and UI redesign
+- [x] `User Settings` Auto relogin every 45 minutes
+- [x] `Inventory` Assign items to more than one folder
+- [x] `Trial` Choose parameter's folder
+- [x] `Library > Trial Photos` Faster loading
+- [x] `Library > Trial Photos` More detailed name
+- [x] `Reminder > Observation` Integration with parameters with formula
+- [x] `Data Analysis` Custom dataset with sheet selection
+
 ## UPCOMING PLANS
 - [ ] Resize/reformat uploaded image dashboard
 - [ ] Reminder > checkbox > run only shows the checked

@@ -401,6 +401,30 @@ async function incrementalRefreshLibrary() {
   }
 }
 
+/**
+ * Derive a human-readable display name from a photo filename.
+ * New format: ParamName_RepX_PlotName_SampleY_uuid.webp
+ * Old format: uuid.webp (fallback)
+ */
+function _derivePhotoDisplayName(fileName, trialName) {
+  const base = fileName.replace(/\.[^.]+$/, ""); // strip extension
+  const parts = base.split("_");
+  // New format has at least 5 parts: param, RepX, plot, SampleY, uuid
+  if (parts.length >= 5) {
+    const repPart = parts.find((p) => /^Rep\d+$/i.test(p));
+    const samplePart = parts.find((p) => /^Sample\d+$/i.test(p));
+    if (repPart && samplePart) {
+      const repIdx = parts.indexOf(repPart);
+      const sampleIdx = parts.indexOf(samplePart);
+      const paramName = parts.slice(0, repIdx).join(" ");
+      const plotName = parts.slice(repIdx + 1, sampleIdx).join(" ");
+      return `${paramName} · ${repPart} · ${plotName} · ${samplePart}`;
+    }
+  }
+  // Fallback: return filename without extension
+  return base;
+}
+
 async function loadTrialPhotoItems(options = {}) {
   const { force = false } = options;
   if (libraryState._trialPhotosLoaded && !force) {
@@ -420,40 +444,49 @@ async function loadTrialPhotoItems(options = {}) {
     const trialFolders = trialFoldersResp.result.files || [];
     const allPhotos = [];
     const total = trialFolders.length;
+    const BATCH = 5;
+    let done = 0;
 
-    for (let i = 0; i < total; i++) {
-      const trialFolder = trialFolders[i];
-      const trialId = trialFolder.name;
-      const trialName = trialState?.trials?.find((t) => t.id === trialId)?.name || trialId;
-      const pct = Math.round(((i + 1) / total) * 100);
+    // Scan trial folders in parallel batches
+    for (let i = 0; i < total; i += BATCH) {
+      const batch = trialFolders.slice(i, i + BATCH);
+      const batchResults = await Promise.all(batch.map(async (trialFolder) => {
+        const trialId = trialFolder.name;
+        const trialName = trialState?.trials?.find((t) => t.id === trialId)?.name || trialId;
+        const photos = [];
 
-      setTrialPhotoProgress(pct, `Scanning photos: ${trialName} (${i + 1}/${total})`);
-
-      // Only scan binary photos from /photos folder
-      const photosFolder = await findFolder("photos", trialFolder.id);
-      if (photosFolder) {
-        const photoFilesResp = await gapi.client.drive.files.list({
-          q: `'${photosFolder.id}' in parents and trashed=false`,
-          fields: "files(id,name,mimeType,modifiedTime,size)",
-          pageSize: 1000,
-        });
-        (photoFilesResp.result.files || []).forEach((file) => {
-          if (!String(file.mimeType || "").startsWith("image/")) return;
-          allPhotos.push({
-            id: `binary:${file.id}`,
-            section: "trial-photos",
-            storageType: "binary",
-            trialId,
-            trialName,
-            trialFolderId: trialFolder.id,
-            name: file.name,
-            mimeType: file.mimeType,
-            modifiedTime: file.modifiedTime,
-            size: file.size,
-            driveFileId: file.id,
+        const photosFolder = await findFolder("photos", trialFolder.id);
+        if (photosFolder) {
+          const photoFilesResp = await gapi.client.drive.files.list({
+            q: `'${photosFolder.id}' in parents and trashed=false`,
+            fields: "files(id,name,mimeType,modifiedTime,size)",
+            pageSize: 1000,
           });
-        });
-      }
+          (photoFilesResp.result.files || []).forEach((file) => {
+            if (!String(file.mimeType || "").startsWith("image/")) return;
+            photos.push({
+              id: `binary:${file.id}`,
+              section: "trial-photos",
+              storageType: "binary",
+              trialId,
+              trialName,
+              trialFolderId: trialFolder.id,
+              name: _derivePhotoDisplayName(file.name, trialName),
+              mimeType: file.mimeType,
+              modifiedTime: file.modifiedTime,
+              size: file.size,
+              driveFileId: file.id,
+            });
+          });
+        }
+        return photos;
+      }));
+
+      batchResults.forEach((photos) => allPhotos.push(...photos));
+      done += batch.length;
+      const pct = Math.round((done / total) * 100);
+      const lastName = trialState?.trials?.find((t) => t.id === batch[batch.length - 1].name)?.name || batch[batch.length - 1].name;
+      setTrialPhotoProgress(pct, `Scanning photos: ${lastName} (${done}/${total})`);
     }
 
     libraryState.trialPhotos = allPhotos;

@@ -1,6 +1,30 @@
 // Inventory Management
 let _currentEntryType = "parental";
 
+/**
+ * Get folder IDs for an item, supporting both legacy `folderId` (string)
+ * and new `folderIds` (array) formats. Returns an array.
+ */
+function _getItemFolderIds(item) {
+  if (Array.isArray(item.folderIds) && item.folderIds.length > 0) return item.folderIds;
+  if (item.folderId) return [item.folderId];
+  return [];
+}
+
+/**
+ * Check if an item belongs to a given folder.
+ */
+function _itemInFolder(item, folderId) {
+  return _getItemFolderIds(item).includes(folderId);
+}
+
+/**
+ * Check if an item is in ANY folder.
+ */
+function _itemHasFolder(item) {
+  return _getItemFolderIds(item).length > 0;
+}
+
 let inventoryState = {
   currentCategory: "crops",
   viewMode: {
@@ -1058,7 +1082,10 @@ function updateInventoryFilters() {
     // Populate crop filter
     const crops = inventoryState.items.crops || [];
     cropSelect.innerHTML = '<option value="">All Crops</option>' +
-      crops.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+      crops.map(c => {
+        const et = c.entryType ? ` (${c.entryType.charAt(0).toUpperCase() + c.entryType.slice(1)})` : '';
+        return `<option value="${c.id}">${escapeHtml(c.name + et)}</option>`;
+      }).join('');
     cropSelect.value = inventoryState.filterCrop || '';
     sortSelect.value = inventoryState.sortBy || (cat === 'parameters' ? 'updatedAt' : 'name');
   } else {
@@ -1074,9 +1101,10 @@ function updateLineCropOptions() {
 
   select.innerHTML = [
     '<option value="">Select crop</option>',
-    ...crops.map(
-      (crop) => `<option value="${crop.id}">${escapeHtml(crop.name)}</option>`,
-    ),
+    ...crops.map((crop) => {
+      const et = crop.entryType ? ` (${crop.entryType.charAt(0).toUpperCase() + crop.entryType.slice(1)})` : '';
+      return `<option value="${crop.id}">${escapeHtml(crop.name + et)}</option>`;
+    }),
   ].join("");
 }
 
@@ -1579,7 +1607,7 @@ function renderInventoryItems() {
 
   // Filter by folder
   if (inFolder) {
-    items = items.filter(it => it.folderId === inventoryState.currentFolderId);
+    items = items.filter(it => _itemInFolder(it, inventoryState.currentFolderId));
   }
 
   // Apply filters for parameters and agronomy
@@ -1650,11 +1678,10 @@ function renderInventoryItems() {
   let folderCardsHtml = "";
   if (!inFolder && !sq && categoryFolders.length > 0) {
     // Filter folders by search if needed (not searching here)
-    const unfolderedItems = items.filter(it => !it.folderId);
-    const folderedItemIds = new Set(items.filter(it => it.folderId).map(it => it.folderId));
+    const unfolderedItems = items.filter(it => !_itemHasFolder(it));
 
     folderCardsHtml = categoryFolders.map(folder => {
-      const folderItems = (inventoryState.items[inventoryState.currentCategory] || []).filter(it => it.folderId === folder.id);
+      const folderItems = (inventoryState.items[inventoryState.currentCategory] || []).filter(it => _itemInFolder(it, folder.id));
       const count = folderItems.length;
       const iconName = folder.icon || "folder";
       const colorStyle = folder.color ? `color:${folder.color};` : "";
@@ -2088,11 +2115,13 @@ function deleteFolder(folderId) {
 
   if (!confirm(`Delete folder "${folder.name}"? Items inside will be moved out of the folder (not deleted).`)) return;
 
-  // Unfolder all items in this folder
+  // Remove this folder from all items
   (inventoryState.items[cat] || []).forEach(item => {
-    if (item.folderId === folderId) {
-      delete item.folderId;
+    if (Array.isArray(item.folderIds)) {
+      item.folderIds = item.folderIds.filter(id => id !== folderId);
+      if (item.folderIds.length === 0) delete item.folderIds;
     }
+    if (item.folderId === folderId) delete item.folderId;
   });
 
   inventoryState.folders[cat] = inventoryState.folders[cat].filter(f => f.id !== folderId);
@@ -2134,7 +2163,7 @@ function saveItemsToCache() {
   }
 }
 
-// Move to folder modal
+// Move to folder modal (multi-folder with checkboxes)
 function openMoveToFolderModal(itemId) {
   const cat = inventoryState.currentCategory;
   const item = (inventoryState.items[cat] || []).find(it => it.id === itemId);
@@ -2142,32 +2171,49 @@ function openMoveToFolderModal(itemId) {
 
   const folders = inventoryState.folders[cat] || [];
   const listEl = document.getElementById("moveFolderList");
+  const currentIds = _getItemFolderIds(item);
 
-  let html = `<div class="move-folder-option${!item.folderId ? ' active' : ''}" data-folder-id="">
-    <span class="material-symbols-rounded">folder_off</span>
-    <span>No Folder</span>
-  </div>`;
-
-  html += folders.map(f => {
-    const isActive = item.folderId === f.id;
+  let html = folders.map(f => {
+    const checked = currentIds.includes(f.id);
     const iconName = f.icon || "folder";
     const colorStyle = f.color ? `color:${f.color};` : "";
-    return `<div class="move-folder-option${isActive ? ' active' : ''}" data-folder-id="${f.id}">
+    return `<label class="move-folder-option${checked ? ' active' : ''}" data-folder-id="${f.id}">
+      <input type="checkbox" value="${f.id}" ${checked ? "checked" : ""} style="display:none">
+      <span class="material-symbols-rounded move-folder-check">${checked ? "check_box" : "check_box_outline_blank"}</span>
       <span class="material-symbols-rounded" style="${colorStyle}">${escapeHtml(iconName)}</span>
       <span>${escapeHtml(f.name)}</span>
-    </div>`;
+    </label>`;
   }).join("");
+
+  if (folders.length === 0) {
+    html = `<div class="move-folder-empty" style="text-align:center;padding:1rem;opacity:0.6;">No folders yet. Create a folder first.</div>`;
+  }
 
   listEl.innerHTML = html;
 
+  // Toggle logic for checkboxes
   listEl.querySelectorAll(".move-folder-option").forEach(opt => {
-    opt.addEventListener("click", () => {
-      const fId = opt.dataset.folderId;
-      if (fId) {
-        item.folderId = fId;
+    const cb = opt.querySelector("input[type=checkbox]");
+    if (!cb) return;
+    opt.addEventListener("click", (e) => {
+      e.preventDefault();
+      cb.checked = !cb.checked;
+      opt.classList.toggle("active", cb.checked);
+      opt.querySelector(".move-folder-check").textContent = cb.checked ? "check_box" : "check_box_outline_blank";
+
+      // Collect all checked folder IDs
+      const selectedIds = [];
+      listEl.querySelectorAll("input[type=checkbox]:checked").forEach(c => selectedIds.push(c.value));
+
+      // Update item
+      if (selectedIds.length > 0) {
+        item.folderIds = selectedIds;
       } else {
-        delete item.folderId;
+        delete item.folderIds;
       }
+      // Clean up legacy folderId
+      delete item.folderId;
+
       saveItemsToCache();
 
       // Sync to Drive
@@ -2177,7 +2223,6 @@ function openMoveToFolderModal(itemId) {
         run: () => saveItemToGoogleDrive(categoryName, item),
       });
 
-      closeMoveToFolderModal();
       renderInventoryItems();
     });
   });
@@ -3269,7 +3314,7 @@ async function saveItem() {
         chemical: isAgronomy ? agronomyChemical : undefined,
         dose: isAgronomy ? agronomyDose : undefined,
         remark: isAgronomy ? agronomyRemark : undefined,
-        folderId: inventoryState.currentFolderId || undefined,
+        folderIds: inventoryState.currentFolderId ? [inventoryState.currentFolderId] : undefined,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };

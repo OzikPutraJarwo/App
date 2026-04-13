@@ -1376,6 +1376,7 @@
   function syncDataSourceUI() {
     const select = document.getElementById("analysisDataSourceSelect");
     const reuploadBtn = document.getElementById("analysisCustomUploadBtn");
+    const sheetSelect = document.getElementById("analysisSheetSelect");
     const state = app.state;
 
     if (select) select.value = state.dataSource || "trial";
@@ -1383,6 +1384,23 @@
     if (reuploadBtn) {
       const showReupload = state.dataSource === "custom" && state.customRows;
       reuploadBtn.style.display = showReupload ? "" : "none";
+    }
+
+    // Show/hide sheet selector
+    if (sheetSelect) {
+      if (state.dataSource === "custom" && state._customWorkbook && state._customWorkbook.SheetNames.length > 1) {
+        sheetSelect.style.display = "";
+        // Populate options if needed
+        const names = state._customWorkbook.SheetNames;
+        if (sheetSelect.options.length !== names.length || sheetSelect.options[0]?.value !== names[0]) {
+          sheetSelect.innerHTML = names.map(n =>
+            `<option value="${typeof escapeHtml === "function" ? escapeHtml(n) : n}">${typeof escapeHtml === "function" ? escapeHtml(n) : n}</option>`
+          ).join("");
+        }
+        sheetSelect.value = state._customSheetName || names[0];
+      } else {
+        sheetSelect.style.display = "none";
+      }
     }
 
     // Update dataset header label to show source info
@@ -1461,70 +1479,77 @@
           return;
         }
 
-        // Use first sheet by default
-        const sheetName = workbook.SheetNames[0];
-        const ws = workbook.Sheets[sheetName];
-        const rawRows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+        // Store workbook in state for sheet switching
+        app.state._customWorkbook = workbook;
+        app.state.customFileName = file.name;
 
-        if (rawRows.length < 2) {
-          if (typeof showToast === "function") showToast("File must have at least a header row and one data row", "error");
-          // Revert select
-          const select = document.getElementById("analysisDataSourceSelect");
-          if (select) select.value = app.state.dataSource || "trial";
-          return;
-        }
-
-        const headerRow = rawRows[0];
-        const bodyRows = rawRows.slice(1);
-
-        // Build columns from header
-        const columns = headerRow.map((h, idx) => {
-          const label = String(h ?? "").trim() || `Column ${idx + 1}`;
-          const key = `custom_${idx}_${label.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase()}`;
-          return { key, label, source: "custom" };
-        });
-
-        // Build row objects
-        const rows = bodyRows.map((row, rowIdx) => {
-          const obj = { _rowIndex: rowIdx + 1 };
-          columns.forEach((col, colIdx) => {
-            const rawValue = row[colIdx];
-            // Try to preserve numeric values
-            if (rawValue !== "" && rawValue !== null && rawValue !== undefined) {
-              const num = Number(rawValue);
-              obj[col.key] = Number.isFinite(num) && String(rawValue).trim() !== "" ? num : rawValue;
-            } else {
-              obj[col.key] = "";
-            }
-          });
-          return obj;
-        });
-
-        // Store in state
-        const state = app.state;
-        state.customColumns = columns;
-        state.customRows = rows;
-        state.customFileName = file.name;
-        state.dataSource = "custom";
-
-        // Re-initialize with custom data
-        app.init();
-
-        if (typeof showToast === "function") {
-          showToast(`Loaded ${rows.length} rows from "${file.name}" (sheet: ${sheetName})`, "success");
-        }
+        // Load first sheet by default
+        _loadSheetIntoAnalysis(workbook, workbook.SheetNames[0], file.name);
       } catch (error) {
         console.error("Custom dataset parse error:", error);
         if (typeof showToast === "function") {
           showToast("Failed to parse file: " + (error.message || "Unknown error"), "error");
         }
-        // Revert select
         const select = document.getElementById("analysisDataSourceSelect");
         if (select) select.value = app.state.dataSource || "trial";
       }
     };
 
     reader.readAsArrayBuffer(file);
+  }
+
+  function _loadSheetIntoAnalysis(workbook, sheetName, fileName) {
+    const ws = workbook.Sheets[sheetName];
+    const rawRows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "" });
+
+    if (rawRows.length < 2) {
+      if (typeof showToast === "function") showToast("Sheet must have at least a header row and one data row", "error");
+      const select = document.getElementById("analysisDataSourceSelect");
+      if (select) select.value = app.state.dataSource || "trial";
+      return;
+    }
+
+    const headerRow = rawRows[0];
+    const bodyRows = rawRows.slice(1);
+
+    const columns = headerRow.map((h, idx) => {
+      const label = String(h ?? "").trim() || `Column ${idx + 1}`;
+      const key = `custom_${idx}_${label.replace(/[^a-zA-Z0-9]/g, "_").toLowerCase()}`;
+      return { key, label, source: "custom" };
+    });
+
+    const rows = bodyRows.map((row, rowIdx) => {
+      const obj = { _rowIndex: rowIdx + 1 };
+      columns.forEach((col, colIdx) => {
+        const rawValue = row[colIdx];
+        if (rawValue !== "" && rawValue !== null && rawValue !== undefined) {
+          const num = Number(rawValue);
+          obj[col.key] = Number.isFinite(num) && String(rawValue).trim() !== "" ? num : rawValue;
+        } else {
+          obj[col.key] = "";
+        }
+      });
+      return obj;
+    });
+
+    const state = app.state;
+    state.customColumns = columns;
+    state.customRows = rows;
+    state.customFileName = fileName;
+    state._customSheetName = sheetName;
+    state.dataSource = "custom";
+
+    app.init();
+
+    if (typeof showToast === "function") {
+      showToast(`Loaded ${rows.length} rows from "${fileName}" (sheet: ${sheetName})`, "success");
+    }
+  }
+
+  function _handleSheetChange(sheetName) {
+    const state = app.state;
+    if (!state._customWorkbook || !sheetName) return;
+    _loadSheetIntoAnalysis(state._customWorkbook, sheetName, state.customFileName || "file");
   }
 
   window.applyAnalysisUserSettings = applyAnalysisUserSettings;
@@ -1548,4 +1573,5 @@
   window.handleAnalysisDataSourceChange = handleDataSourceChange;
   window.openAnalysisCustomUpload = openCustomUpload;
   window.syncAnalysisDataSourceUI = syncDataSourceUI;
+  window.handleAnalysisSheetChange = _handleSheetChange;
 })();
