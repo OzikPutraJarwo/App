@@ -157,7 +157,10 @@ function getTrialListTemplate(columns) {
 
 function renderTrialListCell(trial, col) {
   const progress = getTrialProgress(trial);
-  const isLoaded = !!trial._responsesLoaded;
+  const totalAreas = (trial.areas || []).length;
+  const loadedAreas = Array.isArray(trial._loadedAreas) ? trial._loadedAreas : [];
+  const isLoaded = !!trial._responsesLoaded || (totalAreas > 0 && loadedAreas.length >= totalAreas);
+  if (isLoaded && !trial._responsesLoaded) trial._responsesLoaded = true;
   const hasProgressSummary = !!trial.progressSummary;
   const showProgress = isLoaded || hasProgressSummary;
   const progressPercent = showProgress ? progress.percentage : 0;
@@ -210,7 +213,10 @@ function renderTrials() {
 
   const renderTrialCard = (trial) => {
     const progress = getTrialProgress(trial);
-    const isLoaded = !!trial._responsesLoaded;
+    const _totalAreas = (trial.areas || []).length;
+    const _loadedAreas = Array.isArray(trial._loadedAreas) ? trial._loadedAreas : [];
+    const isLoaded = !!trial._responsesLoaded || (_totalAreas > 0 && _loadedAreas.length >= _totalAreas);
+    if (isLoaded && !trial._responsesLoaded) trial._responsesLoaded = true;
     const hasProgressSummary = !!trial.progressSummary;
     const showProgress = isLoaded || hasProgressSummary;
     const progressPercent = showProgress ? progress.percentage : 0;
@@ -242,7 +248,10 @@ function renderTrials() {
 
   const renderArchivedTrialCard = (trial) => {
     const progress = getTrialProgress(trial);
-    const isLoaded = !!trial._responsesLoaded;
+    const _totalAreas = (trial.areas || []).length;
+    const _loadedAreas = Array.isArray(trial._loadedAreas) ? trial._loadedAreas : [];
+    const isLoaded = !!trial._responsesLoaded || (_totalAreas > 0 && _loadedAreas.length >= _totalAreas);
+    if (isLoaded && !trial._responsesLoaded) trial._responsesLoaded = true;
     const hasProgressSummary = !!trial.progressSummary;
     const showProgress = isLoaded || hasProgressSummary;
     const progressPercent = showProgress ? progress.percentage : 0;
@@ -10280,7 +10289,10 @@ function renderDashboardTrialSummary() {
 
   function buildTrialCard(trial) {
     const progress = getTrialProgress(trial);
-    const isLoaded = !!trial._responsesLoaded;
+    const _totalAreas = (trial.areas || []).length;
+    const _loadedAreas = Array.isArray(trial._loadedAreas) ? trial._loadedAreas : [];
+    const isLoaded = !!trial._responsesLoaded || (_totalAreas > 0 && _loadedAreas.length >= _totalAreas);
+    if (isLoaded && !trial._responsesLoaded) trial._responsesLoaded = true;
     const hasProgressSummary = !!trial.progressSummary;
     const showProgress = isLoaded || hasProgressSummary;
     const obs = progress.obs;

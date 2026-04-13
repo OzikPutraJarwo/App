@@ -470,6 +470,60 @@ async function compactLocalCacheFromUi() {
   }
 }
 
+async function clearAllDataFromUi() {
+  const confirmed = confirm(
+    "This will delete all local data (trials, inventory, library, settings, etc.).\n" +
+    "You will remain logged in.\n\n" +
+    "Continue?"
+  );
+  if (!confirmed) return;
+
+  const card = document.getElementById("storageHealthCard");
+  const clearBtn = card?.querySelector(".storage-btn-clear-all");
+  if (clearBtn) clearBtn.disabled = true;
+
+  try {
+    // Clear all local and persistent cache
+    clearLocalCache();
+    
+    // Reset state variables
+    if (typeof trialState !== 'undefined' && trialState) {
+      trialState.trials = [];
+    }
+    if (typeof inventoryState !== 'undefined' && inventoryState) {
+      inventoryState.items = {
+        crops: [],
+        entries: {},
+        locations: [],
+        parameters: [],
+        agronomy: [],
+      };
+      inventoryState.loaded = false;
+    }
+    if (typeof libraryState !== 'undefined' && libraryState) {
+      libraryState.items = [];
+      libraryState.loaded = false;
+    }
+    if (typeof loadDataBgState !== 'undefined' && loadDataBgState) {
+      loadDataBgState.loadingTrials = {};
+      loadDataBgState.updateFlags = {};
+      loadDataBgState.lastUpdateCheckAt = null;
+    }
+
+    showToast("All local data cleared successfully. Reloading...", "success");
+    
+    // Delay reload to allow toast display
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+  } catch (error) {
+    console.error("Clear all data failed:", error);
+    showToast("Failed to clear data. Please try again.", "error");
+  } finally {
+    if (clearBtn) clearBtn.disabled = false;
+  }
+}
+
 function renderStorageHealthCard() {
   const container = document.getElementById("storageHealthContainer");
   if (!container) return;
@@ -495,6 +549,9 @@ function renderStorageHealthCard() {
         </button>
         <button type="button" class="btn btn-secondary btn-sm storage-btn-compact" onclick="compactLocalCacheFromUi()">
           <span class="material-symbols-rounded">compress</span> Compact Local Cache
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm storage-btn-clear-all" onclick="clearAllDataFromUi()" style="color: #ef4444; margin-left: auto;">
+          <span class="material-symbols-rounded">delete_sweep</span> Clear All Data
         </button>
       </div>
     </div>
@@ -4235,10 +4292,12 @@ function renderLoadDataTrialList() {
   container.innerHTML = trials.map(trial => {
     const trialLoadingInfo = loadDataBgState.loadingTrials[trial.id];
     const isTrialLoading = !!(trialLoadingInfo && trialLoadingInfo.status === "loading");
-    const isLoaded = !!trial._responsesLoaded;
     const loadedAreas = Array.isArray(trial._loadedAreas) ? trial._loadedAreas : [];
     const totalAreas = (trial.areas || []).length;
     const loadedCount = loadedAreas.length;
+    // Derive isLoaded from actual data — _responsesLoaded flag may be stale
+    const isLoaded = !!trial._responsesLoaded || (totalAreas > 0 && loadedCount >= totalAreas);
+    if (isLoaded && !trial._responsesLoaded) trial._responsesLoaded = true;
     const isPartial = !isLoaded && loadedCount > 0;
 
     const hasTrialUpdate = _hasTrialUpdates(trial.id);
@@ -4248,7 +4307,7 @@ function renderLoadDataTrialList() {
       statusClass = "loading";
       statusIcon = "";
       statusLabel = trialLoadingInfo?.step || "Loading...";
-    } else if (hasTrialUpdate) {
+    } else if (isLoaded && hasTrialUpdate) {
       statusClass = "partial";
       statusIcon = "system_update_alt";
       statusLabel = "Update available";
@@ -4256,6 +4315,10 @@ function renderLoadDataTrialList() {
       statusClass = "loaded";
       statusIcon = "check_circle";
       statusLabel = "All loaded";
+    } else if (isPartial && hasTrialUpdate) {
+      statusClass = "partial";
+      statusIcon = "system_update_alt";
+      statusLabel = `${loadedCount}/${totalAreas} · Update`;
     } else if (isPartial) {
       statusClass = "partial";
       statusIcon = "downloading";
@@ -4437,6 +4500,7 @@ function unloadSingleAreaFromPanel(trialId, areaIndex, btnEl) {
   if (trial.agronomyResponses) delete trial.agronomyResponses[areaIdxStr];
   trial._loadedAreas = (trial._loadedAreas || []).filter(a => a !== areaIdxStr);
   if (trial._loadedAreaTypes) delete trial._loadedAreaTypes[areaIdxStr];
+  if (trial._loadSyncMarker) delete trial._loadSyncMarker[areaIdxStr];
   _setAreaTypeUpdateFlag(trialId, areaIdxStr, "observation", false);
   _setAreaTypeUpdateFlag(trialId, areaIdxStr, "agronomy", false);
   trial._responsesLoaded = false;
@@ -4511,6 +4575,7 @@ function unloadSingleAreaTypeFromPanel(trialId, areaIndex, type) {
   _setAreaTypeUpdateFlag(trialId, areaIdxStr, type, false);
 
   trial._loadedAreaTypes[areaIdxStr][type] = false;
+  if (trial._loadSyncMarker?.[areaIdxStr]) delete trial._loadSyncMarker[areaIdxStr][type];
 
   // If neither type is loaded, remove from _loadedAreas
   const types = trial._loadedAreaTypes[areaIdxStr];
@@ -4561,6 +4626,16 @@ async function loadSingleTrialFromPanel(trialId, btnEl) {
     renderLoadDataTrialList();
   }
 
+  // Re-verify _responsesLoaded on the current trial object
+  const currentTrial = trialState.trials.find(t => t.id === trialId);
+  if (currentTrial) {
+    const la = Array.isArray(currentTrial._loadedAreas) ? currentTrial._loadedAreas : [];
+    const ta = (currentTrial.areas || []).length;
+    if (ta > 0 && la.length >= ta && !currentTrial._responsesLoaded) {
+      currentTrial._responsesLoaded = true;
+    }
+  }
+
   delete loadDataBgState.loadingTrials[trialId];
   renderLoadDataTrialList();
   _updateLoadDataBtnAnimation();
@@ -4575,11 +4650,19 @@ async function unloadSingleTrialFromPanel(trialId, btnEl) {
   if (!trial) return;
   if (!trial._responsesLoaded && !(Array.isArray(trial._loadedAreas) && trial._loadedAreas.length > 0)) return;
 
+  // Clear update flags for all areas of this trial
+  const totalAreas = (trial.areas || []).length;
+  for (let i = 0; i < totalAreas; i++) {
+    _setAreaTypeUpdateFlag(trialId, String(i), "observation", false);
+    _setAreaTypeUpdateFlag(trialId, String(i), "agronomy", false);
+  }
+
   trial.responses = {};
   trial.agronomyResponses = {};
   trial._responsesLoaded = false;
   trial._loadedAreas = [];
   trial._loadedAreaTypes = {};
+  trial._loadSyncMarker = {};
 
   if (typeof saveLocalCache === "function") {
     saveLocalCache("trials", { trials: trialState.trials });
@@ -4639,7 +4722,18 @@ async function loadAllTrialResponses() {
       }
     }
 
-    if (trial._responsesLoaded) loaded++;
+    // Re-verify _responsesLoaded on the current trial object in trialState
+    // (the captured `trial` reference may be stale after background sync)
+    const currentTrial = trialState.trials.find(t => t.id === trial.id);
+    if (currentTrial) {
+      const la = Array.isArray(currentTrial._loadedAreas) ? currentTrial._loadedAreas : [];
+      const ta = (currentTrial.areas || []).length;
+      if (ta > 0 && la.length >= ta && !currentTrial._responsesLoaded) {
+        currentTrial._responsesLoaded = true;
+      }
+    }
+
+    if ((currentTrial || trial)._responsesLoaded) loaded++;
     loadDataBgState.loadAllLoaded = loaded;
     _updateLoadAllUI();
   }
