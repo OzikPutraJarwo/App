@@ -1,0 +1,21 @@
+{
+  "name": "SPECTRA",
+  "short_name": "SPECTRA",
+  "start_url": "https://ozikputrajarwo.github.io/Privo/Advanta-v3/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icons/SPECTRA%20Logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/SPECTRA%20Logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

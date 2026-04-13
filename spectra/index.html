@@ -1,0 +1,2340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPECTRA</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="icon" type="image/png" href="icons/SPECTRA Logo.png">
+  </head>
+
+  <body>
+    <!-- Login View -->
+    <div id="loginView" class="view active">
+      <div class="login-container">
+        <div class="login-content">
+          <div class="login-header">
+            <div class="logo-icon">
+              <img src="icons/SPECTRA%20Logo.png" alt="SPECTRA logo" class="logo-image logo-image-login">
+            </div>
+            <h1>SPECTRA</h1>
+            <p>Smart Platform for Experimental Control, Trial Research & Analysis</p>
+          </div>
+          <div class="login-body">
+            <p>Choose how you'd like to get started</p>
+            <button id="googleLoginBtn" class="btn btn-primary btn-large">
+              <span class="material-symbols-rounded">login</span>
+              <span>Sign in with Google</span>
+            </button>
+            <div class="login-divider">
+              <span>or</span>
+            </div>
+            <button id="guestLoginBtn" class="btn btn-secondary btn-large">
+              <span class="material-symbols-rounded">person</span>
+              <span>Continue as Guest</span>
+            </button>
+            <p class="login-hint">Guest data is stored locally on this device only</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main App View -->
+    <div id="appView" class="view">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <div class="logo-container">
+            <img src="icons/SPECTRA%20Logo.png" alt="SPECTRA logo" class="logo-image logo-image-sidebar">
+            <span class="logo-text">SPECTRA</span>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="#" class="nav-item active" data-view="dashboard">
+            <span class="material-symbols-rounded">dashboard</span>
+            <span>Dashboard</span>
+          </a>
+          <div class="nav-group" data-view="inventory">
+            <a href="#" class="nav-item nav-parent" data-view="inventory">
+              <span class="material-symbols-rounded">inventory_2</span>
+              <span>Inventory</span>
+              <span class="material-symbols-rounded nav-caret">expand_more</span>
+            </a>
+            <div class="nav-submenu">
+              <a href="#" class="nav-subitem" data-parent="inventory" data-category="crops">
+                <span class="material-symbols-rounded">psychiatry</span>
+                <span>Crops</span>
+              </a>
+              <a href="#" class="nav-subitem" data-parent="inventory" data-category="locations">
+                <span class="material-symbols-rounded">location_on</span>
+                <span>Locations</span>
+              </a>
+              <a href="#" class="nav-subitem" data-parent="inventory" data-category="parameters">
+                <span class="material-symbols-rounded">tune</span>
+                <span>Parameters</span>
+              </a>
+              <a href="#" class="nav-subitem" data-parent="inventory" data-category="agronomy">
+                <span class="material-symbols-rounded">local_florist</span>
+                <span>Agronomy</span>
+              </a>
+            </div>
+          </div>
+          <a href="#" class="nav-item" data-view="trial">
+            <span class="material-symbols-rounded">science</span>
+            <span>Trial</span>
+          </a>
+          <div class="nav-group" data-view="library">
+            <a href="#" class="nav-item nav-parent" data-view="library">
+              <span class="material-symbols-rounded">folder_open</span>
+              <span>Library</span>
+              <span class="material-symbols-rounded nav-caret">expand_more</span>
+            </a>
+            <div class="nav-submenu">
+              <a href="#" class="nav-subitem" data-parent="library" data-library-section="files">
+                <span class="material-symbols-rounded">folder</span>
+                <span>Uploaded Files</span>
+              </a>
+              <a href="#" class="nav-subitem" data-parent="library" data-library-section="trial-photos">
+                <span class="material-symbols-rounded">photo_library</span>
+                <span>Trial Photos</span>
+              </a>
+            </div>
+          </div>
+          <div class="nav-group" data-view="reminder">
+            <a href="#" class="nav-item nav-parent" data-view="reminder">
+              <span class="material-symbols-rounded">notifications</span>
+              <span>Reminder</span>
+              <span class="material-symbols-rounded nav-caret">expand_more</span>
+            </a>
+            <div class="nav-submenu">
+              <a href="#" class="nav-subitem" data-parent="reminder" data-reminder-tab="observation">
+                <span class="material-symbols-rounded">visibility</span>
+                <span>Observation</span>
+              </a>
+              <a href="#" class="nav-subitem" data-parent="reminder" data-reminder-tab="agronomy">
+                <span class="material-symbols-rounded">local_florist</span>
+                <span>Agronomy</span>
+              </a>
+            </div>
+          </div>
+          <a href="#" class="nav-item" data-view="analysis">
+            <span class="material-symbols-rounded">query_stats</span>
+            <span>Data Analysis</span>
+            <span class="nav-beta-badge">BETA</span>
+          </a>
+          <!-- <a href="https://app.kodejarwo.com/cropid/" target="_blank" data-view="external" class="nav-item">
+            <svg width="3478" height="3478" viewBox="0 0 3478 3478" fill="none" xmlns="http://www.w3.org/2000/svg"> <g filter="url(#filter0_d_2006_15)"> <g clip-path="url(#clip0_2006_15)"> <path d="M2307.47 1265.35L1886.45 1686.37C1857.36 1715.46 1857.36 1762.54 1886.45 1791.63L2307.47 2212.65C2568.66 2473.83 2993.58 2473.83 3254.77 2212.65C3515.95 1951.46 3515.95 1526.54 3254.77 1265.35C2993.58 1004.17 2568.66 1004.17 2307.47 1265.35ZM2307.47 1686.37L2623.24 1370.61C2652.33 1341.52 2699.4 1341.52 2728.49 1370.61C2757.58 1399.69 2757.58 1446.77 2728.49 1475.86L2412.73 1791.63C2383.64 1820.72 2336.56 1820.72 2307.47 1791.63C2278.38 1762.54 2278.38 1715.46 2307.47 1686.37ZM2623.24 2002.14C2594.17 2031.2 2547.04 2031.2 2517.98 2002.14C2488.91 1973.07 2488.91 1925.95 2517.98 1896.88C2547.05 1867.82 2594.17 1867.82 2623.24 1896.88C2652.3 1925.95 2652.3 1973.07 2623.24 2002.14ZM3149.51 1896.88L2939 2107.39C2909.91 2136.48 2862.84 2136.48 2833.75 2107.39C2804.66 2078.3 2804.66 2031.23 2833.75 2002.14L3044.26 1791.63C3073.35 1762.54 3120.42 1762.54 3149.51 1791.63C3178.6 1820.72 3178.6 1867.79 3149.51 1896.88ZM3044.26 1581.12L2807.43 1817.94C2778.34 1847.03 2731.27 1847.03 2702.18 1817.94C2673.09 1788.85 2673.09 1741.77 2702.18 1712.69L2939 1475.86C2968.09 1446.77 3015.17 1446.77 3044.26 1475.86C3073.35 1504.95 3073.35 1552.03 3044.26 1581.12ZM202.365 1265.35C-58.7939 1526.51 -58.8196 1951.46 202.366 2212.65C463.551 2473.83 888.504 2473.81 1149.66 2212.65L1570.68 1791.63C1599.75 1762.56 1599.77 1715.46 1570.68 1686.37L1149.66 1265.35C888.478 1004.17 463.525 1004.19 202.365 1265.35ZM307.621 1581.12L518.131 1370.61C547.195 1341.54 594.298 1341.52 623.386 1370.61C652.475 1399.7 652.45 1446.8 623.387 1475.86L412.876 1686.37C383.812 1715.44 336.71 1715.46 307.621 1686.37C278.532 1657.28 278.557 1610.18 307.621 1581.12ZM518.131 2002.14C489.065 2031.2 441.94 2031.2 412.876 2002.14C383.809 1973.07 383.809 1925.95 412.876 1896.88C441.943 1867.82 489.065 1867.82 518.131 1896.88C547.195 1925.95 547.198 1973.07 518.131 2002.14ZM1149.66 1791.63L833.897 2107.39C804.834 2136.46 757.731 2136.48 728.642 2107.39C699.553 2078.3 699.578 2031.2 728.642 2002.14L1044.41 1686.37C1073.47 1657.31 1120.57 1657.28 1149.66 1686.37C1178.75 1715.46 1178.73 1762.56 1149.66 1791.63ZM939.152 1581.12L702.328 1817.94C673.264 1847 626.162 1847.03 597.073 1817.94C567.984 1788.85 568.009 1741.75 597.073 1712.69L833.897 1475.86C862.961 1446.8 910.063 1446.77 939.152 1475.86C968.241 1504.95 968.216 1552.05 939.152 1581.12Z" fill="white"/> <path d="M1807.51 975.899C1851.11 932.301 1851.11 861.615 1807.51 818.017C1763.91 774.418 1693.22 774.418 1649.63 818.017C1606.03 861.615 1606.03 932.301 1649.63 975.899C1693.22 1019.5 1763.91 1019.5 1807.51 975.899Z" fill="white"/> <path d="M1781.2 1581.12L2096.96 1265.35C2300.07 1062.24 2300.07 731.674 2096.96 528.564C1893.85 325.454 1563.28 325.454 1360.17 528.565C1157.06 731.675 1157.06 1062.24 1360.17 1265.35L1675.94 1581.12C1705.03 1610.21 1752.11 1610.21 1781.2 1581.12ZM1544.37 712.761C1645.93 611.206 1811.21 611.206 1912.76 712.761C2014.32 814.316 2014.32 979.6 1912.76 1081.15C1811.21 1182.71 1645.93 1182.71 1544.37 1081.15C1442.82 979.6 1442.82 814.316 1544.37 712.761Z" fill="white"/> <path d="M1807.51 2659.98C1851.11 2616.39 1851.11 2545.7 1807.51 2502.1C1763.91 2458.5 1693.22 2458.5 1649.63 2502.1C1606.03 2545.7 1606.03 2616.39 1649.63 2659.98C1693.22 2703.58 1763.91 2703.58 1807.51 2659.98Z" fill="white"/> <path d="M1675.94 1896.88L1360.17 2212.65C1157.04 2415.78 1157.06 2746.33 1360.17 2949.44C1563.28 3152.55 1893.83 3152.57 2096.96 2949.44C2300.1 2746.3 2300.07 2415.76 2096.96 2212.65L1781.2 1896.88C1752.11 1867.79 1705 1867.82 1675.94 1896.88ZM1912.76 2765.24C1811.21 2866.79 1645.93 2866.79 1544.37 2765.24C1442.82 2663.68 1442.82 2498.4 1544.37 2396.85C1645.93 2295.29 1811.21 2295.29 1912.76 2396.85C2014.32 2498.4 2014.32 2663.68 1912.76 2765.24Z" fill="white"/> </g> </g> <defs> <filter id="filter0_d_2006_15" x="-4" y="0" width="3486" height="3486" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"> <feFlood flood-opacity="0" result="BackgroundImageFix"/> <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/> <feOffset dy="4"/> <feGaussianBlur stdDeviation="2"/> <feComposite in2="hardAlpha" operator="out"/> <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"/> <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2006_15"/> <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_2006_15" result="shape"/> </filter> <clipPath id="clip0_2006_15"> <rect width="3478" height="3478" fill="white"/> </clipPath> </defs> </svg>
+            <span>CropID</span>
+          </a> -->
+        </nav>
+
+      </aside>
+
+      <!-- Sidebar Overlay for Mobile -->
+      <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Top Bar -->
+        <div class="topbar">
+          <div class="topbar-left">
+            <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+              <span class="material-symbols-rounded">menu</span>
+            </button>
+            <h2 id="pageTitle">Dashboard</h2>
+          </div>
+          <div class="topbar-right">
+            <button id="syncStatusBtn" class="sync-status" aria-label="Sync status" title="Synced">
+              <span class="material-symbols-rounded">cached</span>
+              <span id="syncQueueCount" class="sync-badge">0</span>
+            </button>
+            <button id="runTrialNavBtn" class="btn btn-secondary hidden mobile-nav-toggle" onclick="openMobileNav()" style="display: none;">
+              <span class="material-symbols-rounded">menu</span>
+            </button>
+            <button id="runTrialSaveBtn" class="btn btn-secondary btn-icon-only run-save-icon hidden" onclick="manualSaveProgress()" style="display: none;" title="Save progress">
+              <span class="material-symbols-rounded">save</span>
+            </button>
+            <select id="trialReportSheetSelect" class="trial-report-topbar-select hidden" style="display: none;" onchange="handleTrialReportSheetSelect(this.value)"></select>
+            <button id="trialReportTopbarImportBtn" class="btn btn-secondary hidden" onclick="openTrialReportImport()" style="display: none;" title="Import report">
+              <span class="material-symbols-rounded">upload</span>
+            </button>
+            <button id="trialReportTopbarDownloadBtn" class="btn btn-secondary hidden" onclick="downloadTrialReportExcel()" style="display: none;" title="Download report">
+              <span class="material-symbols-rounded">download</span>
+            </button>
+            <input type="file" id="trialReportImportFileInput" accept=".xlsx,.xls,.csv" hidden>
+            <select id="analysisSectionLayoutTopbar" class="trial-report-topbar-select analysis-topbar-control hidden" style="display: none;" title="Section layout">
+              <option value="vertical">Vertical Split</option>
+              <option value="horizontal">Horizontal Split</option>
+            </select>
+            <select id="analysisSectionFocusTopbar" class="trial-report-topbar-select analysis-topbar-control hidden" style="display: none;" title="Focus mode">
+              <option value="balanced">Balanced</option>
+              <option value="focus-results">Focus Results</option>
+              <option value="focus-settings">Focus Settings</option>
+              <option value="focus-dataset">Focus Dataset</option>
+            </select>
+            <div class="user-menu" id="userMenu">
+              <button class="user-menu-trigger" id="userMenuTrigger" aria-haspopup="true" aria-expanded="false">
+                <div id="userAvatar" class="user-avatar"></div>
+                <span class="material-symbols-rounded">expand_more</span>
+              </button>
+              <div class="user-dropdown" id="userDropdown">
+                <div class="user-dropdown-header">
+                  <div id="userDropdownName" class="user-name"></div>
+                  <div id="userDropdownEmail" class="user-email"></div>
+                  <div id="tokenCountdown" class="token-countdown">--:--:--</div>
+                </div>
+                <div class="user-dropdown-menu">
+                  <button class="user-dropdown-item" id="exportDataBtn">
+                    <span class="material-symbols-rounded">download</span>
+                    <span>Export Data</span>
+                  </button>
+                  <button class="user-dropdown-item" id="importDataBtn">
+                    <span class="material-symbols-rounded">upload</span>
+                    <span>Import Data</span>
+                  </button>
+                  <button class="user-dropdown-item" id="userSettingsBtn">
+                    <span class="material-symbols-rounded">settings</span>
+                    <span>User Settings</span>
+                  </button>
+                  <div class="user-dropdown-divider"></div>
+                  <button class="user-dropdown-item danger" id="userLogoutBtn">
+                    <span class="material-symbols-rounded">logout</span>
+                    <span>Logout</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+          <div id="dashboardContent" class="page-content active">
+            <!-- Inventory Summary Cards -->
+            <div class="dashboard-grid">
+              <div class="dashboard-card" data-category="crops">
+                <div class="card-icon crops">
+                  <span class="material-symbols-rounded">psychiatry</span>
+                </div>
+                <div class="card-content">
+                  <h3>Crops</h3>
+                  <p id="cropsCount" class="card-count">0 items</p>
+                </div>
+              </div>
+              <div class="dashboard-card" data-category="crops">
+                <div class="card-icon lines">
+                  <span class="material-symbols-rounded">timeline</span>
+                </div>
+                <div class="card-content">
+                  <h3>Entries</h3>
+                  <p id="entriesCount" class="card-count">0 items</p>
+                </div>
+              </div>
+              <div class="dashboard-card" data-category="locations">
+                <div class="card-icon locations">
+                  <span class="material-symbols-rounded">location_on</span>
+                </div>
+                <div class="card-content">
+                  <h3>Locations</h3>
+                  <p id="locationsCount" class="card-count">0 items</p>
+                </div>
+              </div>
+              <div class="dashboard-card" data-category="parameters">
+                <div class="card-icon parameters">
+                  <span class="material-symbols-rounded">tune</span>
+                </div>
+                <div class="card-content">
+                  <h3>Parameters</h3>
+                  <p id="parametersCount" class="card-count">0 items</p>
+                </div>
+              </div>
+              <div class="dashboard-card" data-category="agronomy">
+                <div class="card-icon agronomy">
+                  <span class="material-symbols-rounded">local_florist</span>
+                </div>
+                <div class="card-content">
+                  <h3>Agronomy</h3>
+                  <p id="agronomyCount" class="card-count">0 items</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Trial Summary Section (Observation & Agronomy) -->
+            <div class="dashboard-section">
+              <div class="dashboard-section-header">
+                <h3>
+                  <span class="material-symbols-rounded">science</span>
+                  Trial
+                </h3>
+                <button class="dash-view-all-btn" id="dashViewAllTrials">
+                  View All <span class="material-symbols-rounded" style="font-size:16px">arrow_forward</span>
+                </button>
+              </div>
+              <div id="dashboardTrialSummary" class="dashboard-trial-summary">
+                <!-- Trial summary items rendered by JS -->
+              </div>
+            </div>
+
+            <!-- Observation Reminders Section -->
+            <div class="dashboard-section">
+              <div class="dashboard-section-header">
+                <h3>
+                  <span class="material-symbols-rounded">visibility</span>
+                  Observation Reminders
+                </h3>
+                <button class="dash-view-all-btn" id="dashViewAllObsReminders">
+                  View All <span class="material-symbols-rounded" style="font-size:16px">arrow_forward</span>
+                </button>
+              </div>
+              <div id="dashboardObsReminders" class="dashboard-reminders">
+                <!-- Observation reminder preview rendered by JS -->
+              </div>
+            </div>
+
+            <!-- Agronomy Reminders Section -->
+            <div class="dashboard-section">
+              <div class="dashboard-section-header">
+                <h3>
+                  <span class="material-symbols-rounded">local_florist</span>
+                  Agronomy Reminders
+                </h3>
+                <button class="dash-view-all-btn" id="dashViewAllAgroReminders">
+                  View All <span class="material-symbols-rounded" style="font-size:16px">arrow_forward</span>
+                </button>
+              </div>
+              <div id="dashboardAgroReminders" class="dashboard-reminders">
+                <!-- Agronomy reminder preview rendered by JS -->
+              </div>
+            </div>
+          </div>
+        
+          <div id="inventoryContent" class="page-content">
+            <!-- Inventory Content -->
+            <div class="inventory-container">
+              <div class="inventory-header">
+                <div class="inventory-header-left">
+                  <button id="folderBackBtn" class="folder-back-btn hidden" title="Back to folders">
+                    <span class="material-symbols-rounded">arrow_back</span>
+                  </button>
+                  <h3 id="categoryTitle">Crops</h3>
+                  <span id="folderBreadcrumb" class="folder-breadcrumb hidden"></span>
+                </div>
+                <div class="inventory-toolbar">
+                  <div class="inventory-search-container">
+                    <span class="material-symbols-rounded inventory-search-icon">search</span>
+                    <input type="text" id="inventorySearchInput" class="inventory-search-input" placeholder="Search..." autocomplete="off">
+                  </div>
+                  <div class="toolbar-dropdown-wrapper" id="inventoryFilterWrapper" style="display:none;">
+                    <button class="btn btn-secondary btn-icon" id="inventoryFilterBtn" title="Filter & Sort">
+                      <span class="material-symbols-rounded">tune</span>
+                    </button>
+                    <div class="toolbar-dropdown" id="inventoryFilterDropdown">
+                      <div class="toolbar-dropdown-group">
+                        <label class="toolbar-dropdown-label">Filter by Crop</label>
+                        <select id="inventoryFilterCrop" class="toolbar-dropdown-select">
+                          <option value="">All Crops</option>
+                        </select>
+                      </div>
+                      <div class="toolbar-dropdown-group">
+                        <label class="toolbar-dropdown-label">Sort By</label>
+                        <select id="inventorySortBy" class="toolbar-dropdown-select">
+                          <option value="name">Sort by Name</option>
+                          <option value="updatedAt">Sort by Last Updated</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="toolbar-dropdown-wrapper" id="inventoryIoWrapper" style="display:none;">
+                    <button class="btn btn-secondary btn-icon" id="inventoryIoBtn" title="Import / Export">
+                      <span class="material-symbols-rounded">install_desktop</span>
+                    </button>
+                    <div class="toolbar-dropdown" id="inventoryIoDropdown">
+                      <button class="toolbar-dropdown-item" onclick="exportInventoryData()">
+                        <span class="material-symbols-rounded">download</span>
+                        Export
+                      </button>
+                      <button class="toolbar-dropdown-item" onclick="openImportModal()">
+                        <span class="material-symbols-rounded">upload</span>
+                        Import
+                      </button>
+                    </div>
+                  </div>
+                  <button id="addFolderBtn" class="btn btn-secondary btn-icon" title="New Folder">
+                    <span class="material-symbols-rounded">create_new_folder</span>
+                  </button>
+                  <button id="addItemBtn" class="btn btn-primary">
+                    <span class="material-symbols-rounded">add</span>
+                    <span>Add New Item</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="inventory-list" id="inventoryList">
+                <!-- Items will be populated here -->
+              </div>
+            </div>
+
+            <!-- Import Modal -->
+            <div id="importModal" class="import-modal-overlay hidden">
+              <div class="import-modal">
+                <div class="import-modal-header">
+                  <h3 id="importModalTitle">Import Data</h3>
+                  <button class="btn-icon-close" onclick="closeImportModal()">
+                    <span class="material-symbols-rounded">close</span>
+                  </button>
+                </div>
+
+                <!-- Step 1: Upload File -->
+                <div id="importStep1" class="import-step">
+                  <div class="import-dropzone" id="importDropzone">
+                    <span class="material-symbols-rounded">upload_file</span>
+                    <p>Drag & drop your Excel or CSV file here</p>
+                    <span class="import-dropzone-sub">or click to browse</span>
+                    <input type="file" id="importFileInput" accept=".xlsx,.xls,.csv" hidden>
+                  </div>
+                  <div class="import-file-info hidden" id="importFileInfo">
+                    <span class="material-symbols-rounded">description</span>
+                    <span id="importFileName"></span>
+                    <button class="btn-icon-close" onclick="clearImportFile()" title="Remove file">
+                      <span class="material-symbols-rounded">close</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Step 2: Map Columns -->
+                <div id="importStep2" class="import-step hidden">
+                  <p class="import-step-desc">Map your file columns to the data fields. Select the correct header for each field.</p>
+                  <div id="importColumnMapping" class="import-column-mapping">
+                    <!-- Column mapping dropdowns rendered by JS -->
+                  </div>
+                </div>
+
+                <!-- Step 3: Preview -->
+                <div id="importStep3" class="import-step hidden">
+                  <div class="import-preview-header">
+                    <span id="importPreviewCount"></span>
+                  </div>
+                  <div class="import-preview-table-wrap">
+                    <table class="import-preview-table" id="importPreviewTable">
+                      <!-- Preview table rendered by JS -->
+                    </table>
+                  </div>
+                  <div id="importDuplicateWarning" class="import-duplicate-warning hidden">
+                    <span class="material-symbols-rounded">warning</span>
+                    <div>
+                      <strong id="importDuplicateCount">0</strong> duplicate item(s) found.
+                      <p class="import-duplicate-desc">These items have identical data to existing entries.</p>
+                    </div>
+                    <div class="import-duplicate-actions">
+                      <label><input type="radio" name="duplicateAction" value="skip" checked> Skip duplicates</label>
+                      <label><input type="radio" name="duplicateAction" value="replace"> Replace existing</label>
+                      <label><input type="radio" name="duplicateAction" value="add"> Add as new</label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="import-modal-footer">
+                  <button class="btn btn-secondary" id="importBackBtn" onclick="importStepBack()" style="display:none;">
+                    <span class="material-symbols-rounded">arrow_back</span> Back
+                  </button>
+                  <div class="import-modal-footer-right">
+                    <button class="btn btn-secondary" onclick="closeImportModal()">Cancel</button>
+                    <button class="btn btn-primary" id="importNextBtn" onclick="importStepNext()" disabled>
+                      <span id="importNextLabel">Next</span>
+                      <span class="material-symbols-rounded" id="importNextIcon">arrow_forward</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Folder Modal -->
+            <div id="folderModal" class="folder-modal-overlay hidden">
+              <div class="folder-modal">
+                <div class="folder-modal-header">
+                  <h3 id="folderModalTitle">New Folder</h3>
+                  <button class="btn-icon-close" id="folderModalCloseBtn">
+                    <span class="material-symbols-rounded">close</span>
+                  </button>
+                </div>
+                <div class="folder-modal-body">
+                  <div class="form-group">
+                    <label for="folderNameInput">Folder Name</label>
+                    <input type="text" id="folderNameInput" class="form-control" placeholder="Enter folder name" maxlength="50">
+                  </div>
+                  <div class="form-group">
+                    <label>Color</label>
+                    <div class="folder-color-picker" id="folderColorPicker">
+                      <button class="folder-color-swatch active" data-color="" title="Default (no color)">
+                        <span class="material-symbols-rounded" style="font-size:18px;">format_color_reset</span>
+                      </button>
+                      <button class="folder-color-swatch" data-color="#ef4444" style="background:#ef4444;" title="Red"></button>
+                      <button class="folder-color-swatch" data-color="#f97316" style="background:#f97316;" title="Orange"></button>
+                      <button class="folder-color-swatch" data-color="#eab308" style="background:#eab308;" title="Yellow"></button>
+                      <button class="folder-color-swatch" data-color="#22c55e" style="background:#22c55e;" title="Green"></button>
+                      <button class="folder-color-swatch" data-color="#14b8a6" style="background:#14b8a6;" title="Teal"></button>
+                      <button class="folder-color-swatch" data-color="#3b82f6" style="background:#3b82f6;" title="Blue"></button>
+                      <button class="folder-color-swatch" data-color="#8b5cf6" style="background:#8b5cf6;" title="Purple"></button>
+                      <button class="folder-color-swatch" data-color="#ec4899" style="background:#ec4899;" title="Pink"></button>
+                      <button class="folder-color-swatch" data-color="#78716c" style="background:#78716c;" title="Gray"></button>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Icon <span class="form-hint">(optional, from Material Symbols Rounded)</span></label>
+                    <div class="folder-icon-input-row">
+                      <span class="material-symbols-rounded folder-icon-preview" id="folderIconPreview">folder</span>
+                      <input type="text" id="folderIconInput" class="form-control" placeholder="e.g. science, eco, genetics...">
+                    </div>
+                    <div class="folder-icon-suggestions" id="folderIconSuggestions">
+                      <button type="button" data-icon="folder">folder</button>
+                      <button type="button" data-icon="science">science</button>
+                      <button type="button" data-icon="eco">eco</button>
+                      <button type="button" data-icon="spa">spa</button>
+                      <button type="button" data-icon="grass">grass</button>
+                      <button type="button" data-icon="agriculture">agriculture</button>
+                      <button type="button" data-icon="park">park</button>
+                      <button type="button" data-icon="water_drop">water_drop</button>
+                      <button type="button" data-icon="sunny">sunny</button>
+                      <button type="button" data-icon="terrain">terrain</button>
+                      <button type="button" data-icon="bug_report">bug_report</button>
+                      <button type="button" data-icon="biotech">biotech</button>
+                      <button type="button" data-icon="lab_research">lab_research</button>
+                      <button type="button" data-icon="genetics">genetics</button>
+                      <button type="button" data-icon="experiment">experiment</button>
+                      <button type="button" data-icon="potted_plant">potted_plant</button>
+                      <button type="button" data-icon="psychiatry">psychiatry</button>
+                      <button type="button" data-icon="local_florist">local_florist</button>
+                      <button type="button" data-icon="landscape">landscape</button>
+                      <button type="button" data-icon="star">star</button>
+                      <button type="button" data-icon="bookmark">bookmark</button>
+                      <button type="button" data-icon="label">label</button>
+                      <button type="button" data-icon="category">category</button>
+                      <button type="button" data-icon="inventory_2">inventory_2</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="folder-modal-footer">
+                  <button class="btn btn-secondary" id="folderModalCancelBtn">Cancel</button>
+                  <button class="btn btn-danger" id="folderModalDeleteBtn" style="display:none;">Delete</button>
+                  <button class="btn btn-primary" id="folderModalSaveBtn">Create</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Move to Folder Modal -->
+            <div id="moveToFolderModal" class="folder-modal-overlay hidden">
+              <div class="folder-modal folder-modal-sm">
+                <div class="folder-modal-header">
+                  <h3>Move to Folder</h3>
+                  <button class="btn-icon-close" id="moveToFolderCloseBtn">
+                    <span class="material-symbols-rounded">close</span>
+                  </button>
+                </div>
+                <div class="folder-modal-body">
+                  <div class="move-folder-list" id="moveFolderList">
+                    <!-- Folder options rendered by JS -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <div id="trialContent" class="page-content">
+            <div class="inventory-container" id="trialManagementPanel">
+                <div class="inventory-header">
+                  <h3>Trials</h3>
+                  <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <button id="loadDataBtn" class="btn btn-secondary" aria-label="Load latest data" title="Load Latest Data">
+                      <span class="material-symbols-rounded">cloud_download</span>
+                      <span>Load Data</span>
+                    </button>
+                    <button id="addTrialBtn" class="btn btn-primary">
+                      <span class="material-symbols-rounded">add</span>
+                      <span>Create New Trial</span>
+                    </button>
+                  </div>
+                </div>
+        
+                <div class="run-trial-list" id="trialList">
+                  <!-- Active trials will be populated here -->
+                </div>
+              </div>
+        
+              <!-- Archived Trials Container -->
+              <div class="inventory-container" id="archivedTrialManagementPanel" style="display: none;">
+                <div class="inventory-header archived-header">
+                  <button class="archived-header-toggle" onclick="toggleArchivedTrials()" title="Toggle archived trials">
+                    <span class="material-symbols-rounded">expand_more</span>
+                    <h3>Archived Trials</h3>
+                  </button>
+                </div>
+                <div class="run-trial-list" id="archivedTrialList">
+                  <!-- Archived trials will be populated here -->
+                </div>
+              </div>
+        
+              <!-- Trial Detail Modal -->
+              <div id="trialDetailModal" class="library-preview-modal">
+                <div class="library-preview-modal-content">
+                  <div class="library-detail-header">
+                    <div class="library-detail-info">
+                      <h3 id="trialDetailTitle">Trial Details</h3>
+                    </div>
+                    <div class="library-detail-actions">
+                      <div class="toolbar-dropdown-wrapper">
+                        <button class="btn btn-secondary" id="trialDetailActionsBtn">
+                          <span class="material-symbols-rounded">more_horiz</span>
+                          <span>Actions</span>
+                        </button>
+                        <div class="toolbar-dropdown" id="trialDetailActionsDropdown">
+                          <button class="toolbar-dropdown-item" id="trialDetailEditBtn" onclick="editTrialFromDetail(); closeAllToolbarDropdowns();">
+                            <span class="material-symbols-rounded" style="color:var(--info)">edit</span>
+                            Edit
+                          </button>
+                          <button class="toolbar-dropdown-item" id="trialDetailDownloadBtn" onclick="downloadTrialDetailPdf(); closeAllToolbarDropdowns();">
+                            <span class="material-symbols-rounded">download</span>
+                            Download
+                          </button>
+                          <div class="toolbar-dropdown-divider"></div>
+                          <button class="toolbar-dropdown-item" id="trialDetailArchiveBtn" onclick="archiveTrialFromDetail(); closeAllToolbarDropdowns();">
+                            <span class="material-symbols-rounded" style="color:var(--warning)">archive</span>
+                            Archive
+                          </button>
+                          <button class="toolbar-dropdown-item toolbar-dropdown-item-danger" id="trialDetailDeleteBtn" onclick="deleteTrialFromDetail(); closeAllToolbarDropdowns();">
+                            <span class="material-symbols-rounded">delete</span>
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                      <button class="btn btn-secondary" onclick="closeTrialDetailModal()">
+                        <span class="material-symbols-rounded">close</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div id="trialDetailBody" class="library-preview trial-detail-body">
+                    <!-- Content dynamically populated by showTrialDetail() -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Trial Report Interface -->
+              <div id="trialReportInterface" class="trial-editor trial-fullscreen-interface">
+                <div class="modal-content trial-editor-content trial-report-content">
+                  <div class="modal-body modal-body-scrollable trial-report-body">
+                    <div class="trial-report-preview">
+                      <div class="trial-report-table-wrap">
+                        <table id="trialReportPreviewTable" class="trial-report-table"></table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+        
+            <div id="trialEditor" class="trial-editor trial-fullscreen-interface">
+              <div class="modal-content trial-editor-content">
+                <div class="trial-section-nav">
+                  <div class="section-nav-item active" data-section="basic">
+                    <div class="section-nav-number">1</div>
+                    <div class="section-nav-text">Basic Info</div>
+                  </div>
+                  <div class="section-nav-item" data-section="experiment">
+                    <div class="section-nav-number">2</div>
+                    <div class="section-nav-text">Experiment</div>
+                  </div>
+                  <div class="section-nav-item" data-section="splitplot" id="splitPlotNavItem" style="display:none;">
+                    <div class="section-nav-number">3</div>
+                    <div class="section-nav-text">Factorial</div>
+                  </div>
+                  <div class="section-nav-item" data-section="plotspec">
+                    <div class="section-nav-number">4</div>
+                    <div class="section-nav-text">Plot Spec</div>
+                  </div>
+                  <div class="section-nav-item" data-section="observation">
+                    <div class="section-nav-number">4</div>
+                    <div class="section-nav-text">Obs & Agronomy</div>
+                  </div>
+                  <div class="section-nav-item" data-section="field">
+                    <div class="section-nav-number">5</div>
+                    <div class="section-nav-text">Field</div>
+                  </div>
+                  <div class="section-nav-item" data-section="layouting">
+                    <div class="section-nav-number">6</div>
+                    <div class="section-nav-text">Layouting</div>
+                  </div>
+                </div>
+        
+                <div class="modal-body modal-body-scrollable">
+                  <form id="trialForm">
+                    <div class="trial-section active" id="trialSectionBasic">
+                      <h4 class="trial-form-section-title">Basic Information</h4>
+                      <div class="form-group">
+                        <label for="trialName">Trial Name</label>
+                        <input type="text" id="trialName" placeholder="Enter trial name" required>
+                      </div>
+                      <div class="form-group">
+                        <label for="trialDescription">Description</label>
+                        <textarea id="trialDescription" placeholder="Enter trial description" rows="3"></textarea>
+                      </div>
+                      <div class="form-group">
+                        <label>Planting Window</label>
+                        <div class="form-grid-2">
+                          <div>
+                            <input type="month" id="trialPlantingStart" placeholder="Start date" required>
+                            <small class="form-hint">Start month</small>
+                          </div>
+                          <div>
+                            <input type="month" id="trialPlantingEnd" placeholder="End date" required>
+                            <small class="form-hint">End month</small>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="trialPlantingSeason">Planting Season</label>
+                        <select id="trialPlantingSeason" required>
+                          <option value="">Select planting season</option>
+                          <option value="Wet Season">Wet Season</option>
+                          <option value="Dry Season">Dry Season</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label for="trialCrops">Crops</label>
+                        <select id="trialCrops" required>
+                          <option value="">Select crop</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div class="trial-section" id="trialSectionExperiment">
+                      <h4 class="trial-form-section-title">Experiment Setup</h4>
+                      <div class="form-group">
+                        <label for="trialPollination">Type of Pollination</label>
+                        <select id="trialPollination" required>
+                          <option value="">Select type of pollination</option>
+                          <option value="Selfing">Selfing</option>
+                          <option value="Crossing">Crossing</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label for="trialType">Trial Type</label>
+                        <select id="trialType" required>
+                          <option value="">Select trial type</option>
+                          <!-- Options populated dynamically based on pollination -->
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label for="trialExpDesign">Experimental Design</label>
+                        <select id="trialExpDesign">
+                          <option value="">Select design</option>
+                          <option value="CRD">Completely Randomized Design (CRD)</option>
+                          <option value="RBD">Randomized Block Design (RBD)</option>
+                          <option value="LSD">Latin Square Design (LSD)</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label for="trialFactors">No. of Factors</label>
+                        <input type="number" id="trialFactors" min="1" step="1" value="1" placeholder="Enter number of factors">
+                        <small class="form-hint">Minimum 1 factor</small>
+                      </div>
+                      <div class="form-group" id="trialFactorArrangementGroup" style="display:none;">
+                        <label for="trialFactorArrangement">Factor Arrangement</label>
+                        <select id="trialFactorArrangement">
+                          <option value="factorial">Factorial</option>
+                          <option value="splitplot">Split Plot</option>
+                        </select>
+                        <small class="form-hint">Choose how factors interact in the experiment</small>
+                      </div>
+                      <div class="form-group" id="trialTreatmentsGroup">
+                        <label>Factors & Treatments</label>
+                        <div id="trialTreatmentsContainer">
+                          <!-- Dynamic factor configuration inputs -->
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="trial-section" id="trialSectionSplitPlot">
+                      <h4 class="trial-form-section-title" id="factorCodesSectionTitle">Factorial — Treatment Codes</h4>
+                      <p class="form-hint-block" style="margin-bottom:1rem;">Assign a short code (letter or number) to each treatment. These codes will be combined to create the layout plot labels (e.g., A1, B3).</p>
+                      <div id="splitPlotCodesContainer">
+                        <!-- Factor code groups will be rendered here -->
+                      </div>
+                      <div class="form-group" style="margin-top:1rem;">
+                        <label class="factor-entries-toggle">
+                          <input type="checkbox" id="splitPlotLocationAsFactor">
+                          <span>Use Location as Factor</span>
+                        </label>
+                        <small class="form-hint">If checked, each area/location becomes an additional factor level</small>
+                      </div>
+                    </div>
+
+                    <div class="trial-section" id="trialSectionPlotSpec">
+                      <h4 class="trial-form-section-title">Plot Specification</h4>
+                      <div id="plotSpecLockNotice" class="form-hint-block">
+                        Please select <strong>Type of Pollination</strong> and <strong>Trial Type</strong> in the Experiment section first.
+                      </div>
+                      <div id="plotSpecContent" class="hidden">
+                      <!-- Parent Test / Process Research fields -->
+                      <div id="plotSpecParentTest">
+                        <div class="form-group">
+                          <label for="trialRowsPerPlot">Number of Rows per Plot</label>
+                          <input type="number" id="trialRowsPerPlot" min="0" step="1" placeholder="e.g., 4">
+                        </div>
+                        <div class="form-group">
+                          <label for="trialPlotLength">Plot Length (m)</label>
+                          <input type="number" id="trialPlotLength" min="0" step="0.01" placeholder="e.g., 5">
+                        </div>
+                        <div class="form-group">
+                          <label>Plant Spacing (cm)</label>
+                          <div class="form-grid-3 plant-spacing-grid">
+                            <div>
+                              <input type="number" id="trialPlantSpacingWidth" min="0" step="0.01" placeholder="Width">
+                              <small class="form-hint">Width</small>
+                            </div>
+                            <div class="form-grid-separator">×</div>
+                            <div>
+                              <input type="number" id="trialPlantSpacingHeight" min="0" step="0.01" placeholder="Height">
+                              <small class="form-hint">Height</small>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label for="trialPlotArea">Plot Area (m²)</label>
+                          <input type="text" id="trialPlotArea" readonly placeholder="Auto-calculated">
+                        </div>
+                        <div class="form-group">
+                          <label for="trialExpectedPlants">Expected Number of Plants per Plot</label>
+                          <input type="text" id="trialExpectedPlants" readonly placeholder="Auto-calculated">
+                        </div>
+                        <div class="form-group">
+                          <label for="trialPopulationHa">Population per Hectare</label>
+                          <input type="text" id="trialPopulationHa" readonly placeholder="Auto-calculated">
+                        </div>
+                      </div>
+
+                      <!-- Micropilot fields -->
+                      <div id="plotSpecMicropilot" class="hidden">
+                        <div class="form-group">
+                          <label for="trialMpPanel">Panel</label>
+                          <input type="number" id="trialMpPanel" min="1" step="1" placeholder="e.g., 3">
+                        </div>
+                        <div class="form-group">
+                          <label for="trialRatioFemale">Ratio Female : Male</label>
+                          <div class="form-grid-3 plant-spacing-grid">
+                            <div>
+                              <input type="number" id="trialRatioFemale" min="1" step="1" placeholder="Female">
+                              <small class="form-hint">Female</small>
+                            </div>
+                            <div class="form-grid-separator">:</div>
+                            <div>
+                              <input type="number" id="trialRatioMale" min="1" step="1" placeholder="Male">
+                              <small class="form-hint">Male</small>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="td-grid grid-3">
+                          <div class="form-group">
+                            <label for="trialMpTotalFemaleRows">Total Female Rows</label>
+                            <input type="text" id="trialMpTotalFemaleRows" readonly placeholder="Auto-calculated">
+                          </div>
+                          <div class="form-group">
+                            <label for="trialMpExpectedFemale">Female Population/plot</label>
+                            <input type="text" id="trialMpExpectedFemale" readonly placeholder="Auto-calculated">
+                          </div>
+                          <div class="form-group">
+                            <label for="trialMpPopFemale">Female Population/ha</label>
+                            <input type="text" id="trialMpPopFemale" readonly placeholder="Auto-calculated">
+                          </div>
+                        </div>
+
+                        <div class="td-grid grid-3">
+                          <div class="form-group">
+                            <label for="trialMpTotalMaleRows">Total Male Rows</label>
+                            <input type="text" id="trialMpTotalMaleRows" readonly placeholder="Auto-calculated">
+                          </div>
+                          <div class="form-group">
+                            <label for="trialMpExpectedMale">Male Population/plot</label>
+                            <input type="text" id="trialMpExpectedMale" readonly placeholder="Auto-calculated">
+                          </div>
+                          <div class="form-group">
+                            <label for="trialMpPopMale">Male Population/ha</label>
+                            <input type="text" id="trialMpPopMale" readonly placeholder="Auto-calculated">
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label for="trialMpPlotLength">Plot Length (m)</label>
+                          <input type="number" id="trialMpPlotLength" min="0" step="0.01" placeholder="e.g., 5">
+                        </div>
+                        <div class="form-group">
+                          <label>Plant Spacing (cm)</label>
+                          <div class="form-grid-3 plant-spacing-grid">
+                            <div>
+                              <input type="number" id="trialMpSpacingWidth" min="0" step="0.01" placeholder="Width">
+                              <small class="form-hint">Width</small>
+                            </div>
+                            <div class="form-grid-separator">×</div>
+                            <div>
+                              <input type="number" id="trialMpSpacingHeight" min="0" step="0.01" placeholder="Height">
+                              <small class="form-hint">Height</small>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label for="trialMpPlotArea">Plot Area (m²)</label>
+                          <input type="text" id="trialMpPlotArea" readonly placeholder="Auto-calculated">
+                        </div>
+                      </div>
+                      </div>
+                    </div>
+
+                    <div class="trial-section" id="trialSectionObservation">
+                      <h4 class="trial-form-section-title">Observation & Agronomy Setup</h4>
+                      <div class="form-group">
+                        <label for="parameterSearch">Observation Parameters</label>
+                        <div class="dual-picklist">
+                          <div class="picklist-column">
+                            <div class="picklist-header form-hint">Available Parameters</div>
+                            <div class="picklist-search">
+                              <span class="material-symbols-rounded">search</span>
+                              <input type="text" id="parameterSearch" placeholder="Search parameters...">
+                            </div>
+                            <div id="parameterAvailableList" class="picklist-list" data-list="available">
+                              <!-- Available parameters populated here -->
+                            </div>
+                            <small class="form-hint-block picklist-checked-indicator">
+                              <span id="parameterAvailableCheckedCount">0</span> checked
+                            </small>
+                          </div>
+                          <div class="picklist-controls">
+                            <button type="button" class="picklist-control-btn" id="parameterSelectAll" title="Select all">
+                              <span class="material-symbols-rounded">select_all</span>
+                            </button>
+                            <button type="button" class="picklist-control-btn" id="parameterDeselectAll" title="Deselect all">
+                              <span class="material-symbols-rounded">check_box_outline_blank</span>
+                            </button>
+                            <button type="button" class="picklist-control-btn" id="parameterMoveRight" title="Add">
+                              <span class="material-symbols-rounded">arrow_forward</span>
+                            </button>
+                            <button type="button" class="picklist-control-btn" id="parameterMoveUp" title="Move up">
+                              <span class="material-symbols-rounded">arrow_upward</span>
+                            </button>
+                            <button type="button" class="picklist-control-btn" id="parameterMoveDown" title="Move down">
+                              <span class="material-symbols-rounded">arrow_downward</span>
+                            </button>
+                            <button type="button" class="picklist-control-btn danger" id="parameterRemove" title="Remove">
+                              <span class="material-symbols-rounded">delete</span>
+                            </button>
+                          </div>
+                          <div class="picklist-column">
+                            <div class="picklist-header form-hint">Selected Parameters</div>
+                            <div id="parameterSelectedList" class="picklist-list" data-list="selected">
+                              <!-- Selected parameters populated here -->
+                            </div>
+                            <small class="form-hint-block picklist-checked-indicator">
+                              <span id="parameterSelectedCheckedCount">0</span> checked
+                            </small>
+                          </div>
+                        </div>
+                        <small class="form-hint-block">
+                          <span id="selectedParamCount">0</span> parameter(s) selected
+                        </small>
+                      </div>
+                      <div class="form-group">
+                        <label class="agronomy-toggle-label">
+                          <input type="checkbox" id="trialAgronomyMonitoring" class="agronomy-toggle-checkbox">
+                          <span>Agronomy Monitoring</span>
+                        </label>
+                        <div id="agronomyPickerContainer" class="hidden">
+                          <div class="dual-picklist">
+                            <div class="picklist-column">
+                              <div class="picklist-header form-hint">Available Agronomy</div>
+                              <div class="picklist-search">
+                                <span class="material-symbols-rounded">search</span>
+                                <input type="text" id="agronomySearch" placeholder="Search agronomy...">
+                              </div>
+                              <div id="agronomyAvailableList" class="picklist-list" data-list="available">
+                              </div>
+                              <small class="form-hint-block picklist-checked-indicator">
+                                <span id="agronomyAvailableCheckedCount">0</span> checked
+                              </small>
+                            </div>
+                            <div class="picklist-controls">
+                              <button type="button" class="picklist-control-btn" id="agronomySelectAll" title="Select all">
+                                <span class="material-symbols-rounded">select_all</span>
+                              </button>
+                              <button type="button" class="picklist-control-btn" id="agronomyDeselectAll" title="Deselect all">
+                                <span class="material-symbols-rounded">check_box_outline_blank</span>
+                              </button>
+                              <button type="button" class="picklist-control-btn" id="agronomyMoveRight" title="Add">
+                                <span class="material-symbols-rounded">arrow_forward</span>
+                              </button>
+                              <button type="button" class="picklist-control-btn" id="agronomyMoveUp" title="Move up">
+                                <span class="material-symbols-rounded">arrow_upward</span>
+                              </button>
+                              <button type="button" class="picklist-control-btn" id="agronomyMoveDown" title="Move down">
+                                <span class="material-symbols-rounded">arrow_downward</span>
+                              </button>
+                              <button type="button" class="picklist-control-btn danger" id="agronomyRemove" title="Remove">
+                                <span class="material-symbols-rounded">delete</span>
+                              </button>
+                            </div>
+                            <div class="picklist-column">
+                              <div class="picklist-header form-hint">Selected Agronomy</div>
+                              <div id="agronomySelectedList" class="picklist-list" data-list="selected">
+                              </div>
+                              <small class="form-hint-block picklist-checked-indicator">
+                                <span id="agronomySelectedCheckedCount">0</span> checked
+                              </small>
+                            </div>
+                          </div>
+                          <small class="form-hint-block">
+                            <span id="selectedAgronomyCount">0</span> agronomy item(s) selected
+                          </small>
+                        </div>
+                      </div>
+                    </div>
+        
+                    <div class="trial-section" id="trialSectionField">
+                      <h4 class="trial-form-section-title">Field Mapping</h4>
+                      <div id="areasList">
+                        <div id="areasListContainer">
+                          <!-- Saved areas will be listed here -->
+                        </div>
+                      </div>
+                      <div id="areasEmptyState" class="field-areas-empty">
+                        <span class="material-symbols-rounded">landscape</span>
+                        <p>No areas drawn yet. Add a new area to define your trial field.</p>
+                      </div>
+                      <button type="button" class="btn btn-primary" id="addNewAreaBtn" onclick="openFieldMapPopup()">
+                        <span class="material-symbols-rounded">add</span>
+                        <span>Add New Area</span>
+                      </button>
+                    </div>
+
+                    <!-- Field Map Popup (full-screen overlay for drawing areas) -->
+                    <div id="fieldMapPopup" class="field-map-popup hidden">
+                      <div class="field-map-popup-header">
+                        <h4>Draw Trial Area</h4>
+                        <div class="field-map-popup-header-right">
+                          <select id="trialLocation">
+                            <option value="">Select location to focus map</option>
+                          </select>
+                          <button type="button" class="btn btn-secondary btn-icon" id="closeFieldMapPopupBtn" title="Close">
+                            <span class="material-symbols-rounded">close</span>
+                          </button>
+                        </div>
+                      </div>
+                      <div class="field-map-popup-body">
+                        <div id="trialMap"></div>
+                        <div class="field-map-floating-btns">
+                          <button type="button" class="btn btn-secondary btn-icon" id="startDrawingBtn" title="Start Drawing Area">
+                            <span class="material-symbols-rounded">draw</span>
+                          </button>
+                          <button type="button" class="btn btn-primary btn-icon" id="saveAreaBtn" disabled title="Save Area">
+                            <span class="material-symbols-rounded">save</span>
+                          </button>
+                          <button type="button" class="btn btn-secondary btn-icon" id="clearDrawingBtn" title="Clear Points">
+                            <span class="material-symbols-rounded">delete</span>
+                          </button>
+                        </div>
+                        <div id="zoneInfoPanel" class="field-map-zone-panel hidden">
+                          <div class="zone-stats">
+                            <div>
+                              <span class="zone-stat-label">Points:</span>
+                              <span id="pointCount" class="zone-stat-value">0</span>
+                            </div>
+                            <div>
+                              <span class="zone-stat-label">Area:</span>
+                              <span id="zoneArea" class="zone-stat-value">0</span> ha
+                            </div>
+                          </div>
+                          <button type="button" class="btn btn-sm btn-secondary" id="undoPointBtn">
+                            <span class="material-symbols-rounded">undo</span>
+                          </button>
+                        </div>
+                        <div id="areaNameDialog" class="field-map-name-dialog hidden">
+                          <label for="areaNameInput" class="area-name-label">Enter Area Name:</label>
+                          <div class="area-name-actions">
+                            <input type="text" id="areaNameInput" placeholder="e.g., Area 1" class="area-name-input">
+                            <button type="button" class="btn btn-primary" id="confirmAreaNameBtn">Confirm</button>
+                            <button type="button" class="btn btn-secondary" id="cancelAreaNameBtn">Cancel</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="trial-section" id="trialSectionLayouting">
+                      <h4 class="trial-section-title">Trial Layouting</h4>
+                      <div id="layoutingAreasContainer" class="layouting-areas">
+                        <!-- Areas will be rendered here -->
+                      </div>
+                    </div>
+                  </form>
+                </div>
+        
+                <div class="modal-footer modal-footer-spaced">
+                  <button class="btn btn-secondary hidden" id="trialPrevBtn">Previous</button>
+                  <div class="modal-footer-actions" style="margin-left: auto;">
+                    <button class="btn btn-primary" id="trialNextBtn">Next</button>
+                    <button class="btn btn-primary hidden" id="trialModalSaveBtn">Save Trial</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+        
+            <!-- Run Trial Interface -->
+            <div id="runTrialInterface" class="run-trial-section hidden">
+              <div id="runTrialShell" class="run-trial-shell">
+                <div class="run-trial-container">
+        
+                  <!-- Navigation Sidebar -->
+                  <div class="run-trial-nav">
+                    <div id="runTrialNavTree" class="run-nav-tree">
+                      <!-- Navigation tree will be generated here -->
+                    </div>
+                  </div>
+        
+                  <!-- Question/Answer Area -->
+                  <div class="run-trial-content">
+                    <div id="runTrialQuestion" class="run-question-card">
+                      <!-- Question content will be rendered here -->
+                      <div class="run-empty-state">
+                        <span class="material-symbols-rounded">touch_app</span>
+                        <p>Select a line from the navigation to start recording data</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Agronomy Monitoring Interface -->
+            <div id="agronomyMonitoringInterface" class="run-trial-section hidden">
+              <div class="run-trial-shell">
+                <div class="run-trial-container">
+                  <div class="run-trial-nav">
+                    <div id="agronomyNavTree" class="run-nav-tree"></div>
+                  </div>
+                  <div class="run-trial-content">
+                    <div id="agronomyQuestionCard" class="run-question-card">
+                      <div class="run-empty-state">
+                        <span class="material-symbols-rounded">local_florist</span>
+                        <p>Select an agronomy item from the navigation to start monitoring</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+        
+            <!-- Photo Preview Modal -->
+            <div id="photoPreviewModal" class="modal-overlay hidden">
+              <div class="modal-content photo-preview-modal">
+                <button class="modal-close" onclick="closePhotoPreview()">
+                  <span class="material-symbols-rounded">close</span>
+                </button>
+                <img id="photoPreviewImage" src="" alt="Photo Preview" class="photo-preview-image">
+                <div class="photo-preview-controls">
+                  <button class="btn btn-secondary" id="prevPhotoBtn" onclick="navigatePhotos('prev')">
+                    <span class="material-symbols-rounded">arrow_back</span>
+                  </button>
+                  <span id="photoCounter" class="photo-counter">1 / 1</span>
+                  <button class="btn btn-secondary" id="nextPhotoBtn" onclick="navigatePhotos('next')">
+                    <span class="material-symbols-rounded">arrow_forward</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+        
+
+          </div>
+
+          <div id="analysisContent" class="page-content">
+            <div class="analysis-container" id="analysisContainer" data-layout="horizontal">
+              <!-- Section 1: Dataset -->
+              <div class="analysis-section analysis-table-section" id="analysisDatasetSection">
+                <div class="analysis-section-header analysis-table-header">
+                  <div class="analysis-section-title-wrap">
+                    <span class="material-symbols-rounded">table_chart</span>
+                    <h3>Dataset</h3>
+                  </div>
+                  <select id="analysisDataSourceSelect" class="analysis-datasource-select" onchange="handleAnalysisDataSourceChange(this.value)" title="Dataset source">
+                    <option value="trial" selected>Trial Data</option>
+                    <option value="custom">Custom Upload</option>
+                  </select>
+                  <button type="button" id="analysisCustomUploadBtn" class="analysis-columns-trigger" onclick="openAnalysisCustomUpload()" style="display:none;" title="Re-upload custom dataset">
+                    <span class="material-symbols-rounded">upload_file</span>
+                    <span>Re-upload</span>
+                  </button>
+                  <input type="file" id="analysisCustomFileInput" accept=".xlsx,.xls,.csv" hidden>
+                  <button type="button" id="analysisColumnsTrigger" class="analysis-columns-trigger" onclick="toggleAnalysisColumnVisibilityMenu(event)" aria-haspopup="true" aria-expanded="false">
+                    <span class="material-symbols-rounded">view_column</span>
+                    <span id="analysisColumnsTriggerLabel">Columns</span>
+                  </button>
+                </div>
+                <div class="inventory-container trial-report-content">
+                  <div class="trial-report-body">
+                    <div class="trial-report-preview">
+                      <div class="trial-report-table-wrap">
+                        <table class="trial-report-table" id="analysisTable"></table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Resize handle 1 -->
+              <div class="analysis-resize-handle" data-resize="dataset-controls" onmousedown="startAnalysisResize(event, 'dataset-controls')">
+                <div class="analysis-resize-grip"></div>
+              </div>
+
+              <!-- Section 2: Settings -->
+              <div class="analysis-section analysis-controls" id="analysisControls">
+                <div class="analysis-section-header analysis-controls-header">
+                  <div class="analysis-section-title-wrap">
+                    <span class="material-symbols-rounded">tune</span>
+                    <h3>Settings</h3>
+                  </div>
+                  <button class="btn btn-primary analysis-kicker-action" id="analysisRunBtn" onclick="runAnalysis()" disabled>
+                    <span class="material-symbols-rounded">play_arrow</span>
+                    Analyze
+                  </button>
+                </div>
+                <div class="analysis-controls-wrapper">
+                  <div class="analysis-controls-row">
+                    <div class="analysis-select-group">
+                      <label>Analysis</label>
+                      <select id="analysisType">
+                        <option value="anova">ANOVA</option>
+                      </select>
+                    </div>
+                    <div class="analysis-select-group">
+                      <label>Design</label>
+                      <select id="analysisDesign">
+                        <option value="crd">Completely Randomized Design</option>
+                      </select>
+                    </div>
+                    <div class="analysis-select-group" id="analysisFactorsGroup">
+                      <label>Factors</label>
+                      <select id="analysisFactors">
+                        <option value="1">1 Factor</option>
+                      </select>
+                    </div>
+                    <div class="analysis-select-group analysis-posthoc-group" id="analysisPostHocGroup" style="display:none">
+                      <label>Post Hoc</label>
+                      <div class="analysis-posthoc-options">
+                        <label class="analysis-posthoc-checkbox"><input type="checkbox" id="postHocLSD" value="lsd"> Fischer's LSD</label>
+                        <label class="analysis-posthoc-checkbox"><input type="checkbox" id="postHocHSD" value="hsd"> Tukey's HSD</label>
+                        <label class="analysis-posthoc-checkbox"><input type="checkbox" id="postHocDMRT" value="dmrt"> Duncan (DMRT)</label>
+                        <label class="analysis-posthoc-checkbox"><input type="checkbox" id="postHocSNK" value="snk"> SNK</label>
+                        <label class="analysis-posthoc-checkbox"><input type="checkbox" id="postHocSK" value="scott-knott"> Scott-Knott</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="analysis-dropzones-row" id="analysisDropzonesRow">
+                    <!-- Dropzones are generated dynamically by analysis-ui.js -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- Resize handle 2 -->
+              <div class="analysis-resize-handle" data-resize="controls-results" onmousedown="startAnalysisResize(event, 'controls-results')">
+                <div class="analysis-resize-grip"></div>
+              </div>
+
+              <!-- Section 3: Results -->
+              <div class="analysis-section analysis-results" id="analysisResults">
+                <div class="analysis-section-header analysis-results-header">
+                  <div class="analysis-section-title-wrap">
+                    <span class="material-symbols-rounded">summarize</span>
+                    <h3>Results</h3>
+                  </div>
+                  <div class="analysis-results-header-tools">
+                    <select id="analysisResultsTabSelect" class="analysis-results-tab-select" aria-label="Select result tab" disabled>
+                      <option value="">No output yet</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="analysis-results-body" id="analysisResultsBody">
+                  <p class="analysis-results-empty">Run an analysis to see results here.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="libraryContent" class="page-content">
+            <div class="inventory-container">
+              <div class="inventory-header">
+                <h3 id="libraryHeaderTitle" class="library-header-title">Library</h3>
+                <div class="library-toolbar">
+                  <div class="library-search">
+                    <span class="material-symbols-rounded">search</span>
+                    <input type="text" id="librarySearchInput" placeholder="Search files...">
+                  </div>
+                  <div class="library-filter-container">
+                    <button class="library-filter-trigger" id="libraryFilterTrigger" aria-haspopup="true" aria-expanded="false">
+                      <span class="material-symbols-rounded">filter_alt</span>
+                    </button>
+                    <div class="library-filter-dropdown" id="libraryFilterDropdown">
+                      <div class="library-filter-menu">
+                        <button class="library-filter-item active" data-filter="all">
+                          <span class="filter-check"></span>
+                          All files
+                        </button>
+                        <button class="library-filter-item" data-filter="pdf">
+                          <span class="filter-check"></span>
+                          PDF
+                        </button>
+                        <button class="library-filter-item" data-filter="image">
+                          <span class="filter-check"></span>
+                          Images
+                        </button>
+                        <button class="library-filter-item" data-filter="video">
+                          <span class="filter-check"></span>
+                          Videos
+                        </button>
+                        <button class="library-filter-item" data-filter="other">
+                          <span class="filter-check"></span>
+                          Other
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="toolbar-dropdown-wrapper" id="librarySortWrapper">
+                    <button class="library-sort-trigger" id="librarySortBtn" title="Sort & View">
+                      <span class="material-symbols-rounded">sort</span>
+                    </button>
+                    <div class="toolbar-dropdown" id="librarySortDropdown">
+                      <div class="toolbar-dropdown-group">
+                        <label class="toolbar-dropdown-label">Sort By</label>
+                        <select id="librarySortBy" class="toolbar-dropdown-select">
+                          <option value="modifiedTime">Sort by Date</option>
+                          <option value="name">Sort by Name</option>
+                          <option value="size">Sort by Size</option>
+                          <option value="type">Sort by Type</option>
+                        </select>
+                      </div>
+                      <div class="toolbar-dropdown-group">
+                        <label class="toolbar-dropdown-label">Direction</label>
+                        <select id="librarySortDir" class="toolbar-dropdown-select">
+                          <option value="desc">Descending</option>
+                          <option value="asc">Ascending</option>
+                        </select>
+                      </div>
+                      <div class="toolbar-dropdown-group" id="libraryGridSizeGroup">
+                        <label class="toolbar-dropdown-label">Grid Size</label>
+                        <select id="libraryGridSize" class="toolbar-dropdown-select" title="Uploaded files column size">
+                          <option value="small">Small columns</option>
+                          <option value="medium">Medium columns</option>
+                          <option value="large">Large columns</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                  <input type="file" id="libraryUploadInput" multiple>
+                  <button id="refreshLibraryBtn" class="btn btn-secondary" title="Refresh library (load new files only)">
+                    <span class="material-symbols-rounded">refresh</span>
+                    <span>Refresh</span>
+                  </button>
+                  <button id="uploadLibraryBtn" class="btn btn-primary">
+                    <span class="material-symbols-rounded">upload</span>
+                    <span>Upload</span>
+                  </button>
+                  <button id="createLibraryFolderBtn" class="btn btn-secondary" onclick="createLibraryFolder()">
+                    <span class="material-symbols-rounded">create_new_folder</span>
+                    <span>New Folder</span>
+                  </button>
+                  <div id="trialPhotoActionsContainer" class="hidden"></div>
+                </div>
+              </div>
+
+              <div id="libraryStatusBanner" class="library-status-banner hidden" aria-live="polite"></div>
+        
+              <div class="inventory-list" id="libraryList">
+                <!-- Library items will be populated here -->
+              </div>
+            </div>
+        
+            <div id="libraryPreviewModal" class="library-preview-modal">
+              <div class="library-preview-modal-content">
+                <div id="libraryDetail" class="library-detail">
+                  <div class="library-detail-header">
+                    <div class="library-detail-info">
+                      <h3 id="libraryDetailTitle">File Details</h3>
+                      <p id="libraryDetailMeta" class="library-detail-meta"></p>
+                    </div>
+                    <div class="library-detail-actions">
+                      <button class="btn btn-secondary" id="libraryDownloadBtn">
+                        <span class="material-symbols-rounded">download</span>
+                        <span>Download</span>
+                      </button>
+                      <button class="btn btn-secondary" id="libraryRenameBtn">
+                        <span class="material-symbols-rounded">edit</span>
+                        <span>Rename</span>
+                      </button>
+                      <button class="btn btn-danger" id="libraryDeleteBtn">
+                        <span class="material-symbols-rounded">delete</span>
+                        <span>Delete</span>
+                      </button>
+                      <button class="btn btn-secondary" id="libraryCloseBtn">
+                        <span class="material-symbols-rounded">close</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div id="libraryPreview" class="library-preview">
+                    <!-- Preview will be rendered here -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        
+          <div id="reminderContent" class="page-content">
+            <div id="reminderObservationContent" class="reminder-tab-content active">
+            </div>
+        
+            <div id="reminderAgronomyContent" class="reminder-tab-content">
+            </div>
+          </div>
+        </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Modal for Add/Edit Item -->
+    <div id="itemModal" class="modal">
+      <!-- Formula side panel (parameters formula type, left wing) -->
+      <div class="modal-formula-panel hidden" id="modalFormulaPanel">
+        <h4 class="modal-formula-title">Formula Builder</h4>
+        <div class="formula-editor-area">
+          <label class="formula-editor-label">Expression</label>
+          <div class="formula-editor-wrapper">
+            <div id="formulaEditorDisplay" class="formula-editor-display" contenteditable="true" spellcheck="false" data-placeholder="e.g., (100-13)*SHW"></div>
+          </div>
+          <small class="form-hint">Numbers, + - * / ( ) and parameter initials.</small>
+          <small class="form-hint hidden" id="formulaPanelError" style="color: var(--danger);"></small>
+        </div>
+        <div class="formula-param-picker">
+          <label class="formula-editor-label">Parameters</label>
+          <div class="formula-param-search-wrap">
+            <span class="material-symbols-rounded" style="font-size:15px;color:var(--text-tertiary)">search</span>
+            <input type="text" id="formulaParamSearch" class="formula-param-search" placeholder="Search parameters...">
+          </div>
+          <div id="formulaParamPickerList" class="formula-param-picker-list">
+            <!-- parameter list items inserted by JS -->
+          </div>
+        </div>
+      </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modalTitle">Add New Item</h3>
+          <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body modal-body-scrollable">
+          <form id="itemForm">
+            <div class="form-group">
+              <label for="itemName">Item Name</label>
+              <input type="text" id="itemName" placeholder="Enter item name" required>
+            </div>
+            <div class="form-group" id="cropTypeGroup">
+              <label for="cropType">Crop Type</label>
+              <input type="text" id="cropType" placeholder="Enter or select crop type" list="cropTypeList">
+              <datalist id="cropTypeList"></datalist>
+            </div>
+            <div class="form-group hidden" id="cropEntryTypeGroup">
+              <label for="cropEntryType">Entry Type</label>
+              <select id="cropEntryType" required>
+                <option value="">Select entry type</option>
+                <option value="parental">Parental</option>
+                <option value="hybrid">Hybrid</option>
+              </select>
+            </div>
+            <div class="form-group hidden" id="lineCropGroup">
+              <label for="lineCrop">Crop</label>
+              <select id="lineCrop"></select>
+            </div>
+            <!-- Shared fields (both Parental and Hybrid) -->
+            <div class="form-group hidden" id="lineQuantityGroup">
+              <label for="lineQuantity">Quantity</label>
+              <input type="number" id="lineQuantity" placeholder="Enter quantity" min="0" step="1">
+            </div>
+            <div class="form-group hidden" id="lineStageGroup">
+              <label for="lineStage">Stage</label>
+              <select id="lineStage">
+                <option value="">Select stage</option>
+                <option value="Breeder Seed">Breeder Seed</option>
+                <option value="Pre Basic 1">Pre Basic 1</option>
+                <option value="Pre Basic 2">Pre Basic 2</option>
+                <option value="Basic Seed">Basic Seed</option>
+                <option value="Parent Seed">Parent Seed</option>
+                <option value="Commercial">Commercial</option>
+              </select>
+            </div>
+            <div class="form-group hidden" id="lineSeedOriginGroup">
+              <label for="lineSeedOrigin">Seed Origin</label>
+              <input type="text" id="lineSeedOrigin" placeholder="Enter seed origin">
+            </div>
+            <div class="form-group hidden" id="lineRegisteredDateGroup">
+              <label for="lineRegisteredDate">Registered Date</label>
+              <input type="date" id="lineRegisteredDate">
+            </div>
+            <!-- Parental-only fields -->
+            <div class="form-group hidden" id="lineArrivalDateGroup">
+              <label for="lineArrivalDate">Arrival Date</label>
+              <input type="date" id="lineArrivalDate">
+            </div>
+            <div class="form-group hidden" id="lineParentCodeGroup">
+              <label for="lineParentCode">Parent Code</label>
+              <input type="text" id="lineParentCode" placeholder="Enter parent code">
+            </div>
+            <div class="form-group hidden" id="lineHybridCodeGroup">
+              <label for="lineHybridCode">Hybrid Code</label>
+              <input type="text" id="lineHybridCode" placeholder="Enter hybrid code">
+            </div>
+            <div class="form-group hidden" id="lineSprCodeGroup">
+              <label for="lineSprCode">SPR Code</label>
+              <input type="text" id="lineSprCode" placeholder="Enter SPR code">
+            </div>
+            <div class="form-group hidden" id="lineRoleGroup">
+              <label for="lineRole">Role</label>
+              <select id="lineRole">
+                <option value="">Select role</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Both">Both</option>
+              </select>
+            </div>
+            <!-- Hybrid-only fields -->
+            <div class="form-group hidden" id="lineHybridCodeHybridGroup">
+              <label for="lineHybridCodeHybrid">Hybrid Code</label>
+              <input type="text" id="lineHybridCodeHybrid" placeholder="Enter hybrid code">
+            </div>
+            <div class="form-group hidden" id="lineFieldCodeGroup">
+              <label for="lineFieldCode">Field Code</label>
+              <input type="text" id="lineFieldCode" placeholder="Enter field code">
+            </div>
+            <div class="form-group hidden" id="lineFemaleParentGroup">
+              <label for="lineFemaleParent">Female Parent</label>
+              <input type="text" id="lineFemaleParent" placeholder="Enter female parent">
+            </div>
+            <div class="form-group hidden" id="lineMaleParentGroup">
+              <label for="lineMaleParent">Male Parent</label>
+              <input type="text" id="lineMaleParent" placeholder="Enter male parent">
+            </div>
+            <div class="form-group hidden" id="lineSplitPlantingGroup">
+              <label>Split Planting</label>
+              <div class="form-grid-3 plant-spacing-grid">
+                <div>
+                  <input type="number" id="lineFemaleSplit" step="1" placeholder="0">
+                  <small class="form-hint">Female Split</small>
+                </div>
+                <div>
+                  <input type="number" id="lineFirstMaleSplit" step="1" placeholder="0">
+                  <small class="form-hint">1st Male Split</small>
+                </div>
+                <div>
+                  <input type="number" id="lineSecondMaleSplit" step="1" placeholder="0">
+                  <small class="form-hint">2nd Male Split</small>
+                </div>
+              </div>
+            </div>
+            <div class="form-group hidden" id="locationCoordGroup">
+              <label for="locationCoord">Location Coordinates</label>
+              <div id="locationMap">
+              </div>
+              <div class="coord-display">
+                <input type="text" id="locationCoord" placeholder="Click on map to select location" readonly>
+                <button type="button" class="btn btn-secondary" id="clearMapBtn" title="Clear location">Clear</button>
+              </div>
+            </div>
+            <div class="form-group hidden" id="paramInitialGroup">
+              <label for="paramInitial">Parameter Initial</label>
+              <input type="text" id="paramInitial" placeholder="Enter parameter initial">
+            </div>
+            <div class="form-group hidden" id="paramTypeGroup">
+              <label for="paramType">Type</label>
+              <select id="paramType">
+                <option value="">Select type</option>
+                <option value="text">Text/Number</option>
+                <option value="range">Range</option>
+                <option value="radio">Radio</option>
+                <option value="checkbox">Checkbox</option>
+                <option value="date">Date</option>
+                <option value="formula">Formula</option>
+              </select>
+            </div>
+            <div class="form-group hidden" id="paramRangeGroup">
+              <label for="paramRange">Range Definition</label>
+              <div class="range-input-group">
+                <input type="number" id="paramRangeMin" placeholder="Min" step="any">
+                <span class="range-separator">-</span>
+                <input type="number" id="paramRangeMax" placeholder="Max" step="any">
+              </div>
+              <small class="form-hint">Enter minimum and maximum values</small>
+            </div>
+            <div class="form-group hidden" id="paramRadioGroup">
+              <label for="paramRadio">Radio Options</label>
+              <input type="text" id="paramRadio" placeholder="e.g., Yes,No,Maybe">
+              <small class="form-hint">Separate options with commas</small>
+            </div>
+            <div class="form-group hidden" id="paramCheckboxGroup">
+              <label for="paramCheckbox">Checkbox Options</label>
+              <input type="text" id="paramCheckbox" placeholder="e.g., Option1,Option2,Option3">
+              <small class="form-hint">Separate options with commas</small>
+            </div>
+            <div class="form-group hidden" id="paramFormulaGroup">
+              <label for="paramFormula">Formula</label>
+              <input type="text" id="paramFormula" placeholder="e.g., 100/A * B">
+              <small class="form-hint">Allowed: numbers, + - * /, parentheses, and parameter references.</small>
+              <small class="form-hint hidden" id="paramFormulaError" style="color: var(--danger);"></small>
+              <div class="formula-param-list" id="paramFormulaParamList">
+                <!-- parameter chips inserted by JS -->
+              </div>
+            </div>
+            <div class="form-group hidden" id="paramUnitGroup">
+              <label for="paramUnit">Unit</label>
+              <input type="text" id="paramUnit" placeholder="Enter unit (e.g., kg, cm, °C)">
+            </div>
+            <div class="form-group hidden" id="paramQuantityGroup">
+              <label for="paramQuantity">Number of Samples</label>
+              <input type="number" id="paramQuantity" placeholder="Enter number of samples" min="1" step="1" value="1">
+              <small class="form-hint">How many samples per line during run trial</small>
+            </div>
+            <div class="form-group hidden" id="paramPhotoGroup">
+              <label class="param-photo-label">
+                <input type="checkbox" id="paramPhoto" class="param-photo-checkbox">
+                <span>Require Photo Upload</span>
+              </label>
+              <div class="form-group hidden" id="paramPhotoModeGroup" style="margin-top: 0.75rem;">
+                <label style="font-size: 0.875rem; margin-bottom: 0.5rem;">Photo Mode</label>
+                <div class="radio-group">
+                  <label class="radio-label">
+                    <input type="radio" name="photoMode" value="per-sample" checked>
+                    <span>Per Sample - Each sample requires photo(s)</span>
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="photoMode" value="per-line">
+                    <span>Per Line - One photo per line (all samples)</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <!-- Agronomy Fields -->
+            <div class="form-group hidden" id="agronomyCropGroup" style="display:none !important"></div>
+            <div class="form-group hidden" id="agronomyActivityGroup">
+              <label for="agronomyActivity">Activity</label>
+              <input type="text" id="agronomyActivity" placeholder="e.g., Fertilizer Application">
+            </div>
+            <div class="form-group hidden" id="agronomyDapGroup">
+              <label>Days After Planting (DAP)</label>
+              <div class="range-input-group">
+                <input type="number" id="agronomyDapMin" placeholder="From" min="0" step="1">
+                <span class="range-separator">-</span>
+                <input type="number" id="agronomyDapMax" placeholder="To (optional)" min="0" step="1">
+              </div>
+              <small class="form-hint">Single value or range (e.g., 5 or 5-8)</small>
+            </div>
+            <div class="form-group hidden" id="agronomyChemicalGroup">
+              <label for="agronomyChemical">Chemical</label>
+              <input type="text" id="agronomyChemical" placeholder="e.g., Urea, NPK">
+            </div>
+            <div class="form-group hidden" id="agronomyDoseGroup">
+              <label for="agronomyDose">Dose</label>
+              <input type="text" id="agronomyDose" placeholder="e.g., 200 kg/ha">
+            </div>
+            <div class="form-group hidden" id="agronomyRemarkGroup">
+              <label for="agronomyRemark">Remark</label>
+              <textarea id="agronomyRemark" placeholder="Additional notes" rows="2"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="modalCancelBtn">Cancel</button>
+          <button class="btn btn-primary" id="modalSaveBtn">Save</button>
+        </div>
+      </div>
+      <!-- Agronomy Crops side panel -->
+      <div class="modal-agro-crops-panel hidden" id="modalAgroCropsPanel">
+        <h4 class="modal-doo-title">Crops</h4>
+        <div class="agro-crops-search">
+          <span class="material-symbols-rounded" style="font-size:16px;color:var(--text-tertiary)">search</span>
+          <input type="text" id="agroCropSearch" placeholder="Search crops...">
+        </div>
+        <div class="agro-crops-picklist">
+          <div class="agro-crops-col">
+            <div class="agro-crops-col-header form-hint">Available</div>
+            <div id="agroCropAvailable" class="agro-crops-list" data-list="available"></div>
+          </div>
+          <div class="agro-crops-col">
+            <div class="agro-crops-col-header form-hint">Selected</div>
+            <div id="agroCropSelected" class="agro-crops-list" data-list="selected"></div>
+          </div>
+        </div>
+        <div id="agroCropSummary" class="agro-crops-summary"></div>
+      </div>
+      <!-- Days of Observation side panel (parameters only) -->
+      <div class="modal-doo-panel hidden" id="modalDooPanel">
+        <h4 class="modal-doo-title">Days of Observation</h4>
+        <select id="dooCropSelect" class="modal-doo-select">
+          <option value="">Select crop</option>
+        </select>
+        <div class="modal-doo-range">
+          <input type="number" id="dooRangeMin" class="modal-doo-input" placeholder="From" min="0" step="1">
+          <span class="range-separator">–</span>
+          <input type="number" id="dooRangeMax" class="modal-doo-input" placeholder="To" min="0" step="1">
+        </div>
+        <div id="dooSummary" class="modal-doo-summary"></div>
+      </div>
+    </div>
+
+    <!-- Sync Queue Panel -->
+    <div id="syncPanel" class="sync-panel">
+      <div class="sync-panel-header">
+        <div class="sync-panel-title">
+          <span class="material-symbols-rounded">cached</span>
+          <span>Sync Queue</span>
+        </div>
+        <button id="syncPanelClose" class="sync-panel-close" aria-label="Close">
+          <span class="material-symbols-rounded">close</span>
+        </button>
+      </div>
+      <div id="syncQueueList" class="sync-panel-body"></div>
+    </div>
+
+    <!-- Exit Run Trial Confirmation Modal -->
+    <div id="exitRunTrialModal" class="confirm-modal">
+      <div class="confirm-modal-content">
+        <div class="confirm-modal-header">
+          <span class="material-symbols-rounded">warning</span>
+          <h3>Exit Run Trial?</h3>
+        </div>
+        <div class="confirm-modal-body">
+          <p>You are about to leave the run trial mode. Your progress will be automatically saved before exiting.</p>
+        </div>
+        <div class="confirm-modal-footer">
+          <button class="btn btn-secondary" id="exitRunTrialCancelBtn">Cancel</button>
+          <button class="btn btn-primary" id="exitRunTrialConfirmBtn">Save & Exit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generic Alert/Validation Modal -->
+    <div id="alertModal" class="confirm-modal">
+      <div class="confirm-modal-content">
+        <div class="confirm-modal-header" id="alertModalHeader">
+          <span class="material-symbols-rounded" id="alertModalIcon">info</span>
+          <h3 id="alertModalTitle">Message</h3>
+        </div>
+        <div class="confirm-modal-body">
+          <p id="alertModalMessage">Message content goes here</p>
+        </div>
+        <div class="confirm-modal-footer">
+          <button class="btn btn-primary" id="alertModalBtn">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Transfer Overlay -->
+    <div id="dataTransferOverlay" class="data-transfer-overlay">
+      <div class="data-transfer-content">
+        <div class="spinner"></div>
+        <h3 id="dataTransferTitle">Processing...</h3>
+        <p id="dataTransferMessage">Please wait, do not close this page.</p>
+        <div class="loading-progress">
+          <div id="dataTransferBar" class="loading-progress-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Duplicate Review Modal -->
+    <div id="duplicateReviewModal" class="data-transfer-overlay">
+      <div class="duplicate-review-content">
+        <div class="duplicate-review-header">
+          <span class="material-symbols-rounded">warning</span>
+          <h3>Duplicates Found</h3>
+          <p id="duplicateReviewDesc">The imported data contains duplicates. Choose how to handle each one.</p>
+        </div>
+        <div id="duplicateReviewList" class="duplicate-review-list">
+          <!-- duplicate items rendered here -->
+        </div>
+        <div class="duplicate-review-footer">
+          <button class="btn btn-secondary" id="dupKeepAllBtn">Keep All</button>
+          <button class="btn btn-secondary" id="dupRemoveAllNewBtn">Skip All New</button>
+          <button class="btn btn-primary" id="dupApplyBtn">Apply &amp; Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Settings Modal -->
+    <div id="userSettingsModal" class="modal-overlay hidden">
+      <div class="user-settings-modal" role="dialog" aria-modal="true" aria-labelledby="userSettingsTitle">
+        <div class="user-settings-header">
+          <h3 id="userSettingsTitle">User Settings</h3>
+          <button type="button" class="btn btn-secondary btn-icon-only" id="userSettingsCloseBtn" aria-label="Close settings">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+        <div class="user-settings-body">
+          <aside class="user-settings-nav">
+            <button type="button" class="user-settings-nav-item" data-settings-tab="authority">
+              <span class="material-symbols-rounded">admin_panel_settings</span>
+              <span>Authority</span>
+            </button>
+            <button type="button" class="user-settings-nav-item active" data-settings-tab="analysis">
+              <span class="material-symbols-rounded">analytics</span>
+              <span>Analysis</span>
+            </button>
+            <button type="button" class="user-settings-nav-item" data-settings-tab="appearance">
+              <span class="material-symbols-rounded">view_quilt</span>
+              <span>Appearance</span>
+            </button>
+            <button type="button" class="user-settings-nav-item" data-settings-tab="notifications">
+              <span class="material-symbols-rounded">notifications</span>
+              <span>Notifications</span>
+            </button>
+            <button type="button" class="user-settings-nav-item" data-settings-tab="optimization">
+              <span class="material-symbols-rounded">bolt</span>
+              <span>Optimization</span>
+            </button>
+          </aside>
+          <section class="user-settings-content">
+            <!-- AUTHORITY TAB -->
+            <div class="user-settings-tab" id="userSettingsTabAuthority">
+              <h4>User Authority</h4>
+              <p class="user-settings-hint">Enter password to access Superuser mode and manage element visibility rules.</p>
+
+              <div id="authorityPasswordSection">
+                <div class="authority-password-group">
+                  <input type="password" id="authorityPasswordInput" class="authority-input" placeholder="Enter password..." autocomplete="off">
+                  <button type="button" class="btn btn-primary" id="authorityUnlockBtn">
+                    <span class="material-symbols-rounded" style="font-size:16px">lock_open</span> Unlock
+                  </button>
+                </div>
+                <p id="authorityPasswordError" class="authority-error" style="display:none">Incorrect password</p>
+              </div>
+
+              <div id="authoritySuperuserSection" style="display:none">
+                <div class="authority-mode-banner superuser">
+                  <span class="material-symbols-rounded">shield_person</span>
+                  <span>Superuser Mode Active</span>
+                  <button type="button" class="btn btn-secondary btn-sm" id="authorityExitSuperuserBtn">Exit Superuser</button>
+                </div>
+
+                <h4 class="user-settings-subtitle">Hidden Element Selectors</h4>
+                <p class="user-settings-hint">CSS selectors for elements to hide in normal mode (e.g. <code>.my-class</code>, <code>#my-id</code>). One selector per line.</p>
+                <textarea id="authorityHiddenSelectorsInput" class="authority-textarea" rows="8" placeholder=".example-class&#10;#example-id&#10;.another-element"></textarea>
+                <div class="authority-actions">
+                  <button type="button" class="btn btn-primary" id="authoritySaveSelectorsBtn">
+                    <span class="material-symbols-rounded" style="font-size:16px">save</span> Save Selectors
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="user-settings-tab active" id="userSettingsTabAnalysis">
+              <h4>Analysis Dataset Columns</h4>
+              <p class="user-settings-hint">Choose which columns are shown inside the Analysis dataset table.</p>
+              <div class="user-settings-actions">
+                <button type="button" class="btn btn-secondary" id="analysisSettingsSelectAllBtn">Select All</button>
+                <button type="button" class="btn btn-secondary" id="analysisSettingsClearAllBtn">Clear All</button>
+              </div>
+              <div id="analysisSettingsColumnsList" class="user-settings-columns-list"></div>
+
+              <h4 class="user-settings-subtitle">Analysis Layout</h4>
+              <p class="user-settings-hint">Configure split layout and focus mode defaults for Data Analysis.</p>
+              <div class="user-settings-layout-panel">
+                <div class="user-settings-layout-block">
+                  <div class="user-settings-layout-label">Section Split</div>
+                  <div class="user-settings-choice-grid user-settings-choice-grid-2">
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsAnalysisLayout" value="horizontal" checked>
+                      <span class="material-symbols-rounded">splitscreen_left</span>
+                      <span>Horizontal</span>
+                    </label>
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsAnalysisLayout" value="vertical">
+                      <span class="material-symbols-rounded">splitscreen_top</span>
+                      <span>Vertical</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="user-settings-layout-block">
+                  <div class="user-settings-layout-label">Focus Mode</div>
+                  <div class="user-settings-choice-grid user-settings-choice-grid-2">
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsAnalysisFocus" value="balanced" checked>
+                      <span class="material-symbols-rounded">dashboard</span>
+                      <span>Balanced</span>
+                    </label>
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsAnalysisFocus" value="focus-results">
+                      <span class="material-symbols-rounded">lab_profile</span>
+                      <span>Focus Results</span>
+                    </label>
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsAnalysisFocus" value="focus-settings">
+                      <span class="material-symbols-rounded">tune</span>
+                      <span>Focus Settings</span>
+                    </label>
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsAnalysisFocus" value="focus-dataset">
+                      <span class="material-symbols-rounded">table</span>
+                      <span>Focus Dataset</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <h4 class="user-settings-subtitle">Path Diagram Defaults</h4>
+              <p class="user-settings-hint">All Path Diagram preview customizations are stored here and reused automatically.</p>
+              <div id="userSettingsPathDiagramDefaultsUi" class="user-settings-path-diagram-ui"></div>
+
+              <h4 class="user-settings-subtitle">GGE Biplot Defaults</h4>
+              <p class="user-settings-hint">All GGE Biplot preview customizations are stored here and reused automatically.</p>
+              <div id="userSettingsGgeBiplotDefaultsUi" class="user-settings-path-diagram-ui"></div>
+            </div>
+
+            <div class="user-settings-tab" id="userSettingsTabAppearance">
+              <h4>View Mode</h4>
+              <p class="user-settings-hint">Choose default layout for all sections, then override per section if needed.</p>
+
+              <div class="user-settings-layout-panel">
+                <div class="user-settings-layout-block">
+                  <div class="user-settings-layout-label">Global Default</div>
+                  <div class="user-settings-choice-grid user-settings-choice-grid-2">
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsInventoryGlobalView" value="grid" checked>
+                      <span class="material-symbols-rounded">grid_view</span>
+                      <span>Grid</span>
+                    </label>
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsInventoryGlobalView" value="list">
+                      <span class="material-symbols-rounded">view_list</span>
+                      <span>List</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="user-settings-layout-block">
+                  <div class="user-settings-layout-label">Per Section Override</div>
+                  <div class="user-settings-hint" style="margin-top:0">Set to Default to follow global mode.</div>
+
+                  <div class="user-settings-subtitle" style="margin-top:1rem">Reminders</div>
+                  <div class="user-settings-choice-grid user-settings-choice-grid-3">
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsViewReminders" value="default" checked>
+                      <span>Default</span>
+                    </label>
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsViewReminders" value="grid">
+                      <span>Grid</span>
+                    </label>
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsViewReminders" value="list">
+                      <span>List</span>
+                    </label>
+                  </div>
+
+                  <div class="user-settings-subtitle" style="margin-top:1rem">Inventory: Crops</div>
+                  <div class="user-settings-choice-grid user-settings-choice-grid-3">
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsInventoryViewCrops" value="default" checked>
+                      <span>Default</span>
+                    </label>
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsInventoryViewCrops" value="grid">
+                      <span>Grid</span>
+                    </label>
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsInventoryViewCrops" value="list">
+                      <span>List</span>
+                    </label>
+                  </div>
+
+                  <div class="user-settings-subtitle" style="margin-top:1rem">Inventory: Locations</div>
+                  <div class="user-settings-choice-grid user-settings-choice-grid-3">
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsInventoryViewLocations" value="default" checked>
+                      <span>Default</span>
+                    </label>
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsInventoryViewLocations" value="grid">
+                      <span>Grid</span>
+                    </label>
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsInventoryViewLocations" value="list">
+                      <span>List</span>
+                    </label>
+                  </div>
+
+                  <div class="user-settings-subtitle" style="margin-top:1rem">Inventory: Parameters</div>
+                  <div class="user-settings-choice-grid user-settings-choice-grid-3">
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsInventoryViewParameters" value="default" checked>
+                      <span>Default</span>
+                    </label>
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsInventoryViewParameters" value="grid">
+                      <span>Grid</span>
+                    </label>
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsInventoryViewParameters" value="list">
+                      <span>List</span>
+                    </label>
+                  </div>
+
+                  <div class="user-settings-subtitle" style="margin-top:1rem">Inventory: Agronomy</div>
+                  <div class="user-settings-choice-grid user-settings-choice-grid-3">
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsInventoryViewAgronomy" value="default" checked>
+                      <span>Default</span>
+                    </label>
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsInventoryViewAgronomy" value="grid">
+                      <span>Grid</span>
+                    </label>
+                    <label class="user-settings-choice-card">
+                      <input type="radio" name="userSettingsInventoryViewAgronomy" value="list">
+                      <span>List</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- NOTIFICATIONS TAB -->
+            <div class="user-settings-tab" id="userSettingsTabNotifications">
+              <h4>Notification Settings</h4>
+              <p class="user-settings-hint">Configure daily push notifications for reminders. Works on both mobile (installed PWA) and desktop browsers.</p>
+
+              <div id="notifPermissionBanner" class="notif-permission-banner" style="display:none">
+                <span class="material-symbols-rounded">notifications_off</span>
+                <div>
+                  <strong>Notifications are blocked</strong>
+                  <p>Enable notifications in your browser settings to receive daily reminders.</p>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" id="notifRequestPermBtn">Enable</button>
+              </div>
+
+              <div class="notif-settings-group">
+                <label class="notif-toggle-row">
+                  <span>Enable Notifications</span>
+                  <input type="checkbox" id="notifEnabledToggle" class="notif-toggle">
+                </label>
+              </div>
+
+              <div id="notifSchedulePanel">
+                <div class="notif-settings-group">
+                  <div class="notif-field-row">
+                    <label for="notifScope">Notification Scope</label>
+                    <select id="notifScope" class="notif-select">
+                      <option value="general">General (total counts)</option>
+                      <option value="per-trial">Per Trial</option>
+                      <option value="per-location">Per Location</option>
+                    </select>
+                  </div>
+                  <p class="user-settings-hint" id="notifScopeHint">General sends a single summary notification. Per Trial or Per Location sends a separate notification for each.</p>
+                </div>
+
+                <h4 class="user-settings-subtitle">Overdue Reminders</h4>
+                <p class="user-settings-hint">Get notified about overdue tasks. Choose how many times per day and at which hours.</p>
+                <div class="notif-settings-group">
+                  <label class="notif-toggle-row">
+                    <span>Notify for Overdue</span>
+                    <input type="checkbox" id="notifOverdueEnabled" class="notif-toggle">
+                  </label>
+                  <div class="notif-field-row">
+                    <label for="notifOverdueTimes">Times per day</label>
+                    <select id="notifOverdueTimes" class="notif-select">
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                    </select>
+                  </div>
+                  <div class="notif-hours-row" id="notifOverdueHoursRow">
+                    <label>Hour(s)</label>
+                    <div class="notif-hours-inputs" id="notifOverdueHoursInputs"></div>
+                  </div>
+                </div>
+
+                <h4 class="user-settings-subtitle">Today's Reminders</h4>
+                <p class="user-settings-hint">Get notified about tasks due today. Choose how many times per day and at which hours.</p>
+                <div class="notif-settings-group">
+                  <label class="notif-toggle-row">
+                    <span>Notify for Today</span>
+                    <input type="checkbox" id="notifTodayEnabled" class="notif-toggle">
+                  </label>
+                  <div class="notif-field-row">
+                    <label for="notifTodayTimes">Times per day</label>
+                    <select id="notifTodayTimes" class="notif-select">
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                    </select>
+                  </div>
+                  <div class="notif-hours-row" id="notifTodayHoursRow">
+                    <label>Hour(s)</label>
+                    <div class="notif-hours-inputs" id="notifTodayHoursInputs"></div>
+                  </div>
+                </div>
+
+                <h4 class="user-settings-subtitle">Test</h4>
+                <p class="user-settings-hint">Send a test notification to verify it works on this device.</p>
+                <button type="button" class="btn btn-secondary" id="notifTestBtn">
+                  <span class="material-symbols-rounded" style="font-size:16px">send</span>
+                  Send Test Notification
+                </button>
+              </div>
+            </div>
+
+            <div class="user-settings-tab" id="userSettingsTabOptimization">
+              <h4>Storage Health</h4>
+              <p class="user-settings-hint">Monitor local storage usage and persistent storage status for long-term offline data.</p>
+              <div id="storageHealthContainer" class="optimization-categories-list"></div>
+
+              <h4>File Optimization</h4>
+              <p class="user-settings-hint">Consolidate individual inventory files into a single file per category to reduce the number of Google Drive API calls during loading.</p>
+              <div id="optimizationCategoriesList" class="optimization-categories-list"></div>
+
+              <h4 style="margin-top: 1.5rem;">Trial Optimization</h4>
+              <p class="user-settings-hint">Optimize trial data storage: extract inline photos to compressed WebP files and consolidate per-sample files to per-rep.</p>
+              <div id="optimizationTrialList" class="optimization-categories-list"></div>
+            </div>
+          </section>
+        </div>
+        <div class="user-settings-footer">
+          <button type="button" class="btn btn-secondary" id="userSettingsCancelBtn">Cancel</button>
+          <button type="button" class="btn btn-primary" id="userSettingsSaveBtn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="importFileInput" accept=".adv" class="hidden">
+
+    <!-- Load Latest Data Panel -->
+    <div id="loadDataModal" class="modal-overlay hidden">
+      <div class="load-data-modal" role="dialog" aria-modal="true" aria-labelledby="loadDataTitle">
+        <div class="load-data-header">
+          <h3 id="loadDataTitle">Load Latest Data</h3>
+          <button type="button" class="btn btn-secondary btn-icon-only" id="loadDataCloseBtn" aria-label="Close">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+        <div class="load-data-body">
+          <aside class="load-data-nav">
+            <button type="button" class="load-data-nav-item active" data-load-tab="trial">
+              <span class="material-symbols-rounded">science</span>
+              <span>Trial</span>
+            </button>
+            <button type="button" class="load-data-nav-item" data-load-tab="crops">
+              <span class="material-symbols-rounded">eco</span>
+              <span>Crops</span>
+            </button>
+            <button type="button" class="load-data-nav-item" data-load-tab="entries">
+              <span class="material-symbols-rounded">format_list_numbered</span>
+              <span>Entries</span>
+            </button>
+            <button type="button" class="load-data-nav-item" data-load-tab="locations">
+              <span class="material-symbols-rounded">location_on</span>
+              <span>Locations</span>
+            </button>
+            <button type="button" class="load-data-nav-item" data-load-tab="parameters">
+              <span class="material-symbols-rounded">tune</span>
+              <span>Parameters</span>
+            </button>
+            <button type="button" class="load-data-nav-item" data-load-tab="agronomy">
+              <span class="material-symbols-rounded">agriculture</span>
+              <span>Agronomy</span>
+            </button>
+            <button type="button" class="load-data-nav-item" data-load-tab="library">
+              <span class="material-symbols-rounded">folder_open</span>
+              <span>Library</span>
+            </button>
+          </aside>
+          <section class="load-data-content">
+            <div class="load-data-tab active" id="loadDataTabTrial">
+              <div class="load-data-tab-header">
+                <div>
+                  <h4>Trial Data</h4>
+                  <p class="load-data-hint">Load trial observation &amp; agronomy responses from Google Drive.</p>
+                </div>
+                <div class="load-data-btn-group">
+                  <button type="button" class="btn btn-secondary btn-sm" id="refreshAllTrialsBtn" title="Check all loaded trials for newer data on Drive">
+                    <span class="material-symbols-rounded" style="font-size:16px">sync</span> Refresh All
+                  </button>
+                  <button type="button" class="btn btn-sm load-data-update-all-btn" id="updateAllTrialsBtn" style="display:none" title="Download all available updates">
+                    <span class="material-symbols-rounded" style="font-size:16px">update</span> Update All
+                  </button>
+                  <button type="button" class="btn btn-primary btn-sm" id="loadAllTrialsBtn">
+                    <span class="material-symbols-rounded" style="font-size:16px">cloud_download</span> Load All
+                  </button>
+                </div>
+              </div>
+              <div id="loadDataTrialList" class="load-data-list"></div>
+            </div>
+            <div class="load-data-tab" id="loadDataTabCrops">
+              <div class="load-data-tab-header">
+                <div>
+                  <h4>Crops</h4>
+                  <p class="load-data-hint">Refresh crops data from Google Drive.</p>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" id="loadCategoryBtnCrops">
+                  <span class="material-symbols-rounded" style="font-size:16px">cloud_download</span> Refresh
+                </button>
+              </div>
+              <div id="loadDataCropsSummary" class="load-data-summary"></div>
+            </div>
+            <div class="load-data-tab" id="loadDataTabEntries">
+              <div class="load-data-tab-header">
+                <div>
+                  <h4>Entries</h4>
+                  <p class="load-data-hint">Refresh entries/lines data from Google Drive.</p>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" id="loadCategoryBtnEntries">
+                  <span class="material-symbols-rounded" style="font-size:16px">cloud_download</span> Refresh
+                </button>
+              </div>
+              <div id="loadDataEntriesSummary" class="load-data-summary"></div>
+            </div>
+            <div class="load-data-tab" id="loadDataTabLocations">
+              <div class="load-data-tab-header">
+                <div>
+                  <h4>Locations</h4>
+                  <p class="load-data-hint">Refresh locations data from Google Drive.</p>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" id="loadCategoryBtnLocations">
+                  <span class="material-symbols-rounded" style="font-size:16px">cloud_download</span> Refresh
+                </button>
+              </div>
+              <div id="loadDataLocationsSummary" class="load-data-summary"></div>
+            </div>
+            <div class="load-data-tab" id="loadDataTabParameters">
+              <div class="load-data-tab-header">
+                <div>
+                  <h4>Parameters</h4>
+                  <p class="load-data-hint">Refresh parameters data from Google Drive.</p>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" id="loadCategoryBtnParameters">
+                  <span class="material-symbols-rounded" style="font-size:16px">cloud_download</span> Refresh
+                </button>
+              </div>
+              <div id="loadDataParametersSummary" class="load-data-summary"></div>
+            </div>
+            <div class="load-data-tab" id="loadDataTabAgronomy">
+              <div class="load-data-tab-header">
+                <div>
+                  <h4>Agronomy</h4>
+                  <p class="load-data-hint">Refresh agronomy items from Google Drive.</p>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" id="loadCategoryBtnAgronomy">
+                  <span class="material-symbols-rounded" style="font-size:16px">cloud_download</span> Refresh
+                </button>
+              </div>
+              <div id="loadDataAgronomySummary" class="load-data-summary"></div>
+            </div>
+            <div class="load-data-tab" id="loadDataTabLibrary">
+              <div class="load-data-tab-header">
+                <div>
+                  <h4>Library</h4>
+                  <p class="load-data-hint">Refresh library files from Google Drive.</p>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" id="loadCategoryBtnLibrary">
+                  <span class="material-symbols-rounded" style="font-size:16px">cloud_download</span> Refresh
+                </button>
+              </div>
+              <div id="loadDataLibrarySummary" class="load-data-summary"></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner">
+      <div class="spinner"></div>
+      <p id="loadingProgressText">Loading...</p>
+      <div class="loading-progress">
+        <div id="loadingProgressBar" class="loading-progress-bar"></div>
+      </div>
+      <div id="loadingProgressPercent" class="loading-progress-percent">0%</div>
+    </div>
+
+    <!-- Google API -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+
+    <!-- Leaflet Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-draw/1.0.4/leaflet.draw.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-draw/1.0.4/leaflet.draw.min.js"></script>
+
+    <!-- SheetJS for Excel/CSV import/export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+    <!-- PDF export helpers -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- Scroll-lock utilities & toolbar dropdowns (must load before all app scripts) -->
+    <script>
+      var _modalOpenCount = 0;
+      function lockBodyScroll() {
+        _modalOpenCount++;
+        document.body.classList.add('modal-open');
+      }
+      function unlockBodyScroll() {
+        _modalOpenCount = Math.max(0, _modalOpenCount - 1);
+        if (_modalOpenCount === 0) document.body.classList.remove('modal-open');
+      }
+
+      // Toolbar dropdown toggle
+      function toggleToolbarDropdown(triggerId, dropdownId) {
+        var dd = document.getElementById(dropdownId);
+        if (!dd) return;
+        var isOpen = dd.classList.contains('active');
+        closeAllToolbarDropdowns();
+        if (!isOpen) dd.classList.add('active');
+      }
+      function closeAllToolbarDropdowns() {
+        document.querySelectorAll('.toolbar-dropdown.active').forEach(function(d) { d.classList.remove('active'); });
+      }
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.toolbar-dropdown-wrapper')) closeAllToolbarDropdowns();
+      });
+    </script>
+
+    <!-- App Scripts -->
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/drive.js"></script>
+    <script src="assets/js/inventory.js"></script>
+    <script src="assets/js/locations.js"></script>
+    <script src="assets/js/trial.js"></script>
+    <script src="assets/js/analysis/analysis.js"></script>
+    <script src="assets/js/analysis/core/analysis-ui.js"></script>
+    <script src="assets/js/analysis/anova/crd.js"></script>
+    <script src="assets/js/analysis/anova/posthoc.js"></script>
+    <script src="assets/js/analysis/anova/rcbd.js"></script>
+    <script src="assets/js/analysis/anova/latin-square.js"></script>
+    <script src="assets/js/analysis/t-test/t-test.js"></script>
+    <script src="assets/js/analysis/descriptive-analysis/summary.js"></script>
+    <script src="assets/js/analysis/normality/shapiro-wilk.js"></script>
+    <script src="assets/js/analysis/regression-correlation/simple-linear-regression.js"></script>
+    <script src="assets/js/analysis/gge-biplot/gge-biplot.js"></script>
+    <script src="assets/js/analysis/path-analysis/path-analysis.js"></script>
+    <script src="assets/js/library.js"></script>
+    <script src="assets/js/reminder.js"></script>
+    <script src="assets/js/notifications.js"></script>
+    <script src="assets/js/app.js"></script>
+  </body>
+
+</html>
