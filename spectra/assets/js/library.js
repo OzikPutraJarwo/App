@@ -2,6 +2,7 @@
 let libraryState = {
   items: [],
   trialPhotos: [],
+  agronomyPhotos: [],
   folderId: null,
   selectedId: null,
   previewUrl: null,
@@ -10,19 +11,20 @@ let libraryState = {
   sortBy: "modifiedTime",
   sortDir: "desc",
   filesGridSize: "small", // "small" | "medium" | "large" for Uploaded Files
-  section: "files", // "files" | "trial-photos"
+  section: "files", // "files" | "observation-photos" | "agronomy-photos"
   uploading: {}, // Track upload progress by file name: { filename: { progress: 0-100 } }
   _filePreviewCache: {}, // fileId -> objectUrl for image thumbnails
   _filePreviewPromises: {}, // fileId -> Promise while thumbnail is loading
   _driveLoaded: false, // Whether items have been loaded from Drive this session
   _trialPhotosLoaded: false,
+  _agronomyPhotosLoaded: false,
   // Background scanning/conversion tracking
   _scanningInline: false,
   _scanProgress: null,
   _convertingInline: false,
   _convertProgress: null,
   _operationAbort: null,
-  _openTrialPhotoFolderId: null, // Currently open trial folder for trial photos view
+  _openTrialPhotoFolderId: null, // Currently open trial folder for photo views
   _openLibraryFolderId: null, // Currently open folder for uploaded files view
   _openLibraryFolderName: null, // Name of the currently open folder
   _libraryFolders: [], // Subfolders within Library drive folder
@@ -95,8 +97,10 @@ function setupLibraryEvents() {
       refreshBtn.disabled = true;
       refreshBtn.querySelector("span:last-child").textContent = "Refreshing...";
       try {
-        if (libraryState.section === "trial-photos") {
+        if (libraryState.section === "observation-photos") {
           await loadTrialPhotoItems({ force: true });
+        } else if (libraryState.section === "agronomy-photos") {
+          await loadAgronomyPhotoItems({ force: true });
         } else {
           await incrementalRefreshLibrary();
         }
@@ -237,7 +241,8 @@ function clearLibraryStatus(delayMs = 0) {
 }
 
 async function switchLibrarySection(section = "files") {
-  const nextSection = section === "trial-photos" ? "trial-photos" : "files";
+  const validSections = ["files", "observation-photos", "agronomy-photos"];
+  const nextSection = validSections.includes(section) ? section : "files";
   libraryState.section = nextSection;
   libraryState.selectedId = null;
   libraryState._openTrialPhotoFolderId = null;
@@ -252,26 +257,31 @@ async function switchLibrarySection(section = "files") {
   const searchInput = document.getElementById("librarySearchInput");
   const actionBarContainer = document.getElementById("trialPhotoActionsContainer");
 
-  if (nextSection === "trial-photos") {
+  if (nextSection === "observation-photos" || nextSection === "agronomy-photos") {
     if (uploadBtn) uploadBtn.classList.add("hidden");
     if (uploadInput) uploadInput.classList.add("hidden");
     if (createFolderBtn) createFolderBtn.classList.add("hidden");
     if (filterContainer) filterContainer.classList.add("hidden");
     if (gridSizeGroup) gridSizeGroup.classList.remove("hidden");
-    if (actionBarContainer) actionBarContainer.classList.remove("hidden");
+    if (actionBarContainer) actionBarContainer.classList.toggle("hidden", nextSection !== "observation-photos");
     libraryState.activeFilter = "all";
-    if (searchInput) searchInput.placeholder = "Search trial photos...";
-    
-    // Check if a scan/convert is in progress and show its status
-    if (libraryState._scanningInline) {
-      setLibraryStatus("Scanning inline photos in background...", "loading");
-    } else if (libraryState._convertingInline) {
-      setLibraryStatus("Converting inline photos in background...", "loading");
+
+    if (nextSection === "observation-photos") {
+      if (searchInput) searchInput.placeholder = "Search observation photos...";
+      if (libraryState._scanningInline) {
+        setLibraryStatus("Scanning inline photos in background...", "loading");
+      } else if (libraryState._convertingInline) {
+        setLibraryStatus("Converting inline photos in background...", "loading");
+      } else {
+        setLibraryStatus("Loading observation photos in background...", "loading");
+      }
+      loadTrialPhotoItems().catch(() => {});
     } else {
-      setLibraryStatus("Loading trial photos in background...", "loading");
+      if (searchInput) searchInput.placeholder = "Search agronomy photos...";
+      if (actionBarContainer) actionBarContainer.classList.add("hidden");
+      setLibraryStatus("Loading agronomy photos in background...", "loading");
+      loadAgronomyPhotoItems().catch(() => {});
     }
-    
-    loadTrialPhotoItems().catch(() => {});
   } else {
     if (uploadBtn) uploadBtn.classList.remove("hidden");
     if (uploadInput) uploadInput.classList.remove("hidden");
@@ -290,9 +300,14 @@ async function switchLibrarySection(section = "files") {
 }
 
 function ensureLibrarySectionLoaded() {
-  if (libraryState.section === "trial-photos") {
-    setLibraryStatus("Loading trial photos in background...", "loading");
+  if (libraryState.section === "observation-photos") {
+    setLibraryStatus("Loading observation photos in background...", "loading");
     loadTrialPhotoItems().catch(() => {});
+    return;
+  }
+  if (libraryState.section === "agronomy-photos") {
+    setLibraryStatus("Loading agronomy photos in background...", "loading");
+    loadAgronomyPhotoItems().catch(() => {});
     return;
   }
   setLibraryStatus("Loading uploaded files in background...", "loading");
@@ -402,6 +417,27 @@ async function incrementalRefreshLibrary() {
 }
 
 /**
+ * Parse observation photo filename into structured parts.
+ * Format: ParamName_RepX_PlotName_SampleY_uuid.webp
+ */
+function _parseObservationPhotoFileName(fileName) {
+  const base = fileName.replace(/\.[^.]+$/, "");
+  const parts = base.split("_");
+  const result = { paramName: null, repLabel: null, entryName: null, sampleNum: null };
+  if (parts.length >= 5) {
+    const repIdx = parts.findIndex((p) => /^Rep\d+$/i.test(p));
+    const sampleIdx = parts.findIndex((p) => /^Sample\d+$/i.test(p));
+    if (repIdx > 0 && sampleIdx > repIdx) {
+      result.paramName = parts.slice(0, repIdx).join(" ");
+      result.repLabel = parts[repIdx];
+      result.entryName = parts.slice(repIdx + 1, sampleIdx).join(" ");
+      result.sampleNum = parts[sampleIdx].replace(/^Sample/i, "");
+    }
+  }
+  return result;
+}
+
+/**
  * Derive a human-readable display name from a photo filename.
  * New format: ParamName_RepX_PlotName_SampleY_uuid.webp
  * Old format: uuid.webp (fallback)
@@ -464,14 +500,20 @@ async function loadTrialPhotoItems(options = {}) {
           });
           (photoFilesResp.result.files || []).forEach((file) => {
             if (!String(file.mimeType || "").startsWith("image/")) return;
+            const parsed = _parseObservationPhotoFileName(file.name);
             photos.push({
               id: `binary:${file.id}`,
-              section: "trial-photos",
+              section: "observation-photos",
               storageType: "binary",
               trialId,
               trialName,
               trialFolderId: trialFolder.id,
               name: _derivePhotoDisplayName(file.name, trialName),
+              rawFileName: file.name,
+              paramName: parsed.paramName,
+              repLabel: parsed.repLabel,
+              entryName: parsed.entryName,
+              sampleNum: parsed.sampleNum,
               mimeType: file.mimeType,
               modifiedTime: file.modifiedTime,
               size: file.size,
@@ -493,13 +535,225 @@ async function loadTrialPhotoItems(options = {}) {
     libraryState._trialPhotosLoaded = true;
     renderLibraryList();
     clearTrialPhotoProgress();
-    setLibraryStatus(`Trial photos loaded (${allPhotos.length} binary files).`, "success");
+    setLibraryStatus(`Observation photos loaded (${allPhotos.length} binary files).`, "success");
     clearLibraryStatus(3000);
   } catch (error) {
-    console.error("Error loading trial photos:", error);
+    console.error("Error loading observation photos:", error);
     clearTrialPhotoProgress();
-    setLibraryStatus("Failed to load trial photos.", "error");
+    setLibraryStatus("Failed to load observation photos.", "error");
   }
+}
+
+async function loadAgronomyPhotoItems(options = {}) {
+  const { force = false } = options;
+  if (libraryState._agronomyPhotosLoaded && !force) {
+    renderLibraryList();
+    return;
+  }
+
+  setLibraryStatus("Loading agronomy photos...", "loading");
+
+  try {
+    const rootFolderId = await getTrialsFolderId();
+    const trialFoldersResp = await gapi.client.drive.files.list({
+      q: `'${rootFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
+      fields: "files(id,name)",
+      pageSize: 1000,
+    });
+    const trialFolders = trialFoldersResp.result.files || [];
+    const allPhotos = [];
+    const BATCH = 5;
+    let done = 0;
+    const total = trialFolders.length;
+
+    for (let i = 0; i < total; i += BATCH) {
+      const batch = trialFolders.slice(i, i + BATCH);
+      const batchResults = await Promise.all(batch.map(async (trialFolder) => {
+        const trialId = trialFolder.name;
+        const trial = trialState?.trials?.find((t) => t.id === trialId);
+        const trialName = trial?.name || trialId;
+        const photos = [];
+
+        const agronomyPhotosFolder = await findFolder("agronomy-photos", trialFolder.id);
+        if (agronomyPhotosFolder) {
+          const photoFilesResp = await gapi.client.drive.files.list({
+            q: `'${agronomyPhotosFolder.id}' in parents and trashed=false`,
+            fields: "files(id,name,mimeType,modifiedTime,size)",
+            pageSize: 1000,
+          });
+          (photoFilesResp.result.files || []).forEach((file) => {
+            if (!String(file.mimeType || "").startsWith("image/")) return;
+            photos.push({
+              id: `binary:${file.id}`,
+              section: "agronomy-photos",
+              storageType: "binary",
+              trialId,
+              trialName,
+              trialFolderId: trialFolder.id,
+              name: _deriveAgronomyPhotoDisplayName(file.name, trialName),
+              rawFileName: file.name,
+              mimeType: file.mimeType,
+              modifiedTime: file.modifiedTime,
+              size: file.size,
+              driveFileId: file.id,
+            });
+          });
+        }
+        return photos;
+      }));
+
+      batchResults.forEach((photos) => allPhotos.push(...photos));
+      done += batch.length;
+    }
+
+    libraryState.agronomyPhotos = allPhotos;
+    libraryState._agronomyPhotosLoaded = true;
+    renderLibraryList();
+    setLibraryStatus(`Agronomy photos loaded (${allPhotos.length} files).`, "success");
+    clearLibraryStatus(3000);
+  } catch (error) {
+    console.error("Error loading agronomy photos:", error);
+    setLibraryStatus("Failed to load agronomy photos.", "error");
+  }
+}
+
+/**
+ * Derive a human-readable display name from an agronomy photo filename.
+ * Format: ItemActivity_AreaName_uuid.webp
+ */
+function _deriveAgronomyPhotoDisplayName(fileName, trialName) {
+  const base = fileName.replace(/\.[^.]+$/, "");
+  const parts = base.split("_");
+  // Format: ItemActivity_AreaName_uuid — at least 3 parts
+  if (parts.length >= 3) {
+    // Last part is uuid, skip it
+    const meaningful = parts.slice(0, -1).join(" ");
+    return meaningful;
+  }
+  return base;
+}
+
+function renderAgronomyPhotoList(container) {
+  const allItems = libraryState.agronomyPhotos || [];
+
+  if (!libraryState._openTrialPhotoFolderId) {
+    // Show folder view grouped by trial
+    renderAgronomyPhotoFolders(container, allItems);
+    return;
+  }
+
+  // Show photos inside the selected trial folder
+  const query = (libraryState.searchQuery || "").toLowerCase();
+  const folderId = libraryState._openTrialPhotoFolderId;
+
+  let filtered = allItems.filter((item) => {
+    if (item.trialId !== folderId) return false;
+    if (!query) return true;
+    return [item.name, item.trialName, item.rawFileName].filter(Boolean).join(" ").toLowerCase().includes(query);
+  });
+
+  const sortDir = libraryState.sortDir === "asc" ? 1 : -1;
+  filtered = filtered.sort((a, b) => {
+    switch (libraryState.sortBy) {
+      case "name": return (a.name || "").localeCompare(b.name || "") * sortDir;
+      case "size": return (Number(a.size || 0) - Number(b.size || 0)) * sortDir;
+      case "modifiedTime":
+      default: return (new Date(a.modifiedTime || 0).getTime() - new Date(b.modifiedTime || 0).getTime()) * sortDir;
+    }
+  });
+
+  if (filtered.length === 0) {
+    container.classList.add("library-grid-empty");
+    container.innerHTML = `
+      <div class="empty-state">
+        <span class="material-symbols-rounded">agriculture</span>
+        <p>No agronomy photos found in this trial.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.classList.remove("library-grid-empty");
+  container.innerHTML = filtered.map((item) => {
+    const dateLabel = item.modifiedTime ? new Date(item.modifiedTime).toLocaleDateString() : "-";
+    const metaRight = `${formatFileSize(Number(item.size || 0))} · ${dateLabel}`;
+    return `
+      <div class="library-item" data-trial-photo-id="${item.id}">
+        <div class="library-item-icon">
+          ${renderTrialPhotoPreview(item)}
+        </div>
+        <div class="library-item-info">
+          <div class="library-item-name">${escapeHtml(item.name || "Photo")}</div>
+          <div class="library-item-meta">${escapeHtml(metaRight)}</div>
+        </div>
+        <div class="library-item-storage">${getTrialPhotoStorageBadge(item.storageType)}</div>
+      </div>
+    `;
+  }).join("");
+
+  loadExternalPhotos(container);
+
+  container.querySelectorAll(".library-item[data-trial-photo-id]").forEach((row) => {
+    row.addEventListener("click", () => {
+      openTrialPhotoDetail(row.dataset.trialPhotoId);
+    });
+  });
+}
+
+function renderAgronomyPhotoFolders(container, allItems) {
+  const query = (libraryState.searchQuery || "").toLowerCase();
+  const trialMap = new Map();
+  for (const item of allItems) {
+    const tid = item.trialId || "unknown";
+    if (!trialMap.has(tid)) trialMap.set(tid, { trialId: tid, trialName: item.trialName || tid, photos: [] });
+    trialMap.get(tid).photos.push(item);
+  }
+  let folders = Array.from(trialMap.values());
+  if (query) folders = folders.filter(f => f.trialName.toLowerCase().includes(query));
+  folders.sort((a, b) => a.trialName.localeCompare(b.trialName));
+
+  if (folders.length === 0) {
+    container.classList.add("library-grid-empty");
+    container.innerHTML = `
+      <div class="empty-state">
+        <span class="material-symbols-rounded">agriculture</span>
+        <p>${allItems.length === 0 ? "No agronomy photos found." : "No trials match your search."}</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.classList.remove("library-grid-empty");
+  container.innerHTML = folders.map(f => {
+    const photoCount = f.photos.length;
+    const latestDate = f.photos.reduce((max, p) => {
+      const d = new Date(p.modifiedTime || 0).getTime();
+      return d > max ? d : max;
+    }, 0);
+    const dateLabel = latestDate ? new Date(latestDate).toLocaleDateString() : "";
+    return `
+      <div class="library-folder-card" data-trial-folder-id="${escapeHtml(f.trialId)}">
+        <div class="folder-card-icon">
+          <span class="material-symbols-rounded" style="font-size:36px;color:var(--primary)">agriculture</span>
+        </div>
+        <div class="folder-card-meta">
+          <div class="folder-card-name">${escapeHtml(f.trialName)}</div>
+          <div class="folder-card-count">${photoCount} photo${photoCount !== 1 ? "s" : ""}${dateLabel ? " · " + dateLabel : ""}</div>
+        </div>
+        <div class="folder-card-actions">
+          <span class="material-symbols-rounded" style="color:var(--text-tertiary);font-size:20px;">chevron_right</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  loadExternalPhotos(container);
+
+  container.querySelectorAll(".library-folder-card").forEach(card => {
+    card.addEventListener("click", () => {
+      openTrialPhotoFolder(card.dataset.trialFolderId);
+    });
+  });
 }
 
 function setTrialPhotoProgress(pct, message) {
@@ -779,7 +1033,7 @@ function collectInlinePhotosFromJson(node, baseMeta, output, path = []) {
       if (typeof photo === "string" && photo.startsWith("data:")) {
         output.push({
           id: `inline:${baseMeta.sourceFileId}:${path.join("|")}:${idx}`,
-          section: "trial-photos",
+          section: "observation-photos",
           storageType: "inline-json",
           trialId: baseMeta.trialId,
           trialName: baseMeta.trialName,
@@ -994,51 +1248,33 @@ function renderTrialPhotoActionBar() {
 function renderTrialPhotoList(container) {
   const allItems = libraryState.trialPhotos || [];
 
-  // If no folder is open, show folder view (grouped by trial)
+  // Level 0: No trial selected — show trial folders
   if (!libraryState._openTrialPhotoFolderId) {
     renderTrialPhotoFolders(container, allItems);
     return;
   }
 
-  // Show photos inside the selected trial folder
+  // Level 1: Trial selected — show all photos flat
+  const trialId = libraryState._openTrialPhotoFolderId;
   const query = (libraryState.searchQuery || "").toLowerCase();
-  const folderId = libraryState._openTrialPhotoFolderId;
 
   let filtered = allItems.filter((item) => {
-    if (item.trialId !== folderId) return false;
+    if (item.trialId !== trialId) return false;
     if (!query) return true;
-    const haystack = [
-      item.name,
-      item.trialName,
-      item.trialId,
-      item.sourceFileName,
-      item.storageType,
-    ].filter(Boolean).join(" ").toLowerCase();
-    return haystack.includes(query);
+    return [item.entryName, item.name, item.rawFileName, item.paramName, item.repLabel]
+      .filter(Boolean).join(" ").toLowerCase().includes(query);
   });
 
   const sortDir = libraryState.sortDir === "asc" ? 1 : -1;
   filtered = filtered.sort((a, b) => {
-    let av;
-    let bv;
     switch (libraryState.sortBy) {
       case "name":
-        av = (a.name || "").toLowerCase();
-        bv = (b.name || "").toLowerCase();
-        return av.localeCompare(bv) * sortDir;
-      case "type":
-        av = a.storageType || "";
-        bv = b.storageType || "";
-        return av.localeCompare(bv) * sortDir;
+        return ((a.entryName || a.name || "").localeCompare(b.entryName || b.name || "")) * sortDir;
       case "size":
-        av = Number(a.size || 0);
-        bv = Number(b.size || 0);
-        return (av - bv) * sortDir;
+        return (Number(a.size || 0) - Number(b.size || 0)) * sortDir;
       case "modifiedTime":
       default:
-        av = new Date(a.modifiedTime || 0).getTime();
-        bv = new Date(b.modifiedTime || 0).getTime();
-        return (av - bv) * sortDir;
+        return (new Date(a.modifiedTime || 0).getTime() - new Date(b.modifiedTime || 0).getTime()) * sortDir;
     }
   });
 
@@ -1047,18 +1283,19 @@ function renderTrialPhotoList(container) {
     container.innerHTML = `
       <div class="empty-state">
         <span class="material-symbols-rounded">photo_library</span>
-        <p>No photos found in this trial.</p>
+        <p>No observation photos found in this trial.</p>
       </div>
     `;
     return;
   }
 
   container.classList.remove("library-grid-empty");
-  const html = filtered.map((item) => {
+  container.innerHTML = filtered.map((item) => {
+    const displayName = item.entryName && item.sampleNum
+      ? `${item.entryName}_${item.sampleNum}`
+      : (item.name || "Photo");
     const dateLabel = item.modifiedTime ? new Date(item.modifiedTime).toLocaleDateString() : "-";
-    const metaRight = item.storageType === "binary"
-      ? `${formatFileSize(Number(item.size || 0))} · ${dateLabel}`
-      : `${item.sourceScope || "json"} · ${item.sourceFileName || "source"}`;
+    const metaRight = `${formatFileSize(Number(item.size || 0))} · ${dateLabel}`;
 
     return `
       <div class="library-item" data-trial-photo-id="${item.id}">
@@ -1066,7 +1303,7 @@ function renderTrialPhotoList(container) {
           ${renderTrialPhotoPreview(item)}
         </div>
         <div class="library-item-info">
-          <div class="library-item-name">${escapeHtml(item.name || "Photo")}</div>
+          <div class="library-item-name">${escapeHtml(displayName)}</div>
           <div class="library-item-meta">${escapeHtml(metaRight)}</div>
         </div>
         <div class="library-item-storage">${getTrialPhotoStorageBadge(item.storageType)}</div>
@@ -1074,12 +1311,8 @@ function renderTrialPhotoList(container) {
     `;
   }).join("");
 
-  container.innerHTML = html;
-
-  // Load binary photos from Drive
   loadExternalPhotos(container);
 
-  // Item click to view detail
   container.querySelectorAll(".library-item[data-trial-photo-id]").forEach((row) => {
     row.addEventListener("click", () => {
       openTrialPhotoDetail(row.dataset.trialPhotoId);
@@ -1115,7 +1348,7 @@ function renderTrialPhotoFolders(container, allItems) {
     container.innerHTML = `
       <div class="empty-state">
         <span class="material-symbols-rounded">photo_library</span>
-        <p>${allItems.length === 0 ? "No trial photos found. Scan your trials to load photos." : "No trials match your search."}</p>
+        <p>${allItems.length === 0 ? "No observation photos found. Scan your trials to load photos." : "No trials match your search."}</p>
       </div>
     `;
     return;
@@ -1187,7 +1420,7 @@ function updateLibraryHeaderTitle() {
         <span class="library-header-current">${folderName}</span>
       </span>
     `;
-  } else if (libraryState.section === "trial-photos" && libraryState._openTrialPhotoFolderId) {
+  } else if (libraryState.section === "observation-photos" && libraryState._openTrialPhotoFolderId) {
     const trialName = escapeHtml(
       libraryState.trialPhotos.find((item) => item.trialId === libraryState._openTrialPhotoFolderId)?.trialName ||
       libraryState._openTrialPhotoFolderId
@@ -1198,7 +1431,23 @@ function updateLibraryHeaderTitle() {
         <span class="material-symbols-rounded">arrow_back</span>
       </button>
       <span class="library-header-path">
-        <span class="library-header-root">Trial Photos</span>
+        <span class="library-header-root" onclick="closeTrialPhotoFolder()" style="cursor:pointer">Observation Photos</span>
+        <span class="material-symbols-rounded library-header-sep">chevron_right</span>
+        <span class="library-header-current">${trialName}</span>
+      </span>
+    `;
+  } else if (libraryState.section === "agronomy-photos" && libraryState._openTrialPhotoFolderId) {
+    const trialName = escapeHtml(
+      libraryState.agronomyPhotos.find((item) => item.trialId === libraryState._openTrialPhotoFolderId)?.trialName ||
+      libraryState._openTrialPhotoFolderId
+    );
+    baseTitleHtml = "";
+    pathHtml = `
+      <button class="library-header-back" onclick="closeTrialPhotoFolder()" title="Back">
+        <span class="material-symbols-rounded">arrow_back</span>
+      </button>
+      <span class="library-header-path">
+        <span class="library-header-root">Agronomy Photos</span>
         <span class="material-symbols-rounded library-header-sep">chevron_right</span>
         <span class="library-header-current">${trialName}</span>
       </span>
@@ -1337,11 +1586,18 @@ function renderLibraryList() {
   if (!container) return;
   updateLibraryHeaderTitle();
 
-  if (libraryState.section === "trial-photos") {
+  if (libraryState.section === "observation-photos") {
     container.classList.remove("library-grid-empty", "grid-small", "grid-medium", "grid-large");
     container.classList.add("library-files-grid", `grid-${libraryState.filesGridSize}`);
     renderTrialPhotoList(container);
     renderTrialPhotoActionBar();
+    return;
+  }
+
+  if (libraryState.section === "agronomy-photos") {
+    container.classList.remove("library-grid-empty", "grid-small", "grid-medium", "grid-large");
+    container.classList.add("library-files-grid", `grid-${libraryState.filesGridSize}`);
+    renderAgronomyPhotoList(container);
     return;
   }
 
@@ -1676,7 +1932,7 @@ async function uploadLibraryFile(file) {
 }
 
 async function openLibraryDetail(fileId) {
-  if (libraryState.section === "trial-photos") {
+  if (libraryState.section === "observation-photos" || libraryState.section === "agronomy-photos") {
     return openTrialPhotoDetail(fileId);
   }
 
@@ -1696,6 +1952,7 @@ async function openLibraryDetail(fileId) {
   libraryState.selectedId = fileId;
   setLibraryDetailVisible(true);
   updateLibraryDetailMeta(file);
+  updateLibraryPreviewNavButtons();
 
   const preview = document.getElementById("libraryPreview");
   if (!preview) return;
@@ -1716,11 +1973,13 @@ async function openLibraryDetail(fileId) {
 }
 
 async function openTrialPhotoDetail(photoId) {
-  const item = (libraryState.trialPhotos || []).find((p) => p.id === photoId);
+  const item = (libraryState.trialPhotos || []).find((p) => p.id === photoId)
+    || (libraryState.agronomyPhotos || []).find((p) => p.id === photoId);
   if (!item) return;
 
   libraryState.selectedId = photoId;
   setLibraryDetailVisible(true);
+  updateLibraryPreviewNavButtons();
 
   const title = document.getElementById("libraryDetailTitle");
   const meta = document.getElementById("libraryDetailMeta");
@@ -1760,10 +2019,6 @@ async function openTrialPhotoDetail(photoId) {
       photoUrl = await resolveInlinePhotoDataUrl(item);
     }
 
-    const statusHtml = item.storageType === "binary"
-      ? `<div class="trial-photo-detail-status ok"><span class="material-symbols-rounded">check_circle</span> Stored as separate binary file</div>`
-      : `<div class="trial-photo-detail-status warn"><span class="material-symbols-rounded">warning</span> Still inline in JSON</div>`;
-
     const actionHtml = item.storageType === "inline-json"
       ? `<button class="btn btn-primary" onclick="convertInlineTrialPhotoToBinary('${item.id}')"><span class="material-symbols-rounded">conversion_path</span> Convert to Binary</button>`
       : "";
@@ -1773,13 +2028,7 @@ async function openTrialPhotoDetail(photoId) {
         <div class="trial-photo-preview-panel">
           <img src="${photoUrl}" alt="Trial Photo">
         </div>
-        <div class="trial-photo-info-panel">
-          ${statusHtml}
-          <div class="trial-photo-info-row"><strong>Trial:</strong> ${escapeHtml(item.trialName || item.trialId || "-")}</div>
-          <div class="trial-photo-info-row"><strong>Area:</strong> ${item.areaIndex != null ? `Area ${Number(item.areaIndex) + 1}` : "-"}</div>
-          <div class="trial-photo-info-row"><strong>Source:</strong> ${escapeHtml(item.sourceFileName || "Binary file")}</div>
-          ${actionHtml ? `<div class="trial-photo-info-actions">${actionHtml}</div>` : ""}
-        </div>
+        ${actionHtml ? `<div class="trial-photo-info-actions">${actionHtml}</div>` : ""}
       </div>
     `;
   } catch (error) {
@@ -1892,7 +2141,8 @@ async function convertInlineTrialPhotoToBinary(photoId) {
 }
 
 async function downloadTrialPhotoItem(photoId) {
-  const item = (libraryState.trialPhotos || []).find((p) => p.id === photoId);
+  const item = (libraryState.trialPhotos || []).find((p) => p.id === photoId)
+    || (libraryState.agronomyPhotos || []).find((p) => p.id === photoId);
   if (!item || item.storageType !== "binary") return;
 
   try {
@@ -2093,6 +2343,117 @@ function closeLibraryDetail() {
   setLibraryDetailVisible(false);
   renderLibraryList(); // Refresh to remove selected state
 }
+
+/**
+ * Returns the ordered list of item IDs that can be navigated in the current
+ * library view context (uploaded files, observation photos, agronomy photos).
+ */
+function getLibraryPreviewNeighborList() {
+  const section = libraryState.section;
+  const query = (libraryState.searchQuery || "").toLowerCase();
+  const sortDir = libraryState.sortDir === "asc" ? 1 : -1;
+
+  if (section === "observation-photos") {
+    const trialId = libraryState._openTrialPhotoFolderId;
+    if (!trialId) return [];
+    let photos = (libraryState.trialPhotos || []).filter(p => p.trialId === trialId);
+
+    if (query) {
+      photos = photos.filter(p =>
+        [p.entryName, p.name, p.rawFileName, p.paramName, p.repLabel].filter(Boolean).join(" ").toLowerCase().includes(query)
+      );
+    }
+
+    photos.sort((a, b) => {
+      switch (libraryState.sortBy) {
+        case "name": return ((a.entryName || a.name || "").localeCompare(b.entryName || b.name || "")) * sortDir;
+        case "size": return (Number(a.size || 0) - Number(b.size || 0)) * sortDir;
+        case "modifiedTime":
+        default: return (new Date(a.modifiedTime || 0).getTime() - new Date(b.modifiedTime || 0).getTime()) * sortDir;
+      }
+    });
+    return photos.map(p => p.id);
+  }
+
+  if (section === "agronomy-photos") {
+    const trialId = libraryState._openTrialPhotoFolderId;
+    if (!trialId) return [];
+    let photos = (libraryState.agronomyPhotos || []).filter(p => p.trialId === trialId);
+
+    if (query) {
+      photos = photos.filter(p =>
+        [p.name, p.trialName, p.rawFileName].filter(Boolean).join(" ").toLowerCase().includes(query)
+      );
+    }
+
+    photos.sort((a, b) => {
+      switch (libraryState.sortBy) {
+        case "name": return (a.name || "").localeCompare(b.name || "") * sortDir;
+        case "size": return (Number(a.size || 0) - Number(b.size || 0)) * sortDir;
+        case "modifiedTime":
+        default: return (new Date(a.modifiedTime || 0).getTime() - new Date(b.modifiedTime || 0).getTime()) * sortDir;
+      }
+    });
+    return photos.map(p => p.id);
+  }
+
+  // "files" section — non-folder files only
+  const FOLDER_MIME = "application/vnd.google-apps.folder";
+  let files = libraryState.items.filter(f => f.mimeType !== FOLDER_MIME);
+
+  if (query) {
+    files = files.filter(f => f.name.toLowerCase().includes(query));
+  }
+  if (libraryState.activeFilter !== "all") {
+    files = files.filter(f => getFileCategory(f.mimeType) === libraryState.activeFilter);
+  }
+
+  files.sort((a, b) => {
+    switch (libraryState.sortBy) {
+      case "name": return (a.name || "").toLowerCase().localeCompare((b.name || "").toLowerCase()) * sortDir;
+      case "size": return (Number(a.size || 0) - Number(b.size || 0)) * sortDir;
+      case "type": return getFileCategory(a.mimeType || "").localeCompare(getFileCategory(b.mimeType || "")) * sortDir;
+      case "modifiedTime":
+      default: return (new Date(a.modifiedTime || 0).getTime() - new Date(b.modifiedTime || 0).getTime()) * sortDir;
+    }
+  });
+  return files.map(f => f.id);
+}
+
+function navigateLibraryPreview(direction) {
+  const ids = getLibraryPreviewNeighborList();
+  const curIdx = ids.indexOf(libraryState.selectedId);
+  if (curIdx < 0) return;
+  const nextIdx = curIdx + direction;
+  if (nextIdx < 0 || nextIdx >= ids.length) return;
+
+  const nextId = ids[nextIdx];
+  if (libraryState.section === "observation-photos" || libraryState.section === "agronomy-photos") {
+    openTrialPhotoDetail(nextId);
+  } else {
+    openLibraryDetail(nextId);
+  }
+}
+
+function updateLibraryPreviewNavButtons() {
+  const prevBtn = document.getElementById("libraryPreviewPrev");
+  const nextBtn = document.getElementById("libraryPreviewNext");
+  if (!prevBtn || !nextBtn) return;
+
+  const ids = getLibraryPreviewNeighborList();
+  const curIdx = ids.indexOf(libraryState.selectedId);
+
+  prevBtn.disabled = curIdx <= 0;
+  nextBtn.disabled = curIdx < 0 || curIdx >= ids.length - 1;
+}
+
+document.addEventListener("keydown", (e) => {
+  const modal = document.getElementById("libraryPreviewModal");
+  if (!modal || !modal.classList.contains("active")) return;
+  if (e.key === "ArrowLeft") { e.preventDefault(); navigateLibraryPreview(-1); }
+  else if (e.key === "ArrowRight") { e.preventDefault(); navigateLibraryPreview(1); }
+  else if (e.key === "Escape") { e.preventDefault(); closeLibraryDetail(); }
+});
 
 function formatFileSize(bytes) {
   if (!bytes && bytes !== 0) return "-";

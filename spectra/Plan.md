@@ -164,6 +164,15 @@
 - [x] `Reminder > Observation` Integration with parameters with formula
 - [x] `Data Analysis` Custom dataset with sheet selection
 
+# Apr 14, 2026
+- [x] `User Settings` New optimization for trial and it's images
+- [x] `Library > Observation Photos` Changed name
+- [x] `Library > Agronomy Photos` Init
+- [x] `Library > Observation; Agronomy Photos` More detailed folder
+- [x] `Trial` Run per area
+- [x] `Trial > Observation; Agronomy` Upload image more than one once
+- [x] Some small redesigns (`Library`, `Trial`)
+
 ## UPCOMING PLANS
 - [ ] Resize/reformat uploaded image dashboard
 - [ ] Reminder > checkbox > run only shows the checked

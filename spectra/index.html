@@ -101,9 +101,13 @@
                 <span class="material-symbols-rounded">folder</span>
                 <span>Uploaded Files</span>
               </a>
-              <a href="#" class="nav-subitem" data-parent="library" data-library-section="trial-photos">
+              <a href="#" class="nav-subitem" data-parent="library" data-library-section="observation-photos">
                 <span class="material-symbols-rounded">photo_library</span>
-                <span>Trial Photos</span>
+                <span>Observation Photos</span>
+              </a>
+              <a href="#" class="nav-subitem" data-parent="library" data-library-section="agronomy-photos">
+                <span class="material-symbols-rounded">agriculture</span>
+                <span>Agronomy Photos</span>
               </a>
             </div>
           </div>
@@ -1365,6 +1369,9 @@
             </div>
         
             <div id="libraryPreviewModal" class="library-preview-modal">
+              <button class="library-preview-nav library-preview-nav-prev" id="libraryPreviewPrev" onclick="navigateLibraryPreview(-1)">
+                <span class="material-symbols-rounded">chevron_left</span>
+              </button>
               <div class="library-preview-modal-content">
                 <div id="libraryDetail" class="library-detail">
                   <div class="library-detail-header">
@@ -1395,6 +1402,9 @@
                   </div>
                 </div>
               </div>
+              <button class="library-preview-nav library-preview-nav-next" id="libraryPreviewNext" onclick="navigateLibraryPreview(1)">
+                <span class="material-symbols-rounded">chevron_right</span>
+              </button>
             </div>
           </div>
         
@@ -1829,6 +1839,16 @@
                   <button type="button" class="btn btn-secondary btn-sm" id="authorityExitSuperuserBtn">Exit Superuser</button>
                 </div>
 
+                <h4 class="user-settings-subtitle">Auto Relogin Timer</h4>
+                <p class="user-settings-hint">Set how many minutes before the session automatically refreshes the token (min 5, max 120).</p>
+                <div class="authority-relogin-group">
+                  <input type="number" id="authorityReloginMinutesInput" class="authority-input" min="5" max="120" step="1" placeholder="45" style="width:100px;">
+                  <span class="authority-relogin-unit">minutes</span>
+                  <button type="button" class="btn btn-primary btn-sm" id="authorityReloginSaveBtn">
+                    <span class="material-symbols-rounded" style="font-size:16px">save</span> Save
+                  </button>
+                </div>
+
                 <h4 class="user-settings-subtitle">Hidden Element Selectors</h4>
                 <p class="user-settings-hint">CSS selectors for elements to hide in normal mode (e.g. <code>.my-class</code>, <code>#my-id</code>). One selector per line.</p>
                 <textarea id="authorityHiddenSelectorsInput" class="authority-textarea" rows="8" placeholder=".example-class&#10;#example-id&#10;.another-element"></textarea>
@@ -2107,7 +2127,12 @@
               <div id="optimizationCategoriesList" class="optimization-categories-list"></div>
 
               <h4 style="margin-top: 1.5rem;">Trial Optimization</h4>
-              <p class="user-settings-hint">Optimize trial data storage: extract inline photos to compressed WebP files and consolidate per-sample files to per-rep.</p>
+              <p class="user-settings-hint">Select a trial to optimize. Extract inline photos to compressed WebP files, detect orphaned photos, and consolidate per-sample files to per-rep.</p>
+              <div class="form-group" style="margin-bottom: 0.75rem;">
+                <select id="trialOptTrialSelect" class="form-control" onchange="onTrialOptSelectChange()">
+                  <option value="">Select a trial…</option>
+                </select>
+              </div>
               <div id="optimizationTrialList" class="optimization-categories-list"></div>
             </div>
           </section>
@@ -2132,36 +2157,7 @@
           </button>
         </div>
         <div class="load-data-body">
-          <aside class="load-data-nav">
-            <button type="button" class="load-data-nav-item active" data-load-tab="trial">
-              <span class="material-symbols-rounded">science</span>
-              <span>Trial</span>
-            </button>
-            <button type="button" class="load-data-nav-item" data-load-tab="crops">
-              <span class="material-symbols-rounded">eco</span>
-              <span>Crops</span>
-            </button>
-            <button type="button" class="load-data-nav-item" data-load-tab="entries">
-              <span class="material-symbols-rounded">format_list_numbered</span>
-              <span>Entries</span>
-            </button>
-            <button type="button" class="load-data-nav-item" data-load-tab="locations">
-              <span class="material-symbols-rounded">location_on</span>
-              <span>Locations</span>
-            </button>
-            <button type="button" class="load-data-nav-item" data-load-tab="parameters">
-              <span class="material-symbols-rounded">tune</span>
-              <span>Parameters</span>
-            </button>
-            <button type="button" class="load-data-nav-item" data-load-tab="agronomy">
-              <span class="material-symbols-rounded">agriculture</span>
-              <span>Agronomy</span>
-            </button>
-            <button type="button" class="load-data-nav-item" data-load-tab="library">
-              <span class="material-symbols-rounded">folder_open</span>
-              <span>Library</span>
-            </button>
-          </aside>
+          <!-- Single Trial tab only — sidebar nav removed -->
           <section class="load-data-content">
             <div class="load-data-tab active" id="loadDataTabTrial">
               <div class="load-data-tab-header">
@@ -2182,78 +2178,6 @@
                 </div>
               </div>
               <div id="loadDataTrialList" class="load-data-list"></div>
-            </div>
-            <div class="load-data-tab" id="loadDataTabCrops">
-              <div class="load-data-tab-header">
-                <div>
-                  <h4>Crops</h4>
-                  <p class="load-data-hint">Refresh crops data from Google Drive.</p>
-                </div>
-                <button type="button" class="btn btn-primary btn-sm" id="loadCategoryBtnCrops">
-                  <span class="material-symbols-rounded" style="font-size:16px">cloud_download</span> Refresh
-                </button>
-              </div>
-              <div id="loadDataCropsSummary" class="load-data-summary"></div>
-            </div>
-            <div class="load-data-tab" id="loadDataTabEntries">
-              <div class="load-data-tab-header">
-                <div>
-                  <h4>Entries</h4>
-                  <p class="load-data-hint">Refresh entries/lines data from Google Drive.</p>
-                </div>
-                <button type="button" class="btn btn-primary btn-sm" id="loadCategoryBtnEntries">
-                  <span class="material-symbols-rounded" style="font-size:16px">cloud_download</span> Refresh
-                </button>
-              </div>
-              <div id="loadDataEntriesSummary" class="load-data-summary"></div>
-            </div>
-            <div class="load-data-tab" id="loadDataTabLocations">
-              <div class="load-data-tab-header">
-                <div>
-                  <h4>Locations</h4>
-                  <p class="load-data-hint">Refresh locations data from Google Drive.</p>
-                </div>
-                <button type="button" class="btn btn-primary btn-sm" id="loadCategoryBtnLocations">
-                  <span class="material-symbols-rounded" style="font-size:16px">cloud_download</span> Refresh
-                </button>
-              </div>
-              <div id="loadDataLocationsSummary" class="load-data-summary"></div>
-            </div>
-            <div class="load-data-tab" id="loadDataTabParameters">
-              <div class="load-data-tab-header">
-                <div>
-                  <h4>Parameters</h4>
-                  <p class="load-data-hint">Refresh parameters data from Google Drive.</p>
-                </div>
-                <button type="button" class="btn btn-primary btn-sm" id="loadCategoryBtnParameters">
-                  <span class="material-symbols-rounded" style="font-size:16px">cloud_download</span> Refresh
-                </button>
-              </div>
-              <div id="loadDataParametersSummary" class="load-data-summary"></div>
-            </div>
-            <div class="load-data-tab" id="loadDataTabAgronomy">
-              <div class="load-data-tab-header">
-                <div>
-                  <h4>Agronomy</h4>
-                  <p class="load-data-hint">Refresh agronomy items from Google Drive.</p>
-                </div>
-                <button type="button" class="btn btn-primary btn-sm" id="loadCategoryBtnAgronomy">
-                  <span class="material-symbols-rounded" style="font-size:16px">cloud_download</span> Refresh
-                </button>
-              </div>
-              <div id="loadDataAgronomySummary" class="load-data-summary"></div>
-            </div>
-            <div class="load-data-tab" id="loadDataTabLibrary">
-              <div class="load-data-tab-header">
-                <div>
-                  <h4>Library</h4>
-                  <p class="load-data-hint">Refresh library files from Google Drive.</p>
-                </div>
-                <button type="button" class="btn btn-primary btn-sm" id="loadCategoryBtnLibrary">
-                  <span class="material-symbols-rounded" style="font-size:16px">cloud_download</span> Refresh
-                </button>
-              </div>
-              <div id="loadDataLibrarySummary" class="load-data-summary"></div>
             </div>
           </section>
         </div>

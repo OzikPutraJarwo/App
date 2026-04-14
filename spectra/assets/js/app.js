@@ -605,6 +605,7 @@ const userSettingsState = {
     authority: {
       hiddenSelectors: [],
       superuserActive: false,
+      reloginMinutes: 45,
     },
     notifications: {
       enabled: true,
@@ -688,6 +689,7 @@ function normalizeUserSettings(data) {
         ? authority.hiddenSelectors.filter((s) => typeof s === "string" && s.trim())
         : [],
       superuserActive: authority.superuserActive === true,
+      reloginMinutes: Math.max(5, Math.min(120, Number(authority.reloginMinutes) || 45)),
     },
     notifications: _normalizeNotificationSettings(safe.notifications),
   };
@@ -1184,6 +1186,10 @@ function renderAuthorityTab() {
       const selectors = userSettingsState.data?.authority?.hiddenSelectors || [];
       textarea.value = selectors.join("\n");
     }
+    const reloginInput = document.getElementById("authorityReloginMinutesInput");
+    if (reloginInput) {
+      reloginInput.value = userSettingsState.data?.authority?.reloginMinutes || 45;
+    }
   } else {
     passwordSection.style.display = "";
     superuserSection.style.display = "none";
@@ -1262,6 +1268,30 @@ function saveAuthoritySelectors() {
   showToast("Hidden selectors saved", "success");
 }
 
+function saveAuthorityReloginMinutes() {
+  const input = document.getElementById("authorityReloginMinutesInput");
+  if (!input) return;
+
+  const mins = Math.max(5, Math.min(120, Number(input.value) || 45));
+  input.value = mins;
+
+  userSettingsState.data = normalizeUserSettings({
+    ...userSettingsState.data,
+    authority: {
+      ...(userSettingsState.data?.authority || {}),
+      reloginMinutes: mins,
+    },
+  });
+
+  saveUserSettingsLocalCache();
+  enqueueUserSettingsSync();
+
+  // Re-schedule token refresh with new interval
+  if (typeof scheduleTokenRefresh === "function") scheduleTokenRefresh();
+
+  showToast(`Relogin timer set to ${mins} minutes`, "success");
+}
+
 function applyAuthorityHiddenSelectors() {
   // In superuser mode, don't hide anything
   if (userSettingsState.superuserActive) {
@@ -1314,6 +1344,7 @@ function setupAuthorityEvents() {
   const exitBtn = document.getElementById("authorityExitSuperuserBtn");
   const saveBtn = document.getElementById("authoritySaveSelectorsBtn");
   const passwordInput = document.getElementById("authorityPasswordInput");
+  const reloginSaveBtn = document.getElementById("authorityReloginSaveBtn");
 
   if (unlockBtn) {
     unlockBtn.addEventListener("click", attemptAuthorityUnlock);
@@ -1323,6 +1354,9 @@ function setupAuthorityEvents() {
   }
   if (saveBtn) {
     saveBtn.addEventListener("click", saveAuthoritySelectors);
+  }
+  if (reloginSaveBtn) {
+    reloginSaveBtn.addEventListener("click", saveAuthorityReloginMinutes);
   }
   if (passwordInput) {
     passwordInput.addEventListener("keydown", (e) => {
@@ -1522,156 +1556,626 @@ async function optimizeInventoryCategory(category) {
   }
 }
 
-// === Trial Optimization ===
+// === Trial Optimization (per-trial, persistent state) ===
+
+// Persistent state that survives navigation/modal close — resets only on page refresh
+const _trialOptState = {
+  selectedTrialId: null,
+  // Keyed by trialId → { obs, agro, orphanObs, orphanAgro, structure }
+  // Each entry: { status: 'idle'|'scanning'|'done'|'error', html: '', btnDisabled: true }
+  cache: {},
+};
+
+function _getTrialOptCache(trialId) {
+  if (!_trialOptState.cache[trialId]) {
+    _trialOptState.cache[trialId] = {
+      obs:        { status: "idle", html: "", btnDisabled: true },
+      agro:       { status: "idle", html: "", btnDisabled: true },
+      orphanObs:  { status: "idle", html: "", btnDisabled: true },
+      orphanAgro: { status: "idle", html: "", btnDisabled: true },
+      structure:  { status: "idle", html: "", btnDisabled: true },
+    };
+  }
+  return _trialOptState.cache[trialId];
+}
 
 function renderTrialOptimizationCards() {
+  // Populate trial dropdown
+  const select = document.getElementById("trialOptTrialSelect");
+  if (select) {
+    const trials = trialState.trials || [];
+    const currentVal = _trialOptState.selectedTrialId || "";
+    select.innerHTML = '<option value="">Select a trial…</option>' +
+      trials.map(t => `<option value="${t.id}" ${t.id === currentVal ? "selected" : ""}>${escapeHtml(t.name || t.id)}</option>`).join("");
+  }
+
   const container = document.getElementById("optimizationTrialList");
   if (!container) return;
 
-  container.innerHTML = `
-    <div class="optimization-card" id="optimizeCard_TrialPhotos">
-      <div class="optimization-card-header">
-        <span class="material-symbols-rounded optimization-card-icon">photo_camera</span>
-        <span class="optimization-card-title">Photo Optimization</span>
-      </div>
-      <div class="optimization-card-body">
-        <div class="optimization-file-count">
-          <span class="material-symbols-rounded spin-slow">progress_activity</span>
-          <span>Scanning trial photos…</span>
-        </div>
-      </div>
-      <div class="optimization-card-footer">
-        <button type="button" class="btn btn-secondary btn-sm" disabled onclick="optimizeTrialPhotos()">
-          <span class="material-symbols-rounded">compress</span> Optimize Photos
-        </button>
-      </div>
-    </div>
-    <div class="optimization-card" id="optimizeCard_TrialStructure">
-      <div class="optimization-card-header">
-        <span class="material-symbols-rounded optimization-card-icon">account_tree</span>
-        <span class="optimization-card-title">File Structure (Per-Rep)</span>
-      </div>
-      <div class="optimization-card-body">
-        <div class="optimization-file-count">
-          <span class="material-symbols-rounded spin-slow">progress_activity</span>
-          <span>Scanning file structure…</span>
-        </div>
-      </div>
-      <div class="optimization-card-footer">
-        <button type="button" class="btn btn-secondary btn-sm" disabled onclick="optimizeTrialStructure()">
-          <span class="material-symbols-rounded">compress</span> Consolidate to Per-Rep
-        </button>
-      </div>
-    </div>
-  `;
+  const trialId = _trialOptState.selectedTrialId;
+  if (!trialId) {
+    container.innerHTML = `<div class="optimization-file-count" style="padding:1rem 0;color:var(--text-secondary);">
+      <span class="material-symbols-rounded">info</span>
+      <span>Select a trial above to view optimization options.</span>
+    </div>`;
+    return;
+  }
 
-  scanTrialPhotos();
-  scanTrialStructure();
+  const c = _getTrialOptCache(trialId);
+
+  const cards = [
+    { key: "obs",        icon: "photo_camera",  title: "Observation Photo Optimization",     scanFn: "scanTrialObsPhotos",     optFn: "optimizeTrialObsPhotos",     btnLabel: "Optimize" },
+    { key: "agro",       icon: "agriculture",    title: "Agronomy Photo Optimization",        scanFn: "scanTrialAgroPhotos",    optFn: "optimizeTrialAgroPhotos",    btnLabel: "Optimize" },
+    { key: "orphanObs",  icon: "broken_image",   title: "Orphaned Observation Photos",        scanFn: "scanOrphanObsPhotos",    optFn: "deleteOrphanObsPhotos",      btnLabel: "Delete Orphans" },
+    { key: "orphanAgro", icon: "hide_image",     title: "Orphaned Agronomy Photos",           scanFn: "scanOrphanAgroPhotos",   optFn: "deleteOrphanAgroPhotos",     btnLabel: "Delete Orphans" },
+    { key: "structure",  icon: "account_tree",   title: "File Structure (Per-Rep)",            scanFn: "scanTrialStructure",     optFn: "optimizeTrialStructure",     btnLabel: "Consolidate" },
+  ];
+
+  container.innerHTML = cards.map(cd => {
+    const st = c[cd.key];
+    const bodyHtml = st.status === "idle"
+      ? `<div class="optimization-file-count"><span class="material-symbols-rounded spin-slow">progress_activity</span><span>Scanning…</span></div>`
+      : st.html;
+    return `
+      <div class="optimization-card" id="trialOpt_${cd.key}">
+        <div class="optimization-card-header">
+          <span class="material-symbols-rounded optimization-card-icon">${cd.icon}</span>
+          <span class="optimization-card-title">${cd.title}</span>
+        </div>
+        <div class="optimization-card-body">${bodyHtml}</div>
+        <div class="optimization-card-footer" style="display:flex;gap:8px;">
+          <button type="button" class="btn btn-secondary btn-sm trialopt-action-btn" ${st.btnDisabled ? "disabled" : ""} onclick="${cd.optFn}()">
+            <span class="material-symbols-rounded">compress</span> ${cd.btnLabel}
+          </button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="refreshTrialOptCard('${cd.key}','${cd.scanFn}')">
+            <span class="material-symbols-rounded">refresh</span> Refresh
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  // Auto-scan cards that are still idle
+  for (const cd of cards) {
+    if (c[cd.key].status === "idle") {
+      window[cd.scanFn]();
+    }
+  }
 }
 
-async function _getTrialResponseFiles() {
+function onTrialOptSelectChange() {
+  const select = document.getElementById("trialOptTrialSelect");
+  _trialOptState.selectedTrialId = select ? select.value || null : null;
+  renderTrialOptimizationCards();
+}
+
+// Helper: update a single optimization card's body and button state
+function _updateTrialOptCard(key, html, btnDisabled) {
+  const trialId = _trialOptState.selectedTrialId;
+  if (!trialId) return;
+  const c = _getTrialOptCache(trialId);
+  c[key].html = html;
+  c[key].btnDisabled = btnDisabled;
+
+  const card = document.getElementById(`trialOpt_${key}`);
+  if (card) {
+    const body = card.querySelector(".optimization-card-body");
+    const btn = card.querySelector(".trialopt-action-btn");
+    if (body) body.innerHTML = html;
+    if (btn) btn.disabled = btnDisabled;
+  }
+}
+
+function refreshTrialOptCard(key, scanFn) {
+  const trialId = _trialOptState.selectedTrialId;
+  if (!trialId) return;
+  const c = _getTrialOptCache(trialId);
+  c[key].status = "idle";
+  c[key].html = "";
+  c[key].btnDisabled = true;
+
+  const card = document.getElementById(`trialOpt_${key}`);
+  if (card) {
+    const body = card.querySelector(".optimization-card-body");
+    const btn = card.querySelector(".trialopt-action-btn");
+    if (body) body.innerHTML = `<div class="optimization-file-count"><span class="material-symbols-rounded spin-slow">progress_activity</span><span>Scanning…</span></div>`;
+    if (btn) btn.disabled = true;
+  }
+  window[scanFn]();
+}
+
+function _setTrialOptStatus(key, status) {
+  const trialId = _trialOptState.selectedTrialId;
+  if (!trialId) return;
+  _getTrialOptCache(trialId)[key].status = status;
+}
+
+// ── Per-trial response files helper ──
+
+async function _getTrialResponseFilesForTrial(trialId) {
   const rootFolderId = await getTrialsFolderId();
-  const trialsListResp = await gapi.client.drive.files.list({
-    q: `'${rootFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
-    fields: "files(id, name)",
-    pageSize: 1000,
-  });
-  const trialFolders = trialsListResp.result.files || [];
-  const result = [];
+  const trialFolder = await findFolder(trialId, rootFolderId);
+  if (!trialFolder) return { obsFiles: [], agroFiles: [], trialFolderId: null };
 
-  for (const folder of trialFolders) {
-    const respFolder = await findFolder("responses", folder.id);
-    if (!respFolder) continue;
+  const result = { obsFiles: [], agroFiles: [], trialFolderId: trialFolder.id };
 
+  const respFolder = await findFolder("responses", trialFolder.id);
+  if (respFolder) {
     const filesResp = await gapi.client.drive.files.list({
       q: `'${respFolder.id}' in parents and mimeType='application/json' and trashed=false`,
       fields: "files(id, name)",
       pageSize: 1000,
     });
-
     for (const file of (filesResp.result.files || [])) {
-      result.push({
-        trialFolderId: folder.id,
-        trialFolderName: folder.name,
-        responseFolderId: respFolder.id,
-        fileId: file.id,
-        fileName: file.name,
-      });
+      result.obsFiles.push({ trialFolderId: trialFolder.id, responseFolderId: respFolder.id, fileId: file.id, fileName: file.name });
     }
+  }
 
-    // Also scan agronomy folder
-    const agroFolder = await findFolder("agronomy", folder.id);
-    if (agroFolder) {
-      const agroFilesResp = await gapi.client.drive.files.list({
-        q: `'${agroFolder.id}' in parents and mimeType='application/json' and trashed=false`,
-        fields: "files(id, name)",
-        pageSize: 1000,
-      });
-      for (const file of (agroFilesResp.result.files || [])) {
-        result.push({
-          trialFolderId: folder.id,
-          trialFolderName: folder.name,
-          responseFolderId: agroFolder.id,
-          fileId: file.id,
-          fileName: file.name,
-          isAgronomy: true,
-        });
-      }
+  const agroFolder = await findFolder("agronomy", trialFolder.id);
+  if (agroFolder) {
+    const agroFilesResp = await gapi.client.drive.files.list({
+      q: `'${agroFolder.id}' in parents and mimeType='application/json' and trashed=false`,
+      fields: "files(id, name)",
+      pageSize: 1000,
+    });
+    for (const file of (agroFilesResp.result.files || [])) {
+      result.agroFiles.push({ trialFolderId: trialFolder.id, responseFolderId: agroFolder.id, fileId: file.id, fileName: file.name });
     }
   }
 
   return result;
 }
 
-async function scanTrialPhotos() {
-  const card = document.getElementById("optimizeCard_TrialPhotos");
-  if (!card) return;
-  const bodyEl = card.querySelector(".optimization-card-body");
-  const btn = card.querySelector(".optimization-card-footer button");
+// ── Scan & Optimize: Observation Photos (inline→binary) ──
+
+async function scanTrialObsPhotos() {
+  const trialId = _trialOptState.selectedTrialId;
+  if (!trialId) return;
+  _setTrialOptStatus("obs", "scanning");
 
   try {
-    const files = await _getTrialResponseFiles();
-    let totalInlinePhotos = 0;
-    let scanned = 0;
+    const { obsFiles } = await _getTrialResponseFilesForTrial(trialId);
+    let total = 0;
+    for (const f of obsFiles) {
+      try {
+        const data = await getFileContent(f.fileId);
+        if (data && typeof data === "object") total += _countInlinePhotos(data);
+      } catch (_) {}
+    }
+    const html = total === 0
+      ? `<div class="optimization-file-count optimization-file-count--ok"><span class="material-symbols-rounded">check_circle</span><span>No inline photos — already optimized</span></div>`
+      : `<div class="optimization-file-count optimization-file-count--warn"><span class="material-symbols-rounded">photo_library</span><span>${total} inline photo${total !== 1 ? "s" : ""} in ${obsFiles.length} file${obsFiles.length !== 1 ? "s" : ""}</span></div>`;
+    _setTrialOptStatus("obs", "done");
+    _updateTrialOptCard("obs", html, total === 0);
+  } catch (err) {
+    _setTrialOptStatus("obs", "error");
+    _updateTrialOptCard("obs", `<div class="optimization-file-count optimization-file-count--error"><span class="material-symbols-rounded">error</span><span>Scan failed</span></div>`, true);
+  }
+}
 
-    for (const f of files) {
+async function optimizeTrialObsPhotos() {
+  const trialId = _trialOptState.selectedTrialId;
+  if (!trialId) return;
+  _updateTrialOptCard("obs", `<div class="optimization-file-count"><span class="material-symbols-rounded spin-slow">progress_activity</span><span>Optimizing…</span></div>`, true);
+
+  try {
+    const { obsFiles, trialFolderId } = await _getTrialResponseFilesForTrial(trialId);
+    const photosFolderId = await getOrCreateFolder("photos", trialFolderId);
+    let totalConverted = 0;
+
+    for (let i = 0; i < obsFiles.length; i++) {
+      const f = obsFiles[i];
+      let data;
+      try { data = await getFileContent(f.fileId); } catch (_) { continue; }
+      if (!data || typeof data !== "object") continue;
+      if (_countInlinePhotos(data) === 0) continue;
+
+      const converted = await _extractInlinePhotos(data, photosFolderId);
+      if (converted > 0) {
+        await _reuploadJsonFile(f.fileId, f.fileName, data);
+        totalConverted += converted;
+      }
+    }
+
+    const html = `<div class="optimization-file-count optimization-file-count--ok"><span class="material-symbols-rounded">check_circle</span><span>${totalConverted} photo${totalConverted !== 1 ? "s" : ""} converted to WebP</span></div>`;
+    _setTrialOptStatus("obs", "done");
+    _updateTrialOptCard("obs", html, true);
+    showToast(`Observation photo optimization: ${totalConverted} converted`, "success");
+  } catch (err) {
+    _setTrialOptStatus("obs", "error");
+    _updateTrialOptCard("obs", `<div class="optimization-file-count optimization-file-count--error"><span class="material-symbols-rounded">error</span><span>Optimization failed</span></div>`, false);
+  }
+}
+
+// ── Scan & Optimize: Agronomy Photos (inline→binary) ──
+
+async function scanTrialAgroPhotos() {
+  const trialId = _trialOptState.selectedTrialId;
+  if (!trialId) return;
+  _setTrialOptStatus("agro", "scanning");
+
+  try {
+    const { agroFiles } = await _getTrialResponseFilesForTrial(trialId);
+    let total = 0;
+    for (const f of agroFiles) {
+      try {
+        const data = await getFileContent(f.fileId);
+        if (data && typeof data === "object") total += _countInlinePhotos(data);
+      } catch (_) {}
+    }
+    const html = total === 0
+      ? `<div class="optimization-file-count optimization-file-count--ok"><span class="material-symbols-rounded">check_circle</span><span>No inline photos — already optimized</span></div>`
+      : `<div class="optimization-file-count optimization-file-count--warn"><span class="material-symbols-rounded">agriculture</span><span>${total} inline photo${total !== 1 ? "s" : ""} in ${agroFiles.length} file${agroFiles.length !== 1 ? "s" : ""}</span></div>`;
+    _setTrialOptStatus("agro", "done");
+    _updateTrialOptCard("agro", html, total === 0);
+  } catch (err) {
+    _setTrialOptStatus("agro", "error");
+    _updateTrialOptCard("agro", `<div class="optimization-file-count optimization-file-count--error"><span class="material-symbols-rounded">error</span><span>Scan failed</span></div>`, true);
+  }
+}
+
+async function optimizeTrialAgroPhotos() {
+  const trialId = _trialOptState.selectedTrialId;
+  if (!trialId) return;
+  _updateTrialOptCard("agro", `<div class="optimization-file-count"><span class="material-symbols-rounded spin-slow">progress_activity</span><span>Optimizing…</span></div>`, true);
+
+  try {
+    const { agroFiles, trialFolderId } = await _getTrialResponseFilesForTrial(trialId);
+    const agroPhotosFolderId = await getOrCreateFolder("agronomy-photos", trialFolderId);
+    let totalConverted = 0;
+
+    for (const f of agroFiles) {
+      let data;
+      try { data = await getFileContent(f.fileId); } catch (_) { continue; }
+      if (!data || typeof data !== "object") continue;
+      if (_countInlinePhotos(data) === 0) continue;
+
+      const converted = await _extractInlinePhotos(data, agroPhotosFolderId);
+      if (converted > 0) {
+        await _reuploadJsonFile(f.fileId, f.fileName, data);
+        totalConverted += converted;
+      }
+    }
+
+    const html = `<div class="optimization-file-count optimization-file-count--ok"><span class="material-symbols-rounded">check_circle</span><span>${totalConverted} photo${totalConverted !== 1 ? "s" : ""} converted to WebP</span></div>`;
+    _setTrialOptStatus("agro", "done");
+    _updateTrialOptCard("agro", html, true);
+    showToast(`Agronomy photo optimization: ${totalConverted} converted`, "success");
+  } catch (err) {
+    _setTrialOptStatus("agro", "error");
+    _updateTrialOptCard("agro", `<div class="optimization-file-count optimization-file-count--error"><span class="material-symbols-rounded">error</span><span>Optimization failed</span></div>`, false);
+  }
+}
+
+// ── Orphaned Photo Detection ──
+
+// Filter to authoritative (consolidated) response files only.
+// If a consolidated file ({area}~responses.json) exists for an area,
+// skip any individual files for that same area (they're stale).
+function _filterAuthoritativeFiles(files, consolidatedPattern) {
+  const consolidated = files.filter(f => consolidatedPattern.test(f.fileName));
+  if (consolidated.length === 0) return files; // no consolidated → use everything
+
+  const coveredAreas = new Set(consolidated.map(f => f.fileName.split("~")[0]));
+  const nonStaleIndividuals = files.filter(f => {
+    if (consolidatedPattern.test(f.fileName)) return false; // already in consolidated set
+    const area = f.fileName.split(/[~_]/)[0];
+    return !coveredAreas.has(area); // only keep if area NOT covered by consolidated
+  });
+  return [...consolidated, ...nonStaleIndividuals];
+}
+
+async function _getReferencedPhotoFileIds(jsonFiles) {
+  const ids = new Set();
+  let errors = 0;
+  for (const f of jsonFiles) {
+    try {
+      const data = await getFileContent(f.fileId);
+      if (data && typeof data === "object") _collectPhotoFileIds(data, ids);
+    } catch (_) { errors++; }
+  }
+  return { ids, errors };
+}
+
+// Targeted: only collect fileId from objects inside .photos arrays
+function _collectPhotoFileIds(obj, ids) {
+  if (typeof obj !== "object" || obj === null) return;
+  if (Array.isArray(obj)) {
+    for (const item of obj) _collectPhotoFileIds(item, ids);
+    return;
+  }
+  // If this object has a .photos array, extract photo fileIds from it
+  if (Array.isArray(obj.photos)) {
+    for (const p of obj.photos) {
+      if (p && typeof p === "object" && p.fileId) {
+        ids.add(p.fileId);
+      }
+    }
+  }
+  // Recurse into all nested object/array values
+  for (const key of Object.keys(obj)) {
+    const val = obj[key];
+    if (val && typeof val === "object") {
+      _collectPhotoFileIds(val, ids);
+    }
+  }
+}
+
+function _renderOrphanList(orphans) {
+  const maxShow = 20;
+  const shown = orphans.slice(0, maxShow);
+  let html = `<div class="orphan-photo-list" style="margin-top:8px;max-height:200px;overflow-y:auto;font-size:0.82rem;color:var(--text-secondary);">`;
+  html += shown.map(p => {
+    const sizeKB = p.size ? `(${(Number(p.size) / 1024).toFixed(1)} KB)` : "";
+    return `<div style="display:flex;align-items:center;gap:6px;padding:2px 0;"><span class="material-symbols-rounded" style="font-size:16px;">image</span><span style="word-break:break-all;">${escapeHtml(p.name)} ${sizeKB}</span></div>`;
+  }).join("");
+  if (orphans.length > maxShow) {
+    html += `<div style="padding:2px 0;font-style:italic;">…and ${orphans.length - maxShow} more</div>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+async function _listDrivePhotos(folderId) {
+  if (!folderId) return [];
+  const resp = await gapi.client.drive.files.list({
+    q: `'${folderId}' in parents and trashed=false`,
+    fields: "files(id, name, size)",
+    pageSize: 1000,
+  });
+  return resp.result.files || [];
+}
+
+async function scanOrphanObsPhotos() {
+  const trialId = _trialOptState.selectedTrialId;
+  if (!trialId) return;
+  _setTrialOptStatus("orphanObs", "scanning");
+
+  try {
+    const rootFolderId = await getTrialsFolderId();
+    const trialFolder = await findFolder(trialId, rootFolderId);
+    if (!trialFolder) { _setTrialOptStatus("orphanObs", "done"); _updateTrialOptCard("orphanObs", `<div class="optimization-file-count optimization-file-count--ok"><span class="material-symbols-rounded">check_circle</span><span>No trial folder found</span></div>`, true); return; }
+
+    const photosFolder = await findFolder("photos", trialFolder.id);
+    if (!photosFolder) { _setTrialOptStatus("orphanObs", "done"); _updateTrialOptCard("orphanObs", `<div class="optimization-file-count optimization-file-count--ok"><span class="material-symbols-rounded">check_circle</span><span>No photos folder</span></div>`, true); return; }
+
+    const drivePhotos = await _listDrivePhotos(photosFolder.id);
+    if (drivePhotos.length === 0) { _setTrialOptStatus("orphanObs", "done"); _updateTrialOptCard("orphanObs", `<div class="optimization-file-count optimization-file-count--ok"><span class="material-symbols-rounded">check_circle</span><span>Photos folder is empty</span></div>`, true); return; }
+
+    const { obsFiles } = await _getTrialResponseFilesForTrial(trialId);
+    // Use only authoritative (consolidated) files to avoid stale individual files
+    const authFiles = _filterAuthoritativeFiles(obsFiles, /^\d+~responses\.json$/);
+    const { ids: referencedIds, errors: readErrors } = await _getReferencedPhotoFileIds(authFiles);
+
+    const orphans = drivePhotos.filter(p => !referencedIds.has(p.id));
+    _getTrialOptCache(trialId)._orphanObsList = orphans;
+
+    let html;
+    const errNote = readErrors > 0 ? ` (${readErrors} file${readErrors !== 1 ? "s" : ""} failed to read)` : "";
+    if (orphans.length === 0) {
+      html = `<div class="optimization-file-count optimization-file-count--ok"><span class="material-symbols-rounded">check_circle</span><span>No orphaned photos — ${drivePhotos.length} file${drivePhotos.length !== 1 ? "s" : ""} all referenced (${referencedIds.size} refs in ${authFiles.length} JSON${authFiles.length !== 1 ? "s" : ""})${errNote}</span></div>`;
+    } else {
+      html = `<div class="optimization-file-count optimization-file-count--warn"><span class="material-symbols-rounded">broken_image</span><span>${orphans.length} orphaned photo${orphans.length !== 1 ? "s" : ""} of ${drivePhotos.length} total (${referencedIds.size} refs in ${authFiles.length} JSON${authFiles.length !== 1 ? "s" : ""})${errNote}</span></div>`
+        + _renderOrphanList(orphans);
+    }
+    _setTrialOptStatus("orphanObs", "done");
+    _updateTrialOptCard("orphanObs", html, orphans.length === 0);
+  } catch (err) {
+    console.error("scanOrphanObsPhotos error:", err);
+    _setTrialOptStatus("orphanObs", "error");
+    _updateTrialOptCard("orphanObs", `<div class="optimization-file-count optimization-file-count--error"><span class="material-symbols-rounded">error</span><span>Scan failed: ${escapeHtml(err.message || "Unknown error")}</span></div>`, true);
+  }
+}
+
+async function deleteOrphanObsPhotos() {
+  const trialId = _trialOptState.selectedTrialId;
+  if (!trialId) { showToast("No trial selected", "error"); return; }
+  const orphans = (_getTrialOptCache(trialId)._orphanObsList || []).slice();
+  if (orphans.length === 0) { showToast("No orphans to delete — try refreshing the scan first", "info"); return; }
+
+  _updateTrialOptCard("orphanObs", `<div class="optimization-file-count"><span class="material-symbols-rounded spin-slow">progress_activity</span><span>Queuing deletion of ${orphans.length} orphaned photos…</span></div>`, true);
+
+  enqueueSync({
+    label: `Delete ${orphans.length} orphaned obs photos`,
+    run: async () => {
+      let deleted = 0;
+      for (const p of orphans) {
+        try {
+          await deleteDriveFileById(p.id);
+          deleted++;
+        } catch (e) {
+          console.warn(`Failed to delete orphan ${p.name}:`, e);
+        }
+      }
+      _getTrialOptCache(trialId)._orphanObsList = [];
+      const html = `<div class="optimization-file-count optimization-file-count--ok"><span class="material-symbols-rounded">check_circle</span><span>${deleted} orphaned photo${deleted !== 1 ? "s" : ""} deleted</span></div>`;
+      _setTrialOptStatus("orphanObs", "done");
+      _updateTrialOptCard("orphanObs", html, true);
+      showToast(`Deleted ${deleted} orphaned observation photos`, "success");
+    },
+  });
+}
+
+async function scanOrphanAgroPhotos() {
+  const trialId = _trialOptState.selectedTrialId;
+  if (!trialId) return;
+  _setTrialOptStatus("orphanAgro", "scanning");
+
+  try {
+    const rootFolderId = await getTrialsFolderId();
+    const trialFolder = await findFolder(trialId, rootFolderId);
+    if (!trialFolder) { _setTrialOptStatus("orphanAgro", "done"); _updateTrialOptCard("orphanAgro", `<div class="optimization-file-count optimization-file-count--ok"><span class="material-symbols-rounded">check_circle</span><span>No trial folder found</span></div>`, true); return; }
+
+    const agroPhotosFolder = await findFolder("agronomy-photos", trialFolder.id);
+    if (!agroPhotosFolder) { _setTrialOptStatus("orphanAgro", "done"); _updateTrialOptCard("orphanAgro", `<div class="optimization-file-count optimization-file-count--ok"><span class="material-symbols-rounded">check_circle</span><span>No agronomy-photos folder</span></div>`, true); return; }
+
+    const drivePhotos = await _listDrivePhotos(agroPhotosFolder.id);
+    if (drivePhotos.length === 0) { _setTrialOptStatus("orphanAgro", "done"); _updateTrialOptCard("orphanAgro", `<div class="optimization-file-count optimization-file-count--ok"><span class="material-symbols-rounded">check_circle</span><span>Agronomy photos folder is empty</span></div>`, true); return; }
+
+    const { agroFiles } = await _getTrialResponseFilesForTrial(trialId);
+    const authFiles = _filterAuthoritativeFiles(agroFiles, /^\d+~agronomy\.json$/);
+    const { ids: referencedIds, errors: readErrors } = await _getReferencedPhotoFileIds(authFiles);
+
+    const orphans = drivePhotos.filter(p => !referencedIds.has(p.id));
+    _getTrialOptCache(trialId)._orphanAgroList = orphans;
+
+    let html;
+    const errNote = readErrors > 0 ? ` (${readErrors} file${readErrors !== 1 ? "s" : ""} failed to read)` : "";
+    if (orphans.length === 0) {
+      html = `<div class="optimization-file-count optimization-file-count--ok"><span class="material-symbols-rounded">check_circle</span><span>No orphaned photos — ${drivePhotos.length} file${drivePhotos.length !== 1 ? "s" : ""} all referenced (${referencedIds.size} refs in ${authFiles.length} JSON${authFiles.length !== 1 ? "s" : ""})${errNote}</span></div>`;
+    } else {
+      html = `<div class="optimization-file-count optimization-file-count--warn"><span class="material-symbols-rounded">hide_image</span><span>${orphans.length} orphaned photo${orphans.length !== 1 ? "s" : ""} of ${drivePhotos.length} total (${referencedIds.size} refs in ${authFiles.length} JSON${authFiles.length !== 1 ? "s" : ""})${errNote}</span></div>`
+        + _renderOrphanList(orphans);
+    }
+    _setTrialOptStatus("orphanAgro", "done");
+    _updateTrialOptCard("orphanAgro", html, orphans.length === 0);
+  } catch (err) {
+    console.error("scanOrphanAgroPhotos error:", err);
+    _setTrialOptStatus("orphanAgro", "error");
+    _updateTrialOptCard("orphanAgro", `<div class="optimization-file-count optimization-file-count--error"><span class="material-symbols-rounded">error</span><span>Scan failed: ${escapeHtml(err.message || "Unknown error")}</span></div>`, true);
+  }
+}
+
+async function deleteOrphanAgroPhotos() {
+  const trialId = _trialOptState.selectedTrialId;
+  if (!trialId) { showToast("No trial selected", "error"); return; }
+  const orphans = (_getTrialOptCache(trialId)._orphanAgroList || []).slice();
+  if (orphans.length === 0) { showToast("No orphans to delete — try refreshing the scan first", "info"); return; }
+
+  _updateTrialOptCard("orphanAgro", `<div class="optimization-file-count"><span class="material-symbols-rounded spin-slow">progress_activity</span><span>Queuing deletion of ${orphans.length} orphaned photos…</span></div>`, true);
+
+  enqueueSync({
+    label: `Delete ${orphans.length} orphaned agro photos`,
+    run: async () => {
+      let deleted = 0;
+      for (const p of orphans) {
+        try {
+          await deleteDriveFileById(p.id);
+          deleted++;
+        } catch (e) {
+          console.warn(`Failed to delete orphan ${p.name}:`, e);
+        }
+      }
+      _getTrialOptCache(trialId)._orphanAgroList = [];
+      const html = `<div class="optimization-file-count optimization-file-count--ok"><span class="material-symbols-rounded">check_circle</span><span>${deleted} orphaned photo${deleted !== 1 ? "s" : ""} deleted</span></div>`;
+      _setTrialOptStatus("orphanAgro", "done");
+      _updateTrialOptCard("orphanAgro", html, true);
+      showToast(`Deleted ${deleted} orphaned agronomy photos`, "success");
+    },
+  });
+}
+
+// ── File Structure (Per-Rep) — per-trial ──
+
+async function scanTrialStructure() {
+  const trialId = _trialOptState.selectedTrialId;
+  if (!trialId) return;
+  _setTrialOptStatus("structure", "scanning");
+
+  try {
+    const { obsFiles } = await _getTrialResponseFilesForTrial(trialId);
+    const consolidatedFiles = obsFiles.filter(f => f.fileName.match(/^\d+~responses\.json$/));
+    let perSampleKeys = 0, totalKeys = 0;
+
+    for (const f of consolidatedFiles) {
       try {
         const data = await getFileContent(f.fileId);
         if (!data || typeof data !== "object") continue;
-        totalInlinePhotos += _countInlinePhotos(data);
-      } catch (e) {
-        console.warn(`Error reading ${f.fileName}:`, e);
+        for (const paramId of Object.keys(data)) {
+          const paramData = data[paramId];
+          if (!paramData || typeof paramData !== "object") continue;
+          for (const key of Object.keys(paramData)) {
+            totalKeys++;
+            const parts = key.split("_");
+            if (parts.length >= 3) {
+              const potentialSample = Number(parts[parts.length - 1]);
+              if (!isNaN(potentialSample) && potentialSample >= 0) perSampleKeys++;
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    const html = perSampleKeys === 0
+      ? `<div class="optimization-file-count optimization-file-count--ok"><span class="material-symbols-rounded">check_circle</span><span>All ${totalKeys} keys are per-rep — already optimized</span></div>`
+      : `<div class="optimization-file-count optimization-file-count--warn"><span class="material-symbols-rounded">account_tree</span><span>${perSampleKeys} per-sample keys found (of ${totalKeys} total)</span></div>`;
+    _setTrialOptStatus("structure", "done");
+    _updateTrialOptCard("structure", html, perSampleKeys === 0);
+  } catch (err) {
+    _setTrialOptStatus("structure", "error");
+    _updateTrialOptCard("structure", `<div class="optimization-file-count optimization-file-count--error"><span class="material-symbols-rounded">error</span><span>Scan failed</span></div>`, true);
+  }
+}
+
+async function optimizeTrialStructure() {
+  const trialId = _trialOptState.selectedTrialId;
+  if (!trialId) return;
+  _updateTrialOptCard("structure", `<div class="optimization-file-count"><span class="material-symbols-rounded spin-slow">progress_activity</span><span>Consolidating…</span></div>`, true);
+
+  try {
+    const { obsFiles } = await _getTrialResponseFilesForTrial(trialId);
+    const consolidatedFiles = obsFiles.filter(f => f.fileName.match(/^\d+~responses\.json$/));
+    let totalMerged = 0;
+
+    for (const f of consolidatedFiles) {
+      let data;
+      try { data = await getFileContent(f.fileId); } catch (_) { continue; }
+      if (!data || typeof data !== "object") continue;
+
+      let fileMerged = 0;
+      for (const paramId of Object.keys(data)) {
+        const paramData = data[paramId];
+        if (!paramData || typeof paramData !== "object") continue;
+
+        const mergedKeys = {};
+        const keysToDelete = [];
+
+        for (const key of Object.keys(paramData)) {
+          const parts = key.split("_");
+          if (parts.length < 3) continue;
+          const potentialSample = Number(parts[parts.length - 1]);
+          if (isNaN(potentialSample) || potentialSample < 0) continue;
+
+          const repKey = parts.slice(0, -1).join("_");
+          if (!mergedKeys[repKey]) {
+            mergedKeys[repKey] = paramData[repKey] || { value: "", photos: [], timestamp: "" };
+          }
+
+          const sampleData = paramData[key];
+          if (sampleData.value && (!mergedKeys[repKey].value || sampleData.timestamp > (mergedKeys[repKey].timestamp || ""))) {
+            mergedKeys[repKey].value = sampleData.value;
+          }
+          if (Array.isArray(sampleData.photos) && sampleData.photos.length > 0) {
+            mergedKeys[repKey].photos = [...(mergedKeys[repKey].photos || []), ...sampleData.photos];
+          }
+          if (sampleData.timestamp && sampleData.timestamp > (mergedKeys[repKey].timestamp || "")) {
+            mergedKeys[repKey].timestamp = sampleData.timestamp;
+          }
+          keysToDelete.push(key);
+          fileMerged++;
+        }
+
+        for (const repKey of Object.keys(mergedKeys)) paramData[repKey] = mergedKeys[repKey];
+        for (const key of keysToDelete) { if (!mergedKeys[key]) delete paramData[key]; }
       }
-      scanned++;
-      if (scanned % 5 === 0) {
-        bodyEl.innerHTML = `<div class="optimization-file-count">
-          <span class="material-symbols-rounded spin-slow">progress_activity</span>
-          <span>Scanned ${scanned}/${files.length} files…</span>
-        </div>`;
+
+      if (fileMerged > 0) {
+        await _reuploadJsonFile(f.fileId, f.fileName, data);
+        totalMerged += fileMerged;
       }
     }
 
-    if (totalInlinePhotos === 0) {
-      bodyEl.innerHTML = `<div class="optimization-file-count optimization-file-count--ok">
-        <span class="material-symbols-rounded">check_circle</span>
-        <span>No inline base64 photos found — already optimized</span>
-      </div>`;
-      btn.disabled = true;
-    } else {
-      bodyEl.innerHTML = `<div class="optimization-file-count optimization-file-count--warn">
-        <span class="material-symbols-rounded">photo_library</span>
-        <span>${totalInlinePhotos} inline photo${totalInlinePhotos !== 1 ? "s" : ""} in ${files.length} files</span>
-      </div>`;
-      btn.disabled = false;
-    }
+    const html = `<div class="optimization-file-count optimization-file-count--ok"><span class="material-symbols-rounded">check_circle</span><span>${totalMerged} per-sample keys merged to per-rep</span></div>`;
+    _setTrialOptStatus("structure", "done");
+    _updateTrialOptCard("structure", html, true);
+    showToast(`Structure optimization: ${totalMerged} keys consolidated`, "success");
   } catch (err) {
-    console.error("Error scanning trial photos:", err);
-    bodyEl.innerHTML = `<div class="optimization-file-count optimization-file-count--error">
-      <span class="material-symbols-rounded">error</span>
-      <span>Failed to scan trial photos</span>
-    </div>`;
+    _setTrialOptStatus("structure", "error");
+    _updateTrialOptCard("structure", `<div class="optimization-file-count optimization-file-count--error"><span class="material-symbols-rounded">error</span><span>Optimization failed</span></div>`, false);
   }
 }
+
+// ── Shared helpers ──
 
 function _countInlinePhotos(data) {
   let count = 0;
@@ -1686,82 +2190,6 @@ function _countInlinePhotos(data) {
     }
   }
   return count;
-}
-
-async function optimizeTrialPhotos() {
-  const card = document.getElementById("optimizeCard_TrialPhotos");
-  if (!card) return;
-  const bodyEl = card.querySelector(".optimization-card-body");
-  const btn = card.querySelector(".optimization-card-footer button");
-  btn.disabled = true;
-
-  bodyEl.innerHTML = `<div class="optimization-file-count">
-    <span class="material-symbols-rounded spin-slow">progress_activity</span>
-    <span>Loading trial files…</span>
-  </div>`;
-
-  try {
-    const files = await _getTrialResponseFiles();
-    let totalConverted = 0;
-    let fileIdx = 0;
-
-    for (const f of files) {
-      fileIdx++;
-      let data;
-      try {
-        data = await getFileContent(f.fileId);
-      } catch (e) {
-        continue;
-      }
-      if (!data || typeof data !== "object") continue;
-
-      const inlineCount = _countInlinePhotos(data);
-      if (inlineCount === 0) continue;
-
-      bodyEl.innerHTML = `<div class="optimization-file-count">
-        <span class="material-symbols-rounded spin-slow">progress_activity</span>
-        <span>Processing file ${fileIdx}/${files.length} (${inlineCount} photos)…</span>
-      </div>`;
-
-      // Get or create photos folder in trial
-      const photosFolderId = await getOrCreateFolder("photos", f.trialFolderId);
-
-      const converted = await _extractInlinePhotos(data, photosFolderId);
-      if (converted > 0) {
-        // Re-upload the modified JSON (references instead of base64)
-        const boundary = "-------314159265358979323846";
-        const delimiter = "\r\n--" + boundary + "\r\n";
-        const closeDelimiter = "\r\n--" + boundary + "--";
-        const metadata = { name: f.fileName, mimeType: "application/json" };
-        const body = delimiter + "Content-Type: application/json\r\n\r\n" + JSON.stringify(metadata) +
-          delimiter + "Content-Type: application/json\r\n\r\n" + JSON.stringify(data, null, 2) + closeDelimiter;
-
-        await gapi.client.request({
-          path: `/upload/drive/v3/files/${f.fileId}`,
-          method: "PATCH",
-          params: { uploadType: "multipart" },
-          headers: { "Content-Type": 'multipart/related; boundary="' + boundary + '"' },
-          body,
-        });
-
-        totalConverted += converted;
-      }
-    }
-
-    bodyEl.innerHTML = `<div class="optimization-file-count optimization-file-count--ok">
-      <span class="material-symbols-rounded">check_circle</span>
-      <span>${totalConverted} photo${totalConverted !== 1 ? "s" : ""} converted to WebP</span>
-    </div>`;
-
-    showToast(`Photo optimization complete: ${totalConverted} photos converted`, "success");
-  } catch (err) {
-    console.error("Error optimizing trial photos:", err);
-    bodyEl.innerHTML = `<div class="optimization-file-count optimization-file-count--error">
-      <span class="material-symbols-rounded">error</span>
-      <span>Optimization failed</span>
-    </div>`;
-    btn.disabled = false;
-  }
 }
 
 async function _extractInlinePhotos(data, photosFolderId) {
@@ -1799,180 +2227,21 @@ async function _extractInlinePhotos(data, photosFolderId) {
   return converted;
 }
 
-async function scanTrialStructure() {
-  const card = document.getElementById("optimizeCard_TrialStructure");
-  if (!card) return;
-  const bodyEl = card.querySelector(".optimization-card-body");
-  const btn = card.querySelector(".optimization-card-footer button");
+async function _reuploadJsonFile(fileId, fileName, data) {
+  const boundary = "-------314159265358979323846";
+  const delimiter = "\r\n--" + boundary + "\r\n";
+  const closeDelimiter = "\r\n--" + boundary + "--";
+  const metadata = { name: fileName, mimeType: "application/json" };
+  const body = delimiter + "Content-Type: application/json\r\n\r\n" + JSON.stringify(metadata) +
+    delimiter + "Content-Type: application/json\r\n\r\n" + JSON.stringify(data, null, 2) + closeDelimiter;
 
-  try {
-    const files = await _getTrialResponseFiles();
-    // Only consider consolidated response files (e.g., 0~responses.json)
-    const consolidatedFiles = files.filter(f => f.fileName.match(/^\d+~responses\.json$/));
-    let perSampleKeys = 0;
-    let totalKeys = 0;
-
-    for (const f of consolidatedFiles) {
-      try {
-        const data = await getFileContent(f.fileId);
-        if (!data || typeof data !== "object") continue;
-        // data = { paramId: { lineId_repId_sampleId: { value, photos } } }
-        for (const paramId of Object.keys(data)) {
-          const paramData = data[paramId];
-          if (!paramData || typeof paramData !== "object") continue;
-          for (const key of Object.keys(paramData)) {
-            totalKeys++;
-            // Per-sample keys have 3 parts: lineId_repIndex_sampleIndex
-            const parts = key.split("_");
-            if (parts.length >= 3) {
-              // Check if third part is a numeric sample index
-              const potentialSample = Number(parts[parts.length - 1]);
-              if (!isNaN(potentialSample) && potentialSample >= 0) {
-                perSampleKeys++;
-              }
-            }
-          }
-        }
-      } catch (e) {
-        console.warn(`Error reading ${f.fileName}:`, e);
-      }
-    }
-
-    if (perSampleKeys === 0) {
-      bodyEl.innerHTML = `<div class="optimization-file-count optimization-file-count--ok">
-        <span class="material-symbols-rounded">check_circle</span>
-        <span>All ${totalKeys} keys are per-rep — already optimized</span>
-      </div>`;
-      btn.disabled = true;
-    } else {
-      bodyEl.innerHTML = `<div class="optimization-file-count optimization-file-count--warn">
-        <span class="material-symbols-rounded">account_tree</span>
-        <span>${perSampleKeys} per-sample keys found (of ${totalKeys} total)</span>
-      </div>`;
-      btn.disabled = false;
-    }
-  } catch (err) {
-    console.error("Error scanning trial structure:", err);
-    bodyEl.innerHTML = `<div class="optimization-file-count optimization-file-count--error">
-      <span class="material-symbols-rounded">error</span>
-      <span>Failed to scan file structure</span>
-    </div>`;
-  }
-}
-
-async function optimizeTrialStructure() {
-  const card = document.getElementById("optimizeCard_TrialStructure");
-  if (!card) return;
-  const bodyEl = card.querySelector(".optimization-card-body");
-  const btn = card.querySelector(".optimization-card-footer button");
-  btn.disabled = true;
-
-  bodyEl.innerHTML = `<div class="optimization-file-count">
-    <span class="material-symbols-rounded spin-slow">progress_activity</span>
-    <span>Loading response files…</span>
-  </div>`;
-
-  try {
-    const files = await _getTrialResponseFiles();
-    const consolidatedFiles = files.filter(f => f.fileName.match(/^\d+~responses\.json$/));
-    let totalMerged = 0;
-    let fileIdx = 0;
-
-    for (const f of consolidatedFiles) {
-      fileIdx++;
-      let data;
-      try {
-        data = await getFileContent(f.fileId);
-      } catch (e) {
-        continue;
-      }
-      if (!data || typeof data !== "object") continue;
-
-      let fileMerged = 0;
-      for (const paramId of Object.keys(data)) {
-        const paramData = data[paramId];
-        if (!paramData || typeof paramData !== "object") continue;
-
-        const mergedKeys = {};
-        const keysToDelete = [];
-
-        for (const key of Object.keys(paramData)) {
-          const parts = key.split("_");
-          if (parts.length < 3) continue;
-
-          const potentialSample = Number(parts[parts.length - 1]);
-          if (isNaN(potentialSample) || potentialSample < 0) continue;
-
-          // This is a per-sample key — merge to per-rep key
-          const repKey = parts.slice(0, -1).join("_");
-          if (!mergedKeys[repKey]) {
-            mergedKeys[repKey] = paramData[repKey] || { value: "", photos: [], timestamp: "" };
-          }
-
-          const sampleData = paramData[key];
-          // Merge: keep the latest timestamp, concatenate photos, keep latest non-empty value
-          if (sampleData.value && (!mergedKeys[repKey].value || sampleData.timestamp > (mergedKeys[repKey].timestamp || ""))) {
-            mergedKeys[repKey].value = sampleData.value;
-          }
-          if (Array.isArray(sampleData.photos) && sampleData.photos.length > 0) {
-            mergedKeys[repKey].photos = [...(mergedKeys[repKey].photos || []), ...sampleData.photos];
-          }
-          if (sampleData.timestamp && sampleData.timestamp > (mergedKeys[repKey].timestamp || "")) {
-            mergedKeys[repKey].timestamp = sampleData.timestamp;
-          }
-
-          keysToDelete.push(key);
-          fileMerged++;
-        }
-
-        // Apply merged data
-        for (const repKey of Object.keys(mergedKeys)) {
-          paramData[repKey] = mergedKeys[repKey];
-        }
-        for (const key of keysToDelete) {
-          if (!mergedKeys[key]) delete paramData[key];
-        }
-      }
-
-      if (fileMerged > 0) {
-        bodyEl.innerHTML = `<div class="optimization-file-count">
-          <span class="material-symbols-rounded spin-slow">progress_activity</span>
-          <span>Saving file ${fileIdx}/${consolidatedFiles.length}…</span>
-        </div>`;
-
-        const boundary = "-------314159265358979323846";
-        const delimiter = "\r\n--" + boundary + "\r\n";
-        const closeDelimiter = "\r\n--" + boundary + "--";
-        const metadata = { name: f.fileName, mimeType: "application/json" };
-        const body = delimiter + "Content-Type: application/json\r\n\r\n" + JSON.stringify(metadata) +
-          delimiter + "Content-Type: application/json\r\n\r\n" + JSON.stringify(data, null, 2) + closeDelimiter;
-
-        await gapi.client.request({
-          path: `/upload/drive/v3/files/${f.fileId}`,
-          method: "PATCH",
-          params: { uploadType: "multipart" },
-          headers: { "Content-Type": 'multipart/related; boundary="' + boundary + '"' },
-          body,
-        });
-
-        totalMerged += fileMerged;
-      }
-    }
-
-    bodyEl.innerHTML = `<div class="optimization-file-count optimization-file-count--ok">
-      <span class="material-symbols-rounded">check_circle</span>
-      <span>${totalMerged} per-sample keys merged to per-rep</span>
-    </div>`;
-
-    showToast(`Structure optimization complete: ${totalMerged} keys consolidated`, "success");
-  } catch (err) {
-    console.error("Error optimizing trial structure:", err);
-    bodyEl.innerHTML = `<div class="optimization-file-count optimization-file-count--error">
-      <span class="material-symbols-rounded">error</span>
-      <span>Optimization failed</span>
-    </div>`;
-    btn.disabled = false;
-  }
+  await gapi.client.request({
+    path: `/upload/drive/v3/files/${fileId}`,
+    method: "PATCH",
+    params: { uploadType: "multipart" },
+    headers: { "Content-Type": 'multipart/related; boundary="' + boundary + '"' },
+    body,
+  });
 }
 
 function updateStoredAnalysisUserSettings(patch = {}, options = {}) {
@@ -4081,6 +4350,24 @@ function _updateTrialLoadUI(trialId, info) {
   if (areaKey) {
     const areaRow = document.querySelector(`.load-data-area-row[data-area-key="${areaKey}"]`);
     if (!areaRow) return;
+
+    // Toggle loading class on the row
+    if (info.status === "loading") {
+      areaRow.classList.add("loading");
+      areaRow.classList.remove("loaded", "not-loaded", "partial");
+      const icon = areaRow.querySelector(".load-data-area-icon");
+      if (icon) {
+        icon.className = "load-data-area-icon material-symbols-rounded loading";
+        icon.textContent = "";
+        // Replace with spinner if not already
+        if (!areaRow.querySelector(".load-data-area-icon + .spinner-sm") && !icon.nextElementSibling?.classList.contains("spinner-sm")) {
+          const spinner = document.createElement("span");
+          spinner.className = "spinner-sm";
+          icon.replaceWith(spinner);
+        }
+      }
+    }
+
     const progressEl = areaRow.querySelector(".load-data-area-progress");
     const progressFill = areaRow.querySelector(".load-data-progress-fill");
     const progressText = areaRow.querySelector(".load-data-area-progress-text");
@@ -4175,17 +4462,8 @@ function openLoadDataPanel(activeTab = "trial") {
   modal.classList.add("active");
   lockBodyScroll();
 
-  // Switch to requested tab
-  switchLoadDataTab(activeTab);
-
   // Render initial content
   renderLoadDataTrialList();
-  renderLoadDataCategorySummary("crops");
-  renderLoadDataCategorySummary("entries");
-  renderLoadDataCategorySummary("locations");
-  renderLoadDataCategorySummary("parameters");
-  renderLoadDataCategorySummary("agronomy");
-  renderLoadDataLibrarySummary();
 
   // Check if remote data changed after local load.
   checkLoadedTrialUpdates({ silent: false }).catch(() => {});
@@ -4197,20 +4475,6 @@ function closeLoadDataPanel() {
   modal.classList.remove("active");
   modal.classList.add("hidden");
   unlockBodyScroll();
-}
-
-function switchLoadDataTab(tabKey) {
-  const navItems = document.querySelectorAll(".load-data-nav-item");
-  const tabs = document.querySelectorAll(".load-data-tab");
-
-  navItems.forEach(item => {
-    item.classList.toggle("active", item.dataset.loadTab === tabKey);
-  });
-
-  tabs.forEach(tab => {
-    const tabId = "loadDataTab" + tabKey.charAt(0).toUpperCase() + tabKey.slice(1);
-    tab.classList.toggle("active", tab.id === tabId);
-  });
 }
 
 function setupLoadDataPanelEvents() {
@@ -4226,13 +4490,6 @@ function setupLoadDataPanelEvents() {
     });
   }
 
-  // Nav items
-  document.querySelectorAll(".load-data-nav-item").forEach(item => {
-    item.addEventListener("click", () => {
-      switchLoadDataTab(item.dataset.loadTab);
-    });
-  });
-
   // Load All Trials button
   const loadAllTrialsBtn = document.getElementById("loadAllTrialsBtn");
   if (loadAllTrialsBtn) {
@@ -4247,21 +4504,6 @@ function setupLoadDataPanelEvents() {
   const updateAllTrialsBtn = document.getElementById("updateAllTrialsBtn");
   if (updateAllTrialsBtn) {
     updateAllTrialsBtn.addEventListener("click", updateAllTrialData);
-  }
-
-  // Category refresh buttons
-  const categories = ["Crops", "Entries", "Locations", "Parameters", "Agronomy"];
-  categories.forEach(cat => {
-    const btn = document.getElementById(`loadCategoryBtn${cat}`);
-    if (btn) {
-      btn.addEventListener("click", () => refreshCategoryFromDrive(cat.toLowerCase()));
-    }
-  });
-
-  // Library refresh button
-  const libBtn = document.getElementById("loadCategoryBtnLibrary");
-  if (libBtn) {
-    libBtn.addEventListener("click", refreshLibraryFromDrive);
   }
 
   // Open panel button in topbar

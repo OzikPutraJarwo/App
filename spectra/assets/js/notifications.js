@@ -141,10 +141,76 @@ const NotificationsModule = (() => {
 
   // ---- Permission ----
 
+  const STORAGE_KEY_DISMISS_TODAY = "notifDismissToday";
+
+  function isDismissedToday() {
+    const val = localStorage.getItem(STORAGE_KEY_DISMISS_TODAY);
+    if (!val) return false;
+    return val === todayKey();
+  }
+
   function requestPermission() {
     if (!isSupported()) return;
     localStorage.setItem(STORAGE_KEY_PERMISSION_ASKED, "1");
     Notification.requestPermission();
+  }
+
+  function showPermissionPopup() {
+    if (!isSupported()) return;
+    if (Notification.permission !== "default") return;
+    if (isDismissedToday()) return;
+
+    const overlay = document.createElement("div");
+    overlay.className = "notif-perm-overlay";
+    overlay.innerHTML = `
+      <div class="notif-perm-popup">
+        <div class="notif-perm-icon">
+          <span class="material-symbols-rounded">notifications_active</span>
+        </div>
+        <h3 class="notif-perm-title">Enable Notifications</h3>
+        <p class="notif-perm-desc">Get timely reminders about your field tasks, including overdue and upcoming observations.</p>
+        <div class="notif-perm-actions">
+          <button class="btn btn-primary notif-perm-accept" id="_notifPermAccept">
+            <span class="material-symbols-rounded" style="font-size:16px;">check</span> Allow Notifications
+          </button>
+          <button class="btn btn-secondary notif-perm-cancel" id="_notifPermCancel">Not Now</button>
+          <button class="notif-perm-dismiss" id="_notifPermDismiss">Don't show again today</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add("active"));
+
+    overlay.querySelector("#_notifPermAccept")?.addEventListener("click", () => {
+      localStorage.setItem(STORAGE_KEY_PERMISSION_ASKED, "1");
+      Notification.requestPermission().then((result) => {
+        if (result === "granted" && typeof showToast === "function") {
+          showToast("Notifications enabled!", "success");
+        }
+      });
+      overlay.classList.remove("active");
+      setTimeout(() => overlay.remove(), 200);
+    });
+
+    overlay.querySelector("#_notifPermCancel")?.addEventListener("click", () => {
+      overlay.classList.remove("active");
+      setTimeout(() => overlay.remove(), 200);
+    });
+
+    overlay.querySelector("#_notifPermDismiss")?.addEventListener("click", () => {
+      localStorage.setItem(STORAGE_KEY_DISMISS_TODAY, todayKey());
+      overlay.classList.remove("active");
+      setTimeout(() => overlay.remove(), 200);
+    });
+
+    // Backdrop close
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove("active");
+        setTimeout(() => overlay.remove(), 200);
+      }
+    });
   }
 
   // ---- Schedule logic ----
@@ -308,9 +374,9 @@ const NotificationsModule = (() => {
   function init() {
     if (!isSupported()) return;
 
-    // Ask permission first time
+    // Show custom permission popup if not yet granted
     if (Notification.permission === "default" && !localStorage.getItem(STORAGE_KEY_PERMISSION_ASKED)) {
-      requestPermission();
+      setTimeout(showPermissionPopup, 3000);
     }
 
     // Check once on load (delayed to let data load)
@@ -331,6 +397,7 @@ const NotificationsModule = (() => {
     init,
     checkAndNotify,
     requestPermission,
+    showPermissionPopup,
     isSupported,
     getReminderCounts,
     startInterval,

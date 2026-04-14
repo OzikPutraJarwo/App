@@ -1894,8 +1894,10 @@ function populateTrialCrops() {
     '<option value="">Select crop</option>' +
     crops
       .map(
-        (crop) =>
-          `<option value="${crop.id}" data-name="${escapeHtml(crop.name)}">${escapeHtml(crop.name)}</option>`,
+        (crop) => {
+          const typeLabel = crop.entryType === "hybrid" ? "Hybrid" : "Parental";
+          return `<option value="${crop.id}" data-name="${escapeHtml(crop.name)}">${escapeHtml(crop.name)} (${typeLabel})</option>`;
+        },
       )
       .join("");
 }
@@ -5074,6 +5076,16 @@ async function loadTrialAreaFromDrive(trialId, areaIndex, onProgress, options = 
 
     // --- LOAD AGRONOMY ---
     if (loadAgro) {
+    // Skip overwriting agronomy data if user is actively monitoring this trial
+    // (agronomyMonitoringState.responses shares the same object reference as
+    // trial.agronomyResponses, so loading from Drive would clobber unsaved edits)
+    const agroMonActive = agronomyMonitoringState.currentTrialId === trialId;
+
+    if (agroMonActive) {
+      console.info(`Skipping agronomy load for area ${areaIdx} — monitoring active`);
+      trial._loadedAreaTypes[areaIdx].agronomy = true;
+      trial._loadSyncMarker[areaIdx].agronomy = new Date().toISOString();
+    } else {
     const agronomyFolderObj = await findFolder("agronomy", trialFolder.id);
     if (!trial.agronomyResponses[areaIdx]) trial.agronomyResponses[areaIdx] = {};
 
@@ -5129,6 +5141,7 @@ async function loadTrialAreaFromDrive(trialId, areaIndex, onProgress, options = 
     }
     trial._loadedAreaTypes[areaIdx].agronomy = true;
     trial._loadSyncMarker[areaIdx].agronomy = new Date().toISOString();
+    } // end else (not monitoring)
     } // end loadAgro
 
     // Mark area as loaded if both types done
@@ -7427,19 +7440,31 @@ function getTrialAvailableAreaIndexes(trial) {
   const allIndexes = Array.from({ length: totalAreas }, (_, idx) => idx);
   if (!trial || totalAreas === 0) return [];
 
+  // If user selected specific areas via the area selection popup, use those.
+  const selectedRun = Array.isArray(trial._selectedRunAreas) ? trial._selectedRunAreas : null;
+
+  let available;
   if (trial._responsesLoaded) {
-    return allIndexes;
+    available = allIndexes;
+  } else {
+    const loadedAreas = Array.isArray(trial._loadedAreas) ? trial._loadedAreas : [];
+    const normalized = [...new Set(
+      loadedAreas
+        .map((v) => Number(v))
+        .filter((n) => Number.isInteger(n) && n >= 0 && n < totalAreas),
+    )].sort((a, b) => a - b);
+
+    // If no partial-load marker exists, keep default behavior (all areas available).
+    available = normalized.length > 0 ? normalized : allIndexes;
   }
 
-  const loadedAreas = Array.isArray(trial._loadedAreas) ? trial._loadedAreas : [];
-  const normalized = [...new Set(
-    loadedAreas
-      .map((v) => Number(v))
-      .filter((n) => Number.isInteger(n) && n >= 0 && n < totalAreas),
-  )].sort((a, b) => a - b);
+  // Intersect with user's area selection if present
+  if (selectedRun) {
+    const selectedSet = new Set(selectedRun);
+    available = available.filter(idx => selectedSet.has(idx));
+  }
 
-  // If no partial-load marker exists, keep default behavior (all areas available).
-  return normalized.length > 0 ? normalized : allIndexes;
+  return available;
 }
 
 function isTrialAreaAvailableForRun(trial, areaIndex) {
@@ -7553,9 +7578,16 @@ async function startAgronomyMonitoring(trialId) {
     return;
   }
 
-  // Lazy-load responses from Drive if not yet loaded
-  const loaded = await ensureTrialResponsesLoaded(trialId);
-  if (!loaded) return;
+  // Show area selection popup
+  showAreaSelectionPopup(trialId, "agronomy");
+}
+
+async function _startAgronomyMonitoringWithAreas(trialId, selectedAreas) {
+  const trial = trialState.trials.find(t => t.id === trialId);
+  if (!trial) return;
+
+  // Store selected areas on the trial for nav tree filtering
+  trial._selectedRunAreas = selectedAreas;
 
   // Check for remote updates before running
   if (typeof checkSingleTrialUpdates === "function") {
@@ -7573,7 +7605,8 @@ async function startAgronomyMonitoring(trialId) {
 
   agronomyMonitoringState.currentTrialId = trialId;
   agronomyMonitoringState.currentTrial = trial;
-  agronomyMonitoringState.responses = trial.agronomyResponses || {};
+  if (!trial.agronomyResponses) trial.agronomyResponses = {};
+  agronomyMonitoringState.responses = trial.agronomyResponses;
   agronomyMonitoringState.currentAreaIndex = null;
   agronomyMonitoringState.currentItemId = null;
 
@@ -7621,6 +7654,10 @@ async function startAgronomyMonitoring(trialId) {
 
 // Exit Agronomy Monitoring
 function exitAgronomyMonitoring() {
+  // Clear selected areas filter
+  if (agronomyMonitoringState.currentTrial) {
+    delete agronomyMonitoringState.currentTrial._selectedRunAreas;
+  }
   agronomyMonitoringState.currentTrialId = null;
   agronomyMonitoringState.currentTrial = null;
   agronomyMonitoringState.responses = {};
@@ -8093,7 +8130,7 @@ async function saveAgronomyResponseToDrive(trial, areaIndex, itemId) {
 // Save ALL agronomy responses for a single area as one consolidated file: {areaIndex}~agronomy.json
 async function saveAreaAgronomyToDrive(trial, areaIndex) {
   const areaAgronomy = trial.agronomyResponses?.[areaIndex];
-  if (!areaAgronomy || Object.keys(areaAgronomy).length === 0) return;
+  if (!areaAgronomy) return;
 
   const rootFolderId = await getTrialsFolderId();
   const trialFolderId = await getOrCreateFolder(trial.id, rootFolderId);
@@ -8159,38 +8196,76 @@ function showAgronomyPhotoUploadChoice(event) {
   overlay.querySelector('#agrPhotoFile').addEventListener('click', () => {
     closePhotoUploadChoice();
     const input = document.createElement('input');
-    input.type = 'file'; input.accept = 'image/*';
+    input.type = 'file'; input.accept = 'image/*'; input.multiple = true;
     input.onchange = handleAgronomyPhotoUpload;
     input.click();
   });
 }
 
 function handleAgronomyPhotoUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+  const files = Array.from(event.target.files || []);
+  if (files.length === 0) return;
 
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const photoData = e.target.result;
-    const areaIndex = agronomyMonitoringState.currentAreaIndex;
-    const itemId = agronomyMonitoringState.currentItemId;
-    if (areaIndex === null || !itemId) return;
+  for (const file of files) {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const photoData = e.target.result;
+      const areaIndex = agronomyMonitoringState.currentAreaIndex;
+      const itemId = agronomyMonitoringState.currentItemId;
+      if (areaIndex === null || !itemId) return;
 
-    if (!agronomyMonitoringState.responses[areaIndex]) {
-      agronomyMonitoringState.responses[areaIndex] = {};
-    }
-    if (!agronomyMonitoringState.responses[areaIndex][itemId]) {
-      agronomyMonitoringState.responses[areaIndex][itemId] = { applicationDate: "", photos: [], timestamp: "" };
-    }
+      if (!agronomyMonitoringState.responses[areaIndex]) {
+        agronomyMonitoringState.responses[areaIndex] = {};
+      }
+      if (!agronomyMonitoringState.responses[areaIndex][itemId]) {
+        agronomyMonitoringState.responses[areaIndex][itemId] = { applicationDate: "", photos: [], timestamp: "" };
+      }
 
-    agronomyMonitoringState.responses[areaIndex][itemId].photos.push(photoData);
-    agronomyMonitoringState.responses[areaIndex][itemId].timestamp = new Date().toISOString();
+      // Insert placeholder immediately for UI feedback
+      const placeholderIdx = agronomyMonitoringState.responses[areaIndex][itemId].photos.length;
+      agronomyMonitoringState.responses[areaIndex][itemId].photos.push(photoData);
+      agronomyMonitoringState.responses[areaIndex][itemId].timestamp = new Date().toISOString();
 
-    saveAgronomyResponseSilent();
-    autoSaveAgronomyProgress();
-    renderAgronomyQuestionCard();
-  };
-  reader.readAsDataURL(file);
+      saveAgronomyResponseSilent();
+      autoSaveAgronomyProgress();
+      renderAgronomyQuestionCard();
+
+      // Upload binary to Drive in background
+      try {
+        const trial = agronomyMonitoringState.currentTrial;
+        const item = inventoryState.items.agronomy?.find(a => a.id === itemId);
+        const area = trial?.areas?.[areaIndex];
+        const itemNameSafe = (item?.activity || item?.name || itemId).replace(/[^a-zA-Z0-9_-]/g, "-").substring(0, 40);
+        const areaNameSafe = (area?.name || `Area${areaIndex + 1}`).replace(/[^a-zA-Z0-9_-]/g, "-").substring(0, 40);
+        const photoId = (typeof crypto !== "undefined" && crypto.randomUUID)
+          ? crypto.randomUUID()
+          : `photo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const fileName = `${itemNameSafe}_${areaNameSafe}_${photoId}.webp`;
+
+        const { blob, width, height } = await compressPhotoToWebP(photoData, 1000, 0.7);
+        const rootFolderId = await getTrialsFolderId();
+        const trialFolderId = await getOrCreateFolder(trial.id, rootFolderId);
+        const agronomyPhotosFolderId = await getOrCreateFolder("agronomy-photos", trialFolderId);
+        const newFileId = await uploadBinaryFileToDrive(fileName, agronomyPhotosFolderId, blob, "image/webp");
+
+        const photoRef = { photoId, fileId: newFileId, width, height, timestamp: new Date().toISOString() };
+        const photos = agronomyMonitoringState.responses[areaIndex]?.[itemId]?.photos;
+        if (photos && placeholderIdx < photos.length) {
+          photos[placeholderIdx] = photoRef;
+        }
+
+        const blobUrl = URL.createObjectURL(blob);
+        _photoBlobCache[newFileId] = blobUrl;
+
+        autoSaveAgronomyProgress();
+        renderAgronomyQuestionCard();
+      } catch (err) {
+        console.warn("Agronomy binary photo upload failed, keeping inline:", err);
+        autoSaveAgronomyProgress();
+      }
+    };
+    reader.readAsDataURL(file);
+  }
   setTimeout(() => { event.target.value = ""; }, 100);
 }
 
@@ -8360,8 +8435,9 @@ function renderRunTrialList() {
       // Calculate progress using the correct response format
       const progress = getTrialProgress(trial);
       const progressPercent = progress.percentage;
-      const statusText = progressPercent === 0 ? 'Not Started' : progressPercent === 100 ? 'Completed' : 'In Progress';
-      const statusColor = progressPercent === 0 ? 'var(--text-secondary)' : progressPercent === 100 ? 'var(--success)' : 'var(--warning)';
+      const hasStarted = progress.completed > 0 || progressPercent > 0;
+      const statusText = !hasStarted ? 'Not Started' : progressPercent === 100 ? 'Completed' : 'In Progress';
+      const statusColor = !hasStarted ? 'var(--text-secondary)' : progressPercent === 100 ? 'var(--success)' : 'var(--warning)';
 
       return `
         <div class="run-trial-card" data-trial-id="${trial.id}">
@@ -8450,6 +8526,219 @@ function handleRunTrialKeyboard(e) {
   }
 }
 
+// ── Area Selection Popup for Run Observation / Agronomy ──
+
+function showAreaSelectionPopup(trialId, mode) {
+  const trial = trialState.trials.find(t => t.id === trialId);
+  if (!trial) return;
+
+  const areas = trial.areas || [];
+  if (areas.length === 0) { showToast("No areas defined in this trial", "warning"); return; }
+
+  const allLoaded = trial._responsesLoaded === true;
+  const modeLabel = mode === "agronomy" ? "Agronomy Monitoring" : "Run Observation";
+  const loadType = mode === "agronomy" ? "agronomy" : "observation";
+  const _areaSelMaps = [];
+
+  const overlay = document.createElement("div");
+  overlay.className = "confirm-modal active";
+  overlay.id = "areaSelectionPopup";
+
+  function cleanupMaps() {
+    _areaSelMaps.forEach(m => { try { m.remove(); } catch(_){} });
+    _areaSelMaps.length = 0;
+  }
+
+  function areaTypeLoaded(areaIdx) {
+    const t = trialState.trials.find(x => x.id === trialId);
+    if (!t) return false;
+    if (t._responsesLoaded === true) return true;
+    const types = t._loadedAreaTypes?.[String(areaIdx)];
+    if (!types) return false;
+    if (loadType === "observation") return !!types.observation;
+    if (loadType === "agronomy") return !!types.agronomy;
+    return !!types.observation && !!types.agronomy;
+  }
+
+  function renderContent() {
+    cleanupMaps();
+
+    const hasAnyLoaded = areas.some((_, idx) => areaTypeLoaded(idx));
+
+    const cards = areas.map((area, idx) => {
+      const loaded = areaTypeLoaded(idx);
+      const hasCoords = area.coordinates && area.coordinates.length > 0;
+      return `
+        <div class="area-sel-card ${loaded ? 'loaded' : 'not-loaded'}" data-idx="${idx}">
+          <div class="area-sel-map" id="_areaSelMap_${idx}">
+            ${!hasCoords ? '<div class="area-sel-no-map"><span class="material-symbols-rounded">map</span>No map</div>' : ''}
+          </div>
+          <div class="area-sel-info">
+            <label class="area-sel-label">
+              <input type="checkbox" class="_areaSelCheck" value="${idx}" ${loaded ? "checked" : ""} ${!loaded ? "disabled" : ""}>
+              <span class="area-sel-name">${escapeHtml(area.name || `Area ${idx + 1}`)}</span>
+            </label>
+            ${loaded
+              ? `<span class="area-sel-status loaded"><span class="material-symbols-rounded">check_circle</span> Loaded</span>`
+              : `<button type="button" class="_areaSelLoadBtn area-sel-load-btn" data-area-idx="${idx}">
+                  <span class="material-symbols-rounded">cloud_download</span> Load
+                </button>`
+            }
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    overlay.innerHTML = `
+      <div class="area-sel-popup">
+        <div class="area-sel-header">
+          <h3><span class="material-symbols-rounded">${mode === "agronomy" ? "local_florist" : "visibility"}</span> ${modeLabel}</h3>
+          <button class="area-sel-close" id="_areaSelCancel"><span class="material-symbols-rounded">close</span></button>
+        </div>
+        <div class="area-sel-toolbar">
+          <label class="area-sel-selall">
+            <input type="checkbox" id="_areaSelAll"> <span>Select All</span>
+          </label>
+          <span class="area-sel-hint">Tap cards to select areas</span>
+        </div>
+        <div class="area-sel-grid">
+          ${cards}
+        </div>
+        <div class="area-sel-footer">
+          <button class="btn btn-secondary" id="_areaSelCancelBtn">Cancel</button>
+          <button class="btn btn-primary" id="_areaSelRun" ${!hasAnyLoaded ? "disabled" : ""}>
+            <span class="material-symbols-rounded" style="font-size:16px;">${mode === "agronomy" ? "local_florist" : "visibility"}</span> Start ${modeLabel}
+          </button>
+        </div>
+      </div>
+    `;
+
+    requestAnimationFrame(() => {
+      // Initialize mini-maps
+      areas.forEach((area, idx) => {
+        if (!area.coordinates || area.coordinates.length === 0) return;
+        const container = overlay.querySelector(`#_areaSelMap_${idx}`);
+        if (!container) return;
+
+        const map = L.map(container, {
+          zoomControl: false,
+          attributionControl: false,
+          dragging: false,
+          touchZoom: false,
+          doubleClickZoom: false,
+          scrollWheelZoom: false,
+          boxZoom: false,
+          keyboard: false,
+        });
+        if (map.tap) map.tap.disable();
+
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          maxNativeZoom: 17, maxZoom: 22
+        }).addTo(map);
+
+        const latlngs = area.coordinates.map(c => [c[0], c[1]]);
+        L.polygon(latlngs, { color: '#2563eb', fillColor: '#3b82f6', fillOpacity: 0.3, weight: 2 }).addTo(map);
+        map.fitBounds(latlngs, { padding: [8, 8] });
+
+        _areaSelMaps.push(map);
+
+        // Fix sizing
+        setTimeout(() => { map.invalidateSize(); map.fitBounds(latlngs, { padding: [8, 8] }); }, 100);
+        setTimeout(() => { map.invalidateSize(); map.fitBounds(latlngs, { padding: [8, 8] }); }, 400);
+      });
+
+      // Card click → toggle checkbox
+      overlay.querySelectorAll(".area-sel-card").forEach(card => {
+        card.addEventListener("click", (e) => {
+          if (e.target.closest("._areaSelLoadBtn") || e.target.closest("input[type=checkbox]")) return;
+          const chk = card.querySelector("._areaSelCheck");
+          if (chk && !chk.disabled) {
+            chk.checked = !chk.checked;
+            card.classList.toggle("selected", chk.checked);
+            updateSelectAll();
+          }
+        });
+      });
+
+      // Initialize selected state on loaded cards
+      overlay.querySelectorAll("._areaSelCheck:checked").forEach(chk => {
+        chk.closest(".area-sel-card")?.classList.add("selected");
+      });
+
+      // Checkbox change → update card class
+      overlay.querySelectorAll("._areaSelCheck").forEach(chk => {
+        chk.addEventListener("change", () => {
+          chk.closest(".area-sel-card")?.classList.toggle("selected", chk.checked);
+          updateSelectAll();
+        });
+      });
+
+      // Select All
+      const selAllChk = overlay.querySelector("#_areaSelAll");
+      function updateSelectAll() {
+        const checks = overlay.querySelectorAll("._areaSelCheck:not(:disabled)");
+        if (selAllChk) selAllChk.checked = checks.length > 0 && [...checks].every(c => c.checked);
+      }
+      if (selAllChk) {
+        updateSelectAll();
+        selAllChk.addEventListener("change", () => {
+          overlay.querySelectorAll("._areaSelCheck:not(:disabled)").forEach(c => {
+            c.checked = selAllChk.checked;
+            c.closest(".area-sel-card")?.classList.toggle("selected", c.checked);
+          });
+        });
+      }
+
+      // Load buttons
+      overlay.querySelectorAll("._areaSelLoadBtn").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const areaIdx = Number(btn.dataset.areaIdx);
+          const card = btn.closest(".area-sel-card");
+          btn.disabled = true;
+          btn.innerHTML = `<span class="material-symbols-rounded spin-slow">progress_activity</span> Loading…`;
+          if (card) card.classList.add("is-loading");
+          try {
+            await loadTrialAreaFromDrive(trialId, areaIdx, () => {}, { type: loadType });
+            renderContent();
+          } catch (err) {
+            btn.disabled = false;
+            btn.innerHTML = `<span class="material-symbols-rounded">error</span> Failed`;
+            if (card) card.classList.remove("is-loading");
+            showToast(`Failed to load area: ${err.message || "Unknown error"}`, "error");
+          }
+        });
+      });
+
+      // Cancel
+      const closePopup = () => { cleanupMaps(); overlay.remove(); unlockBodyScroll(); };
+      overlay.querySelector("#_areaSelCancel")?.addEventListener("click", closePopup);
+      overlay.querySelector("#_areaSelCancelBtn")?.addEventListener("click", closePopup);
+
+      // Run
+      overlay.querySelector("#_areaSelRun")?.addEventListener("click", () => {
+        const checked = [...overlay.querySelectorAll("._areaSelCheck:checked")].map(c => Number(c.value));
+        if (checked.length === 0) { showToast("Select at least one area to run", "warning"); return; }
+        cleanupMaps();
+        overlay.remove();
+        unlockBodyScroll();
+        if (mode === "agronomy") _startAgronomyMonitoringWithAreas(trialId, checked);
+        else _startRunTrialWithAreas(trialId, checked);
+      });
+    });
+  }
+
+  // Backdrop close
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) { cleanupMaps(); overlay.remove(); unlockBodyScroll(); }
+  });
+
+  renderContent();
+  document.body.appendChild(overlay);
+  lockBodyScroll();
+}
+
 // Start running a trial
 async function startRunTrial(trialId) {
   const trial = trialState.trials.find((t) => t.id === trialId);
@@ -8465,9 +8754,16 @@ async function startRunTrial(trialId) {
     return;
   }
 
-  // Lazy-load responses from Drive if not yet loaded
-  const loaded = await ensureTrialResponsesLoaded(trialId);
-  if (!loaded) return;
+  // Show area selection popup
+  showAreaSelectionPopup(trialId, "observation");
+}
+
+async function _startRunTrialWithAreas(trialId, selectedAreas) {
+  const trial = trialState.trials.find((t) => t.id === trialId);
+  if (!trial) return;
+
+  // Store selected areas on the trial for nav tree filtering
+  trial._selectedRunAreas = selectedAreas;
 
   // Check for remote updates before running
   if (typeof checkSingleTrialUpdates === "function") {
@@ -8531,6 +8827,10 @@ async function startRunTrial(trialId) {
 
 // Exit run trial mode
 function exitRunTrial() {
+  // Clear selected areas filter
+  if (runTrialState.currentTrial) {
+    delete runTrialState.currentTrial._selectedRunAreas;
+  }
   runTrialState.currentTrialId = null;
   runTrialState.currentTrial = null;
   runTrialState.responses = {};
@@ -9476,6 +9776,7 @@ function showPhotoUploadChoice(event) {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
+    input.multiple = true;
     input.onchange = handlePhotoUpload;
     input.click();
   });
@@ -9491,104 +9792,105 @@ function closePhotoUploadChoice() {
 
 // Handle photo upload
 function handlePhotoUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+  const files = Array.from(event.target.files || []);
+  if (files.length === 0) return;
 
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const photoData = e.target.result;
-    
-    // Get current context
-    const areaIndex = runTrialState.currentAreaIndex;
-    const paramId = runTrialState.currentParamId;
-    const lineId = runTrialState.currentLineId;
-    const repIndex = runTrialState.currentRepIndex;
-    const sampleIndex = runTrialState.currentSampleIndex || 0;
-    
-    if (areaIndex === null || !paramId || !lineId || repIndex === null) return;
-    
-    const param = inventoryState.items.parameters.find((p) => p.id === paramId);
-    if (!param) return;
-    
-    // Determine photo key based on photoMode
-    const photoMode = param.photoMode || "per-sample";
-    const photoKey = photoMode === "per-line" 
-      ? `${lineId}_${repIndex}` 
-      : `${lineId}_${repIndex}_${sampleIndex}`;
-    
-    // Initialize response structure
-    if (!runTrialState.responses[areaIndex]) {
-      runTrialState.responses[areaIndex] = {};
-    }
-    if (!runTrialState.responses[areaIndex][paramId]) {
-      runTrialState.responses[areaIndex][paramId] = {};
-    }
-    if (!runTrialState.responses[areaIndex][paramId][photoKey]) {
-      runTrialState.responses[areaIndex][paramId][photoKey] = {
-        value: "",
-        photos: [],
-        timestamp: new Date().toISOString(),
-      };
-    }
-
-    // Compress to WebP and upload as binary file to Drive
-    const trial = runTrialState.currentTrial;
-    const photoId = (typeof crypto !== "undefined" && crypto.randomUUID)
-      ? crypto.randomUUID()
-      : `photo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-    // Build meaningful filename: ParamName_RepX_PlotName_SampleY_uuid.webp
-    const paramNameSafe = (param.name || paramId).replace(/[^a-zA-Z0-9_-]/g, "-").substring(0, 40);
-    const line = runTrialState.currentTrial?.areas?.[areaIndex]?.layout?.result
-      ?.flat(2)?.find(c => c && c.id === lineId);
-    const lineNameSafe = (line?.name || lineId).replace(/[^a-zA-Z0-9_-]/g, "-").substring(0, 40);
-    const fileName = `${paramNameSafe}_Rep${repIndex + 1}_${lineNameSafe}_Sample${sampleIndex + 1}_${photoId}.webp`;
-
-    // Insert a temporary placeholder so the UI shows a spinner immediately
-    const placeholderIdx = runTrialState.responses[areaIndex][paramId][photoKey].photos.length;
-    runTrialState.responses[areaIndex][paramId][photoKey].photos.push(photoData);
-    runTrialState.responses[areaIndex][paramId][photoKey].timestamp = new Date().toISOString();
-
-    // Save current input value to lineKey to prevent data loss
-    saveCurrentResponseSilent();
-    renderQuestionCard();
-
-    // Upload binary in background, then replace inline with reference
-    try {
-      const { blob, width, height } = await compressPhotoToWebP(photoData, 1000, 0.7);
-      const rootFolderId = await getTrialsFolderId();
-      const trialFolderId = await getOrCreateFolder(trial.id, rootFolderId);
-      const photosFolderId = await getOrCreateFolder("photos", trialFolderId);
-      const newFileId = await uploadBinaryFileToDrive(fileName, photosFolderId, blob, "image/webp");
-
-      // Replace inline base64 with reference object
-      const photoRef = {
-        photoId,
-        fileId: newFileId,
-        width,
-        height,
-        timestamp: new Date().toISOString(),
-      };
-
-      const photos = runTrialState.responses[areaIndex]?.[paramId]?.[photoKey]?.photos;
-      if (photos && placeholderIdx < photos.length) {
-        photos[placeholderIdx] = photoRef;
+  for (const file of files) {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const photoData = e.target.result;
+      
+      // Get current context
+      const areaIndex = runTrialState.currentAreaIndex;
+      const paramId = runTrialState.currentParamId;
+      const lineId = runTrialState.currentLineId;
+      const repIndex = runTrialState.currentRepIndex;
+      const sampleIndex = runTrialState.currentSampleIndex || 0;
+      
+      if (areaIndex === null || !paramId || !lineId || repIndex === null) return;
+      
+      const param = inventoryState.items.parameters.find((p) => p.id === paramId);
+      if (!param) return;
+      
+      // Determine photo key based on photoMode
+      const photoMode = param.photoMode || "per-sample";
+      const photoKey = photoMode === "per-line" 
+        ? `${lineId}_${repIndex}` 
+        : `${lineId}_${repIndex}_${sampleIndex}`;
+      
+      // Initialize response structure
+      if (!runTrialState.responses[areaIndex]) {
+        runTrialState.responses[areaIndex] = {};
+      }
+      if (!runTrialState.responses[areaIndex][paramId]) {
+        runTrialState.responses[areaIndex][paramId] = {};
+      }
+      if (!runTrialState.responses[areaIndex][paramId][photoKey]) {
+        runTrialState.responses[areaIndex][paramId][photoKey] = {
+          value: "",
+          photos: [],
+          timestamp: new Date().toISOString(),
+        };
       }
 
-      // Cache blob URL for immediate display
-      const blobUrl = URL.createObjectURL(blob);
-      _photoBlobCache[newFileId] = blobUrl;
+      // Compress to WebP and upload as binary file to Drive
+      const trial = runTrialState.currentTrial;
+      const photoId = (typeof crypto !== "undefined" && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : `photo_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-      autoSaveProgress();
+      // Build meaningful filename: ParamName_RepX_PlotName_SampleY_uuid.webp
+      const paramNameSafe = (param.name || paramId).replace(/[^a-zA-Z0-9_-]/g, "-").substring(0, 40);
+      const line = runTrialState.currentTrial?.areas?.[areaIndex]?.layout?.result
+        ?.flat(2)?.find(c => c && c.id === lineId);
+      const lineNameSafe = (line?.name || lineId).replace(/[^a-zA-Z0-9_-]/g, "-").substring(0, 40);
+      const fileName = `${paramNameSafe}_Rep${repIndex + 1}_${lineNameSafe}_Sample${sampleIndex + 1}_${photoId}.webp`;
+
+      // Insert a temporary placeholder so the UI shows a spinner immediately
+      const placeholderIdx = runTrialState.responses[areaIndex][paramId][photoKey].photos.length;
+      runTrialState.responses[areaIndex][paramId][photoKey].photos.push(photoData);
+      runTrialState.responses[areaIndex][paramId][photoKey].timestamp = new Date().toISOString();
+
+      // Save current input value to lineKey to prevent data loss
+      saveCurrentResponseSilent();
       renderQuestionCard();
-    } catch (err) {
-      console.warn("Binary photo upload failed, keeping inline:", err);
-      // Photo stays as inline base64 — will auto-save with JSON
-      autoSaveProgress();
-    }
-  };
-  
-  reader.readAsDataURL(file);
+
+      // Upload binary in background, then replace inline with reference
+      try {
+        const { blob, width, height } = await compressPhotoToWebP(photoData, 1000, 0.7);
+        const rootFolderId = await getTrialsFolderId();
+        const trialFolderId = await getOrCreateFolder(trial.id, rootFolderId);
+        const photosFolderId = await getOrCreateFolder("photos", trialFolderId);
+        const newFileId = await uploadBinaryFileToDrive(fileName, photosFolderId, blob, "image/webp");
+
+        // Replace inline base64 with reference object
+        const photoRef = {
+          photoId,
+          fileId: newFileId,
+          width,
+          height,
+          timestamp: new Date().toISOString(),
+        };
+
+        const photos = runTrialState.responses[areaIndex]?.[paramId]?.[photoKey]?.photos;
+        if (photos && placeholderIdx < photos.length) {
+          photos[placeholderIdx] = photoRef;
+        }
+
+        // Cache blob URL for immediate display
+        const blobUrl = URL.createObjectURL(blob);
+        _photoBlobCache[newFileId] = blobUrl;
+
+        autoSaveProgress();
+        renderQuestionCard();
+      } catch (err) {
+        console.warn("Binary photo upload failed, keeping inline:", err);
+        // Photo stays as inline base64 — will auto-save with JSON
+        autoSaveProgress();
+      }
+    };
+    reader.readAsDataURL(file);
+  }
   
   // Clear input value after reading starts
   setTimeout(() => {
@@ -10454,8 +10756,9 @@ function renderDashboardTrialSummary() {
       : 'var(--text-tertiary)';
 
     const overallPct = showProgress ? progress.percentage : 0;
-    const badgeClass = !showProgress ? 'not-started' : overallPct === 100 ? 'complete' : overallPct > 0 ? 'in-progress' : 'not-started';
-    const badgeText = !showProgress ? 'Not loaded' : overallPct === 100 ? 'Complete' : overallPct > 0 ? 'In Progress' : 'Not Started';
+    const hasAnyCompleted = progress.completed > 0;
+    const badgeClass = !showProgress ? 'not-started' : overallPct === 100 ? 'complete' : (overallPct > 0 || hasAnyCompleted) ? 'in-progress' : 'not-started';
+    const badgeText = !showProgress ? 'Not loaded' : overallPct === 100 ? 'Complete' : (overallPct > 0 || hasAnyCompleted) ? 'In Progress' : 'Not Started';
 
     const cropName = trial.cropName || 'Unknown Crop';
     const plantDate = getTrialPlantingDateSummary(trial);

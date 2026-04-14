@@ -24,8 +24,15 @@ let tokenRefreshTimer = null;
 let tokenCountdownTimer = null;
 let authExpiryHandlingInProgress = false;
 
-// Token refresh interval: 45 minutes (tokens expire at ~60min)
-const TOKEN_REFRESH_INTERVAL = 45 * 60 * 1000;
+// Token refresh interval: configurable via User Settings > Authority (default 45 min)
+const DEFAULT_TOKEN_REFRESH_MINUTES = 45;
+
+function getTokenRefreshInterval() {
+  const mins = typeof userSettingsState !== "undefined"
+    ? (userSettingsState.data?.authority?.reloginMinutes || DEFAULT_TOKEN_REFRESH_MINUTES)
+    : DEFAULT_TOKEN_REFRESH_MINUTES;
+  return Math.max(5, Math.min(120, mins)) * 60 * 1000;
+}
 
 // Initialize Google APIs
 function initializeGoogleAPIs() {
@@ -125,7 +132,7 @@ function scheduleTokenRefresh() {
 
   const timeUntilRefresh = tokenExpiresAt
     ? Math.max(tokenExpiresAt - Date.now() - 15 * 60 * 1000, 60000) // 15 min before expiry, minimum 1 min
-    : TOKEN_REFRESH_INTERVAL;
+    : getTokenRefreshInterval();
 
   tokenRefreshTimer = setTimeout(async () => {
     console.log("Auto-refreshing token...");
