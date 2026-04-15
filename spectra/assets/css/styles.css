@@ -1000,7 +1000,7 @@ body.trial-fullscreen-active .content {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1.25rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .dashboard-card {
@@ -9616,6 +9616,36 @@ img.leaflet-tile {
   font-size: 13px;
 }
 
+.area-sel-progress {
+  padding: 0.15rem 0.6rem 0.35rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  color: var(--text-tertiary);
+  border-top: 1px solid var(--border);
+}
+
+.area-sel-progress .material-symbols-rounded {
+  font-size: 13px;
+}
+
+.area-sel-subtitle {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--primary-soft);
+}
+
+.area-sel-subtitle .material-symbols-rounded {
+  font-size: 14px;
+}
+
 .area-sel-footer {
   display: flex;
   gap: 0.75rem;
@@ -9635,7 +9665,7 @@ img.leaflet-tile {
   }
 
   .area-sel-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
     gap: 0.5rem;
     padding: 0.75rem;
   }
@@ -9693,6 +9723,10 @@ img.leaflet-tile {
   font-size: 24px;
   color: var(--text-tertiary);
   position: absolute;
+}
+
+.run-photo-preview:not(.photo-loading) .photo-placeholder-icon {
+  display: none;
 }
 
 .storage-health-grid {
@@ -10128,9 +10162,14 @@ img.leaflet-tile {
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.trial-action-popup-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
 }
 
 .trial-action-popup-options {
@@ -12709,6 +12748,7 @@ body.analysis-resizing.analysis-resizing-col * {
   .inventory-search-container {
     flex: 1;
     min-width: 120px;
+    grid-column: span 2;
   }
 
   .folder-modal {
@@ -12762,7 +12802,7 @@ body.analysis-resizing.analysis-resizing-col * {
   }
 
   .dash-progress-row {
-    grid-template-columns: 70px 1fr 50px;
+    grid-template-columns: 70px 1fr;
     gap: 0.5rem;
   }
 
@@ -12774,6 +12814,7 @@ body.analysis-resizing.analysis-resizing-col * {
   .dash-progress-bar {
     min-width: 60%;
     height: 5px;
+    display: none;
   }
 
   .dash-progress-text {
@@ -12917,4 +12958,3 @@ body.analysis-resizing.analysis-resizing-col * {
   color: var(--text-secondary);
   text-decoration: underline;
 }
-}}

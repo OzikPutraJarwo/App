@@ -170,6 +170,7 @@
 - [x] `Library > Agronomy Photos` Init
 - [x] `Library > Observation; Agronomy Photos` More detailed folder
 - [x] `Trial` Run per area
+- [x] `Trial` Run Observation; Agronomy per type (answer or photos only)
 - [x] `Trial > Observation; Agronomy` Upload image more than one once
 - [x] Some small redesigns (`Library`, `Trial`)
 

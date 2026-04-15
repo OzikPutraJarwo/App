@@ -625,10 +625,6 @@ function normalizeUserSettings(data) {
     ? "list"
     : "grid";
 
-  const normalizedLibraryGridSize = ["small", "medium", "large"].includes(appearance.libraryGridSize)
-    ? appearance.libraryGridSize
-    : "small";
-
   const rawCategoryViews = appearance.inventoryCategoryViews && typeof appearance.inventoryCategoryViews === "object"
     ? appearance.inventoryCategoryViews
     : {};
@@ -660,7 +656,6 @@ function normalizeUserSettings(data) {
   return {
     appearance: {
       inventoryViewMode: normalizedInventoryViewMode,
-      libraryGridSize: normalizedLibraryGridSize,
       inventoryCategoryViews: {
         trials: normalizeCategoryView(rawCategoryViews.trials),
         library: normalizeCategoryView(rawCategoryViews.library),
@@ -1566,6 +1561,8 @@ const _trialOptState = {
   cache: {},
 };
 
+const _orphanPhotoPreviewCache = {};
+
 function _getTrialOptCache(trialId) {
   if (!_trialOptState.cache[trialId]) {
     _trialOptState.cache[trialId] = {
@@ -1635,6 +1632,13 @@ function renderTrialOptimizationCards() {
     `;
   }).join("");
 
+  // Hydrate orphan photo previews when cards are re-rendered from cache.
+  container.querySelectorAll('.optimization-card-body').forEach((body) => {
+    if (body.querySelector('img[data-orphan-photo-fileid]')) {
+      _hydrateOrphanPhotoPreviews(body).catch(() => {});
+    }
+  });
+
   // Auto-scan cards that are still idle
   for (const cd of cards) {
     if (c[cd.key].status === "idle") {
@@ -1663,6 +1667,10 @@ function _updateTrialOptCard(key, html, btnDisabled) {
     const btn = card.querySelector(".trialopt-action-btn");
     if (body) body.innerHTML = html;
     if (btn) btn.disabled = btnDisabled;
+
+    if (body && body.querySelector('img[data-orphan-photo-fileid]')) {
+      _hydrateOrphanPhotoPreviews(body).catch(() => {});
+    }
   }
 }
 
@@ -1907,13 +1915,72 @@ function _renderOrphanList(orphans) {
   let html = `<div class="orphan-photo-list" style="margin-top:8px;max-height:200px;overflow-y:auto;font-size:0.82rem;color:var(--text-secondary);">`;
   html += shown.map(p => {
     const sizeKB = p.size ? `(${(Number(p.size) / 1024).toFixed(1)} KB)` : "";
-    return `<div style="display:flex;align-items:center;gap:6px;padding:2px 0;"><span class="material-symbols-rounded" style="font-size:16px;">image</span><span style="word-break:break-all;">${escapeHtml(p.name)} ${sizeKB}</span></div>`;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;">
+      <div style="width:38px;height:38px;border-radius:6px;overflow:hidden;flex:0 0 38px;background:var(--bg-tertiary);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;">
+        <img data-orphan-photo-fileid="${escapeHtml(p.id)}" alt="${escapeHtml(p.name)}" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
+      </div>
+      <div style="min-width:0;display:flex;flex-direction:column;gap:1px;">
+        <span style="word-break:break-all;color:var(--text-primary);">${escapeHtml(p.name)}</span>
+        <span style="font-size:0.74rem;color:var(--text-secondary);">${sizeKB || "Unknown size"}</span>
+      </div>
+    </div>`;
   }).join("");
   if (orphans.length > maxShow) {
     html += `<div style="padding:2px 0;font-style:italic;">…and ${orphans.length - maxShow} more</div>`;
   }
   html += `</div>`;
   return html;
+}
+
+async function _hydrateOrphanPhotoPreviews(container) {
+  if (!container) return;
+
+  const imgs = container.querySelectorAll('img[data-orphan-photo-fileid]');
+  if (!imgs.length) return;
+
+  let token = typeof getAccessToken === "function" ? getAccessToken() : "";
+  if (!token) return;
+
+  const BATCH_SIZE = 20;
+  const imgList = Array.from(imgs);
+
+  async function hydrateImg(img) {
+    const fileId = img.dataset.orphanPhotoFileid;
+    if (!fileId) return;
+
+    if (_orphanPhotoPreviewCache[fileId]) {
+      img.src = _orphanPhotoPreviewCache[fileId];
+      return;
+    }
+
+    try {
+      let resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if ((resp.status === 401 || resp.status === 403) && typeof getAccessToken === "function") {
+        token = getAccessToken();
+        if (!token) return;
+        resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+
+      if (!resp.ok) return;
+
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      _orphanPhotoPreviewCache[fileId] = url;
+      img.src = url;
+    } catch (_) {
+      // Keep graceful fallback: text-only row still identifies orphan file.
+    }
+  }
+
+  for (let i = 0; i < imgList.length; i += BATCH_SIZE) {
+    const batch = imgList.slice(i, i + BATCH_SIZE);
+    await Promise.all(batch.map(hydrateImg));
+  }
 }
 
 async function _listDrivePhotos(folderId) {
@@ -3159,6 +3226,10 @@ async function initializeApp() {
     setLoadingProgress(100, "Ready");
     showView("app");
     showLoading(false);
+    
+    // Ensure nav state is synced to dashboard (clear any leftover subitem active states from initialization)
+    syncNavActiveState("dashboard");
+    
     console.log("App initialized successfully");
   } catch (error) {
     console.error("Error initializing app:", error);

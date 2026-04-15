@@ -10,7 +10,6 @@ let libraryState = {
   activeFilter: "all",
   sortBy: "modifiedTime",
   sortDir: "desc",
-  filesGridSize: "small", // "small" | "medium" | "large" for Uploaded Files
   section: "files", // "files" | "observation-photos" | "agronomy-photos"
   uploading: {}, // Track upload progress by file name: { filename: { progress: 0-100 } }
   _filePreviewCache: {}, // fileId -> objectUrl for image thumbnails
@@ -79,7 +78,6 @@ function setupLibraryEvents() {
   const filterItems = document.querySelectorAll(".library-filter-item");
   const sortBySelect = document.getElementById("librarySortBy");
   const sortDirSelect = document.getElementById("librarySortDir");
-  const gridSizeSelect = document.getElementById("libraryGridSize");
   if (uploadBtn && uploadInput) {
     uploadBtn.addEventListener("click", () => uploadInput.click());
     uploadInput.addEventListener("change", async (e) => {
@@ -189,31 +187,6 @@ function setupLibraryEvents() {
       renderLibraryList();
     });
   }
-
-  if (gridSizeSelect) {
-    gridSizeSelect.value = libraryState.filesGridSize;
-    gridSizeSelect.addEventListener("change", (e) => {
-      const next = String(e.target.value || "small");
-      libraryState.filesGridSize = ["small", "medium", "large"].includes(next) ? next : "small";
-      renderLibraryList();
-      // Persist to user settings
-      if (typeof userSettingsState !== "undefined" && userSettingsState.data?.appearance) {
-        userSettingsState.data.appearance.libraryGridSize = libraryState.filesGridSize;
-        if (typeof saveUserSettingsLocalCache === "function") saveUserSettingsLocalCache();
-        if (typeof enqueueUserSettingsSync === "function") enqueueUserSettingsSync();
-      }
-    });
-  }
-}
-
-function applyLibraryUserSettings(appearancePrefs) {
-  if (!appearancePrefs) return;
-  const size = appearancePrefs.libraryGridSize;
-  if (["small", "medium", "large"].includes(size)) {
-    libraryState.filesGridSize = size;
-    const gridSizeSelect = document.getElementById("libraryGridSize");
-    if (gridSizeSelect) gridSizeSelect.value = size;
-  }
 }
 
 function setLibraryStatus(message, type = "info") {
@@ -253,7 +226,6 @@ async function switchLibrarySection(section = "files") {
   const uploadInput = document.getElementById("libraryUploadInput");
   const createFolderBtn = document.getElementById("createLibraryFolderBtn");
   const filterContainer = document.querySelector(".library-filter-container");
-  const gridSizeGroup = document.getElementById("libraryGridSizeGroup");
   const searchInput = document.getElementById("librarySearchInput");
   const actionBarContainer = document.getElementById("trialPhotoActionsContainer");
 
@@ -262,7 +234,6 @@ async function switchLibrarySection(section = "files") {
     if (uploadInput) uploadInput.classList.add("hidden");
     if (createFolderBtn) createFolderBtn.classList.add("hidden");
     if (filterContainer) filterContainer.classList.add("hidden");
-    if (gridSizeGroup) gridSizeGroup.classList.remove("hidden");
     if (actionBarContainer) actionBarContainer.classList.toggle("hidden", nextSection !== "observation-photos");
     libraryState.activeFilter = "all";
 
@@ -287,7 +258,6 @@ async function switchLibrarySection(section = "files") {
     if (uploadInput) uploadInput.classList.remove("hidden");
     if (createFolderBtn) createFolderBtn.classList.remove("hidden");
     if (filterContainer) filterContainer.classList.remove("hidden");
-    if (gridSizeGroup) gridSizeGroup.classList.remove("hidden");
     if (actionBarContainer) actionBarContainer.classList.add("hidden");
     if (searchInput) searchInput.placeholder = "Search files...";
     renderLibraryList();
@@ -441,6 +411,7 @@ function _parseObservationPhotoFileName(fileName) {
  * Derive a human-readable display name from a photo filename.
  * New format: ParamName_RepX_PlotName_SampleY_uuid.webp
  * Old format: uuid.webp (fallback)
+ * Display: TrialName_ParamName_RepX_PlotName_SampleY
  */
 function _derivePhotoDisplayName(fileName, trialName) {
   const base = fileName.replace(/\.[^.]+$/, ""); // strip extension
@@ -454,11 +425,12 @@ function _derivePhotoDisplayName(fileName, trialName) {
       const sampleIdx = parts.indexOf(samplePart);
       const paramName = parts.slice(0, repIdx).join(" ");
       const plotName = parts.slice(repIdx + 1, sampleIdx).join(" ");
-      return `${paramName} · ${repPart} · ${plotName} · ${samplePart}`;
+      const prefix = trialName ? `${trialName}_` : "";
+      return `${prefix}${paramName}_${repPart}_${plotName}_${samplePart}`;
     }
   }
   // Fallback: return filename without extension
-  return base;
+  return trialName ? `${trialName}_${base}` : base;
 }
 
 async function loadTrialPhotoItems(options = {}) {
@@ -620,6 +592,7 @@ async function loadAgronomyPhotoItems(options = {}) {
 /**
  * Derive a human-readable display name from an agronomy photo filename.
  * Format: ItemActivity_AreaName_uuid.webp
+ * Display: TrialName_ItemActivity_AreaName
  */
 function _deriveAgronomyPhotoDisplayName(fileName, trialName) {
   const base = fileName.replace(/\.[^.]+$/, "");
@@ -627,10 +600,10 @@ function _deriveAgronomyPhotoDisplayName(fileName, trialName) {
   // Format: ItemActivity_AreaName_uuid — at least 3 parts
   if (parts.length >= 3) {
     // Last part is uuid, skip it
-    const meaningful = parts.slice(0, -1).join(" ");
-    return meaningful;
+    const meaningful = parts.slice(0, -1).join("_");
+    return trialName ? `${trialName}_${meaningful}` : meaningful;
   }
-  return base;
+  return trialName ? `${trialName}_${base}` : base;
 }
 
 function renderAgronomyPhotoList(container) {
@@ -1588,7 +1561,7 @@ function renderLibraryList() {
 
   if (libraryState.section === "observation-photos") {
     container.classList.remove("library-grid-empty", "grid-small", "grid-medium", "grid-large");
-    container.classList.add("library-files-grid", `grid-${libraryState.filesGridSize}`);
+    container.classList.add("library-files-grid", "grid-small");
     renderTrialPhotoList(container);
     renderTrialPhotoActionBar();
     return;
@@ -1596,7 +1569,7 @@ function renderLibraryList() {
 
   if (libraryState.section === "agronomy-photos") {
     container.classList.remove("library-grid-empty", "grid-small", "grid-medium", "grid-large");
-    container.classList.add("library-files-grid", `grid-${libraryState.filesGridSize}`);
+    container.classList.add("library-files-grid", "grid-small");
     renderAgronomyPhotoList(container);
     return;
   }
@@ -1675,7 +1648,8 @@ function renderLibraryList() {
         ? (libraryState._openLibraryFolderId ? "This folder is empty." : "No files yet. Upload your first document to the library.")
         : "No files match your search or filter.";
 
-    container.classList.add("library-grid-empty", "library-files-grid", `grid-${libraryState.filesGridSize}`);
+    const gridSize = libraryState._openLibraryFolderId ? "small" : "large";
+    container.classList.add("library-grid-empty", "library-files-grid", `grid-${gridSize}`);
     let html = `
             <div class="empty-state">
                 <span class="material-symbols-rounded">folder_open</span>
@@ -1688,8 +1662,9 @@ function renderLibraryList() {
   }
 
   // Reset grid to normal when showing items
+  const gridSize = libraryState._openLibraryFolderId ? "small" : "large";
   container.classList.remove("library-grid-empty", "grid-small", "grid-medium", "grid-large");
-  container.classList.add("library-files-grid", `grid-${libraryState.filesGridSize}`);
+  container.classList.add("library-files-grid", `grid-${gridSize}`);
 
   let html = "";
 
@@ -1942,8 +1917,10 @@ async function openLibraryDetail(fileId) {
   const renameBtn = document.getElementById("libraryRenameBtn");
   const deleteBtn = document.getElementById("libraryDeleteBtn");
   const downloadBtn = document.getElementById("libraryDownloadBtn");
+  const infoBtn = document.getElementById("libraryInfoBtn");
   if (renameBtn) renameBtn.classList.remove("hidden");
   if (deleteBtn) deleteBtn.classList.remove("hidden");
+  if (infoBtn) infoBtn.classList.add("hidden");
   if (downloadBtn) {
     downloadBtn.classList.remove("hidden");
     downloadBtn.onclick = () => downloadLibraryItem();
@@ -1978,6 +1955,7 @@ async function openTrialPhotoDetail(photoId) {
   if (!item) return;
 
   libraryState.selectedId = photoId;
+  libraryState._currentPhotoItem = item;
   setLibraryDetailVisible(true);
   updateLibraryPreviewNavButtons();
 
@@ -1987,19 +1965,25 @@ async function openTrialPhotoDetail(photoId) {
   const renameBtn = document.getElementById("libraryRenameBtn");
   const deleteBtn = document.getElementById("libraryDeleteBtn");
   const downloadBtn = document.getElementById("libraryDownloadBtn");
+  const infoBtn = document.getElementById("libraryInfoBtn");
 
   if (title) title.textContent = `${item.trialName || item.trialId} · Photo`;
-  if (meta) {
-    const parts = [
-      `Storage: ${item.storageType === "binary" ? "Binary" : "Inline JSON"}`,
-      item.sourceFileName ? `Source: ${item.sourceFileName}` : null,
-      item.areaIndex != null ? `Area ${Number(item.areaIndex) + 1}` : null,
-    ].filter(Boolean);
-    meta.textContent = parts.join(" · ");
+  if (meta) meta.textContent = item.rawFileName || item.name || "";
+
+  if (deleteBtn) deleteBtn.classList.add("hidden");
+
+  // Show rename button for binary photos
+  if (renameBtn) {
+    renameBtn.classList.toggle("hidden", item.storageType !== "binary");
+    renameBtn.onclick = () => renameTrialPhotoItem(item.id);
   }
 
-  if (renameBtn) renameBtn.classList.add("hidden");
-  if (deleteBtn) deleteBtn.classList.add("hidden");
+  // Show info button
+  if (infoBtn) {
+    infoBtn.classList.remove("hidden");
+    infoBtn.onclick = () => showPhotoDetailInfo(item);
+  }
+
   if (downloadBtn) {
     downloadBtn.classList.toggle("hidden", item.storageType !== "binary");
     downloadBtn.onclick = () => downloadTrialPhotoItem(item.id);
@@ -2026,7 +2010,7 @@ async function openTrialPhotoDetail(photoId) {
     preview.innerHTML = `
       <div class="trial-photo-detail-wrap">
         <div class="trial-photo-preview-panel">
-          <img src="${photoUrl}" alt="Trial Photo">
+          <img src="${photoUrl}" alt="Trial Photo" id="_trialPhotoImg">
         </div>
         ${actionHtml ? `<div class="trial-photo-info-actions">${actionHtml}</div>` : ""}
       </div>
@@ -2035,6 +2019,89 @@ async function openTrialPhotoDetail(photoId) {
     console.error("Failed to open trial photo detail:", error);
     preview.innerHTML = "<p>Unable to load trial photo detail.</p>";
   }
+}
+
+async function renameTrialPhotoItem(photoId) {
+  const item = (libraryState.trialPhotos || []).find((p) => p.id === photoId)
+    || (libraryState.agronomyPhotos || []).find((p) => p.id === photoId);
+  if (!item || item.storageType !== "binary" || !item.driveFileId) return;
+
+  const currentName = item.rawFileName || item.name || "";
+  const ext = currentName.includes(".") ? currentName.substring(currentName.lastIndexOf(".")) : "";
+  const baseName = currentName.includes(".") ? currentName.substring(0, currentName.lastIndexOf(".")) : currentName;
+
+  const newBase = prompt("Rename photo file:", baseName);
+  if (!newBase || newBase.trim() === baseName) return;
+
+  const newName = newBase.trim() + ext;
+
+  try {
+    await gapi.client.drive.files.update({
+      fileId: item.driveFileId,
+      resource: { name: newName },
+    });
+
+    item.rawFileName = newName;
+    item.name = item.section === "agronomy-photos"
+      ? _deriveAgronomyPhotoDisplayName(newName, item.trialName)
+      : _derivePhotoDisplayName(newName, item.trialName);
+
+    renderLibraryList();
+    openTrialPhotoDetail(photoId);
+    showToast("Photo renamed", "success");
+  } catch (err) {
+    console.error("Failed to rename photo:", err);
+    showToast("Failed to rename photo", "error");
+  }
+}
+
+function showPhotoDetailInfo(item) {
+  if (!item) return;
+
+  const ext = (item.rawFileName || "").includes(".")
+    ? (item.rawFileName || "").substring((item.rawFileName || "").lastIndexOf(".") + 1).toUpperCase()
+    : "-";
+  const sizeLabel = item.size ? formatFileSize(Number(item.size)) : "-";
+  const dateLabel = item.modifiedTime ? new Date(item.modifiedTime).toLocaleString() : "-";
+  const storageLabel = item.storageType === "binary" ? "Binary (Drive)" : "Inline JSON";
+
+  // Try to get dimensions from the loaded image
+  let dimLabel = "-";
+  const img = document.getElementById("_trialPhotoImg");
+  if (img && img.naturalWidth && img.naturalHeight) {
+    dimLabel = `${img.naturalWidth} × ${img.naturalHeight} px`;
+  }
+
+  const modal = document.createElement("div");
+  modal.className = "confirm-modal active";
+  modal.innerHTML = `
+    <div class="confirm-modal-content" style="max-width:400px;">
+      <div class="confirm-modal-header" style="background:var(--primary-soft);">
+        <span class="material-symbols-rounded" style="color:var(--primary);">info</span>
+        <h3>Photo Detail</h3>
+      </div>
+      <div class="confirm-modal-body" style="padding:1rem 1.5rem;">
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+          <tr><td style="padding:0.4rem 0;color:var(--text-tertiary);width:100px;">Filename</td><td style="padding:0.4rem 0;word-break:break-all;">${escapeHtml(item.rawFileName || item.name || "-")}</td></tr>
+          <tr><td style="padding:0.4rem 0;color:var(--text-tertiary);">Trial</td><td style="padding:0.4rem 0;">${escapeHtml(item.trialName || item.trialId || "-")}</td></tr>
+          <tr><td style="padding:0.4rem 0;color:var(--text-tertiary);">Storage</td><td style="padding:0.4rem 0;">${storageLabel}</td></tr>
+          <tr><td style="padding:0.4rem 0;color:var(--text-tertiary);">Type</td><td style="padding:0.4rem 0;">${escapeHtml(item.mimeType || "-")}</td></tr>
+          <tr><td style="padding:0.4rem 0;color:var(--text-tertiary);">Extension</td><td style="padding:0.4rem 0;">${ext}</td></tr>
+          <tr><td style="padding:0.4rem 0;color:var(--text-tertiary);">Size</td><td style="padding:0.4rem 0;">${sizeLabel}</td></tr>
+          <tr><td style="padding:0.4rem 0;color:var(--text-tertiary);">Dimensions</td><td style="padding:0.4rem 0;">${dimLabel}</td></tr>
+          <tr><td style="padding:0.4rem 0;color:var(--text-tertiary);">Modified</td><td style="padding:0.4rem 0;">${dateLabel}</td></tr>
+        </table>
+      </div>
+      <div class="confirm-modal-footer">
+        <button class="btn btn-secondary _photoInfoClose">Close</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+
+  const close = () => modal.remove();
+  modal.querySelector("._photoInfoClose").addEventListener("click", close);
+  modal.addEventListener("click", (e) => { if (e.target === modal) close(); });
 }
 
 async function resolveInlinePhotoDataUrl(item) {

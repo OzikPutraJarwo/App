@@ -1294,7 +1294,9 @@ function switchCategory(category) {
     inventoryState.parametersSortInitialized = true;
   }
 
-  if (typeof syncInventoryNavState === "function") {
+  // Only sync nav state if Inventory page is currently active
+  const inventoryContent = document.getElementById("inventoryContent");
+  if (inventoryContent?.classList.contains("active") && typeof syncInventoryNavState === "function") {
     syncInventoryNavState(key);
   }
 

@@ -5735,11 +5735,36 @@ async function loadExternalPhotos(containerSelector) {
 
   const BATCH_SIZE = 100;
 
+  function clearPhotoLoadingState(img) {
+    const preview = img.closest(".run-photo-preview");
+    if (!preview) return;
+    preview.classList.remove("photo-loading");
+    const placeholder = preview.querySelector(".photo-placeholder-icon");
+    if (placeholder) placeholder.remove();
+  }
+
+  function bindPhotoStateHandlers(img) {
+    if (img.dataset.photoStateBound === "1") {
+      if (img.complete && img.naturalWidth > 0) clearPhotoLoadingState(img);
+      return;
+    }
+
+    img.dataset.photoStateBound = "1";
+    img.addEventListener("load", () => clearPhotoLoadingState(img));
+    img.addEventListener("error", () => clearPhotoLoadingState(img));
+
+    // Handle cached images that may already be complete before listeners run.
+    if (img.complete && img.naturalWidth > 0) clearPhotoLoadingState(img);
+  }
+
   async function fetchPhoto(img) {
+    bindPhotoStateHandlers(img);
+
     const fileId = img.dataset.photoFileid;
     if (!fileId) return;
     if (_photoBlobCache[fileId]) {
       img.src = _photoBlobCache[fileId];
+      if (img.complete && img.naturalWidth > 0) clearPhotoLoadingState(img);
       return;
     }
     try {
@@ -5754,13 +5779,18 @@ async function loadExternalPhotos(containerSelector) {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
-      if (!resp.ok) return;
+      if (!resp.ok) {
+        clearPhotoLoadingState(img);
+        return;
+      }
       const blob = await resp.blob();
       const url = URL.createObjectURL(blob);
       _photoBlobCache[fileId] = url;
       img.src = url;
+      if (img.complete && img.naturalWidth > 0) clearPhotoLoadingState(img);
     } catch (e) {
       console.warn("Failed to load external photo:", e);
+      clearPhotoLoadingState(img);
     }
   }
 
@@ -7419,6 +7449,7 @@ let runTrialState = {
   currentRepIndex: null,
   responses: {}, // { areaIndex: { paramId: { lineId_repIndex: { value, photos } } } }
   photoFiles: [], // Temporary photo storage
+  runMode: "normal", // "normal" | "answer-only" | "photos-only"
 };
 
 // ===========================
@@ -7431,6 +7462,7 @@ let agronomyMonitoringState = {
   currentAreaIndex: null,
   currentItemId: null,
   responses: {}, // { areaIndex: { agronomyItemId: { applicationDate, photos, timestamp } } }
+  runMode: "normal", // "normal" | "answer-only" | "photos-only"
 };
 
 let agronomyAutoSaveInProgress = false;
@@ -7569,7 +7601,7 @@ function getDapExpectedDate(trial, areaIndex, dapMin) {
 }
 
 // Start Agronomy Monitoring
-async function startAgronomyMonitoring(trialId) {
+async function startAgronomyMonitoring(trialId, runMode) {
   const trial = trialState.trials.find(t => t.id === trialId);
   if (!trial) return;
 
@@ -7579,29 +7611,15 @@ async function startAgronomyMonitoring(trialId) {
   }
 
   // Show area selection popup
-  showAreaSelectionPopup(trialId, "agronomy");
+  showAreaSelectionPopup(trialId, "agronomy", { runMode: runMode || "normal" });
 }
 
-async function _startAgronomyMonitoringWithAreas(trialId, selectedAreas) {
+async function _startAgronomyMonitoringWithAreas(trialId, selectedAreas, runMode) {
   const trial = trialState.trials.find(t => t.id === trialId);
   if (!trial) return;
 
   // Store selected areas on the trial for nav tree filtering
   trial._selectedRunAreas = selectedAreas;
-
-  // Check for remote updates before running
-  if (typeof checkSingleTrialUpdates === "function") {
-    try {
-      showToast("Checking for updates...", "info", 2000);
-      const hasUpdates = await checkSingleTrialUpdates(trialId);
-      if (hasUpdates) {
-        const proceed = await _promptTrialUpdateBeforeRun(trialId, "agronomy");
-        if (!proceed) return;
-      }
-    } catch (e) {
-      console.warn("Update check failed, continuing:", e);
-    }
-  }
 
   agronomyMonitoringState.currentTrialId = trialId;
   agronomyMonitoringState.currentTrial = trial;
@@ -7609,6 +7627,7 @@ async function _startAgronomyMonitoringWithAreas(trialId, selectedAreas) {
   agronomyMonitoringState.responses = trial.agronomyResponses;
   agronomyMonitoringState.currentAreaIndex = null;
   agronomyMonitoringState.currentItemId = null;
+  agronomyMonitoringState.runMode = runMode || "normal";
 
   // Hide trial list, show agronomy interface
   const mgmtPanel = document.getElementById("trialManagementPanel");
@@ -7663,6 +7682,7 @@ function exitAgronomyMonitoring() {
   agronomyMonitoringState.responses = {};
   agronomyMonitoringState.currentAreaIndex = null;
   agronomyMonitoringState.currentItemId = null;
+  agronomyMonitoringState.runMode = "normal";
 
   const mgmtPanel = document.getElementById("trialManagementPanel");
   if (mgmtPanel) mgmtPanel.classList.remove("hidden");
@@ -7919,6 +7939,22 @@ function renderAgronomyQuestionCard() {
     </div>
   `;
 
+  // Apply run mode restrictions
+  let dateInputHTML = `
+      <div class="run-input-group">
+        <label class="run-input-label">
+          Actual Application Date
+        </label>
+        <input type="date" class="run-input-field" id="agronomyDateInput" value="${existingDate}">
+      </div>
+  `;
+  let agrPhotoHTML = photoHTML;
+  if (agronomyMonitoringState.runMode === "answer-only") {
+    agrPhotoHTML = "";
+  } else if (agronomyMonitoringState.runMode === "photos-only") {
+    dateInputHTML = "";
+  }
+
   container.innerHTML = `
     <div class="run-question-header">
       <div class="run-question-breadcrumb">
@@ -7947,13 +7983,8 @@ function renderAgronomyQuestionCard() {
     ` : ''}
 
     <div class="run-question-body">
-      <div class="run-input-group">
-        <label class="run-input-label">
-          Actual Application Date
-        </label>
-        <input type="date" class="run-input-field" id="agronomyDateInput" value="${existingDate}">
-      </div>
-      ${photoHTML}
+      ${dateInputHTML}
+      ${agrPhotoHTML}
     </div>
 
     <div class="run-question-footer">
@@ -8528,15 +8559,18 @@ function handleRunTrialKeyboard(e) {
 
 // ── Area Selection Popup for Run Observation / Agronomy ──
 
-function showAreaSelectionPopup(trialId, mode) {
+function showAreaSelectionPopup(trialId, mode, options = {}) {
   const trial = trialState.trials.find(t => t.id === trialId);
   if (!trial) return;
 
+  const runMode = options.runMode || "normal";
   const areas = trial.areas || [];
   if (areas.length === 0) { showToast("No areas defined in this trial", "warning"); return; }
 
   const allLoaded = trial._responsesLoaded === true;
-  const modeLabel = mode === "agronomy" ? "Agronomy Monitoring" : "Run Observation";
+  const baseLabel = mode === "agronomy" ? "Agronomy Monitoring" : "Run Observation";
+  const modeSuffix = runMode === "answer-only" ? " (Answer Only)" : runMode === "photos-only" ? " (Photos Only)" : "";
+  const modeLabel = baseLabel + modeSuffix;
   const loadType = mode === "agronomy" ? "agronomy" : "observation";
   const _areaSelMaps = [];
 
@@ -8560,10 +8594,8 @@ function showAreaSelectionPopup(trialId, mode) {
     return !!types.observation && !!types.agronomy;
   }
 
-  function renderContent() {
+  function renderContent(subtitle) {
     cleanupMaps();
-
-    const hasAnyLoaded = areas.some((_, idx) => areaTypeLoaded(idx));
 
     const cards = areas.map((area, idx) => {
       const loaded = areaTypeLoaded(idx);
@@ -8575,7 +8607,7 @@ function showAreaSelectionPopup(trialId, mode) {
           </div>
           <div class="area-sel-info">
             <label class="area-sel-label">
-              <input type="checkbox" class="_areaSelCheck" value="${idx}" ${loaded ? "checked" : ""} ${!loaded ? "disabled" : ""}>
+              <input type="checkbox" class="_areaSelCheck" value="${idx}" ${!loaded ? "disabled" : ""}>
               <span class="area-sel-name">${escapeHtml(area.name || `Area ${idx + 1}`)}</span>
             </label>
             ${loaded
@@ -8585,9 +8617,14 @@ function showAreaSelectionPopup(trialId, mode) {
                 </button>`
             }
           </div>
+          <div class="area-sel-progress" data-area-idx="${idx}" style="display:none;"></div>
         </div>
       `;
     }).join("");
+
+    const subtitleHtml = subtitle
+      ? `<div class="area-sel-subtitle" id="_areaSelSubtitle">${subtitle}</div>`
+      : "";
 
     overlay.innerHTML = `
       <div class="area-sel-popup">
@@ -8595,6 +8632,7 @@ function showAreaSelectionPopup(trialId, mode) {
           <h3><span class="material-symbols-rounded">${mode === "agronomy" ? "local_florist" : "visibility"}</span> ${modeLabel}</h3>
           <button class="area-sel-close" id="_areaSelCancel"><span class="material-symbols-rounded">close</span></button>
         </div>
+        ${subtitleHtml}
         <div class="area-sel-toolbar">
           <label class="area-sel-selall">
             <input type="checkbox" id="_areaSelAll"> <span>Select All</span>
@@ -8606,7 +8644,7 @@ function showAreaSelectionPopup(trialId, mode) {
         </div>
         <div class="area-sel-footer">
           <button class="btn btn-secondary" id="_areaSelCancelBtn">Cancel</button>
-          <button class="btn btn-primary" id="_areaSelRun" ${!hasAnyLoaded ? "disabled" : ""}>
+          <button class="btn btn-primary" id="_areaSelRun" disabled>
             <span class="material-symbols-rounded" style="font-size:16px;">${mode === "agronomy" ? "local_florist" : "visibility"}</span> Start ${modeLabel}
           </button>
         </div>
@@ -8647,6 +8685,13 @@ function showAreaSelectionPopup(trialId, mode) {
         setTimeout(() => { map.invalidateSize(); map.fitBounds(latlngs, { padding: [8, 8] }); }, 400);
       });
 
+      // Update start button based on checkbox state
+      function updateStartBtn() {
+        const runBtn = overlay.querySelector("#_areaSelRun");
+        const checkedCount = overlay.querySelectorAll("._areaSelCheck:checked").length;
+        if (runBtn) runBtn.disabled = checkedCount === 0;
+      }
+
       // Card click → toggle checkbox
       overlay.querySelectorAll(".area-sel-card").forEach(card => {
         card.addEventListener("click", (e) => {
@@ -8656,13 +8701,9 @@ function showAreaSelectionPopup(trialId, mode) {
             chk.checked = !chk.checked;
             card.classList.toggle("selected", chk.checked);
             updateSelectAll();
+            updateStartBtn();
           }
         });
-      });
-
-      // Initialize selected state on loaded cards
-      overlay.querySelectorAll("._areaSelCheck:checked").forEach(chk => {
-        chk.closest(".area-sel-card")?.classList.add("selected");
       });
 
       // Checkbox change → update card class
@@ -8670,6 +8711,7 @@ function showAreaSelectionPopup(trialId, mode) {
         chk.addEventListener("change", () => {
           chk.closest(".area-sel-card")?.classList.toggle("selected", chk.checked);
           updateSelectAll();
+          updateStartBtn();
         });
       });
 
@@ -8686,6 +8728,7 @@ function showAreaSelectionPopup(trialId, mode) {
             c.checked = selAllChk.checked;
             c.closest(".area-sel-card")?.classList.toggle("selected", c.checked);
           });
+          updateStartBtn();
         });
       }
 
@@ -8716,15 +8759,89 @@ function showAreaSelectionPopup(trialId, mode) {
       overlay.querySelector("#_areaSelCancel")?.addEventListener("click", closePopup);
       overlay.querySelector("#_areaSelCancelBtn")?.addEventListener("click", closePopup);
 
-      // Run
-      overlay.querySelector("#_areaSelRun")?.addEventListener("click", () => {
+      // Run — with update check flow
+      overlay.querySelector("#_areaSelRun")?.addEventListener("click", async () => {
         const checked = [...overlay.querySelectorAll("._areaSelCheck:checked")].map(c => Number(c.value));
         if (checked.length === 0) { showToast("Select at least one area to run", "warning"); return; }
+
+        const runBtn = overlay.querySelector("#_areaSelRun");
+        if (runBtn) { runBtn.disabled = true; runBtn.innerHTML = `<span class="material-symbols-rounded spin-slow" style="font-size:16px;">progress_activity</span> Checking…`; }
+
+        // Show loading state below each selected area
+        checked.forEach(idx => {
+          const prog = overlay.querySelector(`.area-sel-progress[data-area-idx="${idx}"]`);
+          if (prog) { prog.style.display = "block"; prog.innerHTML = `<span class="material-symbols-rounded spin-slow" style="font-size:13px;">progress_activity</span> Checking for updates…`; }
+        });
+
+        // Check for updates
+        let hasUpdates = false;
+        try {
+          if (typeof checkSingleTrialUpdates === "function") {
+            hasUpdates = await checkSingleTrialUpdates(trialId);
+          }
+        } catch (e) {
+          console.warn("Update check failed, continuing:", e);
+        }
+
+        // Clear checking state
+        checked.forEach(idx => {
+          const prog = overlay.querySelector(`.area-sel-progress[data-area-idx="${idx}"]`);
+          if (prog) { prog.style.display = "none"; prog.innerHTML = ""; }
+        });
+
+        if (hasUpdates) {
+          // Show update confirmation popup
+          const doUpdate = await _showUpdateConfirmInPopup(overlay, trial);
+          if (doUpdate) {
+            // Reload selected areas with progress
+            const subtitleEl = overlay.querySelector("#_areaSelSubtitle") || (() => {
+              const el = document.createElement("div");
+              el.className = "area-sel-subtitle";
+              el.id = "_areaSelSubtitle";
+              const toolbar = overlay.querySelector(".area-sel-toolbar");
+              if (toolbar) toolbar.parentNode.insertBefore(el, toolbar);
+              return el;
+            })();
+
+            // Disable all interaction during reload
+            overlay.querySelectorAll("._areaSelCheck, #_areaSelAll, ._areaSelLoadBtn").forEach(el => { el.disabled = true; });
+            if (runBtn) { runBtn.disabled = true; runBtn.innerHTML = `<span class="material-symbols-rounded spin-slow" style="font-size:16px;">progress_activity</span> Loading…`; }
+
+            let completedAreas = 0;
+            const totalAreas = checked.length;
+
+            await Promise.all(checked.map(async (areaIdx) => {
+              const prog = overlay.querySelector(`.area-sel-progress[data-area-idx="${areaIdx}"]`);
+              if (prog) { prog.style.display = "block"; prog.innerHTML = `<span style="font-size:0.72rem;color:var(--text-tertiary);">0%</span>`; }
+              try {
+                await loadTrialAreaFromDrive(trialId, areaIdx, (info) => {
+                  if (prog) {
+                    prog.innerHTML = `<span style="font-size:0.72rem;color:var(--primary);">${info.percentage || 0}% — ${info.step || ""}</span>`;
+                  }
+                  // Update subtitle with overall progress
+                  const overallPct = Math.round(((completedAreas * 100) + (info.percentage || 0)) / totalAreas);
+                  if (subtitleEl) subtitleEl.innerHTML = `<span class="material-symbols-rounded spin-slow" style="font-size:14px;">sync</span> Loading data… ${overallPct}%`;
+                }, { type: loadType, force: true });
+              } catch (err) {
+                if (prog) prog.innerHTML = `<span style="font-size:0.72rem;color:var(--danger);">Failed</span>`;
+                console.error(`Failed to reload area ${areaIdx}:`, err);
+              }
+              completedAreas++;
+              const prog2 = overlay.querySelector(`.area-sel-progress[data-area-idx="${areaIdx}"]`);
+              if (prog2) prog2.innerHTML = `<span style="font-size:0.72rem;color:var(--success);">100% ✓</span>`;
+            }));
+
+            if (subtitleEl) subtitleEl.innerHTML = `<span class="material-symbols-rounded" style="font-size:14px;color:var(--success);">check_circle</span> Data updated`;
+            await new Promise(r => setTimeout(r, 600));
+          }
+        }
+
+        // All done — start the run
         cleanupMaps();
         overlay.remove();
         unlockBodyScroll();
-        if (mode === "agronomy") _startAgronomyMonitoringWithAreas(trialId, checked);
-        else _startRunTrialWithAreas(trialId, checked);
+        if (mode === "agronomy") _startAgronomyMonitoringWithAreas(trialId, checked, runMode);
+        else _startRunTrialWithAreas(trialId, checked, runMode);
       });
     });
   }
@@ -8739,8 +8856,43 @@ function showAreaSelectionPopup(trialId, mode) {
   lockBodyScroll();
 }
 
+/**
+ * Show an HTML confirmation modal asking the user if they want to load the latest data.
+ * Returns a Promise<boolean>.
+ */
+function _showUpdateConfirmInPopup(parentOverlay, trial) {
+  return new Promise((resolve) => {
+    const trialName = trial ? escapeHtml(trial.name) : "this trial";
+    const modal = document.createElement("div");
+    modal.className = "confirm-modal active";
+    modal.style.zIndex = "10001";
+    modal.innerHTML = `
+      <div class="confirm-modal-content">
+        <div class="confirm-modal-header">
+          <span class="material-symbols-rounded">sync</span>
+          <h3>Update Available</h3>
+        </div>
+        <div class="confirm-modal-body">
+          <p>Newer data is available on Drive for <b>${trialName}</b>. Would you like to load the latest data before starting?</p>
+        </div>
+        <div class="confirm-modal-footer">
+          <button class="btn btn-secondary" id="_updateConfirmSkip">Skip</button>
+          <button class="btn btn-primary" id="_updateConfirmLoad"><span class="material-symbols-rounded" style="font-size:16px;">sync</span> Load Latest</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    const cleanup = () => modal.remove();
+
+    modal.querySelector("#_updateConfirmSkip").addEventListener("click", () => { cleanup(); resolve(false); });
+    modal.querySelector("#_updateConfirmLoad").addEventListener("click", () => { cleanup(); resolve(true); });
+    modal.addEventListener("click", (e) => { if (e.target === modal) { cleanup(); resolve(false); } });
+  });
+}
+
 // Start running a trial
-async function startRunTrial(trialId) {
+async function startRunTrial(trialId, runMode) {
   const trial = trialState.trials.find((t) => t.id === trialId);
   if (!trial) return;
 
@@ -8755,29 +8907,15 @@ async function startRunTrial(trialId) {
   }
 
   // Show area selection popup
-  showAreaSelectionPopup(trialId, "observation");
+  showAreaSelectionPopup(trialId, "observation", { runMode: runMode || "normal" });
 }
 
-async function _startRunTrialWithAreas(trialId, selectedAreas) {
+async function _startRunTrialWithAreas(trialId, selectedAreas, runMode) {
   const trial = trialState.trials.find((t) => t.id === trialId);
   if (!trial) return;
 
   // Store selected areas on the trial for nav tree filtering
   trial._selectedRunAreas = selectedAreas;
-
-  // Check for remote updates before running
-  if (typeof checkSingleTrialUpdates === "function") {
-    try {
-      showToast("Checking for updates...", "info", 2000);
-      const hasUpdates = await checkSingleTrialUpdates(trialId);
-      if (hasUpdates) {
-        const proceed = await _promptTrialUpdateBeforeRun(trialId, "observation");
-        if (!proceed) return;
-      }
-    } catch (e) {
-      console.warn("Update check failed, continuing:", e);
-    }
-  }
 
   runTrialState.currentTrialId = trialId;
   runTrialState.currentTrial = trial;
@@ -8786,6 +8924,7 @@ async function _startRunTrialWithAreas(trialId, selectedAreas) {
   runTrialState.currentParamId = null;
   runTrialState.currentLineId = null;
   runTrialState.currentRepIndex = null;
+  runTrialState.runMode = runMode || "normal";
 
   // Hide trial list panels, show run interface
   const mgmtPanel = document.getElementById("trialManagementPanel");
@@ -8838,6 +8977,7 @@ function exitRunTrial() {
   runTrialState.currentParamId = null;
   runTrialState.currentLineId = null;
   runTrialState.currentRepIndex = null;
+  runTrialState.runMode = "normal";
 
   // Show trial list panels, hide run interface
   const mgmtPanel = document.getElementById("trialManagementPanel");
@@ -9470,7 +9610,7 @@ function renderQuestionCard() {
   }
 
   // Remark section (per sample)
-  const remarkHTML = `
+  let remarkHTML = `
     <div class="run-remark-group">
       <label class="run-remark-label">
         <span class="material-symbols-rounded">note</span> Remark
@@ -9514,6 +9654,37 @@ function renderQuestionCard() {
         </div>
       </div>
     `;
+  }
+
+  // Apply run mode restrictions
+  if (runTrialState.runMode === "answer-only") {
+    photoHTML = "";
+  } else if (runTrialState.runMode === "photos-only") {
+    inputHTML = "";
+    remarkHTML = "";
+    // Always show photo section in photos-only mode even if requirePhoto is false
+    if (!param.requirePhoto) {
+      const _pm = param.photoMode || "per-sample";
+      const _pk = _pm === "per-line" ? `${lineId}_${repIndex}` : `${lineId}_${repIndex}_${sampleIndex}`;
+      const _pr = runTrialState.responses[areaIndex]?.[paramId]?.[_pk] || {};
+      const _pl = _pr.photos || [];
+      const _ml = _pm === "per-line" ? "(1 photo for all samples)" : "(per sample)";
+      photoHTML = `
+        <div class="run-photo-section">
+          <div class="run-photo-label">
+            <span class="material-symbols-rounded">photo_camera</span>
+            Photo Upload ${numberOfSamples > 1 ? `<span class="run-photo-mode-hint">${_ml}</span>` : ''}
+          </div>
+          <div class="run-photo-upload" id="runPhotoContainer">
+            ${_pl.map((photo, idx) => renderPhotoThumb(photo, idx, "removePhoto", "openPhotoPreview")).join("")}
+            <label class="run-photo-add" onclick="showPhotoUploadChoice(event)">
+              <span class="material-symbols-rounded">add_a_photo</span>
+              <span>Add</span>
+            </label>
+          </div>
+        </div>
+      `;
+    }
   }
 
   container.innerHTML = `
@@ -10855,13 +11026,19 @@ function showTrialActionPopup(event, trialId) {
   
   const overlay = document.createElement('div');
   overlay.className = 'trial-action-popup-overlay';
-  overlay.innerHTML = `
-    <div class="trial-action-popup">
+
+  function renderNormalMode() {
+    overlay.querySelector('.trial-action-popup').innerHTML = `
       <div class="trial-action-popup-header">
         <h4>${escapeHtml(trial.name)}</h4>
-        <button class="btn-icon-close" onclick="closeTrialActionPopup()">
-          <span class="material-symbols-rounded">close</span>
-        </button>
+        <div class="trial-action-popup-header-actions">
+          <button class="btn-icon-close" id="_trialAdvancedToggle" title="Advanced options">
+            <span class="material-symbols-rounded">more_horiz</span>
+          </button>
+          <button class="btn-icon-close" onclick="closeTrialActionPopup()">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
       </div>
       <div class="trial-action-popup-options">
         <button class="trial-action-option" onclick="closeTrialActionPopup(); showTrialDetail('${trialId}');">
@@ -10897,8 +11074,80 @@ function showTrialActionPopup(event, trialId) {
           </div>
         </button>
       </div>
-    </div>
-  `;
+    `;
+    overlay.querySelector('#_trialAdvancedToggle')?.addEventListener('click', renderAdvancedMode);
+  }
+
+  function renderAdvancedMode() {
+    overlay.querySelector('.trial-action-popup').innerHTML = `
+      <div class="trial-action-popup-header">
+        <h4>${escapeHtml(trial.name)}</h4>
+        <div class="trial-action-popup-header-actions">
+          <button class="btn-icon-close" id="_trialAdvancedBack" title="Back to normal">
+            <span class="material-symbols-rounded">arrow_back</span>
+          </button>
+          <button class="btn-icon-close" onclick="closeTrialActionPopup()">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+        </div>
+      </div>
+      <div class="trial-action-popup-options trial-action-advanced">
+        <button class="trial-action-option" onclick="closeTrialActionPopup(); showTrialDetail('${trialId}');">
+          <span class="material-symbols-rounded">info</span>
+          <div class="trial-action-option-text">
+            <span class="trial-action-option-title">Detail</span>
+            <span class="trial-action-option-desc">View trial information and settings</span>
+          </div>
+        </button>
+        <button class="trial-action-option" onclick="closeTrialActionPopup(); showTrialReport('${trialId}');">
+          <span class="material-symbols-rounded">description</span>
+          <div class="trial-action-option-text">
+            <span class="trial-action-option-title">Report</span>
+            <span class="trial-action-option-desc">Preview and download trial report (Excel)</span>
+          </div>
+        </button>
+        <button class="trial-action-option ${!canRun || trial.archived ? 'disabled' : ''}" 
+          onclick="${canRun && !trial.archived ? `closeTrialActionPopup(); startRunTrial('${trialId}', 'answer-only');` : ''}" 
+          ${!canRun || trial.archived ? 'disabled' : ''}>
+          <span class="material-symbols-rounded">edit_note</span>
+          <div class="trial-action-option-text">
+            <span class="trial-action-option-title">Run Observation</span>
+            <span class="trial-action-option-desc">Answer Only — record data without photos</span>
+          </div>
+        </button>
+        <button class="trial-action-option ${!canRun || trial.archived ? 'disabled' : ''}" 
+          onclick="${canRun && !trial.archived ? `closeTrialActionPopup(); startRunTrial('${trialId}', 'photos-only');` : ''}" 
+          ${!canRun || trial.archived ? 'disabled' : ''}>
+          <span class="material-symbols-rounded">photo_camera</span>
+          <div class="trial-action-option-text">
+            <span class="trial-action-option-title">Run Observation</span>
+            <span class="trial-action-option-desc">Photos Only — upload photos without data entry</span>
+          </div>
+        </button>
+        <button class="trial-action-option ${!hasAgronomy ? 'disabled' : ''}" 
+                onclick="${hasAgronomy ? `closeTrialActionPopup(); startAgronomyMonitoring('${trialId}', 'answer-only');` : ''}"
+                ${!hasAgronomy ? 'disabled' : ''}>
+          <span class="material-symbols-rounded">edit_calendar</span>
+          <div class="trial-action-option-text">
+            <span class="trial-action-option-title">Agronomy Monitoring</span>
+            <span class="trial-action-option-desc">Answer Only — record dates without photos</span>
+          </div>
+        </button>
+        <button class="trial-action-option ${!hasAgronomy ? 'disabled' : ''}" 
+                onclick="${hasAgronomy ? `closeTrialActionPopup(); startAgronomyMonitoring('${trialId}', 'photos-only');` : ''}"
+                ${!hasAgronomy ? 'disabled' : ''}>
+          <span class="material-symbols-rounded">add_a_photo</span>
+          <div class="trial-action-option-text">
+            <span class="trial-action-option-title">Agronomy Monitoring</span>
+            <span class="trial-action-option-desc">Photos Only — upload photos without date entry</span>
+          </div>
+        </button>
+      </div>
+    `;
+    overlay.querySelector('#_trialAdvancedBack')?.addEventListener('click', renderNormalMode);
+  }
+
+  overlay.innerHTML = `<div class="trial-action-popup"></div>`;
   
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closeTrialActionPopup();
@@ -10906,6 +11155,7 @@ function showTrialActionPopup(event, trialId) {
   
   document.body.appendChild(overlay);
   lockBodyScroll();
+  renderNormalMode();
   requestAnimationFrame(() => overlay.classList.add('active'));
 }
 
