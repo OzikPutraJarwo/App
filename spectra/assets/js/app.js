@@ -70,8 +70,9 @@ if ("serviceWorker" in navigator) {
 // Loading & Caching Helpers
 const CACHE_VERSION = 1;
 const PERSISTENT_DB_NAME = "advanta_persistent_cache";
-const PERSISTENT_DB_VERSION = 1;
+const PERSISTENT_DB_VERSION = 2;
 const PERSISTENT_STORE_CACHE = "cache";
+const PERSISTENT_STORE_SYNC = "dirty_sync";
 
 let _persistentDbPromise = null;
 
@@ -88,6 +89,9 @@ function openPersistentCacheDb() {
       const db = req.result;
       if (!db.objectStoreNames.contains(PERSISTENT_STORE_CACHE)) {
         db.createObjectStore(PERSISTENT_STORE_CACHE, { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains(PERSISTENT_STORE_SYNC)) {
+        db.createObjectStore(PERSISTENT_STORE_SYNC, { keyPath: "fileKey" });
       }
     };
     req.onsuccess = () => resolve(req.result);
@@ -189,6 +193,72 @@ async function clearPersistentCache() {
     });
   } catch (error) {
     console.warn("Failed to clear persistent cache:", error);
+  }
+}
+
+// ── Dirty Sync Persistence (IndexedDB) ──────────────────────
+// Tracks pending sync tasks that must survive app restarts.
+// Each entry stores enough metadata to reconstruct the Drive upload task.
+
+async function addDirtySync(fileKey, taskMeta) {
+  try {
+    const db = await openPersistentCacheDb();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(PERSISTENT_STORE_SYNC, "readwrite");
+      tx.objectStore(PERSISTENT_STORE_SYNC).put({
+        fileKey,
+        taskMeta,
+        createdAt: new Date().toISOString(),
+      });
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (e) {
+    console.warn("addDirtySync failed:", e);
+  }
+}
+
+async function removeDirtySync(fileKey) {
+  if (!fileKey) return;
+  try {
+    const db = await openPersistentCacheDb();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(PERSISTENT_STORE_SYNC, "readwrite");
+      tx.objectStore(PERSISTENT_STORE_SYNC).delete(fileKey);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (e) {
+    console.warn("removeDirtySync failed:", e);
+  }
+}
+
+async function loadAllDirtySyncs() {
+  try {
+    const db = await openPersistentCacheDb();
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(PERSISTENT_STORE_SYNC, "readonly");
+      const req = tx.objectStore(PERSISTENT_STORE_SYNC).getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  } catch (e) {
+    console.warn("loadAllDirtySyncs failed:", e);
+    return [];
+  }
+}
+
+async function clearAllDirtySyncs() {
+  try {
+    const db = await openPersistentCacheDb();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(PERSISTENT_STORE_SYNC, "readwrite");
+      tx.objectStore(PERSISTENT_STORE_SYNC).clear();
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch (e) {
+    console.warn("clearAllDirtySyncs failed:", e);
   }
 }
 
@@ -576,6 +646,11 @@ function clearLocalCache() {
     clearPersistentCache().catch((error) => {
       console.warn("Failed clearing persistent cache:", error);
     });
+  }
+
+  // Also clear any pending dirty sync markers
+  if (typeof clearAllDirtySyncs === "function") {
+    clearAllDirtySyncs().catch(() => {});
   }
 }
 
@@ -1561,8 +1636,6 @@ const _trialOptState = {
   cache: {},
 };
 
-const _orphanPhotoPreviewCache = {};
-
 function _getTrialOptCache(trialId) {
   if (!_trialOptState.cache[trialId]) {
     _trialOptState.cache[trialId] = {
@@ -1632,13 +1705,6 @@ function renderTrialOptimizationCards() {
     `;
   }).join("");
 
-  // Hydrate orphan photo previews when cards are re-rendered from cache.
-  container.querySelectorAll('.optimization-card-body').forEach((body) => {
-    if (body.querySelector('img[data-orphan-photo-fileid]')) {
-      _hydrateOrphanPhotoPreviews(body).catch(() => {});
-    }
-  });
-
   // Auto-scan cards that are still idle
   for (const cd of cards) {
     if (c[cd.key].status === "idle") {
@@ -1667,10 +1733,6 @@ function _updateTrialOptCard(key, html, btnDisabled) {
     const btn = card.querySelector(".trialopt-action-btn");
     if (body) body.innerHTML = html;
     if (btn) btn.disabled = btnDisabled;
-
-    if (body && body.querySelector('img[data-orphan-photo-fileid]')) {
-      _hydrateOrphanPhotoPreviews(body).catch(() => {});
-    }
   }
 }
 
@@ -1915,72 +1977,13 @@ function _renderOrphanList(orphans) {
   let html = `<div class="orphan-photo-list" style="margin-top:8px;max-height:200px;overflow-y:auto;font-size:0.82rem;color:var(--text-secondary);">`;
   html += shown.map(p => {
     const sizeKB = p.size ? `(${(Number(p.size) / 1024).toFixed(1)} KB)` : "";
-    return `<div style="display:flex;align-items:center;gap:8px;padding:4px 0;">
-      <div style="width:38px;height:38px;border-radius:6px;overflow:hidden;flex:0 0 38px;background:var(--bg-tertiary);border:1px solid var(--border-color);display:flex;align-items:center;justify-content:center;">
-        <img data-orphan-photo-fileid="${escapeHtml(p.id)}" alt="${escapeHtml(p.name)}" style="width:100%;height:100%;object-fit:cover;display:block;" loading="lazy">
-      </div>
-      <div style="min-width:0;display:flex;flex-direction:column;gap:1px;">
-        <span style="word-break:break-all;color:var(--text-primary);">${escapeHtml(p.name)}</span>
-        <span style="font-size:0.74rem;color:var(--text-secondary);">${sizeKB || "Unknown size"}</span>
-      </div>
-    </div>`;
+    return `<div style="display:flex;align-items:center;gap:6px;padding:2px 0;"><span class="material-symbols-rounded" style="font-size:16px;">image</span><span style="word-break:break-all;">${escapeHtml(p.name)} ${sizeKB}</span></div>`;
   }).join("");
   if (orphans.length > maxShow) {
     html += `<div style="padding:2px 0;font-style:italic;">…and ${orphans.length - maxShow} more</div>`;
   }
   html += `</div>`;
   return html;
-}
-
-async function _hydrateOrphanPhotoPreviews(container) {
-  if (!container) return;
-
-  const imgs = container.querySelectorAll('img[data-orphan-photo-fileid]');
-  if (!imgs.length) return;
-
-  let token = typeof getAccessToken === "function" ? getAccessToken() : "";
-  if (!token) return;
-
-  const BATCH_SIZE = 20;
-  const imgList = Array.from(imgs);
-
-  async function hydrateImg(img) {
-    const fileId = img.dataset.orphanPhotoFileid;
-    if (!fileId) return;
-
-    if (_orphanPhotoPreviewCache[fileId]) {
-      img.src = _orphanPhotoPreviewCache[fileId];
-      return;
-    }
-
-    try {
-      let resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if ((resp.status === 401 || resp.status === 403) && typeof getAccessToken === "function") {
-        token = getAccessToken();
-        if (!token) return;
-        resp = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      }
-
-      if (!resp.ok) return;
-
-      const blob = await resp.blob();
-      const url = URL.createObjectURL(blob);
-      _orphanPhotoPreviewCache[fileId] = url;
-      img.src = url;
-    } catch (_) {
-      // Keep graceful fallback: text-only row still identifies orphan file.
-    }
-  }
-
-  for (let i = 0; i < imgList.length; i += BATCH_SIZE) {
-    const batch = imgList.slice(i, i + BATCH_SIZE);
-    await Promise.all(batch.map(hydrateImg));
-  }
 }
 
 async function _listDrivePhotos(folderId) {
@@ -2474,8 +2477,18 @@ function showLoading(show) {
   if (show) {
     spinner.classList.add("active");
     setLoadingProgress(0, "Loading...");
+    // Show the emergency logout button after a short delay
+    const logoutBtn = document.getElementById("loadingLogoutBtn");
+    if (logoutBtn) {
+      logoutBtn.style.display = "none";
+      setTimeout(() => {
+        if (spinner.classList.contains("active")) logoutBtn.style.display = "";
+      }, 4000);
+    }
   } else {
     spinner.classList.remove("active");
+    const logoutBtn = document.getElementById("loadingLogoutBtn");
+    if (logoutBtn) logoutBtn.style.display = "none";
   }
 }
 
@@ -2566,6 +2579,10 @@ const syncState = {
 };
 
 function enqueueSync(task) {
+  // Create a completion promise so callers can await the actual Drive finish
+  let _resolve, _reject;
+  const completionPromise = new Promise((res, rej) => { _resolve = res; _reject = rej; });
+
   // Deduplication: if a pending task with the same fileKey exists, update it in-place
   // so we don't upload the same file multiple times when navigating quickly
   if (task.fileKey) {
@@ -2573,11 +2590,17 @@ function enqueueSync(task) {
       (item) => item.status === "pending" && item.fileKey === task.fileKey
     );
     if (existing) {
+      // Chain: when the existing entry finishes, resolve both the old AND new caller
+      const prevResolve = existing._resolve;
+      const prevReject = existing._reject;
+      existing._resolve = (v) => { prevResolve?.(v); _resolve(v); };
+      existing._reject = (e) => { prevReject?.(e); _reject(e); };
       existing.run = task.run;
       existing.label = task.label;
       existing.createdAt = new Date().toISOString();
+      if (task.taskMeta) existing.taskMeta = task.taskMeta;
       updateSyncUI();
-      return;
+      return completionPromise;
     }
   }
 
@@ -2586,19 +2609,32 @@ function enqueueSync(task) {
     id,
     label: task.label,
     fileKey: task.fileKey || null,
+    taskMeta: task.taskMeta || null,
     run: task.run,
     status: "pending",
+    retries: 0,
     createdAt: new Date().toISOString(),
     startedAt: null,
     finishedAt: null,
     durationMs: null,
     error: null,
+    _resolve,
+    _reject,
   };
 
   syncState.queue.push(entry);
+
+  // Persist dirty marker to IndexedDB so we can resume after app restart
+  if (entry.fileKey && entry.taskMeta) {
+    addDirtySync(entry.fileKey, entry.taskMeta).catch(() => {});
+  }
+
   updateSyncUI();
   processSyncQueue();
+  return completionPromise;
 }
+
+const SYNC_MAX_RETRIES = 2;
 
 async function processSyncQueue() {
   if (syncState.processing) return;
@@ -2607,6 +2643,12 @@ async function processSyncQueue() {
   while (syncState.queue.some((item) => item.status === "pending")) {
     const next = syncState.queue.find((item) => item.status === "pending");
     if (!next) break;
+
+    // Skip if we are offline — leave as pending for later
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      showToast("You are offline. Data is saved locally and will sync when connection returns.", "warning", 5000);
+      break;
+    }
 
     next.status = "syncing";
     next.startedAt = Date.now();
@@ -2623,30 +2665,58 @@ async function processSyncQueue() {
           : null;
       next.error = null;
       syncState.lastError = null;
+
+      // Remove dirty marker from IndexedDB — this data is safely on Drive
+      if (next.fileKey) removeDirtySync(next.fileKey).catch(() => {});
+
+      // Resolve callers waiting on this task
+      next._resolve?.();
     } catch (error) {
+      const errMsg = error?.message || "Unknown error";
+      const isAuthError =
+        errMsg.includes("401") || errMsg.includes("unauthorized") ||
+        errMsg.includes("Invalid Credentials") || errMsg.includes("token");
+
+      // Retry non-auth errors up to SYNC_MAX_RETRIES times
+      if (!isAuthError && next.retries < SYNC_MAX_RETRIES) {
+        next.retries++;
+        next.status = "pending"; // put back in queue
+        next.error = `Retry ${next.retries}/${SYNC_MAX_RETRIES} — ${errMsg}`;
+        updateSyncUI();
+        // Brief back-off before retrying
+        await new Promise(r => setTimeout(r, 1500 * next.retries));
+        continue;
+      }
+
       next.status = "error";
       next.finishedAt = Date.now();
       next.durationMs =
         typeof next.startedAt === "number"
           ? Math.max(0, next.finishedAt - next.startedAt)
           : null;
-      next.error = error?.message || "Unknown error";
-      syncState.lastError = next.error;
+      next.error = errMsg;
+      syncState.lastError = errMsg;
       syncState.status = "error";
 
-      if (typeof handleAuthExpiredError === "function") {
-        const handled = handleAuthExpiredError(error, "Sync session expired");
-        if (handled) {
-          updateSyncUI();
-          break;
-        }
-      }
+      // Reject callers waiting on this task
+      next._reject?.(error);
 
-      // Check if it's an authentication error
-      if (error?.message?.includes("401") || error?.message?.includes("unauthorized") || error?.message?.includes("Invalid Credentials")) {
-        next.error = next.error + " - [Requires re-login]";
-        // Show alert with login option
+      if (isAuthError) {
+        next.error = errMsg + " — [Requires re-login]";
+        if (typeof handleAuthExpiredError === "function") {
+          handleAuthExpiredError(error, "Sync session expired");
+        }
         showSyncErrorAlert(next.error, error);
+        // Mark all remaining pending tasks as error
+        syncState.queue
+          .filter(item => item.status === "pending")
+          .forEach(item => {
+            item.status = "error";
+            item.error = "Skipped — authentication expired";
+            item._reject?.(new Error("Auth expired"));
+          });
+        updateSyncUI();
+        break;
       }
 
       updateSyncUI();
@@ -2672,6 +2742,15 @@ async function processSyncQueue() {
   syncState.processing = false;
   updateSyncUI();
 }
+
+// Resume sync when coming back online
+window.addEventListener("online", () => {
+  const hasPending = syncState.queue.some(item => item.status === "pending");
+  if (hasPending) {
+    showToast("Back online — resuming pending saves...", "info", 3000);
+    processSyncQueue();
+  }
+});
 
 function updateSyncUI() {
   const btn = document.getElementById("syncStatusBtn");
@@ -2780,6 +2859,210 @@ window.addEventListener("beforeunload", (event) => {
     event.returnValue = "";
   }
 });
+
+// ── Urgent save on page hide / visibility change ──
+// Mobile browsers may kill the page without firing beforeunload.
+// We save all in-progress work to local IndexedDB cache immediately.
+function _urgentSaveToLocalCache() {
+  try {
+    // If agronomy monitoring is active, flush current answers to state
+    if (typeof agronomyMonitoringState !== "undefined" && agronomyMonitoringState.currentTrial) {
+      if (typeof saveAgronomyResponseSilent === "function") saveAgronomyResponseSilent();
+      const trial = agronomyMonitoringState.currentTrial;
+      trial.agronomyResponses = agronomyMonitoringState.responses;
+      trial.updatedAt = new Date().toISOString();
+      const idx = (typeof trialState !== "undefined" ? trialState.trials : []).findIndex(t => t.id === trial.id);
+      if (idx !== -1) trialState.trials[idx] = trial;
+    }
+
+    // If observation run is active, flush current answers to state
+    if (typeof runTrialState !== "undefined" && runTrialState.currentTrial) {
+      if (typeof saveCurrentResponseSilent === "function") saveCurrentResponseSilent();
+      const trial = runTrialState.currentTrial;
+      trial.responses = runTrialState.responses;
+      trial.updatedAt = new Date().toISOString();
+      const idx = (typeof trialState !== "undefined" ? trialState.trials : []).findIndex(t => t.id === trial.id);
+      if (idx !== -1) trialState.trials[idx] = trial;
+    }
+
+    // Flush to IndexedDB (fire-and-forget — IDB writes are fast)
+    if (typeof saveLocalCache === "function" && typeof trialState !== "undefined" && trialState?.trials) {
+      saveLocalCache("trials", { trials: trialState.trials });
+    }
+  } catch (e) {
+    // Best-effort — ignore errors
+  }
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") {
+    _urgentSaveToLocalCache();
+  }
+  // When page becomes visible again, retry any pending syncs
+  if (document.visibilityState === "visible") {
+    const hasPending = syncState.queue.some(item => item.status === "pending");
+    if (hasPending && !syncState.processing) {
+      processSyncQueue();
+    }
+  }
+});
+
+window.addEventListener("pagehide", () => {
+  _urgentSaveToLocalCache();
+});
+
+// ── Resume Dirty Syncs from previous session ──
+// Called once during app initialization (with a short delay to let trial cache settle).
+async function resumeDirtySyncs() {
+  try {
+    const dirtyEntries = await loadAllDirtySyncs();
+    if (dirtyEntries.length === 0) return;
+
+    // Wait briefly for trial cache to be populated by initializeTrials()
+    let attempts = 0;
+    while ((!trialState?.trials || trialState.trials.length === 0) && attempts < 20) {
+      await new Promise(r => setTimeout(r, 300));
+      attempts++;
+    }
+
+    let resumed = 0;
+    for (const entry of dirtyEntries) {
+      const task = _reconstructSyncTask(entry.taskMeta);
+      if (task) {
+        enqueueSync(task);
+        resumed++;
+      } else {
+        // Trial no longer exists or task can't be reconstructed — clean up
+        removeDirtySync(entry.fileKey).catch(() => {});
+      }
+    }
+
+    if (resumed > 0) {
+      showToast(
+        `Resuming ${resumed} unsaved change(s) from a previous session. Please keep the app open until sync completes.`,
+        "warning",
+        6000
+      );
+    }
+  } catch (err) {
+    console.warn("Failed to resume dirty syncs:", err);
+  }
+}
+
+function _reconstructSyncTask(taskMeta) {
+  if (!taskMeta || !taskMeta.trialId) return null;
+  if (typeof trialState === "undefined") return null;
+
+  const trial = trialState.trials?.find(t => t.id === taskMeta.trialId);
+  if (!trial) return null;
+
+  switch (taskMeta.type) {
+    case "agronomy":
+      if (taskMeta.areaIndex == null) return null;
+      return {
+        label: `Resume: ${trial.name || "Trial"} agronomy · Area ${Number(taskMeta.areaIndex) + 1}`,
+        fileKey: `${trial.id}~agronomy~${taskMeta.areaIndex}`,
+        taskMeta,
+        run: () => saveAreaAgronomyToDrive(trial, taskMeta.areaIndex),
+      };
+    case "responses":
+      if (taskMeta.areaIndex == null) return null;
+      return {
+        label: `Resume: ${trial.name || "Trial"} observation · Area ${Number(taskMeta.areaIndex) + 1}`,
+        fileKey: `${trial.id}~${taskMeta.areaIndex}~responses`,
+        taskMeta,
+        run: () => saveAreaResponsesToDrive(trial, taskMeta.areaIndex),
+      };
+    case "meta":
+      return {
+        label: `Resume: Update ${trial.name || "Trial"} metadata`,
+        fileKey: `${trial.id}~meta-progress`,
+        taskMeta,
+        run: () => saveTrialToGoogleDrive(trial),
+      };
+    default:
+      return null;
+  }
+}
+
+// ── Loading screen logout ──
+function showLoadingLogoutPopup() {
+  const existing = document.getElementById("loadingLogoutPopup");
+  if (existing) existing.remove();
+
+  const overlay = document.createElement("div");
+  overlay.id = "loadingLogoutPopup";
+  overlay.className = "loading-logout-popup-overlay";
+  overlay.innerHTML = `
+    <div class="loading-logout-popup">
+      <h3>Having trouble loading?</h3>
+      <p>If the app is stuck, you can log out or clear all cached data and start fresh.</p>
+      <div class="loading-logout-popup-actions">
+        <button class="btn btn-secondary" id="loadingLogoutOnly">
+          <span class="material-symbols-rounded">logout</span>
+          Logout Only
+        </button>
+        <button class="btn btn-danger" id="loadingLogoutClear">
+          <span class="material-symbols-rounded">delete_forever</span>
+          Logout &amp; Clear All Data
+        </button>
+      </div>
+      <button class="btn btn-ghost loading-logout-cancel" id="loadingLogoutCancel">Cancel</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add("active"));
+
+  overlay.querySelector("#loadingLogoutCancel").addEventListener("click", () => {
+    overlay.classList.remove("active");
+    setTimeout(() => overlay.remove(), 200);
+  });
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) {
+      overlay.classList.remove("active");
+      setTimeout(() => overlay.remove(), 200);
+    }
+  });
+
+  overlay.querySelector("#loadingLogoutOnly").addEventListener("click", () => {
+    // Clear auth state and reload
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("tokenExpiresAt");
+    gapi?.client?.setToken?.(null);
+    window.location.reload();
+  });
+
+  overlay.querySelector("#loadingLogoutClear").addEventListener("click", async () => {
+    const btn = overlay.querySelector("#loadingLogoutClear");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-sm"></span> Clearing...';
+    try {
+      // Clear all IndexedDB stores
+      if (typeof clearPersistentCache === "function") await clearPersistentCache();
+      if (typeof clearAllDirtySyncs === "function") await clearAllDirtySyncs();
+      // Clear all localStorage
+      localStorage.clear();
+      // Unregister service workers
+      if (navigator.serviceWorker) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (const r of regs) await r.unregister();
+      }
+      // Delete the entire IndexedDB database for a clean slate
+      if (indexedDB.databases) {
+        const dbs = await indexedDB.databases();
+        for (const db of dbs) {
+          if (db.name) indexedDB.deleteDatabase(db.name);
+        }
+      } else {
+        indexedDB.deleteDatabase(PERSISTENT_DB_NAME);
+      }
+    } catch (e) {
+      console.warn("Cleanup error:", e);
+    }
+    window.location.reload();
+  });
+}
 
 function isRunTrialVisible() {
   const interfaceEl = document.getElementById("runTrialInterface");
@@ -3221,6 +3504,12 @@ async function initializeApp() {
       setInterval(() => {
         checkLoadedTrialUpdates({ silent: true }).catch(() => {});
       }, 10 * 60 * 1000);
+
+      // Resume any pending sync tasks from a previous session
+      // (delayed to let initializeTrials cache settle)
+      setTimeout(() => {
+        resumeDirtySyncs().catch(e => console.warn("resumeDirtySyncs:", e));
+      }, 3000);
     }
 
     setLoadingProgress(100, "Ready");

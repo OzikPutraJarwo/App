@@ -5586,6 +5586,7 @@ async function saveTrialLineToDrive(trial, areaIndex, paramId, repIndex, lineId)
 }
 
 // Save ALL responses for a single area as one consolidated file: {areaIndex}~responses.json
+// Save observation responses for a single area. Includes merge-before-overwrite.
 async function saveAreaResponsesToDrive(trial, areaIndex) {
   const areaResponses = trial.responses?.[areaIndex];
   if (!areaResponses || Object.keys(areaResponses).length === 0) return;
@@ -5595,7 +5596,69 @@ async function saveAreaResponsesToDrive(trial, areaIndex) {
   const responsesFolderId = await getOrCreateFolder("responses", trialFolderId);
 
   const fileName = `${areaIndex}~responses.json`;
-  await uploadJsonFile(fileName, responsesFolderId, areaResponses);
+
+  // Attempt merge with existing remote data
+  let dataToSave = areaResponses;
+  try {
+    const existingFile = await findFile(fileName, responsesFolderId);
+    if (existingFile) {
+      const resp = await gapi.client.drive.files.get({ fileId: existingFile.id, alt: "media" });
+      const remoteData = typeof resp.body === "string" ? JSON.parse(resp.body) : resp.result;
+      if (remoteData && typeof remoteData === "object") {
+        dataToSave = _mergeResponseData(areaResponses, remoteData);
+        if (trial.responses) trial.responses[areaIndex] = dataToSave;
+      }
+    }
+  } catch (mergeErr) {
+    console.warn("Response merge skipped:", mergeErr);
+  }
+
+  await uploadJsonFile(fileName, responsesFolderId, dataToSave);
+}
+
+// Merge local and remote observation response data.
+// Structure: { paramId: { lineKey: { value, remark, photos, timestamp } } }
+function _mergeResponseData(local, remote) {
+  if (!remote || typeof remote !== "object") return local;
+  if (!local || typeof local !== "object") return remote;
+
+  const merged = {};
+  const allParamIds = new Set([...Object.keys(local), ...Object.keys(remote)]);
+
+  for (const paramId of allParamIds) {
+    const lParam = local[paramId];
+    const rParam = remote[paramId];
+    if (!rParam) { merged[paramId] = lParam; continue; }
+    if (!lParam) { merged[paramId] = rParam; continue; }
+
+    merged[paramId] = {};
+    const allLineKeys = new Set([...Object.keys(lParam), ...Object.keys(rParam)]);
+
+    for (const lineKey of allLineKeys) {
+      const l = lParam[lineKey];
+      const r = rParam[lineKey];
+      if (!r) { merged[paramId][lineKey] = l; continue; }
+      if (!l) { merged[paramId][lineKey] = r; continue; }
+
+      const lt = new Date(l.timestamp || 0).getTime();
+      const rt = new Date(r.timestamp || 0).getTime();
+      const base = lt >= rt ? l : r;
+      const other = lt >= rt ? r : l;
+
+      // Union photos
+      const photoMap = new Map();
+      for (const p of (other.photos || [])) {
+        const key = typeof p === "object" ? (p.fileId || p.photoId || JSON.stringify(p)) : String(p);
+        photoMap.set(key, p);
+      }
+      for (const p of (base.photos || [])) {
+        const key = typeof p === "object" ? (p.fileId || p.photoId || JSON.stringify(p)) : String(p);
+        photoMap.set(key, p);
+      }
+      merged[paramId][lineKey] = { ...base, photos: [...photoMap.values()] };
+    }
+  }
+  return merged;
 }
 
 // Save all responses for a trial to Drive (full backup — one consolidated file per area)
@@ -7466,6 +7529,7 @@ let agronomyMonitoringState = {
 };
 
 let agronomyAutoSaveInProgress = false;
+let _agronomyDirtyFlag = false;
 
 function getTrialAvailableAreaIndexes(trial) {
   const totalAreas = Array.isArray(trial?.areas) ? trial.areas.length : 0;
@@ -8085,10 +8149,15 @@ function saveAgronomyResponseSilent() {
 
 // Auto-save to storage and Drive
 async function autoSaveAgronomyProgress() {
-  if (agronomyAutoSaveInProgress) return;
+  if (agronomyAutoSaveInProgress) {
+    // Don't drop the save — mark dirty so we re-save when current save finishes
+    _agronomyDirtyFlag = true;
+    return;
+  }
   const trial = agronomyMonitoringState.currentTrial;
   if (!trial) return;
 
+  _agronomyDirtyFlag = false;
   agronomyAutoSaveInProgress = true;
 
   const saveIcon = document.querySelector('.run-save-icon');
@@ -8121,11 +8190,13 @@ async function autoSaveAgronomyProgress() {
       enqueueSync({
         label: `Saving ${trialName} · ${areaName} · ${itemName}`,
         fileKey: `${trial.id}~agronomy~${areaIndex}`,
+        taskMeta: { type: "agronomy", trialId: trial.id, areaIndex },
         run: () => saveAreaAgronomyToDrive(trial, areaIndex),
       });
     } else {
       enqueueSync({
         label: `Saving ${trial.name} agronomy`,
+        taskMeta: { type: "agronomy", trialId: trial.id, areaIndex: "all" },
         run: () => saveAllAgronomyResponsesToDrive(trial),
       });
     }
@@ -8136,6 +8207,7 @@ async function autoSaveAgronomyProgress() {
     enqueueSync({
       label: `Updating progress summary: ${trial.name}`,
       fileKey: `${trial.id}~meta-progress`,
+      taskMeta: { type: "meta", trialId: trial.id },
       run: () => saveTrialToGoogleDrive(trial),
     });
 
@@ -8149,6 +8221,12 @@ async function autoSaveAgronomyProgress() {
       agronomyAutoSaveInProgress = false;
       if (saveIcon) { saveIcon.classList.remove('saving'); saveIcon.disabled = false; }
       if (saveIconSymbol) { saveIconSymbol.textContent = 'save'; }
+
+      // If another save was requested while we were busy, re-save now
+      if (_agronomyDirtyFlag) {
+        _agronomyDirtyFlag = false;
+        autoSaveAgronomyProgress();
+      }
     }, 500);
   }
 }
@@ -8159,6 +8237,7 @@ async function saveAgronomyResponseToDrive(trial, areaIndex, itemId) {
 }
 
 // Save ALL agronomy responses for a single area as one consolidated file: {areaIndex}~agronomy.json
+// Includes merge-before-overwrite: fetches remote data first and merges to avoid clobbering newer edits.
 async function saveAreaAgronomyToDrive(trial, areaIndex) {
   const areaAgronomy = trial.agronomyResponses?.[areaIndex];
   if (!areaAgronomy) return;
@@ -8168,7 +8247,62 @@ async function saveAreaAgronomyToDrive(trial, areaIndex) {
   const agronomyFolderId = await getOrCreateFolder("agronomy", trialFolderId);
 
   const fileName = `${areaIndex}~agronomy.json`;
-  await uploadJsonFile(fileName, agronomyFolderId, areaAgronomy);
+
+  // Attempt merge with existing remote data
+  let dataToSave = areaAgronomy;
+  try {
+    const existingFile = await findFile(fileName, agronomyFolderId);
+    if (existingFile) {
+      const resp = await gapi.client.drive.files.get({ fileId: existingFile.id, alt: "media" });
+      const remoteData = typeof resp.body === "string" ? JSON.parse(resp.body) : resp.result;
+      if (remoteData && typeof remoteData === "object") {
+        dataToSave = _mergeAgronomyData(areaAgronomy, remoteData);
+        // Update local state with merged result so future saves include remote data
+        if (trial.agronomyResponses) trial.agronomyResponses[areaIndex] = dataToSave;
+      }
+    }
+  } catch (mergeErr) {
+    // Merge failed (e.g. network issue reading remote) — proceed with local data only.
+    // This is safe: worst case we overwrite, which is the old behaviour.
+    console.warn("Agronomy merge skipped:", mergeErr);
+  }
+
+  await uploadJsonFile(fileName, agronomyFolderId, dataToSave);
+}
+
+// Merge local and remote agronomy data. For each item, keep the entry with the newer timestamp;
+// always union photos from both sides so no photos are ever lost.
+function _mergeAgronomyData(local, remote) {
+  if (!remote || typeof remote !== "object") return local;
+  if (!local || typeof local !== "object") return remote;
+
+  const merged = {};
+  const allKeys = new Set([...Object.keys(local), ...Object.keys(remote)]);
+
+  for (const itemId of allKeys) {
+    const l = local[itemId];
+    const r = remote[itemId];
+    if (!r) { merged[itemId] = l; continue; }
+    if (!l) { merged[itemId] = r; continue; }
+
+    const lt = new Date(l.timestamp || 0).getTime();
+    const rt = new Date(r.timestamp || 0).getTime();
+    const base = lt >= rt ? l : r;
+    const other = lt >= rt ? r : l;
+
+    // Union photos by fileId / photoId
+    const photoMap = new Map();
+    for (const p of (other.photos || [])) {
+      const key = typeof p === "object" ? (p.fileId || p.photoId || JSON.stringify(p)) : String(p);
+      photoMap.set(key, p);
+    }
+    for (const p of (base.photos || [])) {
+      const key = typeof p === "object" ? (p.fileId || p.photoId || JSON.stringify(p)) : String(p);
+      photoMap.set(key, p); // base wins on duplicate keys
+    }
+    merged[itemId] = { ...base, photos: [...photoMap.values()] };
+  }
+  return merged;
 }
 
 // Save all agronomy responses to Drive (one consolidated file per area)
@@ -8180,10 +8314,25 @@ async function saveAllAgronomyResponsesToDrive(trial) {
 }
 
 // Manual save
-function manualSaveAgronomyProgress() {
+async function manualSaveAgronomyProgress() {
   saveAgronomyResponseSilent();
-  autoSaveAgronomyProgress();
-  showToast("Agronomy progress saved", "success");
+  showToast("Saving to cloud...", "info", 2000);
+  try {
+    await autoSaveAgronomyProgress();
+    // Wait for all pending sync tasks to finish (with timeout)
+    const pending = () => syncState.queue.some(item => item.status === "pending" || item.status === "syncing");
+    const start = Date.now();
+    while (pending() && Date.now() - start < 15000) {
+      await new Promise(r => setTimeout(r, 300));
+    }
+    if (syncState.queue.some(item => item.status === "error")) {
+      showToast("Data saved locally but cloud sync failed. Will retry automatically.", "warning", 5000);
+    } else {
+      showToast("Agronomy progress saved to cloud", "success");
+    }
+  } catch (err) {
+    showToast("Data saved locally but cloud sync encountered an error.", "warning", 5000);
+  }
 }
 
 // Photo upload
@@ -10643,12 +10792,14 @@ async function saveRunTrialProgress() {
     enqueueSync({
       label: `Save Responses: ${trial.name}`,
       fileKey: `${trial.id}~${saveAreaIndex}~${saveParamId}~${saveRepIndex}~${saveLineId}`,
+      taskMeta: { type: "responses", trialId: trial.id, areaIndex: saveAreaIndex },
       run: () => saveTrialLineToDrive(trial, saveAreaIndex, saveParamId, saveRepIndex, saveLineId),
     });
   } else {
     // Fallback: full backup if current line context is unknown
     enqueueSync({
       label: `Save Responses: ${trial.name}`,
+      taskMeta: { type: "responses", trialId: trial.id, areaIndex: "all" },
       run: () => saveTrialResponsesToDrive(trial),
     });
   }
@@ -10661,6 +10812,7 @@ async function saveRunTrialProgress() {
   enqueueSync({
     label: `Updating progress summary: ${trial.name}`,
     fileKey: `${trial.id}~meta-progress`,
+    taskMeta: { type: "meta", trialId: trial.id },
     run: () => saveTrialToGoogleDrive(trial),
   });
   
@@ -10672,13 +10824,19 @@ async function saveRunTrialProgress() {
 
 // Auto save in background (without feedback message)
 let autoSaveInProgress = false;
+let _observationDirtyFlag = false;
 
 async function autoSaveProgress() {
-  if (autoSaveInProgress) return; // Prevent multiple simultaneous saves
+  if (autoSaveInProgress) {
+    // Don't drop the save — mark dirty so we re-save when current save finishes
+    _observationDirtyFlag = true;
+    return;
+  }
   
   const trial = runTrialState.currentTrial;
   if (!trial) return;
   
+  _observationDirtyFlag = false;
   autoSaveInProgress = true;
   
   // Update icon to saving state
@@ -10731,12 +10889,14 @@ async function autoSaveProgress() {
       enqueueSync({
         label: `Saving ${trialName} · ${areaName} · ${paramName} · ${repLabel} · ${lineName}${sampleLabel}`,
         fileKey: `${trial.id}~${saveAreaIndex}~responses`,
+        taskMeta: { type: "responses", trialId: trial.id, areaIndex: saveAreaIndex },
         run: () => saveAreaResponsesToDrive(trial, saveAreaIndex),
       });
     } else {
       // Fallback: full backup if current line context is unknown
       enqueueSync({
         label: `Saving ${trial.name}`,
+        taskMeta: { type: "responses", trialId: trial.id, areaIndex: "all" },
         run: () => saveTrialResponsesToDrive(trial),
       });
     }
@@ -10749,6 +10909,7 @@ async function autoSaveProgress() {
     enqueueSync({
       label: `Updating progress summary: ${trial.name}`,
       fileKey: `${trial.id}~meta-progress`,
+      taskMeta: { type: "meta", trialId: trial.id },
       run: () => saveTrialToGoogleDrive(trial),
     });
 
@@ -10768,19 +10929,35 @@ async function autoSaveProgress() {
       if (saveIconSymbol) {
         saveIconSymbol.textContent = 'save';
       }
+
+      // If another save was requested while we were busy, re-save now
+      if (_observationDirtyFlag) {
+        _observationDirtyFlag = false;
+        autoSaveProgress();
+      }
     }, 500);
   }
 }
 
 // Manual save with feedback
 async function manualSaveProgress() {
-  if (autoSaveInProgress) return;
-  
-  await autoSaveProgress();
-  
-  // Show success feedback for manual saves
-  if (typeof showSuccessMessage === "function") {
-    showSuccessMessage("Progress saved");
+  showToast("Saving to cloud...", "info", 2000);
+  try {
+    saveCurrentResponseSilent();
+    await autoSaveProgress();
+    // Wait for pending sync tasks to finish (with timeout)
+    const pending = () => syncState.queue.some(item => item.status === "pending" || item.status === "syncing");
+    const start = Date.now();
+    while (pending() && Date.now() - start < 15000) {
+      await new Promise(r => setTimeout(r, 300));
+    }
+    if (syncState.queue.some(item => item.status === "error")) {
+      showToast("Data saved locally but cloud sync failed. Will retry automatically.", "warning", 5000);
+    } else {
+      showToast("Observation progress saved to cloud", "success");
+    }
+  } catch (err) {
+    showToast("Data saved locally but cloud sync encountered an error.", "warning", 5000);
   }
 }
 

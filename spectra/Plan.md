@@ -174,7 +174,26 @@
 - [x] `Trial > Observation; Agronomy` Upload image more than one once
 - [x] Some small redesigns (`Library`, `Trial`)
 
+# Apr 16, 2026
+- [x] `App > Loading` Logout button on loading screen (appears after 4s idle)
+- [x] `App > Loading` Logout options: Logout Only / Logout & Clear All Data with IndexedDB cleanup
+- [x] `Trial > Run Observation` Accurate save feedback — manual save shows "saved to cloud" only after Drive upload succeeds
+- [x] `Trial > Agronomy` Accurate save feedback — manual save shows "saved to cloud" only after Drive upload succeeds
+- [x] `Trial > Run Observation` Dirty-flag coalescing — rapid interactions no longer silently drop saves (uses flag + re-save pattern)
+- [x] `Trial > Agronomy` Dirty-flag coalescing — rapid interactions no longer silently drop saves (uses flag + re-save pattern)
+- [x] `Sync Queue` Persistent sync queue to IndexedDB — pending Drive uploads survive app close & mobile background kill
+- [x] `Sync Queue` Resume pending saves on app launch with user notification (displays count of resumed tasks)
+- [x] `Sync Queue` Merge-before-overwrite for observation data — fetches remote, merges by timestamp, unions photos
+- [x] `Sync Queue` Merge-before-overwrite for agronomy data — fetches remote, merges by timestamp, unions photos
+- [x] `Sync Queue` Automatic retry on failed sync (up to 2x with exponential back-off)
+- [x] `Sync Queue` Skip-all on auth expiry — no silent failures or dropped data
+- [x] `Network` Offline detection — pauses sync when offline, auto-resumes when reconnected
+- [x] `Network` Offline toast notification when sync blocked by connectivity
+- [x] `Network` Urgent save on visibility change — flushes in-progress agronomy/observation work to IndexedDB cache
+- [x] `Network` Urgent save on pagehide event — safeguard against mobile browser killing the app
+- [x] `App > Cache` `clearLocalCache()` now also clears all dirty sync markers for fresh state
+- [x] `Sync Queue` `enqueueSync()` now returns Promise — callers can await actual Drive completion
+
 ## UPCOMING PLANS
 - [ ] Resize/reformat uploaded image dashboard
 - [ ] Reminder > checkbox > run only shows the checked
-- [ ] Notification on phone

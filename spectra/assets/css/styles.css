@@ -4677,6 +4677,85 @@ body.trial-fullscreen-active .topbar-right .section-nav-item.active .section-nav
   display: flex;
 }
 
+/* Loading screen logout button */
+.loading-logout-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  transition: background 0.15s, color 0.15s;
+  z-index: 10000;
+}
+.loading-logout-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+.loading-logout-btn .material-symbols-rounded {
+  font-size: 18px;
+}
+
+/* Logout popup on loading screen */
+.loading-logout-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+.loading-logout-popup-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.loading-logout-popup {
+  background: var(--bg-primary, #fff);
+  border-radius: 14px;
+  padding: 24px;
+  max-width: 360px;
+  width: 90%;
+  text-align: center;
+  animation: fadeInScale 0.2s ease;
+}
+.loading-logout-popup h3 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+}
+.loading-logout-popup p {
+  margin: 0 0 18px;
+  font-size: 0.88rem;
+  color: var(--text-secondary, #666);
+}
+.loading-logout-popup-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.loading-logout-popup-actions .btn {
+  width: 100%;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.loading-logout-cancel {
+  margin-top: 12px;
+  width: 100%;
+  text-align: center;
+}
+
 .spinner {
   width: 48px;
   height: 48px;

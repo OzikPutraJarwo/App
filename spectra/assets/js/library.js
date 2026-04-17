@@ -1561,7 +1561,7 @@ function renderLibraryList() {
 
   if (libraryState.section === "observation-photos") {
     container.classList.remove("library-grid-empty", "grid-small", "grid-medium", "grid-large");
-    container.classList.add("library-files-grid", "grid-small");
+    container.classList.add("library-files-grid", "grid-medium");
     renderTrialPhotoList(container);
     renderTrialPhotoActionBar();
     return;
@@ -1569,7 +1569,7 @@ function renderLibraryList() {
 
   if (libraryState.section === "agronomy-photos") {
     container.classList.remove("library-grid-empty", "grid-small", "grid-medium", "grid-large");
-    container.classList.add("library-files-grid", "grid-small");
+    container.classList.add("library-files-grid", "grid-medium");
     renderAgronomyPhotoList(container);
     return;
   }
