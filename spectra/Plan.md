@@ -194,6 +194,12 @@
 - [x] `App > Cache` `clearLocalCache()` now also clears all dirty sync markers for fresh state
 - [x] `Sync Queue` `enqueueSync()` now returns Promise — callers can await actual Drive completion
 
+# Apr 21, 2026
+- [x] `Trial > Edit Trial` Fix stale trial reference bug — autosave functions now update canonical trial objects, preventing metadata overwrite during Drive sync
+- [x] `Trial > Edit Trial` Fix Drive load overwriting newer local metadata — preserves offline edits when local version is newer than Drive
+- [x] `Trial > Edit Trial` Fix splitPlotLocationAsFactor not restored — checkbox now properly restored when editing existing trials
+- [x] `Trial > Field Mapping` Fix area edit modal input styling — switched to native form-group pattern for consistent UI/UX
+
 ## UPCOMING PLANS
 - [ ] Resize/reformat uploaded image dashboard
 - [ ] Reminder > checkbox > run only shows the checked

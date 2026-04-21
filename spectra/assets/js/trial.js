@@ -60,23 +60,48 @@ async function initializeTrials(options = {}) {
     // Load trials from Google Drive (in background via sync queue) — skip for guest
     const isGuest = typeof getCurrentUser === 'function' && getCurrentUser()?.isGuest;
     if (!isGuest) {
+      // Helper: merge cached local trial data into a freshly loaded Drive trial.
+      // Preserves local responses if loaded, and keeps local metadata if it is
+      // newer than the Drive version (handles offline edits not yet synced).
+      const _mergeTrialFromCache = (freshTrial) => {
+        const cached = trialState.trials.find(t => t.id === freshTrial.id);
+        if (!cached) return freshTrial;
+
+        // Preserve response/loading state from local cache
+        if (cached._responsesLoaded || (Array.isArray(cached._loadedAreas) && cached._loadedAreas.length > 0)) {
+          freshTrial.responses = cached.responses;
+          freshTrial.agronomyResponses = cached.agronomyResponses;
+          freshTrial._responsesLoaded = cached._responsesLoaded;
+          freshTrial._loadedAreas = cached._loadedAreas;
+          freshTrial._loadedAreaTypes = cached._loadedAreaTypes || {};
+          freshTrial._loadSyncMarker = cached._loadSyncMarker || {};
+        }
+
+        // If local metadata is newer than Drive (offline edits not yet synced),
+        // prefer local metadata to avoid overwriting the user's changes.
+        const localTs = cached.updatedAt || "";
+        const driveTs = freshTrial.updatedAt || "";
+        if (localTs && driveTs && localTs > driveTs) {
+          // Preserve all metadata fields from local, but keep drive responses if any
+          const driveResponses = freshTrial.responses;
+          const driveAgronomyResponses = freshTrial.agronomyResponses;
+          Object.assign(freshTrial, cached);
+          if (driveResponses) freshTrial.responses = driveResponses;
+          if (driveAgronomyResponses) freshTrial.agronomyResponses = driveAgronomyResponses;
+        }
+
+        return freshTrial;
+      };
+
       if (typeof enqueueSync === 'function') {
         enqueueSync({
           label: 'Load Trials',
           run: async () => {
             const freshTrials = await loadTrialsFromGoogleDrive();
 
-            // Merge: keep locally loaded responses for trials that already have them
-            for (const freshTrial of freshTrials) {
-              const cached = trialState.trials.find(t => t.id === freshTrial.id);
-              if (cached && (cached._responsesLoaded || (Array.isArray(cached._loadedAreas) && cached._loadedAreas.length > 0))) {
-                freshTrial.responses = cached.responses;
-                freshTrial.agronomyResponses = cached.agronomyResponses;
-                freshTrial._responsesLoaded = cached._responsesLoaded;
-                freshTrial._loadedAreas = cached._loadedAreas;
-                freshTrial._loadedAreaTypes = cached._loadedAreaTypes || {};
-                freshTrial._loadSyncMarker = cached._loadSyncMarker || {};
-              }
+            // Merge: keep locally loaded responses and prefer newer local metadata
+            for (let i = 0; i < freshTrials.length; i++) {
+              freshTrials[i] = _mergeTrialFromCache(freshTrials[i]);
             }
 
             trialState.trials = freshTrials;
@@ -99,16 +124,8 @@ async function initializeTrials(options = {}) {
       } else {
         const freshTrials = await loadTrialsFromGoogleDrive();
 
-        for (const freshTrial of freshTrials) {
-          const cached = trialState.trials.find(t => t.id === freshTrial.id);
-          if (cached && (cached._responsesLoaded || (Array.isArray(cached._loadedAreas) && cached._loadedAreas.length > 0))) {
-            freshTrial.responses = cached.responses;
-            freshTrial.agronomyResponses = cached.agronomyResponses;
-            freshTrial._responsesLoaded = cached._responsesLoaded;
-            freshTrial._loadedAreas = cached._loadedAreas;
-            freshTrial._loadedAreaTypes = cached._loadedAreaTypes || {};
-            freshTrial._loadSyncMarker = cached._loadSyncMarker || {};
-          }
+        for (let i = 0; i < freshTrials.length; i++) {
+          freshTrials[i] = _mergeTrialFromCache(freshTrials[i]);
         }
 
         trialState.trials = freshTrials;
@@ -594,6 +611,8 @@ function openEditTrialModal(trialId) {
   }
   trialState._splitPlotCodes = trial.splitPlotCodes || {};
   trialState._splitPlotLocationAsFactor = !!trial.splitPlotLocationAsFactor;
+  const splitPlotLocCheckbox = document.getElementById("splitPlotLocationAsFactor");
+  if (splitPlotLocCheckbox) splitPlotLocCheckbox.checked = !!trial.splitPlotLocationAsFactor;
 
   // Restore Parent Test / Process Research fields
   document.getElementById("trialRowsPerPlot").value = trial.rowsPerPlot ?? "";
@@ -4034,19 +4053,28 @@ function renderAreasList() {
         )
         .join("");
 
+      const isCustomSize = area.customAreaSizeM2 != null;
+      const customBadge = isCustomSize ? ` <span class="area-custom-badge">Custom</span>` : "";
+
       return `
             <div class="area-list-card">
                 <div id="areaPreviewMap${index}" class="area-preview-map"></div>
                 <div class="area-list-body">
                     <div class="area-list-header">
                         <strong class="area-list-title">${escapeHtml(area.name)}</strong>
-                        <button type="button" onclick="removeArea(${index})" class="btn btn-sm area-remove-btn">
-                            <span class="material-symbols-rounded">delete</span>
-                            <span>Remove</span>
-                        </button>
+                        <div class="area-list-actions">
+                            <button type="button" onclick="editArea(${index})" class="btn btn-sm area-edit-btn">
+                                <span class="material-symbols-rounded">edit</span>
+                                <span>Edit</span>
+                            </button>
+                            <button type="button" onclick="removeArea(${index})" class="btn btn-sm area-remove-btn">
+                                <span class="material-symbols-rounded">delete</span>
+                                <span>Remove</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="area-list-info">
-                        <strong>Area:</strong> ${areaSize} hectares (${(areaSize * 10000).toFixed(0)} m²)
+                        <strong>Area:</strong> ${areaSize} hectares (${(areaSize * 10000).toFixed(0)} m²)${customBadge}
                     </div>
                     <div class="area-list-info">
                         <strong>Address:</strong> ${escapeHtml(address)}
@@ -4161,6 +4189,98 @@ function invalidateAllPreviewMaps() {
 }
 
 // Remove area
+function editArea(index) {
+  const area = trialState.currentAreas[index];
+  if (!area) return;
+
+  const modal = document.createElement('div');
+  modal.className = 'confirm-modal active';
+  modal.innerHTML = `
+    <div class="confirm-modal-content area-edit-modal-content">
+      <div class="confirm-modal-header">
+        <span class="material-symbols-rounded">edit_location_alt</span>
+        <h3>Edit Area</h3>
+      </div>
+      <div class="confirm-modal-body">
+        <div class="form-group">
+          <label for="areaEditName">Area Name</label>
+          <input type="text" id="areaEditName" value="${escapeHtml(area.name)}" placeholder="Enter area name" maxlength="80" />
+        </div>
+        <div class="form-group">
+          <label for="areaEditCustomSize">Custom Area Size (m²)</label>
+          <input type="number" id="areaEditCustomSize" value="${area.customAreaSizeM2 != null ? area.customAreaSizeM2 : ''}" placeholder="Leave blank to use auto-calculated size" min="0" step="0.01" />
+          <small class="form-hint area-edit-auto-size">
+            <span class="material-symbols-rounded" style="font-size:0.875rem;vertical-align:middle;">calculate</span>
+            Auto-calculated: ${area._origAreaSize ? area._origAreaSize.squareMeters.toLocaleString(undefined, { maximumFractionDigits: 1 }) : (area.areaSize ? area.areaSize.squareMeters.toLocaleString(undefined, { maximumFractionDigits: 1 }) : 'N/A')} m²
+          </small>
+        </div>
+      </div>
+      <div class="confirm-modal-footer">
+        <button class="btn btn-secondary" id="areaEditCancelBtn">Cancel</button>
+        <button class="btn btn-primary" id="areaEditSaveBtn">
+          <span class="material-symbols-rounded">save</span>
+          Save
+        </button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  lockBodyScroll();
+
+  const nameInput = modal.querySelector('#areaEditName');
+  const customSizeInput = modal.querySelector('#areaEditCustomSize');
+  const cancelBtn = modal.querySelector('#areaEditCancelBtn');
+  const saveBtn = modal.querySelector('#areaEditSaveBtn');
+
+  nameInput.focus();
+  nameInput.select();
+
+  const cleanup = () => {
+    modal.remove();
+    unlockBodyScroll();
+  };
+
+  cancelBtn.addEventListener('click', cleanup);
+  modal.addEventListener('click', (e) => { if (e.target === modal) cleanup(); });
+
+  saveBtn.addEventListener('click', () => {
+    const newName = nameInput.value.trim();
+    if (!newName) {
+      nameInput.classList.add('is-invalid');
+      nameInput.focus();
+      return;
+    }
+
+    area.name = newName;
+
+    const customSizeVal = customSizeInput.value.trim();
+    if (customSizeVal !== '' && !isNaN(parseFloat(customSizeVal)) && parseFloat(customSizeVal) > 0) {
+      // Store original auto-calculated size if not yet stored
+      if (area._origAreaSize == null) {
+        area._origAreaSize = area.areaSize ? { ...area.areaSize } : null;
+      }
+      const m2 = parseFloat(customSizeVal);
+      area.customAreaSizeM2 = m2;
+      area.areaSize = { hectares: m2 / 10000, squareMeters: m2 };
+    } else if (customSizeVal === '') {
+      // User cleared custom size — restore auto-calculated
+      if (area._origAreaSize != null) {
+        area.areaSize = { ...area._origAreaSize };
+      }
+      area.customAreaSizeM2 = null;
+    }
+
+    cleanup();
+    renderAreasList();
+  });
+
+  nameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') saveBtn.click();
+    if (e.key === 'Escape') cleanup();
+  });
+}
+
 function removeArea(index) {
   // Remove from array
   trialState.currentAreas.splice(index, 1);
@@ -8170,7 +8290,18 @@ async function autoSaveAgronomyProgress() {
     trial.updatedAt = new Date().toISOString();
 
     const idx = trialState.trials.findIndex(t => t.id === trial.id);
-    if (idx !== -1) trialState.trials[idx] = trial;
+    if (idx !== -1) {
+      // Only update response data — do NOT replace the whole object, which would
+      // overwrite metadata that may have been refreshed by a Drive sync.
+      trialState.trials[idx].agronomyResponses = trial.agronomyResponses;
+      trialState.trials[idx].updatedAt = trial.updatedAt;
+      // Re-point monitoring state to the canonical object in the array
+      if (agronomyMonitoringState.currentTrial !== trialState.trials[idx]) {
+        agronomyMonitoringState.currentTrial = trialState.trials[idx];
+        agronomyMonitoringState.currentTrial.agronomyResponses = trial.agronomyResponses;
+        agronomyMonitoringState.responses = agronomyMonitoringState.currentTrial.agronomyResponses;
+      }
+    }
 
     if (typeof saveLocalCache === "function") {
       saveLocalCache("trials", { trials: trialState.trials });
@@ -10855,10 +10986,18 @@ async function autoSaveProgress() {
     trial.responses = runTrialState.responses;
     trial.updatedAt = new Date().toISOString();
 
-    // Update in state
+    // Update in state — only overwrite response data to preserve metadata
+    // that may have been refreshed by a Drive sync.
     const idx = trialState.trials.findIndex((t) => t.id === trial.id);
     if (idx !== -1) {
-      trialState.trials[idx] = trial;
+      trialState.trials[idx].responses = trial.responses;
+      trialState.trials[idx].updatedAt = trial.updatedAt;
+      // Re-point run state to the canonical object in the array
+      if (runTrialState.currentTrial !== trialState.trials[idx]) {
+        runTrialState.currentTrial = trialState.trials[idx];
+        runTrialState.currentTrial.responses = trial.responses;
+        runTrialState.responses = runTrialState.currentTrial.responses;
+      }
     }
 
     if (typeof saveLocalCache === "function") {

@@ -7468,6 +7468,30 @@ body.no-scroll {
   font-size: 0.95rem;
 }
 
+.area-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+}
+
+.area-edit-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.area-edit-btn .material-symbols-rounded {
+  font-size: 1rem;
+}
+
 .area-remove-btn {
   background: var(--danger);
   color: white;
@@ -7483,6 +7507,56 @@ body.no-scroll {
 
 .area-remove-btn .material-symbols-rounded {
   font-size: 1rem;
+}
+
+.area-custom-badge {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-radius: 4px;
+  vertical-align: middle;
+}
+
+.area-edit-modal-content {
+  width: 460px;
+  max-width: 95vw;
+}
+
+.area-edit-modal-content .confirm-modal-header {
+  background: var(--primary-soft);
+}
+
+.area-edit-modal-content .confirm-modal-header .material-symbols-rounded {
+  color: var(--primary);
+}
+
+.area-edit-modal-content .form-group {
+  margin-bottom: 1rem;
+}
+
+.area-edit-modal-content .form-group:last-child {
+  margin-bottom: 0;
+}
+
+.area-edit-modal-content input.is-invalid {
+  border-color: var(--danger) !important;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(var(--danger-rgb, 220,53,69), 0.15);
+}
+
+.area-edit-auto-size {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.area-edit-auto-size .material-symbols-rounded {
+  font-size: 0.875rem;
 }
 
 .area-list-info {

@@ -2872,7 +2872,12 @@ function _urgentSaveToLocalCache() {
       trial.agronomyResponses = agronomyMonitoringState.responses;
       trial.updatedAt = new Date().toISOString();
       const idx = (typeof trialState !== "undefined" ? trialState.trials : []).findIndex(t => t.id === trial.id);
-      if (idx !== -1) trialState.trials[idx] = trial;
+      if (idx !== -1) {
+        // Only update response data — never replace the whole object, which would
+        // overwrite metadata refreshed by a Drive sync.
+        trialState.trials[idx].agronomyResponses = trial.agronomyResponses;
+        trialState.trials[idx].updatedAt = trial.updatedAt;
+      }
     }
 
     // If observation run is active, flush current answers to state
@@ -2882,7 +2887,11 @@ function _urgentSaveToLocalCache() {
       trial.responses = runTrialState.responses;
       trial.updatedAt = new Date().toISOString();
       const idx = (typeof trialState !== "undefined" ? trialState.trials : []).findIndex(t => t.id === trial.id);
-      if (idx !== -1) trialState.trials[idx] = trial;
+      if (idx !== -1) {
+        // Only update response data — never replace the whole object.
+        trialState.trials[idx].responses = trial.responses;
+        trialState.trials[idx].updatedAt = trial.updatedAt;
+      }
     }
 
     // Flush to IndexedDB (fire-and-forget — IDB writes are fast)
