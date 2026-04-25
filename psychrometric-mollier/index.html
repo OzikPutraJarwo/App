@@ -1,550 +1,819 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PsychroMol</title>
+  <link rel="icon" type="image/x-icon" href="https://app.kodejarwo.com/icon/psychrometric-chart.webp">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
+</head>
+<body>
 
-  <head>
+  <!-- ═══════════════════════════════════════════════════════ TOPBAR -->
+  <header id="app-header">
+    <div id="app-brand">
+      <img id="app-logo" src="https://app.kodejarwo.com/icon/psychrometric-chart.webp" alt="Psychrometric chart logo">
+      <span id="app-title">PsychroMol</span>
+    </div>
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Psychrometric - Mollier</title>
-    <link rel="icon" type="image/x-icon" href="../icon/psychrometric-chart.webp">
-    <link rel="stylesheet" href="./style.css">
-    <link rel="stylesheet" href="../main.css">
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="../assets/xlsx-0.18.5.js"></script>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
+    <div id="app-modebar">
+      <button class="modebar-btn active" id="btn-view" onclick="setMode('view')" title="Explore mode">
+        <span class="material-symbols-rounded">explore</span>Explore
+      </button>
+      <button class="modebar-btn" id="btn-point" onclick="setMode('point')" title="Add points">
+        <span class="material-symbols-rounded">pin_drop</span>Point
+      </button>
+      <button class="modebar-btn" id="btn-zone" onclick="setMode('zone')" title="Add zones">
+        <span class="material-symbols-rounded">add_triangle</span>Zone
+      </button>
+    </div>
 
-  </head>
+    <div id="app-menubar">
+      <button class="topbar-btn" id="btn-undo" onclick="undoAction()" title="Undo (Ctrl+Z)">
+        <span class="material-symbols-rounded">undo</span>
+      </button>
+      <button class="topbar-btn" id="btn-redo" onclick="redoAction()" title="Redo (Ctrl+Y)">
+        <span class="material-symbols-rounded">redo</span>
+      </button>
+      <div class="topbar-sep"></div>
+      <button class="topbar-btn" onclick="toggleSettingsPanel()" title="Chart settings">
+        <span class="material-symbols-rounded">tune</span>Settings
+      </button>
+      <button class="topbar-btn has-dropdown" onclick="toggleTopbarDropdown('dd-data', this)" title="Import or export data">
+        <span class="material-symbols-rounded">import_export</span>Data
+        <span class="material-symbols-rounded dd-arrow">arrow_drop_down</span>
+      </button>
+      <button class="topbar-btn mobile-only" id="btn-sidebar-toggle" onclick="toggleMobileSidebar()" title="Menu">
+        <span class="material-symbols-rounded">menu</span>
+      </button>
+    </div>
+  </header>
 
-  <body>
+  <!-- Topbar dropdowns -->
+  <div id="dd-data" class="topbar-dropdown" style="display:none">
+    <div class="dd-item" onclick="closeTopbarDropdowns(); openImportDialog()">
+      <span class="material-symbols-rounded">upload_file</span>Import CSV or Excel
+    </div>
+    <div class="dd-divider"></div>
+    <div class="dd-item" onclick="closeTopbarDropdowns(); downloadSvgAsPng('#chart-container svg','chart.png',3)">
+      <span class="material-symbols-rounded">image</span>PNG Image
+    </div>
+    <div class="dd-item" onclick="closeTopbarDropdowns(); downloadSvgAsSvg('#chart-container svg','chart.svg')">
+      <span class="material-symbols-rounded">description</span>SVG Image
+    </div>
+    <div class="dd-divider"></div>
+    <div class="dd-item" onclick="closeTopbarDropdowns(); exportToCSV()">
+      <span class="material-symbols-rounded">table_chart</span>CSV Data
+    </div>
+    <div class="dd-item" onclick="closeTopbarDropdowns(); exportToExcel()">
+      <span class="material-symbols-rounded">description</span>Excel Data
+    </div>
+  </div>
 
-    <header>
-      <div class='header wrap title-only'>
-        <a href='/' class='site-back site-button'>
-          <svg fill='#000000' version='1.1' xmlns='http://www.w3.org/2000/svg'
-            xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 512 512' xml:space='preserve'>
-            <g>
-              <g>
-                <g>
-                  <path
-                    d='M490.667,234.667H158.17l112.915-112.915c8.331-8.331,8.331-21.839,0-30.17s-21.839-8.331-30.17,0L91.582,240.915 c-0.497,0.497-0.967,1.02-1.413,1.563c-0.202,0.246-0.378,0.506-0.568,0.759c-0.228,0.304-0.463,0.601-0.674,0.917 c-0.203,0.303-0.379,0.618-0.564,0.929c-0.171,0.286-0.351,0.566-0.509,0.861c-0.169,0.317-0.313,0.643-0.465,0.966 c-0.145,0.308-0.299,0.611-0.43,0.926c-0.13,0.314-0.235,0.635-0.349,0.953c-0.122,0.338-0.251,0.672-0.356,1.018 c-0.096,0.318-0.167,0.642-0.248,0.963c-0.089,0.353-0.188,0.702-0.259,1.061c-0.074,0.372-0.117,0.747-0.171,1.122 c-0.045,0.314-0.105,0.623-0.136,0.941c-0.068,0.693-0.105,1.388-0.105,2.083c0,0.007-0.001,0.015-0.001,0.022 s0.001,0.015,0.001,0.022c0.001,0.695,0.037,1.39,0.105,2.083c0.031,0.318,0.091,0.627,0.136,0.941 c0.054,0.375,0.097,0.75,0.171,1.122c0.071,0.36,0.17,0.708,0.259,1.061c0.081,0.322,0.151,0.645,0.248,0.963 c0.105,0.346,0.234,0.68,0.356,1.018c0.114,0.318,0.219,0.639,0.349,0.953c0.131,0.316,0.284,0.618,0.43,0.926 c0.152,0.323,0.296,0.649,0.465,0.966c0.158,0.295,0.338,0.575,0.509,0.861c0.186,0.311,0.361,0.626,0.564,0.929 c0.211,0.316,0.447,0.613,0.674,0.917c0.19,0.253,0.365,0.513,0.568,0.759c0.446,0.544,0.916,1.067,1.413,1.563l149.333,149.333 c8.331,8.331,21.839,8.331,30.17,0s8.331-21.839,0-30.17L158.17,277.333h332.497c11.782,0,21.333-9.551,21.333-21.333 S502.449,234.667,490.667,234.667z' />
-                  <path
-                    d='M21.333,85.333C9.551,85.333,0,94.885,0,106.667v298.667c0,11.782,9.551,21.333,21.333,21.333 c11.782,0,21.333-9.551,21.333-21.333V106.667C42.667,94.885,33.115,85.333,21.333,85.333z' />
-                </g>
-              </g>
-            </g>
-          </svg>
-        </a>
-        <div class='site-title'>Psychrometric - Mollier</div>
-      </div>
-    </header>
+  <!-- ═══════════════════════════════════════════════════════ APP BODY -->
+  <div id="app-body">
 
-    <main>
+    <!-- ─────────────────────────────────────────── LEFT SIDEBAR -->
+    <aside id="app-sidebar">
 
-      <div class="main wrap">
-
-        <div class="controls-section">
-          
-          <div class="controls-scroll toolbars item">
-
-            <h3>Toolbars</h3>
-
-            <div class="toolbar">
-              <div class="toolbar-group">
-                <div class="toolbar-button">
-                  <button class="tool-btn active" id="btn-view" onclick="setMode('view')">
-                    <span><span class="material-symbols-rounded"> explore </span> Explore</span>
-                  </button>
-                  <button class="tool-btn" id="btn-point" onclick="setMode('point')">
-                    <span><span class="material-symbols-rounded"> pin_drop </span> Point</span>
-                  </button>
-                  <button class="tool-btn" id="btn-zone" onclick="setMode('zone')">
-                    <span><span class="material-symbols-rounded"> add_triangle </span> Zone</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div id="zone-controls" class="toolbar-controls" style="display: none">
-
-              <div class="zone-tabs toolbar-tabs">
-                <div class="z-tab active toolbar-tab" id="tab-manual" onclick="setZoneSubMode('manual')">Click</div>
-                <!-- <div class="z-tab" id="tab-input" onclick="openManualModal('zone')">Input</div> -->
-                <div class="z-tab toolbar-tab" id="tab-input" onclick="setZoneSubMode('input')">Input</div>
-                <div class="z-tab toolbar-tab" id="tab-range" onclick="setZoneSubMode('range')">Range</div>
-              </div>
-
-              <div id="zone-manual-ui">
-                <div class="toolbar-desc">
-                  Click on the chart to define the point (minimum 3 points required).
-                </div>
-                <div id="zonePtCount">0 pts</div>
-                <div class="toolbar-action c2">
-                  <button class="tool-btn btn-primary" onclick="finishZone()">Finish Zone</button>
-                  <button class="tool-btn btn-danger" onclick="cancelZone()">Cancel</button>
-                </div>
-              </div>
-
-              <div id="zone-input-ui">
-
-                <div class="toolbar-desc">
-                  Define the parameters and fill in their values to determine the point (minimum 3 points required).
-                </div>
-                <div class="toolbar-type-input">
-                  <div>
-                    <label>1st Parameter</label>
-                    <select id="p1Type-zone" oninput="syncToolbarInputWithFloating('zone', 'p1Type')">
-                      <option value="Tdb">Dry Bulb Temp (°C)</option>
-                      <option value="Twb">Wet Bulb Temp (°C)</option>
-                      <option value="RH">Rel. Humidity (%)</option>
-                      <option value="W">Humidity Ratio (kg/kg')</option>
-                      <option value="h">Enthalpy (kJ/kg)</option>
-                    </select>
-                    <input type="number" id="p1Val-zone" step="0.1" placeholder="Value" oninput="syncToolbarInputWithFloating('zone', 'p1Val')">
-                  </div>
-
-                  <div>
-                    <label>2nd Parameter</label>
-                    <select id="p2Type-zone" oninput="syncToolbarInputWithFloating('zone', 'p2Type')">
-                      <option value="RH" selected="">Rel. Humidity (%)</option>
-                      <option value="Tdb">Dry Bulb Temp (°C)</option>
-                      <option value="Twb">Wet Bulb Temp (°C)</option>
-                      <option value="W">Humidity Ratio (kg/kg')</option>
-                      <option value="h">Enthalpy (kJ/kg)</option>
-                    </select>
-                    <input type="number" id="p2Val-zone" step="0.1" placeholder="Value" oninput="syncToolbarInputWithFloating('zone', 'p2Val')">
-                  </div>
-                </div>
-
-                <div class="toolbar-action c2">
-                  <!-- <button class="tool-btn" onclick="closeModal('manualModal')">Cancel</button> -->
-                  <button class="tool-btn btn-secondary" onclick="submitManualInput('zone')">Add</button>
-                  <button class="tool-btn btn-primary" onclick="finishZone()">Finish Zone</button>
-                </div>
-              </div>
-
-              <div id="zone-range-ui" style="display: none;">
-
-                <div class="toolbar-desc">
-                  Define the parameters and move the slider to define the zone.
-                </div>
-
-                <div class="toolbar-type-range">
-                  <div>
-                    <div class="title-row">
-                      <label>1st Parameter:</label>
-                      <input type="text" value="Dry Bulb (°C)" disabled>
-                    </div>
-                    <div class="range-row">
-                      <label for="rangeTmin">Min</label>
-                      <input type="range" class="range-slider" id="sliderTmin" min="-10" max="60" value="20"
-                        oninput="syncRange('Tmin')">
-                      <input type="number" class="range-val" id="rangeTmin" min="-10" max="60" value="20"
-                        oninput="updateRangeZone()">
-                      <label for="rangeTmax">Max</label>
-                      <input type="range" class="range-slider" id="sliderTmax" min="-10" max="60" value="30"
-                        oninput="syncRange('Tmax')">
-                      <input type="number" class="range-val" id="rangeTmax" min="-10" max="60" value="30"
-                        oninput="updateRangeZone()">
-                    </div>
-                  </div>
-                  <div>
-                    <div class="title-row">
-                      <label>2nd Parameter:</label>
-                      <select id="rangeParamType" onchange="setupRangeDefaults()">
-                        <option value="RH">Rel. Humidity (%)</option>
-                        <option value="Twb">Wet Bulb (°C)</option>
-                        <option value="Tdp">Dew Point (°C)</option>
-                        <option value="W">Humidity Ratio (kg/kg)</option>
-                        <option value="h">Enthalpy (kJ/kg)</option>
-                        <option value="v">Spec. Volume (m³/kg)</option>
-                      </select>
-                    </div>
-                    <div class="range-row">
-                      <label for="rangeP2min">Min</label>
-                      <input type="range" class="range-slider" id="sliderP2min" oninput="syncRange('P2min')">
-                      <input type="number" class="range-val" id="rangeP2min" step="0.1" oninput="updateRangeZone()">
-                      <label for="rangeP2max">Max</label>
-                      <input type="range" class="range-slider" id="sliderP2max" oninput="syncRange('P2max')">
-                      <input type="number" class="range-val" id="rangeP2max" step="0.1" oninput="updateRangeZone()">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="toolbar-action c2">
-                  <button class="tool-btn btn-primary" onclick="finishZone()">Finish Zone</button>
-                  <button class="tool-btn btn-danger" onclick="cancelZone()">Cancel</button>
-                </div>
-
-              </div>
-
-            </div>
-
-            <div id="point-controls" class="toolbar-controls" style="display: none;">
-
-              <div class="point-tabs toolbar-tabs">
-                <div class="p-tab active toolbar-tab" id="tab-manual" onclick="setPointSubMode('manual')">Click</div>
-                <div class="p-tab toolbar-tab" id="tab-input" onclick="setPointSubMode('input')">Input</div>
-              </div>
-
-              <div id="point-manual-ui">
-                <div class="toolbar-desc">
-                  Click on the chart to define the point.
-                </div>
-              </div>
-
-              <div id="point-input-ui" style="display: none;">
-                <div class="toolbar-desc">
-                  Define the parameters and fill in their values to determine the point.
-                </div>
-
-                <div class="toolbar-type-input">
-                  <div>
-                    <label>1st Parameter</label>
-                    <select id="p1Type-point" oninput="syncToolbarInputWithFloating('point', 'p1Type')">
-                      <option value="Tdb">Dry Bulb Temp (°C)</option>
-                      <option value="Twb">Wet Bulb Temp (°C)</option>
-                      <option value="RH">Rel. Humidity (%)</option>
-                      <option value="W">Humidity Ratio (kg/kg')</option>
-                      <option value="h">Enthalpy (kJ/kg)</option>
-                    </select>
-                    <input type="number" id="p1Val-point" step="0.1" placeholder="Value" oninput="syncToolbarInputWithFloating('point', 'p1Val')">
-                  </div>
-
-                  <div>
-                    <label>2nd Parameter</label>
-                    <select id="p2Type-point" oninput="syncToolbarInputWithFloating('point', 'p2Type')">
-                      <option value="RH" selected="">Rel. Humidity (%)</option>
-                      <option value="Tdb">Dry Bulb Temp (°C)</option>
-                      <option value="Twb">Wet Bulb Temp (°C)</option>
-                      <option value="W">Humidity Ratio (kg/kg')</option>
-                      <option value="h">Enthalpy (kJ/kg)</option>
-                    </select>
-                    <input type="number" id="p2Val-point" step="0.1" placeholder="Value" oninput="syncToolbarInputWithFloating('point', 'p2Val')">
-                  </div>
-                </div>
-
-                <div class="toolbar-action">
-                  <button class="tool-btn btn-primary" onclick="submitManualInput('point')">Add</button>
-                </div>
-              </div>
-
-            </div>
-
-            <div class="marked-point">
-              <div class="toolbar-head">
-                <h4>Marked Points</h4>
-                <span class="count-badge" id="count-points">0</span>
-              </div>
-              <div id="list-points"></div>
-            </div>
-
-            <div class="comfort-zone">
-              <div class="toolbar-head">
-                <h4>Zones</h4>
-                <span class="count-badge" id="count-zones">0</span>
-              </div>
-              <div id="list-zones"></div>
-            </div>
-
-          </div>
-
-          <div class="controls-scroll item">
-
-            <h3>Chart Settings</h3>
-
-            <div class="input-group">
-              <div class="input-item">
-                <label>Chart Type</label>
-                <div class="toolbar-button c2 chart-type">
-                  <button class="tool-btn psychrometric active" value="psychrometric"
-                    onclick="changeChartType(this.value)">
-                    <img src="../icon/type-psychrometric.png" alt="">
-                    <span>Psychrometric</span>
-                  </button>
-                  <button class="tool-btn mollier" value="mollier" onclick="changeChartType(this.value)">
-                    <img src="../icon/type-mollier.png" alt="">
-                    <span>Mollier</span>
-                  </button>
-                </div>
-              </div>
-              <div class="input-item pressure-input">
-                <label><span class="material-symbols-rounded"> public </span> Atm Pressure</label>
-                <div class="pressure-input-row">
-                  <input type="number" id="pressure" value="101325" oninput="drawChart()" step="100">
-                  <select id="pressure-unit" onchange="updatePressureUnit()">
-                    <option value="Pa">Pa</option>
-                    <option value="kPa">kPa</option>
-                  </select>
-                </div>
-              </div>
-              <div class="input-item grid">
-                <div class="input-item">
-                  <label><span class="material-symbols-rounded"> thermometer_gain </span> Min DB Temp (°C)</label>
-                  <input type="number" id="minTemp" value="-10" oninput="drawChart()">
-                </div>
-                <div class="input-item">
-                  <label><span class="material-symbols-rounded"> thermometer_loss </span> Max DB Temp (°C)</label>
-                  <input type="number" id="maxTemp" value="50" oninput="drawChart()">
-                </div>
-              </div>
-
-              <div class="input-item">
-                <label><span class="material-symbols-rounded"> line_axis </span> Y-axis Type</label>
-                <div class="toolbar-button c2 yAxis-type">
-                  <button class="tool-btn humidityRatio active" value="humidityRatio" onclick="changeYAxisType(this.value)">
-                    <span>
-                      <span class="material-symbols-rounded"> water_do </span>
-                      <span>Humidity Ratio (kg/kg')</span>
-                    </span>
-                  </button>
-                  <button class="tool-btn absoluteHumidity" value="absoluteHumidity" onclick="changeYAxisType(this.value)">
-                    <span>
-                      <span class="material-symbols-rounded"> salinity </span>
-                      <span>Absolute Humidity (g/m³)</span>
-                    </span>
-                  </button>
-                </div>
-              </div>
-              <div class="input-item ratio">
-                <label><span class="material-symbols-rounded"> water_do </span> Max Humidity Ratio (kg/kg')</label>
-                <input type="number" id="maxHum" value="0.030" step="0.001" min="0.001" oninput="syncHumidityInputs('ratio')">
-              </div>
-              <div class="input-item absolute none">
-                <label><span class="material-symbols-rounded"> salinity </span> Max Absolute Humidity (g/m³)</label>
-                <input type="number" id="maxAbsHum" value="31" step="1" oninput="syncHumidityInputs('absolute')">
-              </div>
-
-              <div class="input-item item-border advanced-settings">
-                <div class="advanced-settings-header collapsed" onclick="toggleAdvancedSettings()">
-                  <h4>Advanced Settings</h4>
-                  <span class="material-symbols-rounded" id="advanced-settings-icon">expand_more</span>
-                </div>
-                <div class="setting-legend" id="setting-legend">
-                  <div class="settype-checkbox">
-                    <input type="checkbox" name="set-show-info-panel" id="set-show-info-panel" checked>
-                    <label for="set-show-info-panel">Show Info Panel</label>
-                  </div>
-                  <div class="settype-checkbox">
-                    <input type="checkbox" name="set-show-legend" id="set-show-legend" checked>
-                    <label for="set-show-legend">Show Legend</label>
-                  </div>
-                  <div class="settype-checkbox child">
-                    <input type="checkbox" name="set-show-rh" id="set-show-rh" checked>
-                    <label for="set-show-rh">Relative Humidity</label>
-                  </div>
-                  <div class="settype-checkbox child">
-                    <input type="checkbox" name="set-show-h" id="set-show-h" checked>
-                    <label for="set-show-h">Enthalpy</label>
-                  </div>
-                  <div class="settype-checkbox child">
-                    <input type="checkbox" name="set-show-twb" id="set-show-twb" checked>
-                    <label for="set-show-twb">Wet Bulb Temperature</label>
-                  </div>
-                  <div class="settype-checkbox child">
-                    <input type="checkbox" name="set-show-v" id="set-show-v" checked>
-                    <label for="set-show-v">Specific Volume</label>
-                  </div>
-                  <div class="settype-checkbox child">
-                    <input type="checkbox" name="set-show-sat" id="set-show-sat" checked>
-                    <label for="set-show-sat">Saturation</label>
-                  </div>
-                  <div class="settype-comfort-zone">
-                    <div class="settype-checkbox">
-                      <input type="checkbox" name="set-show-comfort-zone" id="set-show-comfort-zone" onchange="toggleComfortZone()">
-                      <label for="set-show-comfort-zone">Show Comfort Zone</label>
-                    </div>
-                    <div class="comfort-zone-options" id="comfort-zone-options" style="display: none;">
-                      <div class="settype-select">
-                        <label for="comfort-zone-preset">Preset:</label>
-                        <select id="comfort-zone-preset" onchange="changeComfortZonePreset()">
-                          <option value="ashrae-summer">ASHRAE 55 Summer</option>
-                          <option value="ashrae-winter">ASHRAE 55 Winter</option>
-                          <option value="en15251-category-ii">EN 15251 Cat II</option>
-                          <option value="custom">Custom</option>
-                        </select>
-                      </div>
-                      <div class="comfort-zone-custom" id="comfort-zone-custom" style="display: none;">
-                        <div class="comfort-zone-inputs">
-                          <div class="input-row">
-                            <label for="comfort-tmin">T Min (°C):</label>
-                            <input type="number" id="comfort-tmin" value="20" step="0.5" onchange="updateComfortZone()">
-                          </div>
-                          <div class="input-row">
-                            <label for="comfort-tmax">T Max (°C):</label>
-                            <input type="number" id="comfort-tmax" value="26" step="0.5" onchange="updateComfortZone()">
-                          </div>
-                          <div class="input-row">
-                            <label for="comfort-rhmin">RH Min (%):</label>
-                            <input type="number" id="comfort-rhmin" value="30" step="1" onchange="updateComfortZone()">
-                          </div>
-                          <div class="input-row">
-                            <label for="comfort-rhmax">RH Max (%):</label>
-                            <input type="number" id="comfort-rhmax" value="60" step="1" onchange="updateComfortZone()">
-                          </div>
-                        </div>
-                      </div>
-                      <div class="comfort-zone-color">
-                        <label for="comfort-zone-color">Color:</label>
-                        <input type="color" id="comfort-zone-color" value="#4caf50" onchange="updateComfortZone()">
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-          
+      <!-- Mode controls -->
+      <div id="explore-controls" class="mode-panel">
+        <div class="seg-control" id="explore-submode-indicator">
+          <button class="seg-btn active" id="seg-explore-hover" onclick="setExploreSubMode('hover')" title="Hover"><span class="material-symbols-rounded">explore</span>Hover</button>
+          <button class="seg-btn" id="seg-explore-lock" onclick="setExploreSubMode('lock')" title="Lock probe"><span class="material-symbols-rounded">push_pin</span>Lock</button>
+          <button class="seg-btn" id="seg-explore-compare" onclick="setExploreSubMode('compare')" title="Compare A/B"><span class="material-symbols-rounded">compare_arrows</span>A/B</button>
         </div>
 
-        <div class="chart-section">
-          <div id="chart-wrapper">
-            <div id="chart-container"></div>
-            <div id="info-panel">
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:3px 15px;" id="tooltip-grid"></div>
-            </div>
+        <div id="explore-hover-ui">
+          <p class="panel-desc">Move cursor over chart to inspect all psychrometric properties.</p>
+        </div>
+
+        <div id="explore-lock-ui" style="display:none">
+          <p class="panel-desc">Click chart to pin a probe point.</p>
+          <div id="probe-a-status" class="probe-status"></div>
+          <button class="sb-btn danger" onclick="clearProbeAll()">
+            <span class="material-symbols-rounded">clear</span>Clear Probe
+          </button>
+        </div>
+
+        <div id="explore-compare-ui" style="display:none">
+          <p class="panel-desc">Select target A or B, then click the chart to place or replace that probe.</p>
+          <div class="compare-ab-status">
+            <button type="button" id="probe-ab-a" class="probe-ab-badge probe-ab-a active" onclick="setCompareTarget('A')">A: —</button>
+            <button type="button" id="probe-ab-b" class="probe-ab-badge probe-ab-b" onclick="setCompareTarget('B')">B: —</button>
+          </div>
+          <div class="sb-btn-row">
+            <button class="sb-btn" onclick="clearProbeA()">Reset A</button>
+            <button class="sb-btn" onclick="clearProbeB()">Reset B</button>
+            <button class="sb-btn danger" onclick="clearProbeAll()">Clear All</button>
+          </div>
+          <div id="compare-delta-panel"></div>
+        </div>
+      </div>
+
+      <div id="zone-controls" class="mode-panel" style="display:none">
+        <div class="seg-control" id="zone-submode-indicator">
+          <button class="seg-btn active" id="seg-zone-manual" onclick="setZoneSubMode('manual')" title="Click vertices"><span class="material-symbols-rounded">ads_click</span>Click</button>
+          <button class="seg-btn" id="seg-zone-input" onclick="setZoneSubMode('input')" title="Input params"><span class="material-symbols-rounded">edit_note</span>Input</button>
+          <button class="seg-btn" id="seg-zone-range" onclick="setZoneSubMode('range')" title="Range sliders"><span class="material-symbols-rounded">tune</span>Range</button>
+          <button class="seg-btn" id="seg-zone-auto" onclick="setZoneSubMode('auto')" title="Auto zone"><span class="material-symbols-rounded">auto_awesome</span>Auto</button>
+          <button class="seg-btn" id="seg-zone-boolean" onclick="setZoneSubMode('boolean')" title="Boolean op"><span class="material-symbols-rounded">join</span>Bool</button>
+        </div>
+
+        <div id="zone-manual-ui">
+          <p class="panel-desc">Click on chart to define vertices (min 3 pts).</p>
+          <div id="zonePtCount" class="pt-count">0 pts</div>
+          <div class="sb-btn-row">
+            <button class="sb-btn primary" onclick="finishZone()">Finish Zone</button>
+            <button class="sb-btn danger" onclick="cancelZone()">Cancel</button>
           </div>
         </div>
 
-      </div>
-
-      <!-- Context Menu -->
-      <div id="context-menu" class="context-menu" style="display:none;">
-        <div id="context-menu-content"></div>
-      </div>
-
-      <!-- Floating Input Window -->
-      <div id="floating-input-window" class="floating-window">
-        <div class="floating-window-header">
-          <span class="floating-window-title">Input Parameters</span>
-          <span class="floating-window-close" onclick="closeFloatingWindow('floating-input-window')">×</span>
-        </div>
-        <div class="floating-window-content">
-          <input type="hidden" id="floating-target">
-          
-          <div class="field-section">
-            <label>1st Parameter:</label>
-            <div class="param-row">
-              <select id="floating-p1Type" oninput="syncFloatingInputWithToolbar('p1Type')">
-                <option value="t">Dry Bulb Temp (°C)</option>
-                <option value="twb">Wet Bulb Temp (°C)</option>
-                <option value="rh">Rel. Humidity (%)</option>
-                <option value="w">Humidity Ratio (kg/kg')</option>
+        <div id="zone-input-ui" style="display:none">
+          <p class="panel-desc">Enter parameter values to place vertices (min 3 pts).</p>
+          <div class="param-grid">
+            <div>
+              <label>1st Param</label>
+              <select id="p1Type-zone" oninput="syncToolbarInputWithFloating('zone','p1Type')">
+                <option value="Tdb">Dry Bulb (°C)</option>
+                <option value="Twb">Wet Bulb (°C)</option>
+                <option value="RH">Rel. Humidity (%)</option>
+                <option value="W">Humidity Ratio (kg/kg)</option>
                 <option value="h">Enthalpy (kJ/kg)</option>
               </select>
-              <input type="number" id="floating-p1Val" step="any" placeholder="Value" oninput="syncFloatingInputWithToolbar('p1Val')">
+              <input type="number" id="p1Val-zone" step="0.1" placeholder="Value" oninput="syncToolbarInputWithFloating('zone','p1Val')">
             </div>
-          </div>
-          
-          <div class="field-section">
-            <label>2nd Parameter:</label>
-            <div class="param-row">
-              <select id="floating-p2Type" oninput="syncFloatingInputWithToolbar('p2Type')">
-                <option value="rh">Rel. Humidity (%)</option>
-                <option value="t">Dry Bulb Temp (°C)</option>
-                <option value="twb">Wet Bulb Temp (°C)</option>
-                <option value="w">Humidity Ratio (kg/kg')</option>
+            <div>
+              <label>2nd Param</label>
+              <select id="p2Type-zone" oninput="syncToolbarInputWithFloating('zone','p2Type')">
+                <option value="RH" selected>Rel. Humidity (%)</option>
+                <option value="Tdb">Dry Bulb (°C)</option>
+                <option value="Twb">Wet Bulb (°C)</option>
+                <option value="W">Humidity Ratio (kg/kg)</option>
                 <option value="h">Enthalpy (kJ/kg)</option>
               </select>
-              <input type="number" id="floating-p2Val" step="any" placeholder="Value" oninput="syncFloatingInputWithToolbar('p2Val')">
+              <input type="number" id="p2Val-zone" step="0.1" placeholder="Value" oninput="syncToolbarInputWithFloating('zone','p2Val')">
             </div>
           </div>
-          
-          <div class="field-section">
-            <div class="floating-btn-group" id="floating-input-btn-group">
-              <button class="floating-btn btn-primary" onclick="submitFloatingInput()">Add</button>
-              <button class="floating-btn btn-success" id="floating-finish-zone-btn" onclick="finishZone(); closeFloatingWindow('floating-input-window');">Finish Zone</button>
+          <div class="sb-btn-row">
+            <button class="sb-btn" onclick="submitManualInput('zone')">Add</button>
+            <button class="sb-btn primary" onclick="finishZone()">Finish</button>
+          </div>
+        </div>
+
+        <div id="zone-range-ui" style="display:none">
+          <p class="panel-desc">Use sliders to define a rectangular zone by parameter ranges.</p>
+          <div class="range-block">
+            <div class="range-label-row">
+              <span>Dry Bulb Temp</span>
+              <input type="text" value="°C" disabled style="width:32px;text-align:center">
+            </div>
+            <div class="range-row">
+              <label>Min</label>
+              <input type="range" class="range-slider" id="sliderTmin" min="-10" max="60" value="20" oninput="syncRange('Tmin')">
+              <input type="number" class="range-val" id="rangeTmin" min="-10" max="60" value="20" oninput="updateRangeZone()">
+            </div>
+            <div class="range-row">
+              <label>Max</label>
+              <input type="range" class="range-slider" id="sliderTmax" min="-10" max="60" value="30" oninput="syncRange('Tmax')">
+              <input type="number" class="range-val" id="rangeTmax" min="-10" max="60" value="30" oninput="updateRangeZone()">
             </div>
           </div>
+          <div class="range-block">
+            <div class="range-label-row">
+              <span>2nd Parameter</span>
+              <select id="rangeParamType" onchange="setupRangeDefaults()">
+                <option value="RH">Rel. Humidity (%)</option>
+                <option value="Twb">Wet Bulb (°C)</option>
+                <option value="Tdp">Dew Point (°C)</option>
+                <option value="W">Humidity Ratio (kg/kg)</option>
+                <option value="h">Enthalpy (kJ/kg)</option>
+                <option value="v">Spec. Volume (m³/kg)</option>
+              </select>
+            </div>
+            <div class="range-row">
+              <label>Min</label>
+              <input type="range" class="range-slider" id="sliderP2min" oninput="syncRange('P2min')">
+              <input type="number" class="range-val" id="rangeP2min" step="0.1" oninput="updateRangeZone()">
+            </div>
+            <div class="range-row">
+              <label>Max</label>
+              <input type="range" class="range-slider" id="sliderP2max" oninput="syncRange('P2max')">
+              <input type="number" class="range-val" id="rangeP2max" step="0.1" oninput="updateRangeZone()">
+            </div>
+          </div>
+          <div class="sb-btn-row">
+            <button class="sb-btn primary" onclick="finishZone()">Finish Zone</button>
+            <button class="sb-btn danger" onclick="cancelZone()">Cancel</button>
+          </div>
+        </div>
+
+        <div id="zone-auto-ui" style="display:none">
+          <p class="panel-desc">Generate a zone from iso-lines of a parameter between min and max bounds.</p>
+          <div class="param-grid single">
+            <div>
+              <label>Parameter</label>
+              <select id="auto-zone-param">
+                <option value="RH">Rel. Humidity (%)</option>
+                <option value="VPD">VPD (kPa)</option>
+                <option value="W">Humidity Ratio (kg/kg)</option>
+                <option value="h">Enthalpy (kJ/kg)</option>
+                <option value="Twb">Wet Bulb Temp (°C)</option>
+                <option value="Tdp">Dew Point (°C)</option>
+              </select>
+            </div>
+            <div>
+              <label>Min</label>
+              <input type="number" id="auto-zone-min" step="0.1" placeholder="e.g. 40">
+            </div>
+            <div>
+              <label>Max</label>
+              <input type="number" id="auto-zone-max" step="0.1" placeholder="e.g. 70">
+            </div>
+          </div>
+          <div class="sb-btn-row">
+            <button class="sb-btn" onclick="previewAutoZone()">Preview</button>
+            <button class="sb-btn primary" onclick="submitAutoZone()">Create</button>
+          </div>
+        </div>
+
+        <div id="zone-boolean-ui" style="display:none">
+          <p class="panel-desc">Boolean operation between two existing zones.</p>
+          <div class="param-grid single">
+            <div>
+              <label>Zone A</label>
+              <select id="boolean-zone-a"></select>
+            </div>
+            <div>
+              <label>Zone B</label>
+              <select id="boolean-zone-b"></select>
+            </div>
+            <div>
+              <label>Operation</label>
+              <select id="boolean-op">
+                <option value="intersect">Intersect (A ∩ B)</option>
+                <option value="union">Union (A ∪ B)</option>
+                <option value="difference">Difference (A − B)</option>
+              </select>
+            </div>
+          </div>
+          <button class="sb-btn primary w-full" onclick="applyZoneBoolean()">Apply</button>
         </div>
       </div>
 
-      <!-- Floating Edit Window -->
-      <div id="floating-edit-window" class="floating-window">
-        <div class="floating-window-header">
-          <span class="floating-window-title" id="editModalTitle">Edit Item</span>
-          <span class="floating-window-close" onclick="closeFloatingWindow('floating-edit-window')">×</span>
+      <div id="point-controls" class="mode-panel" style="display:none">
+        <div class="seg-control" id="point-submode-indicator">
+          <button class="seg-btn active" id="seg-point-manual" onclick="setPointSubMode('manual')" title="Click to place"><span class="material-symbols-rounded">ads_click</span>Click</button>
+          <button class="seg-btn" id="seg-point-input" onclick="setPointSubMode('input')" title="Input params"><span class="material-symbols-rounded">edit_note</span>Input</button>
+          <button class="seg-btn" id="seg-point-batch" onclick="setPointSubMode('batch')" title="Batch CSV"><span class="material-symbols-rounded">data_table</span>Batch</button>
+          <button class="seg-btn" id="seg-point-sensor" onclick="setPointSubMode('sensor')" title="Live sensor"><span class="material-symbols-rounded">sensors</span>Sensor</button>
         </div>
-        <div class="floating-window-content">
-          <input type="hidden" id="editId">
-          <input type="hidden" id="editType">
-          
-          <div class="field-section">
-            <label>Name:</label>
-            <input type="text" id="editName">
-          </div>
-          
-          <div class="field-section" id="colorContainer">
-            <label>Color:</label>
-            <input type="color" id="editColor" class="color-picker">
-          </div>
-          
-          <div class="field-section">
-            <div class="floating-btn-group cols-2">
-              <button class="floating-btn btn-primary" onclick="saveEditSettings()">Save</button>
-              <button class="floating-btn btn-danger" onclick="closeFloatingWindow('floating-edit-window')">Cancel</button>
+
+        <div id="point-manual-ui">
+          <p class="panel-desc">Click on the chart to add a point.</p>
+        </div>
+
+        <div id="point-input-ui" style="display:none">
+          <p class="panel-desc">Enter parameter values to place a point.</p>
+          <div class="param-grid">
+            <div>
+              <label>1st Param</label>
+              <select id="p1Type-point" oninput="syncToolbarInputWithFloating('point','p1Type')">
+                <option value="Tdb">Dry Bulb (°C)</option>
+                <option value="Twb">Wet Bulb (°C)</option>
+                <option value="RH">Rel. Humidity (%)</option>
+                <option value="W">Humidity Ratio (kg/kg)</option>
+                <option value="h">Enthalpy (kJ/kg)</option>
+              </select>
+              <input type="number" id="p1Val-point" step="0.1" placeholder="Value" oninput="syncToolbarInputWithFloating('point','p1Val')">
+            </div>
+            <div>
+              <label>2nd Param</label>
+              <select id="p2Type-point" oninput="syncToolbarInputWithFloating('point','p2Type')">
+                <option value="RH" selected>Rel. Humidity (%)</option>
+                <option value="Tdb">Dry Bulb (°C)</option>
+                <option value="Twb">Wet Bulb (°C)</option>
+                <option value="W">Humidity Ratio (kg/kg)</option>
+                <option value="h">Enthalpy (kJ/kg)</option>
+              </select>
+              <input type="number" id="p2Val-point" step="0.1" placeholder="Value" oninput="syncToolbarInputWithFloating('point','p2Val')">
             </div>
           </div>
+          <button class="sb-btn primary w-full" onclick="submitManualInput('point')">Add Point</button>
+        </div>
+
+        <div id="point-batch-ui" style="display:none">
+          <p class="panel-desc">Paste CSV: <code>name, Tdb, W</code> or <code>Tdb, W</code>. Lines starting with <code>#</code> are ignored.</p>
+          <textarea id="batch-csv-input" rows="5" placeholder="25.0, 0.010&#10;30.0, 0.012&#10;Sensor A, 22.5, 0.008"></textarea>
+          <div id="batch-parse-preview"></div>
+          <div class="sb-btn-row">
+            <button class="sb-btn" onclick="previewBatchPoints()">Preview</button>
+            <button class="sb-btn primary" onclick="submitBatchPoints()">Add All</button>
+          </div>
+        </div>
+
+        <div id="point-sensor-ui" style="display:none">
+          <p class="panel-desc">Live sensor point updated via HTTP JSON endpoint.</p>
+          <div class="param-grid single">
+            <div>
+              <label>Sensor Name</label>
+              <input type="text" id="sensor-name" placeholder="e.g. GH-Sensor-1">
+            </div>
+            <div>
+              <label>Data URL</label>
+              <input type="url" id="sensor-url" placeholder="http://192.168.1.10/data">
+            </div>
+            <div class="two-col">
+              <div>
+                <label>Tdb field</label>
+                <input type="text" id="sensor-tdb-field" value="tdb">
+              </div>
+              <div>
+                <label>W field</label>
+                <input type="text" id="sensor-w-field" value="w">
+              </div>
+            </div>
+            <div>
+              <label>Interval (s)</label>
+              <input type="number" id="sensor-interval" value="5" min="1" max="3600">
+            </div>
+          </div>
+          <button class="sb-btn primary w-full" onclick="addSensorPoint()">
+            <span class="material-symbols-rounded">sensors</span>Add Sensor
+          </button>
+          <div id="sensor-list-panel"></div>
         </div>
       </div>
 
-      <!-- Floating Range Window -->
-      <div id="floating-range-window" class="floating-window">
-        <div class="floating-window-header">
-          <span class="floating-window-title">Range Parameters</span>
-          <span class="floating-window-close" onclick="closeFloatingWindow('floating-range-window')">×</span>
+      <!-- ── Points list -->
+      <div class="sb-section">
+        <div class="sb-section-head" onclick="toggleSbSection(this)">
+          <span class="material-symbols-rounded">pin_drop</span>
+          <span class="sb-section-title">Points</span>
+          <span class="count-badge" id="count-points">0</span>
+          <span class="material-symbols-rounded sb-expand-icon">expand_more</span>
         </div>
-        <div class="floating-window-content">
-          <div class="field-section">
-            <label>Tdb Min (°C):</label>
-            <input type="range" id="floating-sliderTmin" min="-10" max="60" step="0.5" oninput="syncFloatingRange('Tmin')">
-            <input type="number" id="floating-rangeTmin" min="-10" max="60" step="any" oninput="applyFloatingRange();">
-          </div>
-          
-          <div class="field-section">
-            <label>Tdb Max (°C):</label>
-            <input type="range" id="floating-sliderTmax" min="-10" max="60" step="0.5" oninput="syncFloatingRange('Tmax')">
-            <input type="number" id="floating-rangeTmax" min="-10" max="60" step="any" oninput="applyFloatingRange();">
-          </div>
-          
-          <div class="field-section">
-            <label>2nd Parameter:</label>
-            <select id="floating-rangeParamType" onchange="applyFloatingRange();">
-              <option value="RH">Rel. Humidity (%)</option>
-              <option value="Twb">Wet Bulb (°C)</option>
-              <option value="Tdp">Dew Point (°C)</option>
-              <option value="W">Humidity Ratio (kg/kg)</option>
-              <option value="h">Enthalpy (kJ/kg)</option>
-              <option value="v">Spec. Volume (m³/kg)</option>
-            </select>
-          </div>
-          
-          <div class="field-section">
-            <label>Min Value:</label>
-            <input type="range" id="floating-sliderP2min" step="1" oninput="syncFloatingRange('P2min')">
-            <input type="number" id="floating-rangeP2min" step="0.1" oninput="applyFloatingRange();">
-          </div>
-          
-          <div class="field-section">
-            <label>Max Value:</label>
-            <input type="range" id="floating-sliderP2max" step="1" oninput="syncFloatingRange('P2max')">
-            <input type="number" id="floating-rangeP2max" step="0.1" oninput="applyFloatingRange();">
-          </div>
-          
-          <div class="field-section">
-            <div class="floating-btn-group cols-2">
-              <button class="floating-btn btn-success" onclick="finishZone(); closeFloatingWindow('floating-range-window');">Finish Zone</button>
-              <button class="floating-btn btn-danger" onclick="cancelZone(); closeFloatingWindow('floating-range-window');">Cancel</button>
-            </div>
-          </div>
-        </div>
+        <div class="sb-section-body" id="list-points" style="display:none"></div>
       </div>
 
+      <!-- ── Zones list -->
+      <div class="sb-section">
+        <div class="sb-section-head" onclick="toggleSbSection(this)">
+          <span class="material-symbols-rounded">add_triangle</span>
+          <span class="sb-section-title">Zones</span>
+          <span class="count-badge" id="count-zones">0</span>
+          <span class="material-symbols-rounded sb-expand-icon">expand_more</span>
+        </div>
+        <div class="sb-section-body" id="list-zones" style="display:none"></div>
+      </div>
+
+    </aside>
+
+    <!-- ─────────────────────────────────────────── CHART MAIN -->
+    <main id="app-main">
+      <div id="chart-wrapper">
+        <div id="chart-container"></div>
+        <div id="info-panel">
+          <div id="tooltip-grid"></div>
+        </div>
+      </div>
     </main>
 
-    <script src="./script.js"></script>
+  </div><!-- #app-body -->
 
-  </body>
+  <!-- ═══════════════════════════════════════════════════ SETTINGS PANEL -->
+  <div id="settings-overlay" onclick="toggleSettingsPanel()"></div>
+  <div id="settings-panel">
+    <div id="settings-panel-header">
+      <span><span class="material-symbols-rounded">tune</span> Settings</span>
+      <button id="settings-close-btn" onclick="toggleSettingsPanel()">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+    <div id="settings-panel-body">
 
+      <div class="seg-control settings-tabs" id="settings-tabs">
+        <button class="seg-btn active" type="button" data-settings-tab-btn="chart" onclick="setSettingsTab('chart')">
+          <span class="material-symbols-rounded">tune</span>
+          Chart
+        </button>
+        <button class="seg-btn" type="button" data-settings-tab-btn="range" onclick="setSettingsTab('range')">
+          <span class="material-symbols-rounded">straighten</span>
+          Range
+        </button>
+        <button class="seg-btn" type="button" data-settings-tab-btn="cursor" onclick="setSettingsTab('cursor')">
+          <span class="material-symbols-rounded">my_location</span>
+          Cursor
+        </button>
+        <button class="seg-btn" type="button" data-settings-tab-btn="display" onclick="setSettingsTab('display')">
+          <span class="material-symbols-rounded">visibility</span>
+          Display
+        </button>
+      </div>
+
+      <div class="settings-tab-panels">
+        <section class="settings-tab-panel active" data-settings-tab="chart">
+          <div class="settings-group">
+            <div class="settings-group-title">Chart Type</div>
+            <div class="toolbar-button c2 chart-type">
+              <button class="tool-btn psychrometric active" value="psychrometric" onclick="changeChartType(this.value)">
+                <img src="https://app.kodejarwo.com/icon/type-psychrometric.png" alt="" style="width:18px">
+                Psychrometric
+              </button>
+              <button class="tool-btn mollier" value="mollier" onclick="changeChartType(this.value)">
+                <img src="https://app.kodejarwo.com/icon/type-mollier.png" alt="" style="width:18px">
+                Mollier
+              </button>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-group-title">Y-Axis Type</div>
+            <div class="toolbar-button c2 yAxis-type">
+              <button class="tool-btn humidityRatio active" value="humidityRatio" onclick="changeYAxisType(this.value)">
+                <span class="material-symbols-rounded">water_do</span>kg/kg'
+              </button>
+              <button class="tool-btn absoluteHumidity" value="absoluteHumidity" onclick="changeYAxisType(this.value)">
+                <span class="material-symbols-rounded">salinity</span>g/m³
+              </button>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-group-title">Atmospheric Pressure</div>
+            <div class="pressure-input-row">
+              <input type="number" id="pressure" value="101325" oninput="drawChart()" step="100">
+              <select id="pressure-unit" onchange="updatePressureUnit()">
+                <option value="Pa">Pa</option>
+                <option value="kPa">kPa</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="tool-btn danger tool-btn-reset" type="button" onclick="resetLocalState()">
+            <span class="material-symbols-rounded">restart_alt</span>Reset to Default
+          </button>
+        </section>
+
+        <section class="settings-tab-panel" data-settings-tab="range">
+          <div class="settings-group">
+            <div class="settings-group-title">Temperature Range (°C)</div>
+            <div class="settings-row2">
+              <div>
+                <label>Min DB Temp</label>
+                <input type="number" id="minTemp" value="-10" oninput="drawChart()">
+              </div>
+              <div>
+                <label>Max DB Temp</label>
+                <input type="number" id="maxTemp" value="50" oninput="drawChart()">
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group input-item ratio">
+            <div class="settings-group-title">Max Humidity Ratio (kg/kg')</div>
+            <input type="number" id="maxHum" value="0.030" step="0.001" min="0.001" oninput="State.viewMinH=0; State.viewMinAH=0; syncHumidityInputs('ratio')">
+          </div>
+
+          <div class="settings-group input-item absolute none">
+            <div class="settings-group-title">Max Absolute Humidity (g/m³)</div>
+            <input type="number" id="maxAbsHum" value="31" step="1" oninput="State.viewMinH=0; State.viewMinAH=0; syncHumidityInputs('absolute')">
+          </div>
+        </section>
+
+        <section class="settings-tab-panel" data-settings-tab="cursor">
+          <div class="settings-group">
+            <div class="settings-group-title">Cursor</div>
+            <div class="settype-checkbox">
+              <input type="checkbox" name="set-show-info-panel" id="set-show-info-panel" checked>
+              <label for="set-show-info-panel">Show Info Panel</label>
+            </div>
+            <div class="settings-note">Choose the hover fields below. Selected fields appear first, and you can reorder them with the arrow buttons.</div>
+            <div id="cursor-fields-list" class="cursor-fields-list"></div>
+          </div>
+        </section>
+
+        <section class="settings-tab-panel" data-settings-tab="display">
+          <div class="settings-group">
+            <div class="settings-group-title">Legends & Labels</div>
+            <div class="advanced-controls-grid">
+              <div class="settype-checkbox">
+                <input type="checkbox" name="set-show-legend" id="set-show-legend" checked>
+                <label for="set-show-legend">Show Legends</label>
+              </div>
+              <div>
+                <label for="set-line-label-step">Visible labels</label>
+                <select id="set-line-label-step">
+                  <option value="1">Every line</option>
+                  <option value="2" selected>Every 2nd line</option>
+                  <option value="3">Every 3rd line</option>
+                  <option value="4">Every 4th line</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-group-title">Visible Lines</div>
+            <div class="advanced-checkbox-grid">
+              <label class="settype-checkbox pill-check" for="set-show-rh">
+                <input type="checkbox" name="set-show-rh" id="set-show-rh" checked>
+                <span>Relative Humidity</span>
+              </label>
+              <label class="settype-checkbox pill-check" for="set-show-h">
+                <input type="checkbox" name="set-show-h" id="set-show-h" checked>
+                <span>Enthalpy</span>
+              </label>
+              <label class="settype-checkbox pill-check" for="set-show-twb">
+                <input type="checkbox" name="set-show-twb" id="set-show-twb" checked>
+                <span>Wet Bulb</span>
+              </label>
+              <label class="settype-checkbox pill-check" for="set-show-v">
+                <input type="checkbox" name="set-show-v" id="set-show-v" checked>
+                <span>Specific Volume</span>
+              </label>
+              <label class="settype-checkbox pill-check" for="set-show-sat">
+                <input type="checkbox" name="set-show-sat" id="set-show-sat" checked>
+                <span>Saturation</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-group-title">Comfort Zone</div>
+            <div class="settype-comfort-zone">
+              <div class="settype-checkbox">
+                <input type="checkbox" name="set-show-comfort-zone" id="set-show-comfort-zone" onchange="toggleComfortZone()">
+                <label for="set-show-comfort-zone">Show Comfort Zone</label>
+              </div>
+              <div class="comfort-zone-options" id="comfort-zone-options" style="display:none">
+                <div class="settype-select">
+                  <label for="comfort-zone-preset">Preset:</label>
+                  <select id="comfort-zone-preset" onchange="changeComfortZonePreset()">
+                    <option value="ashrae-summer">ASHRAE 55 Summer</option>
+                    <option value="ashrae-winter">ASHRAE 55 Winter</option>
+                    <option value="en15251-category-ii">EN 15251 Cat II</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                </div>
+                <div class="comfort-zone-custom" id="comfort-zone-custom" style="display:none">
+                  <div class="comfort-zone-inputs">
+                    <div class="input-row">
+                      <label for="comfort-tmin">T Min (°C):</label>
+                      <input type="number" id="comfort-tmin" value="20" step="0.5" onchange="updateComfortZone()">
+                    </div>
+                    <div class="input-row">
+                      <label for="comfort-tmax">T Max (°C):</label>
+                      <input type="number" id="comfort-tmax" value="26" step="0.5" onchange="updateComfortZone()">
+                    </div>
+                    <div class="input-row">
+                      <label for="comfort-rhmin">RH Min (%):</label>
+                      <input type="number" id="comfort-rhmin" value="30" step="1" onchange="updateComfortZone()">
+                    </div>
+                    <div class="input-row">
+                      <label for="comfort-rhmax">RH Max (%):</label>
+                      <input type="number" id="comfort-rhmax" value="60" step="1" onchange="updateComfortZone()">
+                    </div>
+                  </div>
+                </div>
+                <div class="comfort-zone-color">
+                  <label for="comfort-zone-color">Color:</label>
+                  <input type="color" id="comfort-zone-color" value="#4caf50" onchange="updateComfortZone()">
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+    </div><!-- #settings-panel-body -->
+  </div><!-- #settings-panel -->
+
+  <!-- sidebar backdrop for mobile -->
+  <div id="sidebar-backdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- ═══════════════════════════════════════════ FLOATING WINDOWS -->
+  <div id="floating-input-window" class="floating-window">
+    <div class="floating-window-header">
+      <span class="floating-window-title">Input Parameters</span>
+      <span class="floating-window-close" onclick="closeFloatingWindow('floating-input-window')">×</span>
+    </div>
+    <div class="floating-window-content">
+      <input type="hidden" id="floating-target">
+      <div class="field-section">
+        <label>1st Parameter:</label>
+        <div class="param-row">
+          <select id="floating-p1Type" oninput="syncFloatingInputWithToolbar('p1Type')">
+            <option value="t">Dry Bulb Temp (°C)</option>
+            <option value="twb">Wet Bulb Temp (°C)</option>
+            <option value="rh">Rel. Humidity (%)</option>
+            <option value="w">Humidity Ratio (kg/kg')</option>
+            <option value="h">Enthalpy (kJ/kg)</option>
+          </select>
+          <input type="number" id="floating-p1Val" step="any" placeholder="Value" oninput="syncFloatingInputWithToolbar('p1Val')">
+        </div>
+      </div>
+      <div class="field-section">
+        <label>2nd Parameter:</label>
+        <div class="param-row">
+          <select id="floating-p2Type" oninput="syncFloatingInputWithToolbar('p2Type')">
+            <option value="rh">Rel. Humidity (%)</option>
+            <option value="t">Dry Bulb Temp (°C)</option>
+            <option value="twb">Wet Bulb Temp (°C)</option>
+            <option value="w">Humidity Ratio (kg/kg')</option>
+            <option value="h">Enthalpy (kJ/kg)</option>
+          </select>
+          <input type="number" id="floating-p2Val" step="any" placeholder="Value" oninput="syncFloatingInputWithToolbar('p2Val')">
+        </div>
+      </div>
+      <div class="field-section">
+        <div class="floating-btn-group" id="floating-input-btn-group">
+          <button class="floating-btn btn-primary" onclick="submitFloatingInput()">Add</button>
+          <button class="floating-btn btn-success" id="floating-finish-zone-btn" onclick="finishZone(); closeFloatingWindow('floating-input-window');">Finish Zone</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="floating-edit-window" class="floating-window">
+    <div class="floating-window-header">
+      <span class="floating-window-title" id="editModalTitle">Edit Item</span>
+      <span class="floating-window-close" onclick="closeFloatingWindow('floating-edit-window')">×</span>
+    </div>
+    <div class="floating-window-content">
+      <input type="hidden" id="editId">
+      <input type="hidden" id="editType">
+      <div class="field-section">
+        <label>Name:</label>
+        <input type="text" id="editName">
+      </div>
+      <div class="field-section" id="colorContainer">
+        <label>Color:</label>
+        <input type="color" id="editColor" class="color-picker">
+      </div>
+      <div class="field-section">
+        <div class="floating-btn-group cols-2">
+          <button class="floating-btn btn-primary" onclick="saveEditSettings()">Save</button>
+          <button class="floating-btn btn-danger" onclick="closeFloatingWindow('floating-edit-window')">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="floating-detail-window" class="floating-window floating-detail-window">
+    <div class="floating-window-header">
+      <span class="floating-window-title" id="detailModalTitle">Details</span>
+      <span class="floating-window-close" onclick="closeFloatingWindow('floating-detail-window')">×</span>
+    </div>
+    <div class="floating-window-content" id="detailModalContent"></div>
+  </div>
+
+  <div id="floating-range-window" class="floating-window">
+    <div class="floating-window-header">
+      <span class="floating-window-title">Range Parameters</span>
+      <span class="floating-window-close" onclick="closeFloatingWindow('floating-range-window')">×</span>
+    </div>
+    <div class="floating-window-content">
+      <div class="field-section">
+        <label>Tdb Min (°C):</label>
+        <input type="range" id="floating-sliderTmin" min="-10" max="60" step="0.5" oninput="syncFloatingRange('Tmin')">
+        <input type="number" id="floating-rangeTmin" min="-10" max="60" step="any" oninput="applyFloatingRange();">
+      </div>
+      <div class="field-section">
+        <label>Tdb Max (°C):</label>
+        <input type="range" id="floating-sliderTmax" min="-10" max="60" step="0.5" oninput="syncFloatingRange('Tmax')">
+        <input type="number" id="floating-rangeTmax" min="-10" max="60" step="any" oninput="applyFloatingRange();">
+      </div>
+      <div class="field-section">
+        <label>2nd Parameter:</label>
+        <select id="floating-rangeParamType" onchange="applyFloatingRange();">
+          <option value="RH">Rel. Humidity (%)</option>
+          <option value="Twb">Wet Bulb (°C)</option>
+          <option value="Tdp">Dew Point (°C)</option>
+          <option value="W">Humidity Ratio (kg/kg)</option>
+          <option value="h">Enthalpy (kJ/kg)</option>
+          <option value="v">Spec. Volume (m³/kg)</option>
+        </select>
+      </div>
+      <div class="field-section">
+        <label>Min Value:</label>
+        <input type="range" id="floating-sliderP2min" step="1" oninput="syncFloatingRange('P2min')">
+        <input type="number" id="floating-rangeP2min" step="0.1" oninput="applyFloatingRange();">
+      </div>
+      <div class="field-section">
+        <label>Max Value:</label>
+        <input type="range" id="floating-sliderP2max" step="1" oninput="syncFloatingRange('P2max')">
+        <input type="number" id="floating-rangeP2max" step="0.1" oninput="applyFloatingRange();">
+      </div>
+      <div class="field-section">
+        <div class="floating-btn-group cols-2">
+          <button class="floating-btn btn-success" onclick="finishZone(); closeFloatingWindow('floating-range-window');">Finish Zone</button>
+          <button class="floating-btn btn-danger" onclick="cancelZone(); closeFloatingWindow('floating-range-window');">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="./xlsx.min.js"></script>
+  <script src="./script.js"></script>
+  <script>
+    // ── Topbar dropdown helpers ─────────────────────────────────
+    function toggleTopbarDropdown(id, btn) {
+      const dd = document.getElementById(id);
+      const isOpen = dd.style.display === 'block';
+      closeTopbarDropdowns();
+      if (!isOpen) {
+        const rect = btn.getBoundingClientRect();
+        const edge = 12;
+        dd.style.visibility = 'hidden';
+        dd.style.display = 'block';
+        const ddRect = dd.getBoundingClientRect();
+        let left = rect.left;
+        let top = rect.bottom + 8;
+        if (left + ddRect.width > window.innerWidth - edge) {
+          left = window.innerWidth - ddRect.width - edge;
+        }
+        if (left < edge) left = edge;
+        if (top + ddRect.height > window.innerHeight - edge) {
+          top = rect.top - ddRect.height - 8;
+        }
+        if (top < edge) top = edge;
+        dd.style.left = left + 'px';
+        dd.style.top = top + 'px';
+        dd.style.visibility = 'visible';
+      }
+    }
+    function closeTopbarDropdowns() {
+      document.querySelectorAll('.topbar-dropdown').forEach(d => {
+        d.style.display = 'none';
+        d.style.visibility = 'visible';
+      });
+    }
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.has-dropdown') && !e.target.closest('.topbar-dropdown')) {
+        closeTopbarDropdowns();
+      }
+    });
+
+    // ── Settings panel toggle ───────────────────────────────────
+    function toggleSettingsPanel() {
+      const panel   = document.getElementById('settings-panel');
+      const overlay = document.getElementById('settings-overlay');
+      if (panel._closeResetTimer) {
+        clearTimeout(panel._closeResetTimer);
+        panel._closeResetTimer = null;
+      }
+      const willOpen = !panel.classList.contains('open');
+      closeTopbarDropdowns();
+      if (willOpen) {
+        if (typeof resetPopupWindowFrame === 'function') {
+          resetPopupWindowFrame(panel);
+        } else {
+          panel.style.left = '50%';
+          panel.style.top = '50%';
+          panel.style.transform = 'translate(-50%, -50%)';
+          panel.style.width = '';
+          panel.style.height = '';
+        }
+        panel.classList.add('open');
+        overlay.style.display = 'none';
+        if (typeof makeWindowDraggable === 'function') {
+          makeWindowDraggable(panel, '#settings-panel-header');
+        }
+        if (typeof scheduleAnimatedTabRefresh === 'function') {
+          requestAnimationFrame(() => scheduleAnimatedTabRefresh());
+        }
+      } else {
+        panel.classList.remove('open');
+        overlay.style.display = 'none';
+        panel._closeResetTimer = window.setTimeout(() => {
+          if (!panel.classList.contains('open') && typeof resetPopupWindowFrame === 'function') {
+            resetPopupWindowFrame(panel);
+          }
+          panel._closeResetTimer = null;
+        }, 280);
+      }
+    }
+
+    // ── Sidebar section toggle ──────────────────────────────────
+    function toggleSbSection(head) {
+      const body = head.nextElementSibling;
+      const icon = head.querySelector('.sb-expand-icon');
+      const collapsed = body.style.display === 'none';
+      body.style.display = collapsed ? '' : 'none';
+      if (icon) icon.style.transform = collapsed ? 'rotate(180deg)' : '';
+    }
+    // ── Mobile sidebar ────────────────────────────────────
+    function toggleMobileSidebar() {
+      document.getElementById('app-sidebar').classList.toggle('mobile-open');
+    }
+    function closeMobileSidebar() {
+      document.getElementById('app-sidebar').classList.remove('mobile-open');
+    }  </script>
+</body>
 </html>

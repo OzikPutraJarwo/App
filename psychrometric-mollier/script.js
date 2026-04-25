@@ -85,6 +85,11 @@ const State = {
   targetForManual: null,
   zoneSubMode: "manual",
   pointSubMode: "manual",
+  exploreSubMode: "hover",
+  probeA: null,
+  probeB: null,
+  compareTarget: "A",
+  sensors: [],
   rangePreview: [],
   yAxisType: "humidityRatio",
   visibility: {
@@ -102,10 +107,14 @@ const State = {
     tMax: 26,
     rhMin: 30,
     rhMax: 60
-  }
+  },
+  viewMinH: 0,  // lower bound of visible W window (for panning, always >= 0)
+  viewMinAH: 0  // lower bound of visible AH window (g/m3)
 };
 
 historyManager.push(State);
+
+const _sensorIntervals = {};
 
 const Psychro = {
   R_DA: 287.058,
@@ -185,6 +194,10 @@ const Psychro = {
 
     if (type1 === "W") {
       const w = val1;
+
+      // Direct solution: both unknowns are fully determined
+      if (type2 === "Tdb") return { t: val2, w };
+
       let tLow = -50,
         tHigh = 100,
         tMid = 0;
@@ -213,6 +226,7 @@ const Psychro = {
     let tLow = -20,
       tHigh = 100,
       tMid = 0;
+    let lastWGuess = 0;
     for (let i = 0; i < 50; i++) {
       tMid = (tLow + tHigh) / 2;
 
@@ -232,6 +246,7 @@ const Psychro = {
         else wL = wM;
       }
       let wGuess = wM;
+      lastWGuess = wGuess;
 
       let v2Calc = 0;
       if (type2 === "RH") {
@@ -250,7 +265,7 @@ const Psychro = {
         else tLow = tMid;
       }
     }
-    return { t: tMid, w: 0.01 };
+    return { t: tMid, w: lastWGuess };
   },
 
   getWFromTwbLine: (Tdb, Twb, Patm) => {
@@ -399,29 +414,37 @@ function changeYAxisType(type) {
 }
 
 function syncHumidityInputs(source) {
+  if (source === 'ratio') {
+    _syncAbsHumFromRatio();
+  } else if (source === 'absolute') {
+    _syncRatioFromAbsHum();
+  }
+
+  drawChart();
+}
+
+function _syncAbsHumFromRatio() {
   const Patm = getPressureInPa();
   const minT = parseFloat(document.getElementById("minTemp").value);
   const maxT = parseFloat(document.getElementById("maxTemp").value);
   const elMaxHum = document.getElementById("maxHum");
   const elMaxAbsHum = document.getElementById("maxAbsHum");
+  const valW = parseFloat(elMaxHum.value);
+  if (!elMaxAbsHum || isNaN(valW)) return;
+  const avgT = (minT + maxT) / 2;
+  elMaxAbsHum.value = calculateAbsoluteHumidity(avgT, valW, Patm).toFixed(1);
+}
 
-  if (source === 'ratio') {
-    const valW = parseFloat(elMaxHum.value);
-    if (!isNaN(valW)) {
-      const avgT = (minT + maxT) / 2;
-      const valAH = calculateAbsoluteHumidity(avgT, valW, Patm);
-      elMaxAbsHum.value = valAH.toFixed(1);
-    }
-  } else if (source === 'absolute') {
-    const valAH = parseFloat(elMaxAbsHum.value);
-    if (!isNaN(valAH)) {
-      const avgT = (minT + maxT) / 2;
-      const valW = getWFromAbsoluteHumidity(avgT, valAH, Patm);
-      elMaxHum.value = valW.toFixed(4);
-    }
-  }
-
-  drawChart();
+function _syncRatioFromAbsHum() {
+  const Patm = getPressureInPa();
+  const minT = parseFloat(document.getElementById("minTemp").value);
+  const maxT = parseFloat(document.getElementById("maxTemp").value);
+  const elMaxHum = document.getElementById("maxHum");
+  const elMaxAbsHum = document.getElementById("maxAbsHum");
+  const valAH = parseFloat(elMaxAbsHum.value);
+  if (!elMaxHum || isNaN(valAH)) return;
+  const avgT = (minT + maxT) / 2;
+  elMaxHum.value = getWFromAbsoluteHumidity(avgT, valAH, Patm).toFixed(4);
 }
 
 function updatePressureUnit() {
@@ -462,6 +485,7 @@ function getPressureInPa() {
 function toggleAdvancedSettings() {
   const header = document.querySelector(".advanced-settings-header");
   const icon = document.getElementById("advanced-settings-icon");
+  if (!header || !icon) return;
   
   header.classList.toggle("collapsed");
   
@@ -470,6 +494,18 @@ function toggleAdvancedSettings() {
   } else {
     icon.textContent = "expand_less";
   }
+}
+
+function setSettingsTab(tabName) {
+  document.querySelectorAll("#settings-tabs .seg-btn").forEach((button) => {
+    button.classList.toggle("active", button.dataset.settingsTabBtn === tabName);
+  });
+
+  document.querySelectorAll(".settings-tab-panel").forEach((panel) => {
+    panel.classList.toggle("active", panel.dataset.settingsTab === tabName);
+  });
+
+  scheduleAnimatedTabRefresh();
 }
 
 const RangeConfigs = {
@@ -555,23 +591,60 @@ function validateRangeInputs(minId, maxId, type = "Tdb") {
   }
 }
 
-function updateTabStyles(tabsSelector, activeTabId) {
-  document.querySelectorAll(tabsSelector).forEach((t) => {
-    t.style.background = "rgba(255,255,255,0.5)";
-    t.style.color = "#1565c0";
-    t.classList.remove("active");
-  });
-  const activeTab = document.querySelector(activeTabId);
-  if (activeTab) {
-    activeTab.style.background = "#2196f3";
-    activeTab.style.color = "white";
-    activeTab.classList.add("active");
+const ANIMATED_TAB_CONTAINERS = "#app-modebar, .seg-control";
+
+function ensureTabIndicator(container) {
+  let indicator = container.querySelector(":scope > .tab-indicator");
+  if (!indicator) {
+    indicator = document.createElement("span");
+    indicator.className = "tab-indicator";
+    container.prepend(indicator);
   }
+  return indicator;
+}
+
+function syncAnimatedTabIndicator(container) {
+  if (!container) return;
+
+  const indicator = ensureTabIndicator(container);
+  const activeButton = Array.from(container.children).find((child) =>
+    child.matches?.(".modebar-btn.active, .seg-btn.active")
+  );
+
+  if (!activeButton || !activeButton.offsetWidth || !container.getClientRects().length) {
+    indicator.style.opacity = "0";
+    return;
+  }
+
+  indicator.style.opacity = "1";
+  indicator.style.width = `${activeButton.offsetWidth}px`;
+  indicator.style.height = `${activeButton.offsetHeight}px`;
+  indicator.style.transform = `translate3d(${activeButton.offsetLeft}px, ${activeButton.offsetTop}px, 0)`;
+  indicator.style.borderRadius = window.getComputedStyle(activeButton).borderRadius;
+}
+
+function refreshAnimatedTabs() {
+  document.querySelectorAll(ANIMATED_TAB_CONTAINERS).forEach(syncAnimatedTabIndicator);
+}
+
+function scheduleAnimatedTabRefresh() {
+  if (scheduleAnimatedTabRefresh._raf) {
+    cancelAnimationFrame(scheduleAnimatedTabRefresh._raf);
+  }
+  scheduleAnimatedTabRefresh._raf = requestAnimationFrame(() => {
+    refreshAnimatedTabs();
+    scheduleAnimatedTabRefresh._raf = null;
+  });
 }
 
 function setZoneSubMode(subMode) {
   State.zoneSubMode = subMode;
-  updateTabStyles(".z-tab", ".zone-tabs #tab-" + subMode);
+  const icons = { manual: "ads_click", input: "edit_note", range: "tune", auto: "auto_awesome", boolean: "join" };
+  const labels = { manual: "Click", input: "Input", range: "Range", auto: "Auto Zone", boolean: "Boolean" };
+  const icon = document.getElementById("zone-submode-icon");
+  const label = document.getElementById("zone-submode-label");
+  if (icon) icon.textContent = icons[subMode] || "ads_click";
+  if (label) label.textContent = labels[subMode] || subMode;
 
   document.getElementById("zone-manual-ui").style.display =
     subMode === "manual" ? "block" : "none";
@@ -579,6 +652,10 @@ function setZoneSubMode(subMode) {
     subMode === "input" ? "block" : "none";
   document.getElementById("zone-range-ui").style.display =
     subMode === "range" ? "block" : "none";
+  document.getElementById("zone-auto-ui").style.display =
+    subMode === "auto" ? "block" : "none";
+  document.getElementById("zone-boolean-ui").style.display =
+    subMode === "boolean" ? "block" : "none";
 
   if (subMode !== "manual") {
     cancelZone();
@@ -588,20 +665,48 @@ function setZoneSubMode(subMode) {
     State.tempZone = [];
     updateZonePtCount();
     setupRangeDefaults();
+  } else if (subMode === "boolean") {
+    State.rangePreview = [];
+    populateBooleanZoneSelects();
+    drawChart();
+  } else if (subMode === "auto") {
+    State.rangePreview = [];
+    drawChart();
   } else {
     State.rangePreview = [];
     drawChart();
   }
+  ["manual","input","range","auto","boolean"].forEach(m => {
+    const b = document.getElementById("seg-zone-" + m);
+    if (b) b.classList.toggle("active", m === subMode);
+  });
+  scheduleAnimatedTabRefresh();
 }
 
 function setPointSubMode(subMode) {
   State.pointSubMode = subMode;
-  updateTabStyles(".p-tab", ".point-tabs #tab-" + subMode);
+  const icons = { manual: "ads_click", input: "edit_note", batch: "data_table", sensor: "sensors" };
+  const labels = { manual: "Click", input: "Input", batch: "Batch CSV", sensor: "Live Sensor" };
+  const icon = document.getElementById("point-submode-icon");
+  const label = document.getElementById("point-submode-label");
+  if (icon) icon.textContent = icons[subMode] || "ads_click";
+  if (label) label.textContent = labels[subMode] || subMode;
 
   document.getElementById("point-manual-ui").style.display =
     subMode === "manual" ? "block" : "none";
   document.getElementById("point-input-ui").style.display =
     subMode === "input" ? "block" : "none";
+  document.getElementById("point-batch-ui").style.display =
+    subMode === "batch" ? "block" : "none";
+  document.getElementById("point-sensor-ui").style.display =
+    subMode === "sensor" ? "block" : "none";
+  
+  if (subMode === "sensor") renderSensorList();
+  ["manual","input","batch","sensor"].forEach(m => {
+    const b = document.getElementById("seg-point-" + m);
+    if (b) b.classList.toggle("active", m === subMode);
+  });
+  scheduleAnimatedTabRefresh();
 }
 
 function syncRange(id) {
@@ -699,10 +804,13 @@ function updateRangeZone() {
 function setMode(mode) {
   State.mode = mode;
   document
-    .querySelectorAll(".toolbar .tool-btn")
+    .querySelectorAll(".toolbar .tool-btn, .modebar-btn")
     .forEach((b) => b.classList.remove("active"));
   if (document.getElementById("btn-" + mode))
     document.getElementById("btn-" + mode).classList.add("active");
+
+  const exploreCtrl = document.getElementById("explore-controls");
+  if (exploreCtrl) exploreCtrl.style.display = mode === "view" ? "block" : "none";
 
   const zoneCtrl = document.getElementById("zone-controls");
   zoneCtrl.style.display = mode === "zone" ? "block" : "none";
@@ -719,12 +827,13 @@ function setMode(mode) {
     cancelZone();
     State.rangePreview = [];
   }
+  scheduleAnimatedTabRefresh();
   drawChart();
 }
 
 function updateZonePtCount() {
   document.getElementById("zonePtCount").innerText =
-    State.tempZone.length + " pts";
+    State.tempZone.length + " points";
 }
 
 function openManualModal(target) {
@@ -770,84 +879,426 @@ function submitManualInput(target) {
 
 // === LIST & CRUD ===
 
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  }[char] || char));
+}
+
+const DEFAULT_CURSOR_FIELDS = ["tdb", "ah"];
+
+const CURSOR_FIELD_DEFINITIONS = [
+  { key: "tdb", label: "Dry Bulb Temperature", shortLabel: "Tdb", formatValue: (data) => `${data.Tdb.toFixed(1)} °C` },
+  { key: "ah", label: "Absolute Humidity", shortLabel: "AH", formatValue: (data) => `${data.AH.toFixed(1)} g/m3` },
+  { key: "twb", label: "Wet Bulb Temperature", shortLabel: "Twb", formatValue: (data) => `${data.Twb.toFixed(1)} °C` },
+  { key: "tdp", label: "Dew Point Temperature", shortLabel: "Tdp", formatValue: (data) => `${data.Tdp.toFixed(1)} °C` },
+  { key: "tf", label: "Frost Point Temperature", shortLabel: "Tf", formatValue: (data) => `${data.Tf.toFixed(1)} °C` },
+  { key: "w", label: "Humidity Ratio", shortLabel: "W", formatValue: (data) => `${data.W.toFixed(4)} kg/kg'` },
+  { key: "rh", label: "Relative Humidity", shortLabel: "RH", formatValue: (data) => `${data.RH.toFixed(1)} %` },
+  { key: "mu", label: "Moisture Content", shortLabel: "u", formatValue: (data) => `${data.mu.toFixed(1)} %` },
+  { key: "h", label: "Enthalpy", shortLabel: "h", formatValue: (data) => `${data.h.toFixed(1)} kJ/kg` },
+  { key: "cp", label: "Specific Heat Capacity", shortLabel: "Cp", formatValue: (data) => `${data.cp.toFixed(3)} kJ/(kg·°C)` },
+  { key: "v", label: "Specific Volume", shortLabel: "v", formatValue: (data) => `${data.v.toFixed(3)} m3/kg` },
+  { key: "rho", label: "Density", shortLabel: "rho", formatValue: (data) => `${data.rho.toFixed(2)} kg/m3` },
+  { key: "pw", label: "Vapor Partial Pressure", shortLabel: "Pw", formatValue: (data) => `${data.Pw.toFixed(0)} Pa` },
+  { key: "pws", label: "Saturation Vapor Pressure", shortLabel: "Pws", formatValue: (data) => `${data.Pws.toFixed(0)} Pa` },
+  { key: "vpd", label: "Vapor Pressure Deficit", shortLabel: "VPD", formatValue: (data) => `${data.VPD.toFixed(1)} Pa` },
+  { key: "hd", label: "Humidity Deficit", shortLabel: "HD", formatValue: (data) => `${data.HD.toFixed(4)} kg/kg'` },
+  { key: "wsat", label: "Saturation Humidity Ratio", shortLabel: "Wsat", formatValue: (data) => `${data.Wsat.toFixed(4)} kg/kg'` },
+  { key: "dvs", label: "Saturation Vapor Concentration", shortLabel: "Dvs", formatValue: (data) => `${data.Dvs.toFixed(1)} g/m3` },
+  { key: "vmr", label: "Volume Mixing Ratio", shortLabel: "VMR", formatValue: (data) => `${data.VMR.toFixed(1)} ppm` },
+  { key: "pd", label: "Psychrometric Difference", shortLabel: "PD", formatValue: (data) => `${data.PD.toFixed(1)} °C` },
+];
+
+const CURSOR_FIELD_MAP = CURSOR_FIELD_DEFINITIONS.reduce((accumulator, definition) => {
+  accumulator[definition.key] = definition;
+  return accumulator;
+}, {});
+
+function normalizeCursorFields(fields) {
+  const validKeys = new Set(CURSOR_FIELD_DEFINITIONS.map((definition) => definition.key));
+  const source = Array.isArray(fields) ? fields : String(fields || "").split("|");
+  const normalized = [];
+  const seen = new Set();
+
+  source.forEach((field) => {
+    const key = String(field || "").trim().toLowerCase();
+    if (!validKeys.has(key) || seen.has(key)) return;
+    seen.add(key);
+    normalized.push(key);
+  });
+
+  return normalized.length ? normalized : [...DEFAULT_CURSOR_FIELDS];
+}
+
+function getImportedCursorFields(settings = {}) {
+  if (settings.infoFields !== undefined) {
+    return normalizeCursorFields(String(settings.infoFields).split("|"));
+  }
+
+  const legacyFields = [];
+  if (settings.infoPrimary) legacyFields.push(settings.infoPrimary);
+  if (settings.infoSecondary) legacyFields.push(settings.infoSecondary);
+  return normalizeCursorFields(legacyFields);
+}
+
+function getSelectedInfoFields() {
+  const checked = Array.from(document.querySelectorAll("#cursor-fields-list .cursor-field-toggle:checked"))
+    .map((input) => String(input.value || "").trim().toLowerCase());
+
+  return checked.length ? checked : [...DEFAULT_CURSOR_FIELDS];
+}
+
+function renderCursorFieldSettings(selectedFields = DEFAULT_CURSOR_FIELDS) {
+  const container = document.getElementById("cursor-fields-list");
+  if (!container) return;
+
+  const selected = normalizeCursorFields(selectedFields);
+  const orderedKeys = [
+    ...selected,
+    ...CURSOR_FIELD_DEFINITIONS.map((definition) => definition.key).filter((key) => !selected.includes(key)),
+  ];
+
+  container.innerHTML = orderedKeys.map((key) => {
+    const definition = CURSOR_FIELD_MAP[key];
+    const selectedIndex = selected.indexOf(key);
+    const checked = selectedIndex !== -1;
+    return `
+      <div class="cursor-field-row ${checked ? "selected" : ""}">
+        <label class="cursor-field-main" for="cursor-field-${definition.key}">
+          <input
+            class="cursor-field-toggle"
+            type="checkbox"
+            id="cursor-field-${definition.key}"
+            value="${definition.key}"
+            ${checked ? "checked" : ""}
+            onchange="toggleCursorField('${definition.key}', this.checked)">
+          <span class="cursor-field-copy">
+            <strong>${escapeHtml(definition.shortLabel)}</strong>
+            <em>${escapeHtml(definition.label)}</em>
+          </span>
+        </label>
+        <div class="cursor-field-sort">
+          <button type="button" class="cursor-sort-btn" onclick="moveCursorField('${definition.key}', -1)" ${checked && selectedIndex > 0 ? "" : "disabled"} title="Move up">
+            <span class="material-symbols-rounded">keyboard_arrow_up</span>
+          </button>
+          <button type="button" class="cursor-sort-btn" onclick="moveCursorField('${definition.key}', 1)" ${checked && selectedIndex < selected.length - 1 ? "" : "disabled"} title="Move down">
+            <span class="material-symbols-rounded">keyboard_arrow_down</span>
+          </button>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+function toggleCursorField(key, checked) {
+  let selected = getSelectedInfoFields();
+
+  if (checked) {
+    if (!selected.includes(key)) selected.push(key);
+  } else {
+    const next = selected.filter((field) => field !== key);
+    selected = next.length ? next : selected;
+  }
+
+  renderCursorFieldSettings(selected);
+  queuePersistedStateSave();
+}
+
+function moveCursorField(key, direction) {
+  const selected = getSelectedInfoFields();
+  const index = selected.indexOf(key);
+  const targetIndex = index + direction;
+  if (index === -1 || targetIndex < 0 || targetIndex >= selected.length) return;
+
+  [selected[index], selected[targetIndex]] = [selected[targetIndex], selected[index]];
+  renderCursorFieldSettings(selected);
+  queuePersistedStateSave();
+}
+
+function getInfoFieldMeta(field, data) {
+  const axisX = State.chartType === "psychrometric"
+    ? { label: "Tdb", value: `${data.Tdb.toFixed(1)} °C` }
+    : State.yAxisType === "absoluteHumidity"
+      ? { label: "AH", value: `${data.AH.toFixed(1)} g/m3` }
+      : { label: "W", value: `${data.W.toFixed(4)} kg/kg'` };
+
+  const axisY = State.chartType === "psychrometric"
+    ? State.yAxisType === "absoluteHumidity"
+      ? { label: "AH", value: `${data.AH.toFixed(1)} g/m3` }
+      : { label: "W", value: `${data.W.toFixed(4)} kg/kg'` }
+    : { label: "Tdb", value: `${data.Tdb.toFixed(1)} °C` };
+
+  const fieldMap = {
+    "axis-x": axisX,
+    "axis-y": axisY,
+  };
+
+  CURSOR_FIELD_DEFINITIONS.forEach((definition) => {
+    fieldMap[definition.key] = {
+      label: definition.shortLabel,
+      value: definition.formatValue(data),
+    };
+  });
+
+  return fieldMap[field] || fieldMap["axis-x"];
+}
+
+function renderInfoPanelRows(data) {
+  return getSelectedInfoFields()
+    .map((field) => {
+      const meta = getInfoFieldMeta(field, data);
+      return `
+        <div class="info-mini-row">
+          <span class="info-mini-key">${escapeHtml(meta.label)}</span>
+          <span class="info-mini-val">${escapeHtml(meta.value)}</span>
+        </div>`;
+    })
+    .join("");
+}
+
+function buildDetailMetricCard(label, value) {
+  return `
+    <div class="detail-row">
+      <span class="det-abbr">${escapeHtml(label)}</span>
+      <span class="det-val">${escapeHtml(value)}</span>
+    </div>`;
+}
+
+function buildStatCell(label, value) {
+  return `
+    <div class="item-stat">
+      <span class="item-stat-label">${escapeHtml(label)}</span>
+      <strong class="item-stat-value">${escapeHtml(value)}</strong>
+    </div>`;
+}
+
+function buildEmptyState(icon, title, caption) {
+  return `
+    <div class="list-empty">
+      <span class="material-symbols-rounded">${icon}</span>
+      <div class="list-empty-title">${escapeHtml(title)}</div>
+      <div class="list-empty-caption">${escapeHtml(caption)}</div>
+    </div>`;
+}
+
+function getZoneDisplayPoints(zone) {
+  const Patm = getPressureInPa();
+  return zone.points.map((point) => {
+    const data = calculateAllProperties(point.t, point.w, Patm);
+    return {
+      raw: point,
+      data,
+      x: State.chartType === "psychrometric"
+        ? point.t
+        : (State.yAxisType === "absoluteHumidity" ? data.AH : point.w),
+      y: State.chartType === "psychrometric"
+        ? (State.yAxisType === "absoluteHumidity" ? data.AH : point.w)
+        : point.t,
+    };
+  });
+}
+
+function estimatePolygonArea(points) {
+  if (!Array.isArray(points) || points.length < 3) return 0;
+  let area = 0;
+  for (let i = 0; i < points.length; i++) {
+    const current = points[i];
+    const next = points[(i + 1) % points.length];
+    area += current.x * next.y - next.x * current.y;
+  }
+  return Math.abs(area) / 2;
+}
+
+function formatZoneArea(area) {
+  if (!isFinite(area)) return "—";
+  const decimals = area < 0.1 ? 4 : area < 10 ? 3 : 2;
+  const unit = State.yAxisType === "absoluteHumidity" ? "°C·g/m3" : "°C·kg/kg'";
+  return `${area.toFixed(decimals)} ${unit}`;
+}
+
+function buildVertexMarkup(displayPoints) {
+  return displayPoints.map((point, vertexIndex) => {
+    const axisX = getInfoFieldMeta("axis-x", point.data);
+    const axisY = getInfoFieldMeta("axis-y", point.data);
+    return `
+      <div class="vertex-chip">
+        <span>P${vertexIndex + 1}</span>
+        <strong>${escapeHtml(axisX.value)}</strong>
+        <em>${escapeHtml(axisY.value)}</em>
+      </div>`;
+  }).join("");
+}
+
+function renderProbeStatusCard(probe) {
+  if (!probe) return "";
+  const data = probe.data || calculateAllProperties(probe.t, probe.w, getPressureInPa());
+  const tdb = getInfoFieldMeta("tdb", data);
+  const w = getInfoFieldMeta("w", data);
+  const rh = getInfoFieldMeta("rh", data);
+  return `
+    <div class="probe-status-card">
+      <div class="probe-status-pill"><span>Tdb</span><strong>${escapeHtml(tdb.value)}</strong></div>
+      <div class="probe-status-pill"><span>W</span><strong>${escapeHtml(w.value)}</strong></div>
+      <div class="probe-status-pill"><span>RH</span><strong>${escapeHtml(rh.value)}</strong></div>
+    </div>`;
+}
+
+function syncProbeAStatus() {
+  const status = document.getElementById("probe-a-status");
+  if (!status) return;
+
+  const shouldShow = State.exploreSubMode === "lock" && !!State.probeA;
+  status.innerHTML = shouldShow ? renderProbeStatusCard(State.probeA) : "";
+  status.style.display = shouldShow ? "block" : "none";
+}
+
+function refreshCompareProbeBadges() {
+  const badgeA = document.getElementById("probe-ab-a");
+  const badgeB = document.getElementById("probe-ab-b");
+  if (badgeA) {
+    badgeA.textContent = State.probeA
+      ? `A: ${State.probeA.t.toFixed(1)}°C · ${State.probeA.w.toFixed(4)}`
+      : "A: —";
+    badgeA.classList.toggle("active", State.compareTarget === "A");
+  }
+  if (badgeB) {
+    badgeB.textContent = State.probeB
+      ? `B: ${State.probeB.t.toFixed(1)}°C · ${State.probeB.w.toFixed(4)}`
+      : "B: —";
+    badgeB.classList.toggle("active", State.compareTarget === "B");
+  }
+}
+
+function setCompareTarget(target) {
+  State.compareTarget = target === "B" ? "B" : "A";
+  refreshCompareProbeBadges();
+}
+
+function buildPointDetailContent(point) {
+  const data = point.data || calculateAllProperties(point.t, point.w, getPressureInPa());
+  return `
+    <div class="detail-popup-section">
+      <div class="detail-popup-title">Properties</div>
+      <div class="detail-sheet detail-sheet-two-col">${generateHTMLGrid(data)}</div>
+    </div>`;
+}
+
+function buildZoneDetailContent(zone) {
+  const displayPoints = getZoneDisplayPoints(zone);
+  const axisValuesX = displayPoints.map((point) => point.x);
+  const axisValuesY = displayPoints.map((point) => point.y);
+  const temps = zone.points.map((point) => point.t);
+  const area = estimatePolygonArea(displayPoints);
+  const yUnit = State.yAxisType === "absoluteHumidity" ? "g/m3" : "kg/kg'";
+  const vertices = buildVertexMarkup(displayPoints);
+
+  return `
+    <div class="detail-popup-section">
+      <div class="detail-popup-title">Summary</div>
+      <div class="detail-sheet detail-sheet-two-col">
+        ${buildDetailMetricCard("Vertices", String(zone.points.length))}
+        ${buildDetailMetricCard("Area", formatZoneArea(area))}
+        ${buildDetailMetricCard("Temp Range", `${Math.min(...temps).toFixed(1)}-${Math.max(...temps).toFixed(1)} °C`)}
+        ${buildDetailMetricCard("Axis Span", `${Math.min(...axisValuesX).toFixed(2)}-${Math.max(...axisValuesX).toFixed(2)} / ${Math.min(...axisValuesY).toFixed(2)}-${Math.max(...axisValuesY).toFixed(2)} ${State.chartType === "psychrometric" ? yUnit : "°C"}`)}
+      </div>
+    </div>
+    <div class="detail-popup-section">
+      <div class="detail-popup-title">Vertices</div>
+      <div class="vertex-list detail-sheet-two-col">${vertices}</div>
+    </div>`;
+}
+
+function buildPointCard(point, index) {
+  const data = point.data || calculateAllProperties(point.t, point.w, getPressureInPa());
+  const tdb = getInfoFieldMeta("tdb", data);
+  const w = getInfoFieldMeta("w", data);
+
+  return `
+    <article class="list-item ${point.id === State.selectedPointId ? "active" : ""}" style="--item-accent:${escapeHtml(point.color || "#cc1919")}">
+      <div class="item-header" onclick="selectPoint(${point.id}, event)">
+        <div class="item-head-main">
+          <div class="id-circle" style="background-color:${escapeHtml(point.color || "#cc1919")}">${index + 1}</div>
+          <div class="item-title-group">
+            <div class="item-name">${escapeHtml(point.name || `Point ${index + 1}`)}</div>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="icon-btn" type="button" onclick="openDetailModal('point', ${point.id}, event)" title="View details">
+            <span class="material-symbols-rounded">visibility</span>
+          </button>
+          <button class="icon-btn" type="button" onclick="openEditModal('point', ${point.id}, event)" title="Edit point">
+            <span class="material-symbols-rounded">edit_square</span>
+          </button>
+          <button class="icon-btn btn-delete" type="button" onclick="deletePoint(event, ${point.id})" title="Delete point">
+            <span class="material-symbols-rounded">delete</span>
+          </button>
+        </div>
+      </div>
+      <div class="item-body item-body-collapsible ${point.id === State.selectedPointId ? "show" : ""}">
+        <div class="item-stat-grid">
+          ${buildStatCell(tdb.label, tdb.value)}
+          ${buildStatCell(w.label, w.value)}
+        </div>
+      </div>
+    </article>`;
+}
+
+function buildZoneCard(zone, index) {
+  const displayPoints = getZoneDisplayPoints(zone);
+  const subtitle = `${zone.points.length} vertices`;
+  const vertices = buildVertexMarkup(displayPoints);
+
+  return `
+    <article class="list-item ${zone.id === State.selectedZoneId ? "active" : ""}" style="--item-accent:${escapeHtml(zone.color || "#19cc2e")}" onclick="selectZone(${zone.id}, event)">
+      <div class="item-header">
+        <div class="item-head-main">
+          <div class="id-circle" style="background:${escapeHtml(zone.color || "#19cc2e")}">${index + 1}</div>
+          <div class="item-title-group">
+            <div class="item-name">${escapeHtml(zone.name || `Zone ${index + 1}`)}</div>
+            <div class="item-subtitle">${escapeHtml(subtitle)}</div>
+          </div>
+        </div>
+        <div class="item-actions">
+          <button class="icon-btn" type="button" onclick="openDetailModal('zone', ${zone.id}, event)" title="View details">
+            <span class="material-symbols-rounded">visibility</span>
+          </button>
+          <button class="icon-btn" type="button" onclick="openEditModal('zone', ${zone.id}, event)" title="Edit zone">
+            <span class="material-symbols-rounded">edit_square</span>
+          </button>
+          <button class="icon-btn btn-delete" type="button" onclick="deleteZone(event, ${zone.id})" title="Delete zone">
+            <span class="material-symbols-rounded">delete</span>
+          </button>
+        </div>
+      </div>
+      <div class="item-body item-body-collapsible ${zone.id === State.selectedZoneId ? "show" : ""}">
+        <div class="item-details show">
+          <div class="item-details-title">Vertices</div>
+          <div class="vertex-list">${vertices}</div>
+        </div>
+      </div>
+    </article>`;
+}
+
 function updateLists() {
   const pl = document.getElementById("list-points");
   document.getElementById("count-points").innerText = State.points.length;
 
-  pl.innerHTML =
-    State.points
-      .map(
-        (p, i) => `
-        <div class="list-item ${
-          p.id === State.selectedPointId ? "active" : ""
-        }">
-            <div class="item-header" onclick="selectPoint(${p.id})">
-                <div class="id-circle" style="background-color: ${p.color || '#ff0000'}">${i + 1}</div>
-                
-                <div class="item-name">${p.name}</div>
-                <div class="item-actions">
-                    <div class="icon-btn" onclick="openEditModal('point', ${
-                      p.id
-                    })">
-                      <span class="material-symbols-rounded"> edit_square </span>
-                    </div>
-                    <div class="icon-btn btn-delete" onclick="deletePoint(event, ${
-                      p.id
-                    })">
-                      <span class="material-symbols-rounded"> delete </span>
-                    </div>
-                </div>
-            </div>
-            <div class="item-details">${generateHTMLGrid(p.data)}</div>
-        </div>`
-      )
-      .join("") ||
-    `
-      <div style="font-size:10px;text-align:center;color:#999;padding:10px">No points</div>
-      <style>
-        .marked-point {display:none}
-      </style>
-    `;
+  pl.innerHTML = State.points.length
+    ? State.points.map(buildPointCard).join("")
+    : `${buildEmptyState("pin_drop", "No points yet", "Add points manually, by input, in batch, or from a live sensor using the panel above.")}
+      <style>.marked-point { display:none }</style>`;
 
   const zl = document.getElementById("list-zones");
   document.getElementById("count-zones").innerText = State.zones.length;
 
-  zl.innerHTML =
-    State.zones
-      .map(
-        (z, i) => `
-        <div class="list-item ${
-          z.id === State.selectedZoneId ? "active" : ""
-        }" onclick="selectZone(${z.id})" style="border-left:4px solid ${
-          z.color
-        }">
-            <div class="item-header">
-                <div class="id-circle" style="background:${z.color}">${
-          i + 1
-        }</div>
-                <div class="item-name">${z.name}</div>
-                <div class="item-actions">
-                    <div class="icon-btn" onclick="openEditModal('zone', ${
-                      z.id
-                    })">
-                      <span class="material-symbols-rounded"> edit_square </span>
-                    </div>
-                    <div class="icon-btn btn-delete" onclick="deleteZone(event, ${
-                      z.id
-                    })">
-                      <span class="material-symbols-rounded"> delete </span>
-                    </div>
-                </div>
-            </div>
-        </div>`
-      )
-      .join("") ||
-    `
-      <div style="font-size:10px;text-align:center;color:#999;padding:10px">No zones</div> 
-      <style>
-        .comfort-zone {display:none}
-      </style>
-    `;
+  zl.innerHTML = State.zones.length
+    ? State.zones.map(buildZoneCard).join("")
+    : `${buildEmptyState("add_triangle", "No zones yet", "Create a zone manually, by input, by range, automatically, or with boolean logic to start mapping areas.")}
+      <style>.comfort-zone { display:none }</style>`;
 
   updateToolbarsVisibility();
 }
@@ -904,6 +1355,12 @@ function redoAction() {
 let contextMenuPointId = null;
 
 function showContextMenu(event, pointId = null, zoneId = null) {
+  if (event) event.preventDefault();
+  // Context menu removed — no-op
+}
+
+// Legacy (unused) context menu helpers preserved below
+function _showContextMenuLegacy(event, pointId = null, zoneId = null) {
   event.preventDefault();
   contextMenuPointId = pointId;
 
@@ -955,9 +1412,25 @@ function showContextMenu(event, pointId = null, zoneId = null) {
       addContextMenuDivider(content);
     }
     
-    addContextMenuItem(content, "explore", "Explore", () => {
-      hideContextMenu();
-      setMode("view");
+    // Explore with submenu
+    addContextSubmenu(content, "explore", "Explore", (submenu) => {
+      addContextMenuItem(submenu, "explore", "Hover", () => {
+        hideContextMenu();
+        setMode("view");
+        setExploreSubMode("hover");
+      }, State.mode === "view" && State.exploreSubMode === "hover");
+
+      addContextMenuItem(submenu, "push_pin", "Lock / Probe", () => {
+        hideContextMenu();
+        setMode("view");
+        setExploreSubMode("lock");
+      }, State.mode === "view" && State.exploreSubMode === "lock");
+
+      addContextMenuItem(submenu, "compare_arrows", "Compare A\u2013B", () => {
+        hideContextMenu();
+        setMode("view");
+        setExploreSubMode("compare");
+      }, State.mode === "view" && State.exploreSubMode === "compare");
     }, State.mode === "view");
 
     // Point with submenu
@@ -974,6 +1447,18 @@ function showContextMenu(event, pointId = null, zoneId = null) {
         setPointSubMode("input");
         openFloatingInputWindow("point");
       }, State.mode === "point" && State.pointSubMode === "input");
+
+      addContextMenuItem(submenu, "data_table", "Batch CSV", () => {
+        hideContextMenu();
+        setMode("point");
+        setPointSubMode("batch");
+      }, State.mode === "point" && State.pointSubMode === "batch");
+
+      addContextMenuItem(submenu, "sensors", "Live Sensor", () => {
+        hideContextMenu();
+        setMode("point");
+        setPointSubMode("sensor");
+      }, State.mode === "point" && State.pointSubMode === "sensor");
     }, State.mode === "point");
 
     // Zone with submenu
@@ -997,6 +1482,18 @@ function showContextMenu(event, pointId = null, zoneId = null) {
         setZoneSubMode("range");
         openFloatingRangeWindow();
       }, State.mode === "zone" && State.zoneSubMode === "range");
+
+      addContextMenuItem(submenu, "auto_awesome", "Auto Zone", () => {
+        hideContextMenu();
+        setMode("zone");
+        setZoneSubMode("auto");
+      }, State.mode === "zone" && State.zoneSubMode === "auto");
+
+      addContextMenuItem(submenu, "join", "Boolean", () => {
+        hideContextMenu();
+        setMode("zone");
+        setZoneSubMode("boolean");
+      }, State.mode === "zone" && State.zoneSubMode === "boolean");
     }, State.mode === "zone");
 
     addContextMenuDivider(content);
@@ -1118,11 +1615,27 @@ function addContextSubmenu(container, icon, label, builder, isActive = false) {
 }
 
 function hideContextMenu() {
+  const menu = document.getElementById("context-menu");
+  if (menu) menu.style.display = "none";
+}
+function _hideContextMenuLegacy() {
   document.getElementById("context-menu").style.display = "none";
   contextMenuPointId = null;
 }
 
 // Floating window functions
+function resetPopupWindowFrame(popupWindow) {
+  if (!popupWindow) return;
+  popupWindow.style.transition = "";
+  popupWindow.style.left = "50%";
+  popupWindow.style.top = "50%";
+  popupWindow.style.right = "";
+  popupWindow.style.bottom = "";
+  popupWindow.style.width = "";
+  popupWindow.style.height = "";
+  popupWindow.style.transform = "translate(-50%, -50%)";
+}
+
 function openFloatingInputWindow(target) {
   // Close range window if open
   const rangeWindow = document.getElementById("floating-range-window");
@@ -1174,10 +1687,8 @@ function openFloatingInputWindow(target) {
     btnGroup.className = shouldShow ? "floating-btn-group cols-2" : "floating-btn-group";
   }
   
-  // Position window at center
-  window.style.left = "50%";
-  window.style.top = "50%";
-  window.style.transform = "translate(-50%, -50%)";
+  // Position window at center with its default size
+  resetPopupWindowFrame(window);
   window.style.display = "block";
   
   makeWindowDraggable(window);
@@ -1317,17 +1828,18 @@ function openFloatingRangeWindow() {
     document.getElementById("floating-sliderP2max").step = cfg.step;
   }
   
-  // Position window at center
-  window.style.left = "50%";
-  window.style.top = "50%";
-  window.style.transform = "translate(-50%, -50%)";
+  // Position window at center with its default size
+  resetPopupWindowFrame(window);
   window.style.display = "block";
   
   makeWindowDraggable(window);
 }
 
 function closeFloatingWindow(windowId) {
-  document.getElementById(windowId).style.display = "none";
+  const popupWindow = document.getElementById(windowId);
+  if (!popupWindow) return;
+  popupWindow.style.display = "none";
+  resetPopupWindowFrame(popupWindow);
 }
 
 function submitFloatingInput() {
@@ -1443,42 +1955,165 @@ function syncFloatingRange(id) {
 }
 
 // Make window draggable
-function makeWindowDraggable(window) {
-  const header = window.querySelector(".floating-window-header");
+function makeWindowDraggable(draggableWindow, headerSelector = ".floating-window-header") {
+  if (!draggableWindow || draggableWindow.dataset.draggableReady === "true") return;
+  const header = draggableWindow.querySelector(headerSelector) || draggableWindow.querySelector(".floating-window-header");
+  if (!header) return;
   let isDragging = false;
   let currentX, currentY, initialX, initialY;
 
   header.addEventListener("mousedown", (e) => {
+    if (e.target.closest("button, input, select, textarea, label, a")) return;
     isDragging = true;
     
     // Get actual position before removing transform
-    const rect = window.getBoundingClientRect();
+    const rect = draggableWindow.getBoundingClientRect();
     
     // Remove center transform first
-    window.style.transform = "none";
+    draggableWindow.style.transition = "none";
+    draggableWindow.style.transform = "none";
     
     // Set absolute position based on current visual position
-    window.style.left = rect.left + "px";
-    window.style.top = rect.top + "px";
+    draggableWindow.style.left = rect.left + "px";
+    draggableWindow.style.top = rect.top + "px";
     
     // Calculate offset from mouse to window edge
     initialX = e.clientX - rect.left;
     initialY = e.clientY - rect.top;
+    document.body.style.userSelect = "none";
   });
 
   document.addEventListener("mousemove", (e) => {
     if (isDragging) {
       e.preventDefault();
-      currentX = e.clientX - initialX;
-      currentY = e.clientY - initialY;
-      window.style.left = currentX + "px";
-      window.style.top = currentY + "px";
+      const maxX = Math.max(12, window.innerWidth - draggableWindow.offsetWidth - 12);
+      const maxY = Math.max(12, window.innerHeight - draggableWindow.offsetHeight - 12);
+      currentX = Math.min(Math.max(12, e.clientX - initialX), maxX);
+      currentY = Math.min(Math.max(12, e.clientY - initialY), maxY);
+      draggableWindow.style.left = currentX + "px";
+      draggableWindow.style.top = currentY + "px";
     }
   });
 
   document.addEventListener("mouseup", () => {
     isDragging = false;
+    draggableWindow.style.transition = "";
+    document.body.style.userSelect = "";
   });
+
+  draggableWindow.dataset.draggableReady = "true";
+  makeWindowResizable(draggableWindow);
+}
+
+function makeWindowResizable(resizableWindow) {
+  if (!resizableWindow || resizableWindow.dataset.resizableReady === "true") return;
+
+  const directions = ["n", "s", "e", "w", "ne", "nw", "se", "sw"];
+  let isResizing = false;
+  let resizeDirection = "";
+  let startRect = null;
+  let startX = 0;
+  let startY = 0;
+
+  const getMinimumWidth = () => {
+    const computedMinWidth = parseFloat(window.getComputedStyle(resizableWindow).minWidth) || 0;
+    return Math.min(Math.max(computedMinWidth, 260), Math.max(260, window.innerWidth - 24));
+  };
+
+  const getMinimumHeight = () => {
+    const computedMinHeight = parseFloat(window.getComputedStyle(resizableWindow).minHeight) || 0;
+    return Math.min(Math.max(computedMinHeight, 180), Math.max(180, window.innerHeight - 24));
+  };
+
+  directions.forEach((direction) => {
+    const handle = document.createElement("span");
+    handle.className = `window-resize-handle resize-${direction}`;
+    handle.dataset.direction = direction;
+    handle.addEventListener("mousedown", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      resizeDirection = direction;
+      isResizing = true;
+      const rect = resizableWindow.getBoundingClientRect();
+      resizableWindow.style.transform = "none";
+      resizableWindow.style.left = rect.left + "px";
+      resizableWindow.style.top = rect.top + "px";
+      resizableWindow.style.width = rect.width + "px";
+      resizableWindow.style.height = rect.height + "px";
+      startRect = {
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+      };
+      startX = event.clientX;
+      startY = event.clientY;
+      document.body.style.userSelect = "none";
+    });
+    resizableWindow.appendChild(handle);
+  });
+
+  document.addEventListener("mousemove", (event) => {
+    if (!isResizing || !startRect) return;
+
+    event.preventDefault();
+
+    const viewportLeft = 12;
+    const viewportTop = 12;
+    const viewportRight = window.innerWidth - 12;
+    const viewportBottom = window.innerHeight - 12;
+    const minWidth = Math.min(getMinimumWidth(), viewportRight - viewportLeft);
+    const minHeight = Math.min(getMinimumHeight(), viewportBottom - viewportTop);
+
+    let left = startRect.left;
+    let top = startRect.top;
+    let right = startRect.right;
+    let bottom = startRect.bottom;
+
+    if (resizeDirection.includes("e")) right = startRect.right + (event.clientX - startX);
+    if (resizeDirection.includes("s")) bottom = startRect.bottom + (event.clientY - startY);
+    if (resizeDirection.includes("w")) left = startRect.left + (event.clientX - startX);
+    if (resizeDirection.includes("n")) top = startRect.top + (event.clientY - startY);
+
+    left = Math.min(left, right - minWidth);
+    top = Math.min(top, bottom - minHeight);
+    right = Math.max(right, left + minWidth);
+    bottom = Math.max(bottom, top + minHeight);
+
+    left = Math.max(viewportLeft, left);
+    top = Math.max(viewportTop, top);
+    right = Math.min(viewportRight, right);
+    bottom = Math.min(viewportBottom, bottom);
+
+    if (right - left < minWidth) {
+      if (resizeDirection.includes("w")) left = right - minWidth;
+      else right = left + minWidth;
+    }
+    if (bottom - top < minHeight) {
+      if (resizeDirection.includes("n")) top = bottom - minHeight;
+      else bottom = top + minHeight;
+    }
+
+    left = Math.max(viewportLeft, left);
+    top = Math.max(viewportTop, top);
+    right = Math.min(viewportRight, right);
+    bottom = Math.min(viewportBottom, bottom);
+
+    resizableWindow.style.left = left + "px";
+    resizableWindow.style.top = top + "px";
+    resizableWindow.style.width = Math.max(minWidth, right - left) + "px";
+    resizableWindow.style.height = Math.max(minHeight, bottom - top) + "px";
+  });
+
+  document.addEventListener("mouseup", () => {
+    if (!isResizing) return;
+    isResizing = false;
+    resizeDirection = "";
+    startRect = null;
+    document.body.style.userSelect = "";
+  });
+
+  resizableWindow.dataset.resizableReady = "true";
 }
 
 // Close context menu when clicking elsewhere
@@ -1503,6 +2138,7 @@ function getInputValue(id) {
 
 function buildKeyValueExportRows() {
   const rows = [];
+  const infoFields = getSelectedInfoFields();
   rows.push(["meta.version", "1"]);
   rows.push(["settings.chartType", State.chartType]);
   rows.push(["settings.mode", State.mode]);
@@ -1514,7 +2150,11 @@ function buildKeyValueExportRows() {
   rows.push(["settings.maxHum", getInputValue("maxHum")]);
   rows.push(["settings.maxAbsHum", getInputValue("maxAbsHum")]);
   rows.push(["settings.showInfoPanel", getCheckboxValue("set-show-info-panel")]);
+  rows.push(["settings.infoFields", infoFields.join("|")]);
+  rows.push(["settings.infoPrimary", infoFields[0] || ""]);
+  rows.push(["settings.infoSecondary", infoFields[1] || ""]);
   rows.push(["settings.showLegend", getCheckboxValue("set-show-legend")]);
+  rows.push(["settings.labelInterval", getInputValue("set-line-label-step")]);
   rows.push(["settings.showRh", getCheckboxValue("set-show-rh")]);
   rows.push(["settings.showH", getCheckboxValue("set-show-h")]);
   rows.push(["settings.showTwb", getCheckboxValue("set-show-twb")]);
@@ -1770,6 +2410,10 @@ function applyImportedSettings(settings) {
     }
   });
 
+  renderCursorFieldSettings(getImportedCursorFields(settings));
+  const labelInterval = document.getElementById("set-line-label-step");
+  if (labelInterval && settings.labelInterval !== undefined) labelInterval.value = settings.labelInterval;
+
   if (settings["comfortZone.preset"]) {
     const preset = document.getElementById("comfort-zone-preset");
     if (preset) {
@@ -1846,6 +2490,8 @@ function applyImportedData(points, zones) {
 }
 
 function clearSelections() {
+  State.selectedPointId = null;
+  State.selectedZoneId = null;
   document.querySelectorAll(".list-item.active").forEach((item) => {
     item.classList.remove("active");
   });
@@ -1864,11 +2510,12 @@ function clearSelections() {
     });
 }
 
-function selectPoint(id) {
-  let element = this.event.target;
-  let parent = element.closest('.active');
-  if (parent) {
+function selectPoint(id, event) {
+  if (event) event.stopPropagation();
+  if (State.selectedPointId === id) {
     clearSelections();
+    updateLists();
+    drawChart();
     return;
   }
   State.selectedPointId = id;
@@ -1877,11 +2524,12 @@ function selectPoint(id) {
   drawChart();
 }
 
-function selectZone(id) {
-  let element = this.event.target;
-  let parent = element.closest('.active');
-  if (parent) {
+function selectZone(id, event) {
+  if (event) event.stopPropagation();
+  if (State.selectedZoneId === id) {
     clearSelections();
+    updateLists();
+    drawChart();
     return;
   }
   State.selectedZoneId = id;
@@ -1893,6 +2541,7 @@ function selectZone(id) {
 function deletePoint(e, id) {
   e.stopPropagation();
   State.points = State.points.filter((p) => p.id !== id);
+  if (State.selectedPointId === id) State.selectedPointId = null;
   historyManager.push(State);
   updateLists();
   drawChart();
@@ -1901,6 +2550,7 @@ function deletePoint(e, id) {
 function deleteZone(e, id) {
   e.stopPropagation();
   State.zones = State.zones.filter((z) => z.id !== id);
+  if (State.selectedZoneId === id) State.selectedZoneId = null;
   historyManager.push(State);
   updateLists();
   drawChart();
@@ -1908,8 +2558,36 @@ function deleteZone(e, id) {
 
 // === UNIFIED EDIT MODAL ===
 
-function openEditModal(type, id) {
-  if (window.event) window.event.stopPropagation();
+function openDetailModal(type, id, event) {
+  if (event) event.stopPropagation();
+
+  const detailWindow = document.getElementById("floating-detail-window");
+  const titleEl = document.getElementById("detailModalTitle");
+  const contentEl = document.getElementById("detailModalContent");
+  if (!detailWindow || !titleEl || !contentEl) return;
+
+  if (type === "point") {
+    const point = State.points.find((item) => item.id === id);
+    if (!point) return;
+    titleEl.innerText = point.name || "Point Details";
+    contentEl.innerHTML = buildPointDetailContent(point);
+  } else if (type === "zone") {
+    const zone = State.zones.find((item) => item.id === id);
+    if (!zone) return;
+    titleEl.innerText = zone.name || "Zone Details";
+    contentEl.innerHTML = buildZoneDetailContent(zone);
+  } else {
+    return;
+  }
+
+  resetPopupWindowFrame(detailWindow);
+  detailWindow.style.display = "flex";
+  makeWindowDraggable(detailWindow);
+}
+
+function openEditModal(type, id, event) {
+  if (event) event.stopPropagation();
+  else if (window.event) window.event.stopPropagation();
 
   const editWindow = document.getElementById("floating-edit-window");
   document.getElementById("editId").value = id;
@@ -1935,9 +2613,7 @@ function openEditModal(type, id) {
     colorContainer.style.display = "block";
   }
 
-  editWindow.style.left = "50%";
-  editWindow.style.top = "50%";
-  editWindow.style.transform = "translate(-50%, -50%)";
+  resetPopupWindowFrame(editWindow);
   editWindow.style.display = "block";
   
   makeWindowDraggable(editWindow);
@@ -2001,7 +2677,7 @@ function finishZone() {
   drawChart();
 
   if (document.getElementById("zonePtCount"))
-    document.getElementById("zonePtCount").innerText = "0 pts";
+    document.getElementById("zonePtCount").innerText = "0 points";
 }
 
 function cancelZone() {
@@ -2011,7 +2687,7 @@ function cancelZone() {
 
   drawChart();
   if (document.getElementById("zonePtCount"))
-    document.getElementById("zonePtCount").innerText = "0 pts";
+    document.getElementById("zonePtCount").innerText = "0 points";
 }
 
 function clearAllData() {
@@ -2159,6 +2835,9 @@ function drawChart() {
     maxTInput.value = parseFloat(minTInput.value) + 1;
   }
 
+  if (State.yAxisType === "absoluteHumidity") _syncRatioFromAbsHum();
+  else _syncAbsHumFromRatio();
+
   // Ambil nilai
   const minT = parseFloat(document.getElementById("minTemp").value);
   const maxT = parseFloat(maxTInput.value);
@@ -2168,22 +2847,27 @@ function drawChart() {
   syncZoneRangeLimits(minT, maxT);
 
   let x, y;
+  // Clamp viewport lower bounds so they never exceed the current upper bounds.
+  const viewMinH = Math.min(State.viewMinH, maxH - 0.001);
+  State.viewMinH = Math.max(0, viewMinH);
+  const maxAH = parseFloat(document.getElementById("maxAbsHum").value);
+  const viewMinAH = Math.min(State.viewMinAH, maxAH - 0.1);
+  State.viewMinAH = Math.max(0, viewMinAH);
+
   if (State.chartType === "psychrometric") {
     x = d3.scaleLinear().domain([minT, maxT]).range([0, w]);
 
     if (State.yAxisType === "absoluteHumidity") {
-      const maxAH = parseFloat(document.getElementById("maxAbsHum").value);
-      y = d3.scaleLinear().domain([0, maxAH]).range([h, 0]);
+      y = d3.scaleLinear().domain([State.viewMinAH, maxAH]).range([h, 0]);
     } else {
-      y = d3.scaleLinear().domain([0, maxH]).range([h, 0]);
+      y = d3.scaleLinear().domain([State.viewMinH, maxH]).range([h, 0]);
     }
   } else {
     // Mollier: x = Humidity, y = DBT
     if (State.yAxisType === "absoluteHumidity") {
-      const maxAH = parseFloat(document.getElementById("maxAbsHum").value);
-      x = d3.scaleLinear().domain([0, maxAH]).range([0, w]);
+      x = d3.scaleLinear().domain([State.viewMinAH, maxAH]).range([0, w]);
     } else {
-      x = d3.scaleLinear().domain([0, maxH]).range([0, w]);
+      x = d3.scaleLinear().domain([State.viewMinH, maxH]).range([0, w]);
     }
     y = d3.scaleLinear().domain([minT, maxT]).range([h, 0]);
   }
@@ -2329,16 +3013,7 @@ function drawChart() {
       .attr("data-zone-id", z.id)
       .attr("fill", `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.3)`)
       .attr("stroke", z.color)
-      .on("click", (e) => {
-        e.stopPropagation();
-        selectZone(z.id);
-      })
-      .on("contextmenu", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        showContextMenu(e, null, z.id);
-      })
-      .style("cursor", "pointer");
+      .style("pointer-events", "none");
 
     if (z.id === State.selectedZoneId) poly.classed("selected", true);
 
@@ -2420,15 +3095,7 @@ function drawChart() {
       .append("g")
       .attr("class", "point-group")
       .attr("data-point-id", p.id)
-      .on("click", (e) => {
-        e.stopPropagation();
-        selectPoint(p.id);
-      })
-      .on("contextmenu", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        showContextMenu(e, p.id);
-      });
+      .style("pointer-events", "none");
 
     const circle = pointGroup
       .append("circle")
@@ -2436,8 +3103,21 @@ function drawChart() {
       .attr("cx", cx)
       .attr("cy", cy)
       .attr("r", 6)
-      .attr("fill", p.color || "#ff0000")
-      .style("cursor", "pointer");
+      .attr("fill", p.color || "#ff0000");
+
+    // Sensor: pulsing ring
+    if (p.isSensor) {
+      pointGroup
+        .append("circle")
+        .attr("class", "sensor-pulse")
+        .attr("cx", cx)
+        .attr("cy", cy)
+        .attr("r", 10)
+        .attr("fill", "none")
+        .attr("stroke", p.color || "#1565c0")
+        .attr("stroke-width", 1.5)
+        .attr("opacity", 0.4);
+    }
 
     // Posisi label
     const labelX = cx > w * 0.8 ? cx - 15 : cx + 10;
@@ -2450,26 +3130,24 @@ function drawChart() {
       .attr("y", labelY)
       .text(p.name)
       .style("pointer-events", "none")
-      .style("text-anchor", cx > w * 0.8 ? "end" : "start")
-      .attr("onclick", "selectPoint(" + p.id + ")");
+      .style("text-anchor", cx > w * 0.8 ? "end" : "start");
   });
 
   // Interaksi mouse - sesuaikan dengan tipe chart
   overlay
     .on("mousemove", (e) => handleMouseMove(e, x, y, minT, maxT, maxH, Patm))
     .on("click", (e) => handleChartClick(e, x, y, minT, maxT, maxH, Patm))
-    .on("contextmenu", (e) => showContextMenu(e));
+    .on("contextmenu", (e) => e.preventDefault());
+
+  // Probe pins (Explore Lock / Compare)
+  if (State.probeA || State.probeB) {
+    renderProbes(pointLayer, x, y, w, h, Patm);
+  }
 
   // LEGEND
   const showLegend = document.getElementById("set-show-legend").checked;
   if (showLegend) {
     const legG = axesLayer.append("g").attr("class", "chart-legend");
-
-    if (State.chartType === "psychrometric") {
-      legG.attr("transform", `translate(10, 10)`);
-    } else {
-      legG.attr("transform", `translate(${w - 130}, ${h - 115})`);
-    }
 
     const allLegItems = [
       { c: color_rh, t: "Rel. Humidity", d: "0", key: "rh" },
@@ -2480,42 +3158,67 @@ function drawChart() {
     ];
     
     const legItems = allLegItems.filter(item => State.visibility[item.key]);
-    
-    const legendHeight = 25 + legItems.length * 15;
+    const legendWidth = 138;
+    const rowHeight = 18;
+    const legendHeight = 20 + legItems.length * rowHeight;
+
+    if (State.chartType === "psychrometric") {
+      legG.attr("transform", `translate(16, 16)`);
+    } else {
+      legG.attr("transform", `translate(${w - legendWidth - 16}, ${h - legendHeight - 16})`);
+    }
 
     legG
       .append("rect")
-      .attr("class", "legend-box")
-      .attr("width", 120)
-      .attr("height", legendHeight + 7)
-      .attr("rx", 1);
+      .attr("class", "legend-shell")
+      .attr("width", legendWidth)
+      .attr("height", legendHeight)
+      .attr("rx", 18);
 
     legG
       .append("text")
-      .text("Legend")
+      .text("")
+      .attr("class", "legend-eyebrow")
+      .attr("x", 12)
+      .attr("y", 14);
+
+    legG
+      .append("text")
+      .text("Legends")
       .attr("class", "legend-title")
-      .attr("x", "10")
-      .attr("y", "17.5")
+      .attr("x", 12)
+      .attr("y", 16);
 
     legItems.forEach((item, i) => {
-      const ly = 33 + i * 15;
-      legG
+      const rowY = 22 + i * rowHeight;
+      const row = legG.append("g").attr("transform", `translate(8, ${rowY})`);
+
+      row
+        .append("rect")
+        .attr("class", "legend-row-bg")
+        .attr("width", legendWidth - 16)
+        .attr("height", 14)
+        .attr("rx", 9);
+
+      row
         .append("line")
+        .attr("class", "legend-row-line")
         .attr("x1", 10)
-        .attr("x2", 30)
-        .attr("y1", ly)
-        .attr("y2", ly)
+        .attr("x2", 31)
+        .attr("y1", 7)
+        .attr("y2", 7)
         .attr("stroke", item.c)
-        .attr("stroke-width", 2)
-        .attr("stroke-dasharray", item.d);
-      legG
+        .attr("stroke-dasharray", item.d === "0" ? null : item.d);
+
+      row
         .append("text")
         .attr("class", "legend-text")
-        .attr("x", 35)
-        .attr("y", ly + 4)
+        .attr("x", 40)
+        .attr("y", 10)
         .text(item.t);
     });
   }
+  queuePersistedStateSave();
 }
 
 function handleMouseMove(e, x, y, minT, maxT, maxH, Patm) {
@@ -2551,9 +3254,17 @@ function handleMouseMove(e, x, y, minT, maxT, maxH, Patm) {
 
   const d = calculateAllProperties(t, w, Patm);
   const panel = document.getElementById("info-panel");
+  const tooltipGrid = document.getElementById("tooltip-grid");
+  const fieldCount = getSelectedInfoFields().length;
 
   panel.style.display = "block";
-  document.getElementById("tooltip-grid").innerHTML = generateHTMLGrid(d);
+  if (tooltipGrid) {
+    const columnMode = fieldCount > 10 ? "3" : "2";
+    panel.dataset.columns = columnMode;
+    tooltipGrid.dataset.columns = columnMode;
+    tooltipGrid.dataset.density = fieldCount > 18 ? "micro" : fieldCount > 14 ? "compact" : fieldCount > 8 ? "medium" : "default";
+    tooltipGrid.innerHTML = renderInfoPanelRows(d);
+  }
 
   const panelW = panel.offsetWidth;
   const panelH = panel.offsetHeight;
@@ -2588,146 +3299,54 @@ function handleChartClick(e, x, y, minT, maxT, maxH, Patm) {
     updateZonePtCount();
     drawChart();
   } else {
-    selectPoint(null);
-    selectZone(null);
+    if (State.exploreSubMode === "lock") {
+      const d = calculateAllProperties(t, w, Patm);
+      State.probeA = { t, w, data: d };
+      syncProbeAStatus();
+      drawChart();
+    } else if (State.exploreSubMode === "compare") {
+      const d = calculateAllProperties(t, w, Patm);
+      if (State.compareTarget === "B") {
+        State.probeB = { t, w, data: d };
+      } else {
+        State.probeA = { t, w, data: d };
+        if (!State.probeB) State.compareTarget = "B";
+      }
+      refreshCompareProbeBadges();
+      const panel = document.getElementById("compare-delta-panel");
+      if (State.probeA && State.probeB) updateCompareDeltaPanel(State.probeA.data, State.probeB.data);
+      else if (panel) panel.innerHTML = "";
+      drawChart();
+    } else {
+      selectPoint(null);
+      selectZone(null);
+    }
   }
 }
 
 function generateHTMLGrid(d) {
-  return `
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> thermometer </span> Dry Bulb Temperature</span>
-            <span class="det-abbr">Tdb</span>
-            <span>:</span>
-            <span class="det-val">${d.Tdb.toFixed(2)} °C</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> device_thermostat </span> Wet Bulb Temperature</span>
-            <span class="det-abbr">Twb</span>
-            <span>:</span>
-            <span class="det-val">${d.Twb.toFixed(2)} °C</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> water_drop </span> Dew Point Temperature</span>
-            <span class="det-abbr">Tdp</span>
-            <span>:</span>
-            <span class="det-val">${d.Tdp.toFixed(2)} °C</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> ac_unit </span> Frost Point Temperature</span>
-            <span class="det-abbr">Tf</span>
-            <span>:</span>
-            <span class="det-val">${d.Tf.toFixed(2)} °C</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> water_do </span> Humidity Ratio</span>
-            <span class="det-abbr">W</span>
-            <span>:</span>
-            <span class="det-val">${d.W.toFixed(4)} kg/kg'</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> humidity_percentage </span> Relative Humidity</span>
-            <span class="det-abbr">RH</span>
-            <span>:</span>
-            <span class="det-val">${d.RH.toFixed(2)} %</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> water </span> Moisture Content</span>
-            <span class="det-abbr">μ</span>
-            <span>:</span>
-            <span class="det-val">${d.mu.toFixed(2)} %</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> local_fire_department </span> Enthalpy</span>
-            <span class="det-abbr">h</span>
-            <span>:</span>
-            <span class="det-val">${d.h.toFixed(2)} kJ/kg</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> heat </span> Specific Heat Capacity</span>
-            <span class="det-abbr">Cp</span>
-            <span>:</span>
-            <span class="det-val">${d.cp.toFixed(3)} kJ/(kg·°C)</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> open_in_full </span> Specific Volume</span>
-            <span class="det-abbr">v</span>
-            <span>:</span>
-            <span class="det-val">${d.v.toFixed(3)} m³/kg</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> layers </span> Density</span>
-            <span class="det-abbr">ρ</span>
-            <span>:</span>
-            <span class="det-val">${d.rho.toFixed(2)} kg/m³</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> speed </span> Vapor Partial Pressure</span>
-            <span class="det-abbr">Pw</span>
-            <span>:</span>
-            <span class="det-val">${d.Pw.toFixed(0)} Pa</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> speed </span> Saturation Vapor Pressure</span>
-            <span class="det-abbr">Pws</span>
-            <span>:</span>
-            <span class="det-val">${d.Pws.toFixed(0)} Pa</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> trending_down </span> Vapor Pressure Deficit</span>
-            <span class="det-abbr">VPD</span>
-            <span>:</span>
-            <span class="det-val">${d.VPD.toFixed(2)} Pa</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> compare_arrows </span> Humidity Deficit</span>
-            <span class="det-abbr">HD</span>
-            <span>:</span>
-            <span class="det-val">${d.HD.toFixed(4)} kg/kg'</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> salinity </span> Absolute Humidity</span>
-            <span class="det-abbr">AH</span>
-            <span>:</span>
-            <span class="det-val">${d.AH.toFixed(2)} g/m³</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> water_drop </span> Saturation Vapor Concentration</span>
-            <span class="det-abbr">Dvs</span>
-            <span>:</span>
-            <span class="det-val">${d.Dvs.toFixed(2)} g/m³</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> science </span> Volume Mixing Ratio (dry)</span>
-            <span class="det-abbr">VMR</span>
-            <span>:</span>
-            <span class="det-val">${d.VMR.toFixed(2)} ppm</span>
-        </div>
-
-        <div class="detail-row">
-            <span class="det-label"><span class="material-symbols-rounded"> difference </span> Psychrometric Difference</span>
-            <span class="det-abbr">PD</span>
-            <span>:</span>
-            <span class="det-val">${d.PD.toFixed(2)} °C</span>
-        </div>
-    `;
+  return [
+  buildDetailMetricCard("Dry Bulb Temperature (Tdb)", `${d.Tdb.toFixed(2)} °C`),
+  buildDetailMetricCard("Wet Bulb Temperature (Twb)", `${d.Twb.toFixed(2)} °C`),
+  buildDetailMetricCard("Dew Point Temperature (Tdp)", `${d.Tdp.toFixed(2)} °C`),
+  buildDetailMetricCard("Frost Point Temperature (Tf)", `${d.Tf.toFixed(2)} °C`),
+  buildDetailMetricCard("Humidity Ratio (W)", `${d.W.toFixed(4)} kg/kg'`),
+  buildDetailMetricCard("Relative Humidity (RH)", `${d.RH.toFixed(2)} %`),
+  buildDetailMetricCard("Moisture Content (u)", `${d.mu.toFixed(2)} %`),
+  buildDetailMetricCard("Enthalpy (h)", `${d.h.toFixed(2)} kJ/kg`),
+  buildDetailMetricCard("Specific Heat Capacity (Cp)", `${d.cp.toFixed(3)} kJ/(kg·°C)`),
+  buildDetailMetricCard("Specific Volume (v)", `${d.v.toFixed(3)} m³/kg`),
+  buildDetailMetricCard("Density (rho)", `${d.rho.toFixed(2)} kg/m³`),
+  buildDetailMetricCard("Vapor Partial Pressure (Pw)", `${d.Pw.toFixed(0)} Pa`),
+  buildDetailMetricCard("Saturation Vapor Pressure (Pws)", `${d.Pws.toFixed(0)} Pa`),
+  buildDetailMetricCard("Vapor Pressure Deficit (VPD)", `${d.VPD.toFixed(2)} Pa`),
+  buildDetailMetricCard("Humidity Deficit (HD)", `${d.HD.toFixed(4)} kg/kg'`),
+  buildDetailMetricCard("Absolute Humidity (AH)", `${d.AH.toFixed(2)} g/m³`),
+  buildDetailMetricCard("Saturation Vapor Concentration (Dvs)", `${d.Dvs.toFixed(2)} g/m³`),
+  buildDetailMetricCard("Volume Mixing Ratio (VMR)", `${d.VMR.toFixed(2)} ppm`),
+  buildDetailMetricCard("Psychrometric Difference (PD)", `${d.PD.toFixed(2)} °C`),
+  buildDetailMetricCard("Saturation Humidity Ratio (Wsat)", `${d.Wsat.toFixed(4)} kg/kg'`),
+  ].join("");
 }
 
 function hexToRgb(hex) {
@@ -2770,7 +3389,10 @@ function drawPsychroLines(
 
   // 1. VOLUME LINES (Specific Volume) - Only render if visibility.v is true
   if (State.visibility.v) {
-    for (let v = 0.75; v <= 1.11; v += 0.01) {
+    // Dynamic range: cover full visible area (v = Ra*(T+273.15)/Patm, Ra_dry=287.058, Ra_moist bigger)
+    const _vLo = Math.max(0.50, Math.floor(287.058 * (minT + 273.15) / Patm / 0.01) * 0.01 - 0.02);
+    const _vHi = Math.min(2.00, Math.ceil((287.058 + 461.5 * maxH) * (maxT + 273.15) / Patm / 0.01) * 0.01 + 0.02);
+    for (let v = _vLo; v <= _vHi; v = Math.round((v + 0.01) * 1000) / 1000) {
       const ts = Psychro.solveIntersectionWithSaturation(
         "volume",
         v,
@@ -2840,7 +3462,10 @@ function drawPsychroLines(
 
   // 2. ENTHALPY LINES - Only render if visibility.h is true
   if (State.visibility.h) {
-    for (let h = -20; h <= 180; h += 5) {
+    // Dynamic range: h = 1.006*T + W*(2501 + 1.86*T)
+    const _hLo = Math.max(-300, Math.floor(1.006 * minT / 5) * 5 - 10);
+    const _hHi = Math.min(800, Math.ceil((1.006 * maxT + maxH * (2501 + 1.86 * maxT)) / 5) * 5 + 10);
+    for (let h = _hLo; h <= _hHi; h += 5) {
       const ts = Psychro.solveIntersectionWithSaturation(
         "enthalpy",
         h,
@@ -3224,16 +3849,31 @@ function renderSmartLabels(
 ) {
   if (labelData.length === 0) return;
 
-  labelData.sort((a, b) => a.pos - b.pos);
+  const labelInterval = (() => {
+    const raw = parseInt(getInputValue("set-line-label-step"), 10);
+    return Number.isFinite(raw) && raw > 0 ? raw : 1;
+  })();
 
-  for (let i = 1; i < labelData.length; i++) {
-    if (labelData[i].pos < labelData[i - 1].pos + 15) {
-      labelData[i].pos = labelData[i - 1].pos + 15;
+  const counters = new Map();
+  const filteredLabelData = labelData.filter((entry) => {
+    const key = entry.class || "default";
+    const count = counters.get(key) || 0;
+    counters.set(key, count + 1);
+    return count % labelInterval === 0;
+  });
+
+  if (filteredLabelData.length === 0) return;
+
+  filteredLabelData.sort((a, b) => a.pos - b.pos);
+  const minGap = 15 + (labelInterval - 1) * 6;
+
+  for (let i = 1; i < filteredLabelData.length; i++) {
+    if (filteredLabelData[i].pos < filteredLabelData[i - 1].pos + minGap) {
+      filteredLabelData[i].pos = filteredLabelData[i - 1].pos + minGap;
     }
   }
 
-  // Gambar label
-  labelData.forEach((d) => {
+  filteredLabelData.forEach((d) => {
     let xPos, yPos, anchor, alignment;
     let rotate = false;
 
@@ -3342,9 +3982,895 @@ function renderSmartLabels(
   });
 }
 
-updateLists();
-drawChart();
-window.addEventListener("resize", drawChart);
+// ==========================================
+// EXPLORE: LOCK / PROBE / COMPARE A-B
+// ==========================================
+
+function setExploreSubMode(subMode) {
+  State.exploreSubMode = subMode;
+  const icons = { hover: "explore", lock: "push_pin", compare: "compare_arrows" };
+  const labels = { hover: "Hover", lock: "Lock / Probe", compare: "Compare A–B" };
+  const icon = document.getElementById("explore-submode-icon");
+  const label = document.getElementById("explore-submode-label");
+  if (icon) icon.textContent = icons[subMode] || "explore";
+  if (label) label.textContent = labels[subMode] || subMode;
+
+  document.getElementById("explore-hover-ui").style.display = subMode === "hover" ? "block" : "none";
+  document.getElementById("explore-lock-ui").style.display = subMode === "lock" ? "block" : "none";
+  document.getElementById("explore-compare-ui").style.display = subMode === "compare" ? "block" : "none";
+  if (subMode === "hover") clearProbeAll();
+  if (subMode === "compare") setCompareTarget(State.compareTarget || "A");
+  syncProbeAStatus();
+  ["hover","lock","compare"].forEach(m => {
+    const b = document.getElementById("seg-explore-" + m);
+    if (b) b.classList.toggle("active", m === subMode);
+  });
+  scheduleAnimatedTabRefresh();
+}
+
+function clearProbeA() {
+  State.probeA = null;
+  State.compareTarget = "A";
+  const dp = document.getElementById("compare-delta-panel");
+  if (dp && (!State.probeA || !State.probeB)) dp.innerHTML = "";
+  refreshCompareProbeBadges();
+  if (State.probeA && State.probeB) updateCompareDeltaPanel(State.probeA.data, State.probeB.data);
+  drawChart();
+}
+
+function clearProbeB() {
+  State.probeB = null;
+  State.compareTarget = "B";
+  const dp = document.getElementById("compare-delta-panel");
+  if (dp && (!State.probeA || !State.probeB)) dp.innerHTML = "";
+  refreshCompareProbeBadges();
+  if (State.probeA && State.probeB) updateCompareDeltaPanel(State.probeA.data, State.probeB.data);
+  drawChart();
+}
+
+function clearProbeAll() {
+  State.probeA = null;
+  State.probeB = null;
+  State.compareTarget = "A";
+  const dp = document.getElementById("compare-delta-panel");
+  if (dp) dp.innerHTML = "";
+  refreshCompareProbeBadges();
+  syncProbeAStatus();
+  drawChart();
+}
+
+function updateCompareDeltaPanel(dA, dB) {
+  const panel = document.getElementById("compare-delta-panel");
+  if (!panel) return;
+
+  const df = (a, b, dec = 2) => {
+    const v = b - a;
+    return (v >= 0 ? "+" : "") + v.toFixed(dec);
+  };
+  const cls = (a, b) => b > a ? "delta-pos" : b < a ? "delta-neg" : "";
+
+  panel.innerHTML = `
+    <div class="compare-delta-title">\u0394 (B \u2212 A)</div>
+    <div class="compare-delta-grid">
+      <div class="delta-row"><span class="delta-label">\u0394Tdb</span><span class="delta-val ${cls(dA.Tdb,dB.Tdb)}">${df(dA.Tdb,dB.Tdb)} \u00b0C</span></div>
+      <div class="delta-row"><span class="delta-label">\u0394Twb</span><span class="delta-val ${cls(dA.Twb,dB.Twb)}">${df(dA.Twb,dB.Twb)} \u00b0C</span></div>
+      <div class="delta-row"><span class="delta-label">\u0394Tdp</span><span class="delta-val ${cls(dA.Tdp,dB.Tdp)}">${df(dA.Tdp,dB.Tdp)} \u00b0C</span></div>
+      <div class="delta-row"><span class="delta-label">\u0394RH</span><span class="delta-val ${cls(dA.RH,dB.RH)}">${df(dA.RH,dB.RH)} %</span></div>
+      <div class="delta-row"><span class="delta-label">\u0394W</span><span class="delta-val ${cls(dA.W,dB.W)}">${df(dA.W,dB.W,4)} kg/kg'</span></div>
+      <div class="delta-row"><span class="delta-label">\u0394VPD</span><span class="delta-val ${cls(dA.VPD,dB.VPD)}">${df(dA.VPD,dB.VPD,4)} kPa</span></div>
+      <div class="delta-row"><span class="delta-label">\u0394h</span><span class="delta-val ${cls(dA.h,dB.h)}">${df(dA.h,dB.h)} kJ/kg</span></div>
+      <div class="delta-row"><span class="delta-label">\u0394v</span><span class="delta-val ${cls(dA.v,dB.v)}">${df(dA.v,dB.v,4)} m\u00b3/kg</span></div>
+      <div class="delta-row"><span class="delta-label">\u0394AH</span><span class="delta-val ${cls(dA.AH,dB.AH)}">${df(dA.AH,dB.AH,2)} g/m\u00b3</span></div>
+    </div>`;
+}
+
+function renderProbes(layer, x, y, w, h, Patm) {
+  const getXY = (probe) => {
+    let cx, cy;
+    if (State.chartType === "psychrometric") {
+      const yVal = State.yAxisType === "absoluteHumidity"
+        ? calculateAbsoluteHumidity(probe.t, probe.w, Patm)
+        : probe.w;
+      cx = x(probe.t);
+      cy = y(yVal);
+    } else {
+      const xVal = State.yAxisType === "absoluteHumidity"
+        ? calculateAbsoluteHumidity(probe.t, probe.w, Patm)
+        : probe.w;
+      cx = x(xVal);
+      cy = y(probe.t);
+    }
+    return { cx, cy };
+  };
+
+  const drawPin = (probe, label, colorFill, colorStroke) => {
+    const { cx, cy } = getXY(probe);
+    const g = layer.append("g").attr("class", "probe-pin probe-" + label.toLowerCase());
+    g.append("line").attr("x1", cx - 12).attr("y1", cy).attr("x2", cx + 12).attr("y2", cy).attr("class", "probe-crosshair").attr("stroke", colorStroke).attr("stroke-width", 1.5);
+    g.append("line").attr("x1", cx).attr("y1", cy - 12).attr("x2", cx).attr("y2", cy + 12).attr("class", "probe-crosshair").attr("stroke", colorStroke).attr("stroke-width", 1.5);
+    g.append("circle").attr("cx", cx).attr("cy", cy).attr("r", 7).attr("fill", colorFill).attr("stroke", colorStroke).attr("stroke-width", 1.5).attr("class", "probe-circle");
+    g.append("text").attr("x", cx + 10).attr("y", cy - 9).attr("class", "probe-label").attr("fill", colorStroke).attr("font-size", "11px").attr("font-weight", "700").text(label);
+  };
+
+  if (State.probeA) drawPin(State.probeA, "A", "rgba(46,125,50,0.18)", "#2e7d32");
+  if (State.probeB) drawPin(State.probeB, "B", "rgba(230,81,0,0.18)", "#e65100");
+
+  if (State.probeA && State.probeB) {
+    const a = getXY(State.probeA);
+    const b = getXY(State.probeB);
+    layer.append("line")
+      .attr("x1", a.cx).attr("y1", a.cy).attr("x2", b.cx).attr("y2", b.cy)
+      .attr("class", "probe-ab-line").attr("stroke", "#9e9e9e").attr("stroke-width", 1).attr("stroke-dasharray", "4,3").attr("opacity", 0.6);
+  }
+}
+
+// ==========================================
+// POINT: BATCH CSV
+// ==========================================
+
+function parseBatchCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  const results = [];
+  const errors = [];
+
+  lines.forEach((raw, idx) => {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) return;
+
+    const parts = line.split(",").map(s => s.trim());
+    let name, tdb, w;
+
+    if (parts.length >= 3) {
+      name = parts[0];
+      tdb = parseFloat(parts[1]);
+      w = parseFloat(parts[2]);
+    } else if (parts.length === 2) {
+      name = null;
+      tdb = parseFloat(parts[0]);
+      w = parseFloat(parts[1]);
+    } else {
+      errors.push(`Line ${idx + 1}: expected 2 or 3 comma-separated columns`);
+      return;
+    }
+
+    if (isNaN(tdb) || isNaN(w)) {
+      errors.push(`Line ${idx + 1}: non-numeric value (tdb=${parts[parts.length-2]}, w=${parts[parts.length-1]})`);
+      return;
+    }
+
+    if (w < 0 || w > 0.5) {
+      errors.push(`Line ${idx + 1}: W=${w} out of valid range [0, 0.5]`);
+      return;
+    }
+
+    results.push({ name: name || `Pt${results.length + 1}`, t: tdb, w });
+  });
+
+  return { results, errors };
+}
+
+function previewBatchPoints() {
+  const text = document.getElementById("batch-csv-input").value;
+  const preview = document.getElementById("batch-parse-preview");
+  preview.style.display = "block";
+
+  if (!text.trim()) {
+    preview.innerHTML = `<span style="color:#999">Paste CSV data above first.</span>`;
+    return;
+  }
+
+  const { results, errors } = parseBatchCSV(text);
+
+  if (errors.length > 0) {
+    preview.innerHTML = `<span style="color:#c62828">${errors.join("<br>")}</span>`;
+  } else if (results.length === 0) {
+    preview.innerHTML = `<span style="color:#999">No valid rows found.</span>`;
+  } else {
+    const rows = results.slice(0, 8).map(r => `${r.name}: Tdb=${r.t}\u00b0C, W=${r.w}`).join("<br>");
+    const more = results.length > 8 ? `<br>... and ${results.length - 8} more` : "";
+    preview.innerHTML = `<span style="color:#2e7d32">\u2713 ${results.length} point(s) ready:<br>${rows}${more}</span>`;
+  }
+}
+
+function submitBatchPoints() {
+  const text = document.getElementById("batch-csv-input").value;
+  if (!text.trim()) { alert("No CSV data entered."); return; }
+
+  const { results, errors } = parseBatchCSV(text);
+
+  if (errors.length > 0) {
+    alert("Errors in CSV:\n" + errors.join("\n"));
+    return;
+  }
+  if (results.length === 0) { alert("No valid rows found."); return; }
+
+  const Patm = getPressureInPa();
+  const colors = ["#cc1919","#1565c0","#6a1e8e","#2e7d32","#e65100","#ad1457","#00695c","#37474f"];
+
+  results.forEach((r, i) => {
+    const props = calculateAllProperties(r.t, r.w, Patm);
+    State.points.push({
+      id: Date.now() + i,
+      name: r.name,
+      color: colors[i % colors.length],
+      t: r.t,
+      w: r.w,
+      data: props
+    });
+  });
+
+  historyManager.push(State);
+  updateLists();
+  drawChart();
+
+  document.getElementById("batch-csv-input").value = "";
+  const preview = document.getElementById("batch-parse-preview");
+  if (preview) { preview.style.display = "none"; preview.innerHTML = ""; }
+}
+
+// ==========================================
+// POINT: LIVE SENSOR
+// ==========================================
+
+function addSensorPoint() {
+  const name = document.getElementById("sensor-name").value.trim();
+  const url = document.getElementById("sensor-url").value.trim();
+  const tdbField = document.getElementById("sensor-tdb-field").value.trim() || "tdb";
+  const wField = document.getElementById("sensor-w-field").value.trim() || "w";
+  const intervalSec = Math.max(1, parseFloat(document.getElementById("sensor-interval").value) || 5);
+
+  if (!name) { alert("Please enter a sensor name/ID."); return; }
+  if (!url) { alert("Please enter a data URL."); return; }
+
+  try {
+    const parsed = new URL(url);
+    if (!["http:", "https:"].includes(parsed.protocol)) {
+      alert("Only http:// and https:// URLs are supported.");
+      return;
+    }
+  } catch (e) {
+    alert("Invalid URL format.");
+    return;
+  }
+
+  const sensorId = Date.now();
+  const Patm = getPressureInPa();
+
+  const sensor = { id: sensorId, name, url, tdbField, wField, intervalSec, status: "connecting", t: null, w: null, lastUpdate: null };
+  State.sensors.push(sensor);
+
+  State.points.push({
+    id: sensorId,
+    name,
+    color: "#1565c0",
+    t: 25,
+    w: 0.01,
+    data: calculateAllProperties(25, 0.01, Patm),
+    isSensor: true,
+    sensorId
+  });
+
+  updateLists();
+  renderSensorList();
+  startSensor(sensorId);
+
+  document.getElementById("sensor-name").value = "";
+  document.getElementById("sensor-url").value = "";
+}
+
+function startSensor(sensorId) {
+  if (_sensorIntervals[sensorId]) clearInterval(_sensorIntervals[sensorId]);
+  const sensor = State.sensors.find(s => s.id === sensorId);
+  if (!sensor) return;
+  const poll = () => fetchSensorData(sensorId);
+  poll();
+  _sensorIntervals[sensorId] = setInterval(poll, sensor.intervalSec * 1000);
+  sensor.status = "polling";
+  renderSensorList();
+}
+
+function stopSensor(sensorId) {
+  if (_sensorIntervals[sensorId]) { clearInterval(_sensorIntervals[sensorId]); delete _sensorIntervals[sensorId]; }
+  const sensor = State.sensors.find(s => s.id === sensorId);
+  if (sensor) { sensor.status = "stopped"; renderSensorList(); }
+}
+
+function removeSensor(sensorId) {
+  stopSensor(sensorId);
+  State.sensors = State.sensors.filter(s => s.id !== sensorId);
+  State.points = State.points.filter(p => p.sensorId !== sensorId);
+  updateLists();
+  renderSensorList();
+  drawChart();
+}
+
+async function fetchSensorData(sensorId) {
+  const sensor = State.sensors.find(s => s.id === sensorId);
+  if (!sensor) return;
+
+  try {
+    const response = await fetch(sensor.url, { method: "GET", mode: "cors", credentials: "omit", headers: { Accept: "application/json" } });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const raw = await response.json();
+
+    const getVal = (obj, path) => path.includes(".")
+      ? path.split(".").reduce((o, k) => (o && o[k] !== undefined ? o[k] : undefined), obj)
+      : obj[path];
+
+    const tdb = parseFloat(getVal(raw, sensor.tdbField));
+    const w = parseFloat(getVal(raw, sensor.wField));
+
+    if (isNaN(tdb) || isNaN(w)) throw new Error(`Fields "${sensor.tdbField}" / "${sensor.wField}" not found or not numeric`);
+    if (w < 0 || w > 0.5 || tdb < -100 || tdb > 200) throw new Error("Values out of physical range");
+
+    sensor.t = tdb;
+    sensor.w = w;
+    sensor.lastUpdate = new Date();
+    sensor.status = "live";
+
+    const Patm = getPressureInPa();
+    const idx = State.points.findIndex(p => p.sensorId === sensorId);
+    if (idx !== -1) {
+      State.points[idx].t = tdb;
+      State.points[idx].w = w;
+      State.points[idx].data = calculateAllProperties(tdb, w, Patm);
+    }
+
+    renderSensorList();
+    updateLists();
+    drawChart();
+
+  } catch (e) {
+    sensor.status = "error: " + e.message.substring(0, 50);
+    renderSensorList();
+  }
+}
+
+function renderSensorList() {
+  const panel = document.getElementById("sensor-list-panel");
+  if (!panel) return;
+
+  if (State.sensors.length === 0) {
+    panel.innerHTML = `<div style="font-size:11px;color:#999;text-align:center;padding:6px;">No sensors added.</div>`;
+    return;
+  }
+
+  panel.innerHTML = State.sensors.map(s => {
+    const statusClass = s.status === "live" ? "status-live" : s.status === "polling" || s.status === "connecting" ? "status-polling" : s.status === "stopped" ? "status-stopped" : "status-error";
+    const isRunning = !!_sensorIntervals[s.id];
+    const tsStr = s.lastUpdate ? s.lastUpdate.toLocaleTimeString() : "";
+    const dataStr = s.t !== null ? `Tdb: ${s.t.toFixed(1)}\u00b0C \u2502 W: ${s.w.toFixed(4)} kg/kg'` : "Waiting for data\u2026";
+    return `
+      <div class="sensor-item">
+        <div class="sensor-item-header">
+          <span class="sensor-status-dot ${statusClass}"></span>
+          <span class="sensor-name">${s.name}</span>
+          <div class="sensor-actions">
+            ${isRunning
+              ? `<div class="icon-btn" onclick="stopSensor(${s.id})" title="Pause"><span class="material-symbols-rounded">pause</span></div>`
+              : `<div class="icon-btn" onclick="startSensor(${s.id})" title="Resume"><span class="material-symbols-rounded">play_arrow</span></div>`}
+            <div class="icon-btn btn-delete" onclick="removeSensor(${s.id})" title="Remove"><span class="material-symbols-rounded">delete</span></div>
+          </div>
+        </div>
+        <div class="sensor-item-detail">${dataStr}${tsStr ? " \u2502 " + tsStr : ""}<br><span style="color:#aaa">${s.status}</span></div>
+      </div>`;
+  }).join("");
+}
+
+// ==========================================
+// ZONE: AUTO ZONE BY TARGET PARAMETER
+// ==========================================
+
+function getWForAutoZoneParam(t, paramType, val, Patm) {
+  switch (paramType) {
+    case "RH": {
+      const Pws = Psychro.getSatVapPres(t);
+      return Psychro.getWFromPw(Pws * (val / 100), Patm);
+    }
+    case "VPD": {
+      const Pws = Psychro.getSatVapPres(t);
+      const Pw = Pws - val * 1000; // val in kPa, Pws in Pa
+      if (Pw <= 0) return null;
+      return Psychro.getWFromPw(Pw, Patm);
+    }
+    case "W": return val;
+    case "h": {
+      const w = Psychro.getWFromEnthalpyLine(t, val);
+      return (w >= 0) ? w : null;
+    }
+    case "Twb": {
+      const w = Psychro.getWFromTwbLine(t, val, Patm);
+      return (w >= 0) ? w : null;
+    }
+    case "Tdp": {
+      // Dew point → partial pressure → humidity ratio (independent of t)
+      const Pws_dp = Psychro.getSatVapPres(val);
+      return Psychro.getWFromPw(Pws_dp, Patm);
+    }
+    default: return null;
+  }
+}
+
+function generateAutoZonePoints(paramType, minVal, maxVal, Patm, minT, maxT, maxH) {
+  const tStep = 0.5;
+  const upper = [];
+  const lower = [];
+
+  for (let t = minT; t <= maxT + 0.01; t += tStep) {
+    const wHigh = getWForAutoZoneParam(t, paramType, maxVal, Patm);
+    if (wHigh !== null && wHigh >= 0 && wHigh <= maxH * 1.05) {
+      upper.push({ t, w: Math.min(wHigh, maxH) });
+    }
+    const wLow = getWForAutoZoneParam(t, paramType, minVal, Patm);
+    if (wLow !== null && wLow >= 0 && wLow <= maxH * 1.05) {
+      lower.push({ t, w: Math.min(wLow, maxH) });
+    }
+  }
+
+  if (upper.length < 2 && lower.length < 2) return [];
+  // For params where w is independent of t (W, Tdp), supplement with t-range boundaries
+  if (paramType === "W" || paramType === "Tdp") {
+    return [
+      { t: minT, w: maxVal <= maxH ? maxVal : maxH },
+      { t: maxT, w: maxVal <= maxH ? maxVal : maxH },
+      { t: maxT, w: minVal },
+      { t: minT, w: minVal }
+    ];
+  }
+  return [...upper, ...lower.slice().reverse()];
+}
+
+function previewAutoZone() {
+  const paramType = document.getElementById("auto-zone-param").value;
+  const minVal = parseFloat(document.getElementById("auto-zone-min").value);
+  const maxVal = parseFloat(document.getElementById("auto-zone-max").value);
+
+  if (isNaN(minVal) || isNaN(maxVal)) { alert("Enter valid min and max values."); return; }
+  if (minVal >= maxVal) { alert("Min must be less than max."); return; }
+
+  const Patm = getPressureInPa();
+  const minT = parseFloat(document.getElementById("minTemp").value);
+  const maxT = parseFloat(document.getElementById("maxTemp").value);
+  const maxH = parseFloat(document.getElementById("maxHum").value);
+
+  State.rangePreview = generateAutoZonePoints(paramType, minVal, maxVal, Patm, minT, maxT, maxH);
+  drawChart();
+}
+
+function submitAutoZone() {
+  const paramType = document.getElementById("auto-zone-param").value;
+  const minVal = parseFloat(document.getElementById("auto-zone-min").value);
+  const maxVal = parseFloat(document.getElementById("auto-zone-max").value);
+
+  if (isNaN(minVal) || isNaN(maxVal)) { alert("Enter valid min and max values."); return; }
+  if (minVal >= maxVal) { alert("Min must be less than max."); return; }
+
+  const Patm = getPressureInPa();
+  const minT = parseFloat(document.getElementById("minTemp").value);
+  const maxT = parseFloat(document.getElementById("maxTemp").value);
+  const maxH = parseFloat(document.getElementById("maxHum").value);
+
+  const points = generateAutoZonePoints(paramType, minVal, maxVal, Patm, minT, maxT, maxH);
+  if (points.length < 3) { alert("Could not generate a valid zone. Check parameter values and chart bounds."); return; }
+
+  const labels = { RH: "RH", VPD: "VPD", W: "W", h: "h", Twb: "Twb", Tdp: "Tdp" };
+  const zone = {
+    id: Date.now(),
+    name: `Auto ${labels[paramType]} ${minVal}\u2013${maxVal}`,
+    color: "#7b1fa2",
+    points
+  };
+
+  State.zones.push(zone);
+  State.rangePreview = [];
+  historyManager.push(State);
+  updateLists();
+  drawChart();
+}
+
+// ==========================================
+// ZONE: BOOLEAN OPERATIONS
+// ==========================================
+
+function isPointInPolygon(t, w, polygonPoints) {
+  let inside = false;
+  const n = polygonPoints.length;
+  for (let i = 0, j = n - 1; i < n; j = i++) {
+    const xi = polygonPoints[i].t, yi = polygonPoints[i].w;
+    const xj = polygonPoints[j].t, yj = polygonPoints[j].w;
+    if (((yi > w) !== (yj > w)) && (t < (xj - xi) * (w - yi) / (yj - yi) + xi)) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+// Sutherland-Hodgman intersection
+function clipPolygonSH(subject, clip) {
+  if (!subject.length || !clip.length) return [];
+  let output = subject.slice();
+
+  for (let i = 0; i < clip.length; i++) {
+    if (!output.length) break;
+    const input = output;
+    output = [];
+    const a = clip[i], b = clip[(i + 1) % clip.length];
+    const eDt = b.t - a.t, eDw = b.w - a.w;
+
+    const inside = (p) => eDt * (p.w - a.w) - eDw * (p.t - a.t) >= 0;
+    const intersect = (s, e) => {
+      const dt = e.t - s.t, dw = e.w - s.w;
+      const denom = eDt * dw - eDw * dt;
+      if (Math.abs(denom) < 1e-12) return null;
+      const t_ = ((a.t - s.t) * dw - (a.w - s.w) * dt) / denom;
+      return { t: s.t + t_ * dt, w: s.w + t_ * dw };
+    };
+
+    for (let k = 0; k < input.length; k++) {
+      const p = input[k], q = input[(k + 1) % input.length];
+      if (inside(p) && inside(q)) {
+        output.push(q);
+      } else if (inside(p) && !inside(q)) {
+        const ix = intersect(p, q); if (ix) output.push(ix);
+      } else if (!inside(p) && inside(q)) {
+        const ix = intersect(p, q); if (ix) output.push(ix);
+        output.push(q);
+      }
+    }
+  }
+  return output;
+}
+
+function segSegIntersect(a1, a2, b1, b2) {
+  const d1t = a2.t - a1.t, d1w = a2.w - a1.w;
+  const d2t = b2.t - b1.t, d2w = b2.w - b1.w;
+  const cross = d1t * d2w - d1w * d2t;
+  if (Math.abs(cross) < 1e-12) return null;
+  const dt = b1.t - a1.t, dw = b1.w - a1.w;
+  const s = (dt * d2w - dw * d2t) / cross;
+  const u = (dt * d1w - dw * d1t) / cross;
+  if (s < 0 || s > 1 || u < 0 || u > 1) return null;
+  return { t: a1.t + s * d1t, w: a1.w + s * d1w };
+}
+
+// Vertex-collection + angular sort for union/difference
+function polygonBooleanVertexMethod(polyA, polyB, operation) {
+  const candidates = [];
+
+  polyA.forEach(p => {
+    const inB = isPointInPolygon(p.t, p.w, polyB);
+    if (operation === "union" || (operation === "difference" && !inB)) {
+      candidates.push(p);
+    }
+  });
+
+  if (operation === "union") {
+    polyB.forEach(p => {
+      const inA = isPointInPolygon(p.t, p.w, polyA);
+      if (!inA) candidates.push(p);
+    });
+  }
+
+  // Add intersection points of edges
+  for (let i = 0; i < polyA.length; i++) {
+    for (let j = 0; j < polyB.length; j++) {
+      const ix = segSegIntersect(polyA[i], polyA[(i + 1) % polyA.length], polyB[j], polyB[(j + 1) % polyB.length]);
+      if (ix) candidates.push(ix);
+    }
+  }
+
+  if (candidates.length < 3) return null;
+
+  // Sort by polar angle around centroid
+  const cx = candidates.reduce((s, p) => s + p.t, 0) / candidates.length;
+  const cy = candidates.reduce((s, p) => s + p.w, 0) / candidates.length;
+  candidates.sort((a, b) => Math.atan2(a.w - cy, a.t - cx) - Math.atan2(b.w - cy, b.t - cx));
+
+  return candidates;
+}
+
+function populateBooleanZoneSelects() {
+  const selA = document.getElementById("boolean-zone-a");
+  const selB = document.getElementById("boolean-zone-b");
+  if (!selA || !selB) return;
+  const opts = State.zones.map((z, i) => `<option value="${z.id}">${i + 1}. ${z.name}</option>`).join("");
+  selA.innerHTML = opts || `<option disabled>No zones yet</option>`;
+  selB.innerHTML = opts || `<option disabled>No zones yet</option>`;
+  if (State.zones.length >= 2) { selA.value = State.zones[0].id; selB.value = State.zones[1].id; }
+}
+
+function applyZoneBoolean() {
+  if (State.zones.length < 2) { alert("Need at least 2 zones."); return; }
+
+  const aId = parseInt(document.getElementById("boolean-zone-a").value);
+  const bId = parseInt(document.getElementById("boolean-zone-b").value);
+  const op = document.getElementById("boolean-op").value;
+
+  if (aId === bId) { alert("Select two different zones."); return; }
+
+  const zA = State.zones.find(z => z.id === aId);
+  const zB = State.zones.find(z => z.id === bId);
+  if (!zA || !zB) { alert("Zone not found."); return; }
+
+  let resultPoints;
+  if (op === "intersect") {
+    resultPoints = clipPolygonSH(zA.points, zB.points);
+  } else {
+    resultPoints = polygonBooleanVertexMethod(zA.points, zB.points, op);
+  }
+
+  if (!resultPoints || resultPoints.length < 3) {
+    alert("Result is empty. The zones may not overlap, or the winding direction of the clicked zones may not be compatible with this operation.");
+    return;
+  }
+
+  const opLabel = { intersect: "\u2229", union: "\u222a", difference: "\u2212" };
+  const opColor = { intersect: "#e65100", union: "#1b5e20", difference: "#4a148c" };
+
+  const zone = {
+    id: Date.now(),
+    name: `${zA.name} ${opLabel[op]} ${zB.name}`,
+    color: opColor[op],
+    points: resultPoints
+  };
+
+  State.zones.push(zone);
+  historyManager.push(State);
+  updateLists();
+  drawChart();
+}
+
+window.addEventListener("resize", () => {
+  drawChart();
+  scheduleAnimatedTabRefresh();
+});
+
+// ===== CHART ZOOM + PAN: Ctrl+Scroll (zoom), Scroll (vertical pan), Shift+Scroll (horizontal pan) =====
+
+const _zoomTouch = { active: false, dist0: 1, minT0: 0, maxT0: 50, maxH0: 0.030, minH0: 0 };
+const _panTouch  = { active: false, lastX: 0, lastY: 0 };
+
+// ── helpers ──────────────────────────────────────────────────────────────────
+
+function _touchDist(t1, t2) {
+  const dx = t1.clientX - t2.clientX, dy = t1.clientY - t2.clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
+function _chartInnerSize() {
+  return {
+    cw: chartWrapper.clientWidth  - margin.left - margin.right,
+    ch: chartWrapper.clientHeight - margin.top  - margin.bottom
+  };
+}
+
+// ── ZOOM ─────────────────────────────────────────────────────────────────────
+
+function _applyChartZoom(factor, pixX, pixY) {
+  if (factor <= 0 || !isFinite(factor)) return;
+  const { cw, ch } = _chartInnerSize();
+  if (cw <= 0 || ch <= 0) return;
+
+  const minT = parseFloat(document.getElementById("minTemp").value);
+  const maxT = parseFloat(document.getElementById("maxTemp").value);
+  const maxH = parseFloat(document.getElementById("maxHum").value);
+  const maxAH = parseFloat(document.getElementById("maxAbsHum").value);
+
+  const fx = Math.max(0, Math.min(cw, pixX - margin.left)) / cw;
+  const fy = Math.max(0, Math.min(ch, pixY - margin.top))  / ch;
+
+  let t_foc, w_foc, ah_foc;
+  if (State.chartType === "psychrometric") {
+    t_foc = minT + fx * (maxT - minT);
+    if (State.yAxisType === "absoluteHumidity") {
+      ah_foc = State.viewMinAH + (1 - fy) * (maxAH - State.viewMinAH);
+    } else {
+      w_foc = State.viewMinH + (1 - fy) * (maxH - State.viewMinH);
+    }
+  } else {
+    if (State.yAxisType === "absoluteHumidity") {
+      ah_foc = State.viewMinAH + fx * (maxAH - State.viewMinAH);
+    } else {
+      w_foc = State.viewMinH + fx * (maxH - State.viewMinH);
+    }
+    t_foc = minT + (1 - fy) * (maxT - minT);
+  }
+
+  let newMinT  = t_foc - (t_foc - minT)          * factor;
+  let newMaxT  = t_foc + (maxT - t_foc)           * factor;
+  let newMinH = State.viewMinH;
+  let newMaxH = maxH;
+  let newMinAH = State.viewMinAH;
+  let newMaxAH = maxAH;
+
+  if (State.yAxisType === "absoluteHumidity") {
+    newMinAH = ah_foc - (ah_foc - State.viewMinAH) * factor;
+    newMaxAH = ah_foc + (maxAH - ah_foc) * factor;
+  } else {
+    newMinH = w_foc - (w_foc - State.viewMinH) * factor;
+    newMaxH = w_foc + (maxH - w_foc) * factor;
+  }
+
+  const MIN_T = 2;
+  const MIN_AH = 1;
+  const MAX_AH = 400;
+  if (newMaxT - newMinT < MIN_T) { const m = (newMinT + newMaxT) / 2; newMinT = m - MIN_T / 2; newMaxT = m + MIN_T / 2; }
+  newMinT = Math.max(min_tdb, Math.min(max_tdb - MIN_T, newMinT));
+  newMaxT = Math.min(max_tdb, Math.max(newMinT + MIN_T, newMaxT));
+
+  if (State.yAxisType === "absoluteHumidity") {
+    if (newMaxAH - newMinAH < MIN_AH) {
+      const m = (newMinAH + newMaxAH) / 2;
+      newMinAH = m - MIN_AH / 2;
+      newMaxAH = m + MIN_AH / 2;
+    }
+    newMinAH = Math.max(0, newMinAH);
+    newMaxAH = Math.max(newMinAH + MIN_AH, Math.min(MAX_AH, newMaxAH));
+    State.viewMinAH = newMinAH;
+    document.getElementById("maxAbsHum").value = newMaxAH.toFixed(1);
+  } else {
+    newMinH = Math.max(0, newMinH);
+    newMaxH = Math.max(newMinH + 0.001, Math.min(0.2, newMaxH));
+    State.viewMinH = newMinH;
+    document.getElementById("maxHum").value  = newMaxH.toFixed(4);
+  }
+
+  document.getElementById("minTemp").value = newMinT.toFixed(1);
+  document.getElementById("maxTemp").value = newMaxT.toFixed(1);
+  if (State.yAxisType === "absoluteHumidity") _syncRatioFromAbsHum();
+  else _syncAbsHum();
+  drawChart();
+}
+
+// ── PAN ──────────────────────────────────────────────────────────────────────
+// vertFrac  > 0 → pan toward higher Y-axis values (more humid / hotter)
+// horizFrac > 0 → pan toward higher X-axis values (hotter / more humid)
+
+function _applyChartPan(vertFrac, horizFrac) {
+  const minT = parseFloat(document.getElementById("minTemp").value);
+  const maxT = parseFloat(document.getElementById("maxTemp").value);
+  const maxH = parseFloat(document.getElementById("maxHum").value);
+  const maxAH = parseFloat(document.getElementById("maxAbsHum").value);
+  const tRange = maxT - minT;
+  const wRange = maxH - State.viewMinH;
+  const ahRange = maxAH - State.viewMinAH;
+  let changed = false;
+
+  function panW(frac) {
+    const d = frac * wRange;
+    let lo = State.viewMinH + d, hi = maxH + d;
+    if (lo < 0)   { hi -= lo; lo = 0; }
+    if (hi > 0.2) { lo -= (hi - 0.2); hi = 0.2; lo = Math.max(0, lo); }
+    State.viewMinH = lo;
+    document.getElementById("maxHum").value = hi.toFixed(4);
+    changed = true;
+  }
+
+  function panAH(frac) {
+    const d = frac * ahRange;
+    let lo = State.viewMinAH + d, hi = maxAH + d;
+    if (lo < 0) { hi -= lo; lo = 0; }
+    if (hi > 400) { lo -= hi - 400; hi = 400; lo = Math.max(0, lo); }
+    State.viewMinAH = lo;
+    document.getElementById("maxAbsHum").value = hi.toFixed(1);
+    _syncRatioFromAbsHum();
+    changed = true;
+  }
+
+  function panT(frac) {
+    const d = frac * tRange;
+    let lo = minT + d, hi = maxT + d;
+    if (lo < min_tdb) { hi += min_tdb - lo; lo = min_tdb; }
+    if (hi > max_tdb) { lo -= hi - max_tdb; hi = max_tdb; lo = Math.max(min_tdb, lo); }
+    document.getElementById("minTemp").value = lo.toFixed(1);
+    document.getElementById("maxTemp").value = hi.toFixed(1);
+    changed = true;
+  }
+
+  if (State.chartType === "psychrometric") {
+    if (vertFrac  !== 0) {
+      if (State.yAxisType === "absoluteHumidity") panAH(vertFrac);
+      else panW(vertFrac);
+    }
+    if (horizFrac !== 0) panT(horizFrac);  // X = Tdb
+  } else {
+    if (vertFrac  !== 0) panT(vertFrac);   // Y = Tdb (Mollier)
+    if (horizFrac !== 0) {
+      if (State.yAxisType === "absoluteHumidity") panAH(horizFrac);
+      else panW(horizFrac);
+    }
+  }
+
+  if (changed) { _syncAbsHum(); drawChart(); }
+}
+
+function _syncAbsHum() {
+  try { _syncAbsHumFromRatio(); } catch (_) {}
+}
+
+// ── MOUSE WHEEL ──────────────────────────────────────────────────────────────
+
+chartWrapper.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  const rect = chartWrapper.getBoundingClientRect();
+  const px = e.clientX - rect.left, py = e.clientY - rect.top;
+
+  if (e.ctrlKey) {
+    // ZOOM centred on cursor
+    const factor = e.deltaY > 0 ? 1.12 : 1 / 1.12;
+    _applyChartZoom(factor, px, py);
+  } else {
+    // PAN: normalise delta to ±8% of current range per wheel step
+    // scroll up (deltaY < 0) → see higher values (step < 0 means pan toward higher data)
+    const step = Math.sign(e.deltaY) * 0.08;
+    if (e.shiftKey) {
+      // HORIZONTAL PAN (scroll right → see higher X)
+      _applyChartPan(0, step);
+    } else {
+      // VERTICAL PAN (scroll up → see higher Y, so negate step)
+      _applyChartPan(-step, 0);
+    }
+  }
+}, { passive: false });
+
+// ── TOUCH: PINCH-ZOOM + 1-FINGER PAN ─────────────────────────────────────────
+
+chartWrapper.addEventListener("touchstart", (e) => {
+  if (e.touches.length === 2) {
+    _panTouch.active = false;
+    _zoomTouch.active = true;
+    _zoomTouch.dist0 = _touchDist(e.touches[0], e.touches[1]);
+    _zoomTouch.minT0 = parseFloat(document.getElementById("minTemp").value);
+    _zoomTouch.maxT0 = parseFloat(document.getElementById("maxTemp").value);
+    _zoomTouch.maxH0 = parseFloat(document.getElementById("maxHum").value);
+    _zoomTouch.minH0 = State.viewMinH;
+  } else if (e.touches.length === 1) {
+    _zoomTouch.active = false;
+    _panTouch.active = true;
+    _panTouch.lastX = e.touches[0].clientX;
+    _panTouch.lastY = e.touches[0].clientY;
+  }
+}, { passive: true });
+
+chartWrapper.addEventListener("touchmove", (e) => {
+  if (_zoomTouch.active && e.touches.length === 2) {
+    e.preventDefault();
+    const newDist = _touchDist(e.touches[0], e.touches[1]);
+    if (_zoomTouch.dist0 < 1) return;
+
+    // Restore initial domain so every frame zooms from the gesture start
+    document.getElementById("minTemp").value = _zoomTouch.minT0;
+    document.getElementById("maxTemp").value = _zoomTouch.maxT0;
+    document.getElementById("maxHum").value  = _zoomTouch.maxH0;
+    State.viewMinH = _zoomTouch.minH0;
+
+    const rect = chartWrapper.getBoundingClientRect();
+    const midX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
+    const midY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
+    _applyChartZoom(_zoomTouch.dist0 / newDist, midX, midY);
+
+  } else if (_panTouch.active && e.touches.length === 1) {
+    e.preventDefault();
+    const { cw, ch } = _chartInnerSize();
+    if (cw <= 0 || ch <= 0) return;
+
+    const dx = e.touches[0].clientX - _panTouch.lastX;
+    const dy = e.touches[0].clientY - _panTouch.lastY;
+    _panTouch.lastX = e.touches[0].clientX;
+    _panTouch.lastY = e.touches[0].clientY;
+
+    // finger right (+dx) → content moves right → see lower X → negative horiz frac
+    // finger down  (+dy) → content moves down  → see lower Y → negative vert  frac
+    const horiz = -(dx / cw) * 0.5;
+    const vert  = -(dy / ch) * 0.5;
+
+    _applyChartPan(vert, horiz);
+  }
+}, { passive: false });
+
+chartWrapper.addEventListener("touchend",   () => { _zoomTouch.active = false; _panTouch.active = false; }, { passive: true });
+chartWrapper.addEventListener("touchcancel",() => { _zoomTouch.active = false; _panTouch.active = false; }, { passive: true });
 
 function downloadSvgAsPng(svgSelector, fileName = 'image.png', scale = 3) {
   const originalSvg = document.querySelector(svgSelector);
@@ -3622,6 +5148,9 @@ const inputHandlers = {
       if (panel) panel.style.display = "none";
     }
   },
+  "set-line-label-step": () => {
+    drawChart();
+  },
   "set-show-comfort-zone": (event) => {
     toggleComfortZone();
   },
@@ -3632,13 +5161,234 @@ function handleInputChange(event) {
   if (inputHandlers[inputId]) {
     inputHandlers[inputId](event);
   }
+  queuePersistedStateSave();
 }
 
-const inputs = document.querySelectorAll("input");
+const inputs = document.querySelectorAll("input, select");
 inputs.forEach((input) => {
   input.addEventListener("input", handleInputChange);
   input.addEventListener("change", handleInputChange);
 });
+
+const LOCAL_DB_NAME = "psychrometric-mollier";
+const LOCAL_DB_STORE = "workspace";
+const LOCAL_DB_KEY = "app-state";
+let localDbPromise = null;
+let persistTimer = null;
+let isHydratingPersistedState = false;
+
+function cloneValue(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function openLocalDb() {
+  if (!("indexedDB" in window)) return Promise.resolve(null);
+  if (localDbPromise) return localDbPromise;
+
+  localDbPromise = new Promise((resolve, reject) => {
+    const request = window.indexedDB.open(LOCAL_DB_NAME, 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(LOCAL_DB_STORE)) {
+        db.createObjectStore(LOCAL_DB_STORE);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+
+  return localDbPromise;
+}
+
+function captureSettingsSnapshot() {
+  const infoFields = getSelectedInfoFields();
+  return {
+    chartType: State.chartType,
+    yAxisType: State.yAxisType,
+    pressure: getInputValue("pressure"),
+    pressureUnit: getInputValue("pressure-unit"),
+    minTemp: getInputValue("minTemp"),
+    maxTemp: getInputValue("maxTemp"),
+    maxHum: getInputValue("maxHum"),
+    maxAbsHum: getInputValue("maxAbsHum"),
+    showInfoPanel: getCheckboxValue("set-show-info-panel"),
+    infoFields: infoFields.join("|"),
+    infoPrimary: infoFields[0] || "",
+    infoSecondary: infoFields[1] || "",
+    showLegend: getCheckboxValue("set-show-legend"),
+    labelInterval: getInputValue("set-line-label-step"),
+    showRh: getCheckboxValue("set-show-rh"),
+    showH: getCheckboxValue("set-show-h"),
+    showTwb: getCheckboxValue("set-show-twb"),
+    showV: getCheckboxValue("set-show-v"),
+    showSat: getCheckboxValue("set-show-sat"),
+    "comfortZone.visible": getCheckboxValue("set-show-comfort-zone"),
+    "comfortZone.preset": getInputValue("comfort-zone-preset"),
+    "comfortZone.color": getInputValue("comfort-zone-color"),
+    "comfortZone.tMin": getInputValue("comfort-tmin"),
+    "comfortZone.tMax": getInputValue("comfort-tmax"),
+    "comfortZone.rhMin": getInputValue("comfort-rhmin"),
+    "comfortZone.rhMax": getInputValue("comfort-rhmax"),
+  };
+}
+
+function captureDataSnapshot() {
+  return {
+    points: State.points.map((point) => ({
+      name: point.name,
+      color: point.color,
+      t: point.t,
+      w: point.w,
+      isSensor: !!point.isSensor,
+    })),
+    zones: State.zones.map((zone) => ({
+      name: zone.name,
+      color: zone.color,
+      points: zone.points.map((point) => ({ t: point.t, w: point.w })),
+    })),
+  };
+}
+
+function captureRuntimeSnapshot() {
+  return {
+    mode: State.mode,
+    pointSubMode: State.pointSubMode,
+    zoneSubMode: State.zoneSubMode,
+    exploreSubMode: State.exploreSubMode,
+    viewMinH: State.viewMinH,
+    viewMinAH: State.viewMinAH,
+  };
+}
+
+function buildPersistedSnapshot() {
+  return {
+    version: 2,
+    settings: captureSettingsSnapshot(),
+    data: captureDataSnapshot(),
+    runtime: captureRuntimeSnapshot(),
+  };
+}
+
+async function writePersistedSnapshot(snapshot) {
+  const db = await openLocalDb();
+  if (!db) return;
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction(LOCAL_DB_STORE, "readwrite");
+    tx.objectStore(LOCAL_DB_STORE).put(snapshot, LOCAL_DB_KEY);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function readPersistedSnapshot() {
+  const db = await openLocalDb();
+  if (!db) return null;
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(LOCAL_DB_STORE, "readonly");
+    const request = tx.objectStore(LOCAL_DB_STORE).get(LOCAL_DB_KEY);
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function clearPersistedSnapshot() {
+  const db = await openLocalDb();
+  if (!db) return;
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction(LOCAL_DB_STORE, "readwrite");
+    tx.objectStore(LOCAL_DB_STORE).delete(LOCAL_DB_KEY);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+function queuePersistedStateSave() {
+  if (isHydratingPersistedState) return;
+  if (persistTimer) window.clearTimeout(persistTimer);
+  persistTimer = window.setTimeout(() => {
+    writePersistedSnapshot(buildPersistedSnapshot()).catch(() => {});
+  }, 180);
+}
+
+const DEFAULT_SETTINGS_SNAPSHOT = cloneValue(captureSettingsSnapshot());
+const DEFAULT_RUNTIME_SNAPSHOT = cloneValue(captureRuntimeSnapshot());
+
+function resetWorkingCollections() {
+  Object.keys(_sensorIntervals).forEach((sensorId) => {
+    clearInterval(_sensorIntervals[sensorId]);
+    delete _sensorIntervals[sensorId];
+  });
+  State.points = [];
+  State.zones = [];
+  State.tempZone = [];
+  State.rangePreview = [];
+  State.probeA = null;
+  State.probeB = null;
+  State.sensors = [];
+  State.selectedPointId = null;
+  State.selectedZoneId = null;
+}
+
+async function initializeApp() {
+  isHydratingPersistedState = true;
+  renderCursorFieldSettings(DEFAULT_CURSOR_FIELDS);
+  setSettingsTab("chart");
+  try {
+    const snapshot = await readPersistedSnapshot();
+    if (snapshot?.settings) {
+      applyImportedSettings(snapshot.settings);
+    }
+    resetWorkingCollections();
+    if (snapshot?.data) {
+      applyImportedData(snapshot.data.points || [], snapshot.data.zones || []);
+    } else {
+      updateLists();
+    }
+    State.viewMinH = snapshot?.runtime?.viewMinH ?? DEFAULT_RUNTIME_SNAPSHOT.viewMinH;
+    State.viewMinAH = snapshot?.runtime?.viewMinAH ?? DEFAULT_RUNTIME_SNAPSHOT.viewMinAH;
+    setMode(snapshot?.runtime?.mode || DEFAULT_RUNTIME_SNAPSHOT.mode);
+    setExploreSubMode(snapshot?.runtime?.exploreSubMode || DEFAULT_RUNTIME_SNAPSHOT.exploreSubMode);
+    setPointSubMode(snapshot?.runtime?.pointSubMode || DEFAULT_RUNTIME_SNAPSHOT.pointSubMode);
+    setZoneSubMode(snapshot?.runtime?.zoneSubMode || DEFAULT_RUNTIME_SNAPSHOT.zoneSubMode);
+    updateZonePtCount();
+    drawChart();
+    scheduleAnimatedTabRefresh();
+  } catch (_) {
+    updateLists();
+    drawChart();
+    scheduleAnimatedTabRefresh();
+  } finally {
+    isHydratingPersistedState = false;
+  }
+}
+
+async function resetLocalState() {
+  const confirmed = window.confirm("Reset all local settings, points, and zones to their defaults?");
+  if (!confirmed) return;
+
+  isHydratingPersistedState = true;
+  try {
+    await clearPersistedSnapshot();
+    resetWorkingCollections();
+    State.viewMinH = DEFAULT_RUNTIME_SNAPSHOT.viewMinH;
+    State.viewMinAH = DEFAULT_RUNTIME_SNAPSHOT.viewMinAH;
+    applyImportedSettings(DEFAULT_SETTINGS_SNAPSHOT);
+    updateLists();
+    setMode(DEFAULT_RUNTIME_SNAPSHOT.mode);
+    setExploreSubMode(DEFAULT_RUNTIME_SNAPSHOT.exploreSubMode);
+    setPointSubMode(DEFAULT_RUNTIME_SNAPSHOT.pointSubMode);
+    setZoneSubMode(DEFAULT_RUNTIME_SNAPSHOT.zoneSubMode);
+    updateZonePtCount();
+    drawChart();
+    scheduleAnimatedTabRefresh();
+  } finally {
+    isHydratingPersistedState = false;
+  }
+}
+
+initializeApp();
+
+document.fonts?.ready?.then(() => scheduleAnimatedTabRefresh());
 
 // === KEYBOARD SHORTCUTS ===
 
