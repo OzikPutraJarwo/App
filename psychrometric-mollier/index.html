@@ -387,17 +387,21 @@
 
   <!-- ═══════════════════════════════════════════════════ SETTINGS PANEL -->
   <div id="settings-overlay" onclick="toggleSettingsPanel()"></div>
-  <div id="settings-panel">
-    <div id="settings-panel-header">
-      <span><span class="material-symbols-rounded">tune</span> Settings</span>
-      <button id="settings-close-btn" onclick="toggleSettingsPanel()">
+  <div id="settings-panel" class="floating-window floating-settings-window" data-window-display="flex">
+    <div id="settings-panel-header" class="floating-window-header">
+      <span class="floating-window-title"><span class="material-symbols-rounded">tune</span> Settings</span>
+      <button id="settings-close-btn" class="floating-window-close settings-close-btn" type="button" onclick="toggleSettingsPanel()">
         <span class="material-symbols-rounded">close</span>
       </button>
     </div>
-    <div id="settings-panel-body">
+    <div id="settings-panel-body" class="floating-window-content">
 
       <div class="seg-control settings-tabs" id="settings-tabs">
-        <button class="seg-btn active" type="button" data-settings-tab-btn="chart" onclick="setSettingsTab('chart')">
+        <button class="seg-btn active" type="button" data-settings-tab-btn="general" onclick="setSettingsTab('general')">
+          <span class="material-symbols-rounded">settings</span>
+          General
+        </button>
+        <button class="seg-btn" type="button" data-settings-tab-btn="chart" onclick="setSettingsTab('chart')">
           <span class="material-symbols-rounded">tune</span>
           Chart
         </button>
@@ -416,7 +420,24 @@
       </div>
 
       <div class="settings-tab-panels">
-        <section class="settings-tab-panel active" data-settings-tab="chart">
+        <section class="settings-tab-panel active" data-settings-tab="general">
+          <div class="settings-group">
+            <div class="settings-group-title">Language</div>
+            <div>
+              <label for="set-language">Interface Language</label>
+              <select id="set-language">
+                <option value="en">English</option>
+                <option value="ko">Korean</option>
+              </select>
+            </div>
+          </div>
+
+          <button class="tool-btn danger tool-btn-reset" type="button" onclick="resetLocalState()">
+            <span class="material-symbols-rounded">restart_alt</span>Reset to Default
+          </button>
+        </section>
+
+        <section class="settings-tab-panel" data-settings-tab="chart">
           <div class="settings-group">
             <div class="settings-group-title">Chart Type</div>
             <div class="toolbar-button c2 chart-type">
@@ -453,10 +474,6 @@
               </select>
             </div>
           </div>
-
-          <button class="tool-btn danger tool-btn-reset" type="button" onclick="resetLocalState()">
-            <span class="material-symbols-rounded">restart_alt</span>Reset to Default
-          </button>
         </section>
 
         <section class="settings-tab-panel" data-settings-tab="range">
@@ -664,7 +681,7 @@
     </div>
   </div>
 
-  <div id="floating-detail-window" class="floating-window floating-detail-window">
+  <div id="floating-detail-window" class="floating-window floating-detail-window" data-window-display="flex">
     <div class="floating-window-header">
       <span class="floating-window-title" id="detailModalTitle">Details</span>
       <span class="floating-window-close" onclick="closeFloatingWindow('floating-detail-window')">×</span>
@@ -762,41 +779,20 @@
 
     // ── Settings panel toggle ───────────────────────────────────
     function toggleSettingsPanel() {
-      const panel   = document.getElementById('settings-panel');
-      const overlay = document.getElementById('settings-overlay');
-      if (panel._closeResetTimer) {
-        clearTimeout(panel._closeResetTimer);
-        panel._closeResetTimer = null;
-      }
+      const panel = document.getElementById('settings-panel');
       const willOpen = !panel.classList.contains('open');
       closeTopbarDropdowns();
       if (willOpen) {
-        if (typeof resetPopupWindowFrame === 'function') {
-          resetPopupWindowFrame(panel);
-        } else {
-          panel.style.left = '50%';
-          panel.style.top = '50%';
-          panel.style.transform = 'translate(-50%, -50%)';
-          panel.style.width = '';
-          panel.style.height = '';
-        }
-        panel.classList.add('open');
-        overlay.style.display = 'none';
-        if (typeof makeWindowDraggable === 'function') {
-          makeWindowDraggable(panel, '#settings-panel-header');
+        if (typeof showFloatingWindow === 'function') {
+          showFloatingWindow(panel);
         }
         if (typeof scheduleAnimatedTabRefresh === 'function') {
           requestAnimationFrame(() => scheduleAnimatedTabRefresh());
         }
       } else {
-        panel.classList.remove('open');
-        overlay.style.display = 'none';
-        panel._closeResetTimer = window.setTimeout(() => {
-          if (!panel.classList.contains('open') && typeof resetPopupWindowFrame === 'function') {
-            resetPopupWindowFrame(panel);
-          }
-          panel._closeResetTimer = null;
-        }, 280);
+        if (typeof hideFloatingWindow === 'function') {
+          hideFloatingWindow(panel);
+        }
       }
     }
 
