@@ -14,6 +14,16 @@ const chart_margin_top = 35,
   color_v = "#fb8c00",
   color_sat = "#0056b3";
 
+const MINIMAP_T_MIN = min_tdb;
+const MINIMAP_T_MAX = max_tdb;
+const MINIMAP_W_MIN = 0;
+const MINIMAP_W_MAX = 0.2;
+const MINIMAP_AUTO_VISIBLE_MS = 1100;
+const DEFAULT_INFO_PRECISION_DECIMALS = 2;
+
+let minimapAutoVisibleUntil = 0;
+let minimapAutoHideTimer = null;
+
 // ==========================================
 // HISTORY MANAGER (UNDO/REDO)
 // ==========================================
@@ -80,6 +90,10 @@ const State = {
   language: "en",
   points: [],
   zones: [],
+  realDataZoneVisibility: {},
+  realDataZoneConfigs: {},
+  minimapMode: "auto",
+  infoPrecisionDecimals: DEFAULT_INFO_PRECISION_DECIMALS,
   tempZone: [],
   selectedPointId: null,
   selectedZoneId: null,
@@ -92,6 +106,7 @@ const State = {
   compareTarget: "A",
   sensors: [],
   rangePreview: [],
+  realDataZoneDraft: null,
   yAxisType: "humidityRatio",
   visibility: {
     rh: true,
@@ -99,15 +114,6 @@ const State = {
     twb: true,
     v: true,
     sat: true
-  },
-  comfortZone: {
-    visible: false,
-    preset: "ashrae-summer",
-    color: "#4caf50",
-    tMin: 22.5,
-    tMax: 26,
-    rhMin: 30,
-    rhMax: 60
   },
   viewMinH: 0,  // lower bound of visible W window (for panning, always >= 0)
   viewMinAH: 0  // lower bound of visible AH window (g/m3)
@@ -121,6 +127,8 @@ const I18N_ATTR_BASES = new WeakMap();
 
 const I18N_LITERAL_TRANSLATIONS = {
   ko: {
+    "Korean Zucchini": "애호박",
+    //
     "Explore": "탐색",
     "Point": "포인트",
     "Zone": "영역",
@@ -140,7 +148,15 @@ const I18N_LITERAL_TRANSLATIONS = {
     "Interface Language": "인터페이스 언어",
     "English": "영어",
     "Korean": "한국어",
-    "Reset to Default": "기본값으로 재설정",
+    "Reset All to Default": "모두 기본값으로 재설정",
+    "Real Data Zones": "실측 데이터 영역",
+    "Choose which zones loaded from real data should appear on the chart.": "실측 데이터에서 불러온 영역 중 차트에 표시할 항목을 선택하세요.",
+    "Loading real-data zones...": "실측 데이터 영역을 불러오는 중...",
+    "No real-data JSON files found in /real-data/.": "/real-data/에서 실측 데이터 JSON 파일을 찾을 수 없습니다.",
+    "Unable to load real-data zone files.": "실측 데이터 영역 파일을 불러올 수 없습니다.",
+    "Auto-discovery needs the app to be served over HTTP with a browsable /real-data/ folder.": "자동 인식을 사용하려면 앱이 /real-data/ 폴더 목록에 접근할 수 있는 HTTP 환경에서 제공되어야 합니다.",
+    "If your server hides folder listings, add the file names to /real-data/index.json.": "서버가 폴더 목록을 숨기면 파일 이름을 /real-data/index.json에 추가하세요.",
+    "Real-Data Converter": "실측 데이터 변환기",
     "Lock / Probe": "고정 / 프로브",
     "Compare A–B": "A–B 비교",
     "Psychrometric": "사이크로메트릭",
@@ -157,6 +173,10 @@ const I18N_LITERAL_TRANSLATIONS = {
     "Choose the hover fields below. Selected fields appear first, and you can reorder them with the arrow buttons.": "아래에서 호버 필드를 선택하세요. 선택된 항목이 먼저 표시되며 화살표 버튼으로 순서를 바꿀 수 있습니다.",
     "Legends & Labels": "범례 및 라벨",
     "Show Legends": "범례 표시",
+    "Minimap": "미니맵",
+    "Auto (Zoom Only)": "자동 (줌 시에만)",
+    "Always Show": "항상 표시",
+    "Hide": "숨기기",
     "Visible labels": "표시할 라벨",
     "Every line": "모든 선",
     "Every 2nd line": "2번째마다",
@@ -164,21 +184,11 @@ const I18N_LITERAL_TRANSLATIONS = {
     "Every 4th line": "4번째마다",
     "Visible Lines": "표시할 선",
     "Relative Humidity": "상대 습도",
+    "Rel. Humidity": "상대 습도",
     "Enthalpy": "엔탈피",
     "Wet Bulb": "습구",
     "Specific Volume": "비체적",
     "Saturation": "포화",
-    "Comfort Zone": "쾌적 영역",
-    "Show Comfort Zone": "쾌적 영역 표시",
-    "Preset:": "프리셋:",
-    "ASHRAE 55 Summer": "ASHRAE 55 여름",
-    "ASHRAE 55 Winter": "ASHRAE 55 겨울",
-    "EN 15251 Cat II": "EN 15251 카테고리 II",
-    "Custom": "사용자 지정",
-    "T Min (°C):": "최소 온도 (°C):",
-    "T Max (°C):": "최대 온도 (°C):",
-    "RH Min (%):": "최소 RH (%):",
-    "RH Max (%):": "최대 RH (%):",
     "Color:": "색상:",
     "Hover": "호버",
     "Lock": "고정",
@@ -192,9 +202,23 @@ const I18N_LITERAL_TRANSLATIONS = {
     "Click": "클릭",
     "Input": "입력",
     "Auto": "자동",
+    "Plants": "식물",
     "Bool": "불리언",
     "Auto Zone": "자동 영역",
     "Boolean": "불리언",
+    "Plant Dataset": "작물 데이터셋",
+    "Shape": "형상",
+    "Polygon": "다각형",
+    "Oval": "타원",
+    "Boundary": "경계",
+    "Loose": "느슨하게",
+    "Compact": "촘촘하게",
+    "Method": "방법",
+    "Decimal Precision": "소수점 자릿수",
+    "Digits after decimal": "소수점 이하 자릿수",
+    "Choose how many digits are shown after the decimal point, then pick and sort the hover fields below.": "소수점 이하 몇 자리까지 표시할지 정한 뒤, 아래에서 호버 필드를 선택하고 순서를 바꾸세요.",
+    "Single Parameter": "단일 파라미터",
+    "Two Parameters": "두 개 파라미터",
     "Click on chart to define vertices (min 3 pts).": "차트를 클릭해 꼭짓점을 지정하세요. (최소 3개)",
     "Finish Zone": "영역 완료",
     "Cancel": "취소",
@@ -216,9 +240,14 @@ const I18N_LITERAL_TRANSLATIONS = {
     "Dew Point (°C)": "이슬점 (°C)",
     "Spec. Volume (m³/kg)": "비체적 (m³/kg)",
     "Generate a zone from iso-lines of a parameter between min and max bounds.": "최소값과 최대값 사이의 등치선을 이용해 영역을 생성하세요.",
+    "Auto zone can use a single parameter band or a two-parameter boundary.": "자동 영역은 단일 파라미터 밴드 또는 2개 파라미터 경계를 사용할 수 있습니다.",
     "Parameter": "파라미터",
     "Preview": "미리보기",
     "Create": "생성",
+    "Configure a real-data plant zone with polygon or oval boundaries.": "실측 데이터 작물 영역을 다각형 또는 타원 경계로 설정하세요.",
+    "Preview updates in real time. Click Apply to show this dataset on the chart.": "미리보기가 실시간으로 갱신됩니다. 이 데이터셋을 차트에 표시하려면 적용을 누르세요.",
+    "Apply": "적용",
+    "No real-data plant zones are available yet.": "아직 사용할 수 있는 실측 작물 영역이 없습니다.",
     "Boolean operation between two existing zones.": "기존 두 영역에 불리언 연산을 적용합니다.",
     "Zone A": "영역 A",
     "Zone B": "영역 B",
@@ -347,8 +376,8 @@ const I18N_LITERAL_TRANSLATIONS = {
     "Compare A/B": "A/B 비교",
     "Click vertices": "꼭짓점 클릭",
     "Input params": "파라미터 입력",
-    "Range sliders": "범위 슬라이더",
     "Auto zone": "자동 영역",
+    "Plant zones": "식물 영역",
     "Boolean op": "불리언 연산",
     "Click to place": "클릭해 배치",
     "Batch CSV": "CSV 일괄",
@@ -560,6 +589,7 @@ function setLanguage(language, options = {}) {
   applyLanguage();
   if (options.skipRefresh) return;
   renderCursorFieldSettings(getSelectedInfoFields());
+  renderRealDataZoneSettings();
   updateLists();
   renderSensorList();
   updateZonePtCount();
@@ -577,6 +607,15 @@ function getSensorStatusLabel(status) {
 }
 
 const _sensorIntervals = {};
+const REAL_DATA_DIRECTORY = "real-data";
+const REAL_DATA_MANIFEST_FILES = ["index.json", "manifest.json"];
+const REAL_DATA_DEFAULT_COLOR = "#4b8b3b";
+const REAL_DATA_DEFAULT_SHAPE = "polygon";
+const REAL_DATA_DEFAULT_COMPACTNESS = 65;
+
+let realDataCatalog = [];
+let realDataLoadState = "loading";
+let realDataLoadError = "";
 
 const Psychro = {
   R_DA: 287.058,
@@ -961,12 +1000,18 @@ function toggleAdvancedSettings() {
 }
 
 function setSettingsTab(tabName) {
+  const tabAlias = {
+    range: "chart",
+    cursor: "display",
+  };
+  const normalizedTab = tabAlias[tabName] || tabName;
+
   document.querySelectorAll("#settings-tabs .seg-btn").forEach((button) => {
-    button.classList.toggle("active", button.dataset.settingsTabBtn === tabName);
+    button.classList.toggle("active", button.dataset.settingsTabBtn === normalizedTab);
   });
 
   document.querySelectorAll(".settings-tab-panel").forEach((panel) => {
-    panel.classList.toggle("active", panel.dataset.settingsTab === tabName);
+    panel.classList.toggle("active", panel.dataset.settingsTab === normalizedTab);
   });
 
   scheduleAnimatedTabRefresh();
@@ -1122,47 +1167,53 @@ function initializeAnimatedTabObservers() {
 }
 
 function setZoneSubMode(subMode) {
-  State.zoneSubMode = subMode;
-  const icons = { manual: "ads_click", input: "edit_note", range: "tune", auto: "auto_awesome", boolean: "join" };
-  const labels = { manual: "Click", input: "Input", range: "Range", auto: "Auto Zone", boolean: "Boolean" };
+  const nextSubMode = ["manual", "input", "auto", "plants", "boolean"].includes(subMode)
+    ? subMode
+    : "manual";
+
+  State.zoneSubMode = nextSubMode;
+  const icons = { manual: "ads_click", input: "edit_note", auto: "auto_awesome", plants: "local_florist", boolean: "join" };
+  const labels = { manual: "Click", input: "Input", auto: "Auto Zone", plants: "Plants", boolean: "Boolean" };
   const icon = document.getElementById("zone-submode-icon");
   const label = document.getElementById("zone-submode-label");
-  if (icon) icon.textContent = icons[subMode] || "ads_click";
-  if (label) label.textContent = translateLiteral(labels[subMode] || subMode);
+  if (icon) icon.textContent = icons[nextSubMode] || "ads_click";
+  if (label) label.textContent = translateLiteral(labels[nextSubMode] || nextSubMode);
 
   document.getElementById("zone-manual-ui").style.display =
-    subMode === "manual" ? "block" : "none";
+    nextSubMode === "manual" ? "grid" : "none";
   document.getElementById("zone-input-ui").style.display =
-    subMode === "input" ? "block" : "none";
-  document.getElementById("zone-range-ui").style.display =
-    subMode === "range" ? "block" : "none";
+    nextSubMode === "input" ? "grid" : "none";
   document.getElementById("zone-auto-ui").style.display =
-    subMode === "auto" ? "block" : "none";
+    nextSubMode === "auto" ? "grid" : "none";
+  document.getElementById("zone-plants-ui").style.display =
+    nextSubMode === "plants" ? "grid" : "none";
   document.getElementById("zone-boolean-ui").style.display =
-    subMode === "boolean" ? "block" : "none";
+    nextSubMode === "boolean" ? "grid" : "none";
 
-  if (subMode !== "manual") {
+  if (nextSubMode !== "manual") {
     cancelZone();
   }
 
-  if (subMode === "range") {
-    State.tempZone = [];
-    updateZonePtCount();
-    setupRangeDefaults();
-  } else if (subMode === "boolean") {
+  if (nextSubMode === "boolean") {
+    State.realDataZoneDraft = null;
     State.rangePreview = [];
     populateBooleanZoneSelects();
     drawChart();
-  } else if (subMode === "auto") {
+  } else if (nextSubMode === "auto") {
+    State.realDataZoneDraft = null;
+    syncAutoZoneMethod();
+  } else if (nextSubMode === "plants") {
     State.rangePreview = [];
-    drawChart();
+    populatePlantsZoneDatasetSelect();
+    previewPlantsZone();
   } else {
+    State.realDataZoneDraft = null;
     State.rangePreview = [];
     drawChart();
   }
-  ["manual","input","range","auto","boolean"].forEach(m => {
+  ["manual","input","auto","plants","boolean"].forEach(m => {
     const b = document.getElementById("seg-zone-" + m);
-    if (b) b.classList.toggle("active", m === subMode);
+    if (b) b.classList.toggle("active", m === nextSubMode);
   });
   scheduleAnimatedTabRefresh();
 }
@@ -1177,13 +1228,13 @@ function setPointSubMode(subMode) {
   if (label) label.textContent = translateLiteral(labels[subMode] || subMode);
 
   document.getElementById("point-manual-ui").style.display =
-    subMode === "manual" ? "block" : "none";
+    subMode === "manual" ? "grid" : "none";
   document.getElementById("point-input-ui").style.display =
-    subMode === "input" ? "block" : "none";
+    subMode === "input" ? "grid" : "none";
   document.getElementById("point-batch-ui").style.display =
-    subMode === "batch" ? "block" : "none";
+    subMode === "batch" ? "grid" : "none";
   document.getElementById("point-sensor-ui").style.display =
-    subMode === "sensor" ? "block" : "none";
+    subMode === "sensor" ? "grid" : "none";
   
   if (subMode === "sensor") renderSensorList();
   ["manual","input","batch","sensor"].forEach(m => {
@@ -1285,6 +1336,27 @@ function updateRangeZone() {
   drawChart();
 }
 
+function getAutoZoneMethod() {
+  return document.getElementById("auto-zone-method")?.value || "single";
+}
+
+function syncAutoZoneMethod() {
+  const method = getAutoZoneMethod();
+  const singlePanel = document.getElementById("auto-zone-single-ui");
+  const doublePanel = document.getElementById("auto-zone-double-ui");
+
+  if (singlePanel) singlePanel.style.display = method === "single" ? "block" : "none";
+  if (doublePanel) doublePanel.style.display = method === "double" ? "block" : "none";
+
+  State.rangePreview = [];
+  if (method === "double") {
+    setupRangeDefaults();
+    return;
+  }
+
+  drawChart();
+}
+
 function setMode(mode) {
   State.mode = mode;
   document
@@ -1294,13 +1366,13 @@ function setMode(mode) {
     document.getElementById("btn-" + mode).classList.add("active");
 
   const exploreCtrl = document.getElementById("explore-controls");
-  if (exploreCtrl) exploreCtrl.style.display = mode === "view" ? "block" : "none";
+  if (exploreCtrl) exploreCtrl.style.display = mode === "view" ? "grid" : "none";
 
   const zoneCtrl = document.getElementById("zone-controls");
-  zoneCtrl.style.display = mode === "zone" ? "block" : "none";
+  zoneCtrl.style.display = mode === "zone" ? "grid" : "none";
 
   const pointCtrl = document.getElementById("point-controls");
-  pointCtrl.style.display = mode === "point" ? "block" : "none";
+  pointCtrl.style.display = mode === "point" ? "grid" : "none";
 
   if (mode === "zone") {
     if (!State.zoneSubMode) setZoneSubMode("manual");
@@ -1373,29 +1445,1191 @@ function escapeHtml(value) {
   }[char] || char));
 }
 
+function normalizeRealDataKey(value) {
+  return String(value || "")
+    .normalize("NFKC")
+    .trim()
+    .toLowerCase()
+    .replace(/\.json$/i, "")
+    .replace(/[^\p{Letter}\p{Number}]+/gu, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function getRealDataFileBase(filePath) {
+  const fileName = String(filePath || "").split("/").pop() || "";
+  return fileName.replace(/\.json$/i, "");
+}
+
+function humanizeRealDataFileBase(fileBase) {
+  return String(fileBase || "")
+    .split(/[-_]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ") || "Real Data";
+}
+
+function normalizeRealDataFilePath(value) {
+  let rawPath = "";
+
+  if (typeof value === "string") {
+    rawPath = value;
+  } else if (value && typeof value === "object") {
+    rawPath = value.file || value.path || value.href || "";
+  }
+
+  if (!rawPath) return "";
+
+  const trimmedPath = String(rawPath).trim();
+  if (!trimmedPath.toLowerCase().endsWith(".json")) return "";
+  if (/^https?:\/\//i.test(trimmedPath)) return trimmedPath;
+
+  const relativePath = trimmedPath
+    .replace(/^\.\//, "")
+    .replace(new RegExp(`^${REAL_DATA_DIRECTORY}\/`, "i"), "");
+  const normalizedPath = `${REAL_DATA_DIRECTORY}/${relativePath}`;
+  const fileName = normalizedPath.split("/").pop()?.toLowerCase();
+
+  if (!fileName) {
+    return "";
+  }
+
+  return normalizedPath;
+}
+
+function normalizeRealDataVisibilityMap(value) {
+  if (!value) return {};
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return {};
+
+    try {
+      return normalizeRealDataVisibilityMap(JSON.parse(trimmed));
+    } catch (_) {
+      return trimmed.split("|").reduce((map, entry) => {
+        const key = normalizeRealDataKey(entry);
+        if (key) map[key] = true;
+        return map;
+      }, {});
+    }
+  }
+
+  if (Array.isArray(value)) {
+    return value.reduce((map, entry) => {
+      const key = normalizeRealDataKey(entry);
+      if (key) map[key] = true;
+      return map;
+    }, {});
+  }
+
+  if (typeof value === "object") {
+    return Object.entries(value).reduce((map, [key, enabled]) => {
+      const normalizedKey = normalizeRealDataKey(key);
+      if (normalizedKey) map[normalizedKey] = parseBool(enabled);
+      return map;
+    }, {});
+  }
+
+  return {};
+}
+
+function syncRealDataVisibilityDefaults() {
+  const nextVisibility = normalizeRealDataVisibilityMap(State.realDataZoneVisibility);
+
+  if (!realDataCatalog.length) {
+    State.realDataZoneVisibility = nextVisibility;
+    return;
+  }
+
+  const catalogKeys = new Set(realDataCatalog.map((definition) => definition.key));
+
+  realDataCatalog.forEach((definition) => {
+    if (!(definition.key in nextVisibility)) {
+      nextVisibility[definition.key] = false;
+    }
+  });
+
+  Object.keys(nextVisibility).forEach((key) => {
+    if (!catalogKeys.has(key)) {
+      delete nextVisibility[key];
+    }
+  });
+
+  State.realDataZoneVisibility = nextVisibility;
+}
+
+function normalizeRealDataCompactness(value) {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return REAL_DATA_DEFAULT_COMPACTNESS;
+  return Math.max(0, Math.min(Math.round(numericValue), 100));
+}
+
+function getDefaultRealDataZoneConfig() {
+  return {
+    shape: REAL_DATA_DEFAULT_SHAPE,
+    compactness: REAL_DATA_DEFAULT_COMPACTNESS,
+  };
+}
+
+function normalizeRealDataZoneConfig(value) {
+  if (typeof value === "string") {
+    try {
+      return normalizeRealDataZoneConfig(JSON.parse(value));
+    } catch (_) {
+      return {
+        ...getDefaultRealDataZoneConfig(),
+        shape: value === "oval" ? "oval" : REAL_DATA_DEFAULT_SHAPE,
+      };
+    }
+  }
+
+  const defaults = getDefaultRealDataZoneConfig();
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return { ...defaults };
+  }
+
+  return {
+    shape: value.shape === "oval" ? "oval" : defaults.shape,
+    compactness: normalizeRealDataCompactness(value.compactness ?? value.boundary ?? defaults.compactness),
+  };
+}
+
+function normalizeRealDataZoneConfigMap(value) {
+  if (!value) return {};
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return {};
+
+    try {
+      return normalizeRealDataZoneConfigMap(JSON.parse(trimmed));
+    } catch (_) {
+      return {};
+    }
+  }
+
+  if (typeof value !== "object" || Array.isArray(value)) {
+    return {};
+  }
+
+  return Object.entries(value).reduce((map, [key, config]) => {
+    const normalizedKey = normalizeRealDataKey(key);
+    if (!normalizedKey) return map;
+    map[normalizedKey] = normalizeRealDataZoneConfig(config);
+    return map;
+  }, {});
+}
+
+function syncRealDataZoneConfigDefaults() {
+  const nextConfigs = normalizeRealDataZoneConfigMap(State.realDataZoneConfigs);
+
+  if (!realDataCatalog.length) {
+    State.realDataZoneConfigs = nextConfigs;
+    return;
+  }
+
+  const catalogKeys = new Set(realDataCatalog.map((definition) => definition.key));
+
+  realDataCatalog.forEach((definition) => {
+    nextConfigs[definition.key] = normalizeRealDataZoneConfig(nextConfigs[definition.key]);
+  });
+
+  Object.keys(nextConfigs).forEach((key) => {
+    if (!catalogKeys.has(key)) {
+      delete nextConfigs[key];
+    }
+  });
+
+  State.realDataZoneConfigs = nextConfigs;
+}
+
+function setRealDataZoneConfigMap(value) {
+  State.realDataZoneConfigs = normalizeRealDataZoneConfigMap(value);
+}
+
+function getRealDataZoneConfig(key) {
+  const normalizedKey = normalizeRealDataKey(key);
+  return normalizeRealDataZoneConfig(State.realDataZoneConfigs?.[normalizedKey]);
+}
+
+function setRealDataZoneVisibilityMap(value) {
+  State.realDataZoneVisibility = normalizeRealDataVisibilityMap(value);
+}
+
+function toggleRealDataZoneVisibility(key, visible) {
+  const normalizedKey = normalizeRealDataKey(key);
+  if (!normalizedKey) return;
+
+  State.realDataZoneVisibility = {
+    ...State.realDataZoneVisibility,
+    [normalizedKey]: !!visible,
+  };
+
+  renderRealDataZoneSettings();
+  drawChart();
+  queuePersistedStateSave();
+}
+
+function renderRealDataZoneSettings() {
+  const container = document.getElementById("real-data-zone-list");
+  if (!container) return;
+
+  if (realDataLoadState === "loading" && !realDataCatalog.length) {
+    container.innerHTML = `<div class="settings-note">${escapeHtml(translateLiteral("Loading real-data zones..."))}</div>`;
+    applyLanguage(container);
+    return;
+  }
+
+  if (!realDataCatalog.length) {
+    const summary = realDataLoadState === "error"
+      ? translateLiteral("Unable to load real-data zone files.")
+      : translateLiteral("No real-data JSON files found in /real-data/.");
+    const helpPrimary = translateLiteral("If your server hides folder listings, add the file names to /real-data/index.json.");
+    const helpSecondary = translateLiteral("Auto-discovery needs the app to be served over HTTP with a browsable /real-data/ folder.");
+    container.innerHTML = `<div class="settings-note">${escapeHtml(summary)}<br>${escapeHtml(helpPrimary)}<br>${escapeHtml(helpSecondary)}</div>`;
+    applyLanguage(container);
+    return;
+  }
+
+  container.innerHTML = realDataCatalog.map((definition) => {
+    const inputId = `real-data-zone-${definition.key}`;
+    const checked = State.realDataZoneVisibility[definition.key] !== false;
+
+    return `
+      <div class="settype-checkbox pill-check">
+        <input id="${inputId}" type="checkbox" data-real-data-zone-key="${escapeHtml(definition.key)}" ${checked ? "checked" : ""}>
+        <label for="${inputId}">${escapeHtml(definition.name)}</label>
+      </div>
+    `;
+  }).join("");
+
+  container.querySelectorAll("input[data-real-data-zone-key]").forEach((input) => {
+    input.addEventListener("change", (event) => {
+      const key = event.currentTarget.dataset.realDataZoneKey;
+      toggleRealDataZoneVisibility(key, event.currentTarget.checked);
+    });
+  });
+
+  applyLanguage(container);
+}
+
+function updatePlantsCompactnessLabel() {
+  const compactnessInput = document.getElementById("plants-zone-compactness");
+  const compactnessLabel = document.getElementById("plants-zone-compactness-label");
+  if (!compactnessInput || !compactnessLabel) return;
+
+  compactnessLabel.textContent = `${normalizeRealDataCompactness(compactnessInput.value)}%`;
+}
+
+function getPlantsZoneDraftFromControls() {
+  const datasetSelect = document.getElementById("plants-zone-dataset");
+  const shapeSelect = document.getElementById("plants-zone-shape");
+  const compactnessInput = document.getElementById("plants-zone-compactness");
+  const normalizedKey = normalizeRealDataKey(datasetSelect?.value);
+
+  if (!normalizedKey || !realDataCatalog.some((definition) => definition.key === normalizedKey)) {
+    return null;
+  }
+
+  const config = normalizeRealDataZoneConfig({
+    shape: shapeSelect?.value,
+    compactness: compactnessInput?.value,
+  });
+
+  return {
+    key: normalizedKey,
+    ...config,
+  };
+}
+
+function syncPlantsZoneSelection() {
+  const datasetSelect = document.getElementById("plants-zone-dataset");
+  const shapeSelect = document.getElementById("plants-zone-shape");
+  const compactnessInput = document.getElementById("plants-zone-compactness");
+  if (!datasetSelect || !shapeSelect || !compactnessInput) return;
+
+  const normalizedKey = normalizeRealDataKey(datasetSelect.value);
+  const config = getRealDataZoneConfig(normalizedKey);
+
+  shapeSelect.value = config.shape;
+  compactnessInput.value = config.compactness;
+  updatePlantsCompactnessLabel();
+  previewPlantsZone();
+}
+
+function populatePlantsZoneDatasetSelect(preferredKey) {
+  const datasetSelect = document.getElementById("plants-zone-dataset");
+  const note = document.getElementById("plants-zone-note");
+  if (!datasetSelect) return;
+
+  if (!realDataCatalog.length) {
+    datasetSelect.innerHTML = `<option value="">${escapeHtml(translateLiteral("No real-data plant zones are available yet."))}</option>`;
+    datasetSelect.disabled = true;
+    if (note) note.textContent = translateLiteral("No real-data plant zones are available yet.");
+    State.realDataZoneDraft = null;
+    drawChart();
+    return;
+  }
+
+  datasetSelect.disabled = false;
+  datasetSelect.innerHTML = realDataCatalog
+    .map((definition) => `<option value="${escapeHtml(definition.key)}">${escapeHtml(definition.name)}</option>`)
+    .join("");
+
+  const selectedKey = normalizeRealDataKey(preferredKey)
+    || normalizeRealDataKey(State.realDataZoneDraft?.key)
+    || normalizeRealDataKey(datasetSelect.value)
+    || realDataCatalog[0].key;
+
+  datasetSelect.value = realDataCatalog.some((definition) => definition.key === selectedKey)
+    ? selectedKey
+    : realDataCatalog[0].key;
+
+  if (note) {
+    note.textContent = translateLiteral("Preview updates in real time. Click Apply to show this dataset on the chart.");
+  }
+
+  syncPlantsZoneSelection();
+}
+
+function previewPlantsZone() {
+  updatePlantsCompactnessLabel();
+  State.realDataZoneDraft = getPlantsZoneDraftFromControls();
+  drawChart();
+}
+
+function applyPlantsZoneConfig() {
+  const draft = getPlantsZoneDraftFromControls();
+  if (!draft) {
+    alert(translateLiteral("No real-data plant zones are available yet."));
+    return;
+  }
+
+  State.realDataZoneConfigs = {
+    ...normalizeRealDataZoneConfigMap(State.realDataZoneConfigs),
+    [draft.key]: {
+      shape: draft.shape,
+      compactness: draft.compactness,
+    },
+  };
+  State.realDataZoneVisibility = {
+    ...normalizeRealDataVisibilityMap(State.realDataZoneVisibility),
+    [draft.key]: true,
+  };
+  State.realDataZoneDraft = draft;
+
+  renderRealDataZoneSettings();
+  drawChart();
+  queuePersistedStateSave();
+}
+
+async function fetchRealDataJson(filePath) {
+  const response = await fetch(filePath, { cache: "no-store" });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+function extractRealDataManifestFiles(payload) {
+  if (Array.isArray(payload)) {
+    return payload.map((entry) => normalizeRealDataFilePath(entry)).filter(Boolean);
+  }
+
+  if (payload && typeof payload === "object") {
+    const sourceList = Array.isArray(payload.files)
+      ? payload.files
+      : Array.isArray(payload.datasets)
+        ? payload.datasets
+        : [];
+
+    return sourceList.map((entry) => normalizeRealDataFilePath(entry)).filter(Boolean);
+  }
+
+  return [];
+}
+
+async function discoverRealDataFilesFromDirectory() {
+  try {
+    const response = await fetch(`${REAL_DATA_DIRECTORY}/`, {
+      cache: "no-store",
+      headers: { Accept: "text/html" },
+    });
+
+    if (!response.ok) return [];
+
+    const html = await response.text();
+    if (!html) return [];
+
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    return Array.from(doc.querySelectorAll("a[href]"))
+      .map((anchor) => anchor.getAttribute("href") || "")
+      .map((href) => href.split("?")[0].split("#")[0])
+      .map((href) => href.split("/").pop() || "")
+      .map((fileName) => normalizeRealDataFilePath(fileName))
+      .filter(Boolean);
+  } catch (_) {
+    return [];
+  }
+}
+
+async function getRealDataFileList() {
+  const files = [];
+
+  for (const manifestFile of REAL_DATA_MANIFEST_FILES) {
+    try {
+      const manifest = await fetchRealDataJson(`${REAL_DATA_DIRECTORY}/${manifestFile}`);
+      files.push(...extractRealDataManifestFiles(manifest));
+      if (files.length) break;
+    } catch (_) {
+      // Ignore missing manifest files and fall back to directory discovery.
+    }
+  }
+
+  if (!files.length) {
+    files.push(...await discoverRealDataFilesFromDirectory());
+  }
+
+  return Array.from(new Set(files));
+}
+
+function normalizeRealDataHumidityType(value) {
+  const normalized = String(value || "RH").trim().toUpperCase();
+  if (normalized === "ABSOLUTEHUMIDITY") return "AH";
+  if (normalized === "HUMIDITYRATIO") return "W";
+  return ["RH", "AH", "W"].includes(normalized) ? normalized : "RH";
+}
+
+function extractRealDataDefinitions(payload, filePath) {
+  let sourceDefinitions = [];
+
+  if (Array.isArray(payload)) {
+    sourceDefinitions = payload;
+  } else if (payload && Array.isArray(payload.zones)) {
+    sourceDefinitions = payload.zones;
+  } else if (payload && typeof payload === "object") {
+    sourceDefinitions = [payload.zone && typeof payload.zone === "object"
+      ? { ...payload, ...payload.zone }
+      : payload];
+  }
+
+  const fileBase = getRealDataFileBase(filePath);
+
+  return sourceDefinitions
+    .map((definition, index) => {
+      const keyBase = normalizeRealDataKey(definition?.id || definition?.key || `${fileBase}${index ? `-${index + 1}` : ""}`);
+      const rows = Array.isArray(definition?.rows) ? definition.rows : [];
+      const points = Array.isArray(definition?.points) ? definition.points : [];
+
+      return {
+        key: keyBase || `real-data-${index + 1}`,
+        name: String(definition?.name || definition?.zoneName || humanizeRealDataFileBase(fileBase)),
+        color: typeof definition?.color === "string" && definition.color ? definition.color : REAL_DATA_DEFAULT_COLOR,
+        humidityType: normalizeRealDataHumidityType(definition?.humidityType || definition?.moistureType || definition?.inputType),
+        rows,
+        points,
+      };
+    })
+    .filter((definition) => definition.rows.length || definition.points.length);
+}
+
+function normalizeRealDataSourcePoints(definition, Patm) {
+  const sourcePoints = definition.points.length ? definition.points : definition.rows;
+  const uniquePoints = [];
+  const seenPoints = new Set();
+
+  sourcePoints.forEach((entry) => {
+    let point = null;
+
+    if (definition.points.length) {
+      const t = Number(entry?.t);
+      const w = Number(entry?.w);
+      if (Number.isFinite(t) && Number.isFinite(w) && w >= 0) {
+        point = { t, w };
+      } else {
+        point = getRealDataPointFromRow(entry, definition.humidityType, Patm);
+      }
+    } else {
+      point = getRealDataPointFromRow(entry, definition.humidityType, Patm);
+    }
+
+    if (!point || !Number.isFinite(point.t) || !Number.isFinite(point.w)) return;
+    if (point.w < 0 || point.w > 0.5) return;
+
+    const dedupeKey = `${point.t.toFixed(3)}|${point.w.toFixed(6)}`;
+    if (seenPoints.has(dedupeKey)) return;
+    seenPoints.add(dedupeKey);
+    uniquePoints.push(point);
+  });
+
+  return uniquePoints;
+}
+
+function getRealDataPointBounds(points) {
+  const minT = d3.min(points, (point) => point.t);
+  const maxT = d3.max(points, (point) => point.t);
+  const minW = d3.min(points, (point) => point.w);
+  const maxW = d3.max(points, (point) => point.w);
+
+  return {
+    minT,
+    maxT,
+    minW,
+    maxW,
+    spanT: Math.max((maxT ?? 0) - (minT ?? 0), 1e-9),
+    spanW: Math.max((maxW ?? 0) - (minW ?? 0), 1e-9),
+  };
+}
+
+function getRealDataEdgeKey(indexA, indexB) {
+  return indexA < indexB ? `${indexA}|${indexB}` : `${indexB}|${indexA}`;
+}
+
+function getRealDataNormalizedPoints(points, bounds = getRealDataPointBounds(points)) {
+  const { minT, minW, spanT, spanW } = bounds;
+
+  return points.map((point, index) => ({
+    index,
+    x: (point.t - minT) / spanT,
+    y: (point.w - minW) / spanW,
+  }));
+}
+
+function denormalizeRealDataPoint(point, bounds) {
+  return {
+    t: bounds.minT + point.x * bounds.spanT,
+    w: bounds.minW + point.y * bounds.spanW,
+  };
+}
+
+function getRealDataBoundarySampleCount(compactness) {
+  const ratio = getRealDataCompactnessRatio(compactness);
+  return Math.max(8, Math.round(8 + ratio * 10));
+}
+
+function getRealDataCompactnessRatio(compactness) {
+  return normalizeRealDataCompactness(compactness) / 100;
+}
+
+function getRealDataPolygonArea(points) {
+  if (!Array.isArray(points) || points.length < 3) return 0;
+  return Math.abs(d3.polygonArea(points.map((point) => [point.t, point.w])));
+}
+
+function getRealDataNormalizedPolygonPoints(points, bounds) {
+  return getRealDataNormalizedPoints(points, bounds).map((point) => [point.x, point.y]);
+}
+
+function getRealDataDistanceToSegmentSquared(point, segmentStart, segmentEnd) {
+  const deltaX = segmentEnd[0] - segmentStart[0];
+  const deltaY = segmentEnd[1] - segmentStart[1];
+
+  if (Math.abs(deltaX) < 1e-12 && Math.abs(deltaY) < 1e-12) {
+    const offsetX = point[0] - segmentStart[0];
+    const offsetY = point[1] - segmentStart[1];
+    return offsetX * offsetX + offsetY * offsetY;
+  }
+
+  const projection = Math.max(0, Math.min(1, (
+    ((point[0] - segmentStart[0]) * deltaX + (point[1] - segmentStart[1]) * deltaY)
+    / (deltaX * deltaX + deltaY * deltaY)
+  )));
+  const closestX = segmentStart[0] + projection * deltaX;
+  const closestY = segmentStart[1] + projection * deltaY;
+  const diffX = point[0] - closestX;
+  const diffY = point[1] - closestY;
+  return diffX * diffX + diffY * diffY;
+}
+
+function isRealDataNormalizedPointInsidePolygon(point, polygon, tolerance = 5e-4) {
+  if (d3.polygonContains(polygon, point)) {
+    return true;
+  }
+
+  const toleranceSquared = tolerance * tolerance;
+  for (let index = 0; index < polygon.length; index += 1) {
+    const segmentStart = polygon[index];
+    const segmentEnd = polygon[(index + 1) % polygon.length];
+    if (getRealDataDistanceToSegmentSquared(point, segmentStart, segmentEnd) <= toleranceSquared) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function doesRealDataBoundaryContainPoints(boundaryPoints, sourcePoints) {
+  if (!Array.isArray(boundaryPoints) || boundaryPoints.length < 3) return false;
+  if (!Array.isArray(sourcePoints) || !sourcePoints.length) return true;
+
+  const bounds = getRealDataPointBounds([...boundaryPoints, ...sourcePoints]);
+  const polygon = getRealDataNormalizedPolygonPoints(boundaryPoints, bounds);
+
+  return sourcePoints.every((point) => {
+    const normalizedPoint = [
+      (point.t - bounds.minT) / bounds.spanT,
+      (point.w - bounds.minW) / bounds.spanW,
+    ];
+    return isRealDataNormalizedPointInsidePolygon(normalizedPoint, polygon);
+  });
+}
+
+function scaleRealDataBoundary(points, scaleFactor, bounds = getRealDataPointBounds(points)) {
+  if (!(scaleFactor > 1) || !Array.isArray(points) || points.length < 3) {
+    return points.map((point) => ({ t: point.t, w: point.w }));
+  }
+
+  const normalizedPoints = getRealDataNormalizedPoints(points, bounds);
+  const center = {
+    x: d3.mean(normalizedPoints, (point) => point.x) ?? 0.5,
+    y: d3.mean(normalizedPoints, (point) => point.y) ?? 0.5,
+  };
+
+  return normalizedPoints.map((point) => denormalizeRealDataPoint({
+    x: center.x + (point.x - center.x) * scaleFactor,
+    y: center.y + (point.y - center.y) * scaleFactor,
+  }, bounds));
+}
+
+function clampRealDataPointToSaturation(point, Patm) {
+  const saturationPressure = Psychro.getSatVapPres(point.t);
+  const saturationW = Psychro.getWFromPw(saturationPressure, Patm);
+
+  return {
+    t: point.t,
+    w: Math.max(0, Math.min(point.w, saturationW)),
+  };
+}
+
+function clipRealDataBoundaryToSaturation(points, Patm, compactness = REAL_DATA_DEFAULT_COMPACTNESS) {
+  if (!Array.isArray(points) || points.length < 3) return [];
+
+  const sampleCount = getRealDataBoundarySampleCount(compactness);
+  const clippedPoints = [];
+
+  for (let index = 0; index < points.length; index += 1) {
+    const pointA = points[index];
+    const pointB = points[(index + 1) % points.length];
+    const segmentSteps = Math.max(2, sampleCount);
+
+    for (let stepIndex = 0; stepIndex < segmentSteps; stepIndex += 1) {
+      if (index > 0 && stepIndex === 0) continue;
+
+      const ratio = stepIndex / (segmentSteps - 1);
+      const interpolatedPoint = clampRealDataPointToSaturation({
+        t: pointA.t + (pointB.t - pointA.t) * ratio,
+        w: pointA.w + (pointB.w - pointA.w) * ratio,
+      }, Patm);
+
+      const previousPoint = clippedPoints[clippedPoints.length - 1];
+      if (
+        previousPoint
+        && Math.abs(previousPoint.t - interpolatedPoint.t) < 1e-6
+        && Math.abs(previousPoint.w - interpolatedPoint.w) < 1e-8
+      ) {
+        continue;
+      }
+
+      clippedPoints.push(interpolatedPoint);
+    }
+  }
+
+  return clippedPoints.length >= 3 ? clippedPoints : [];
+}
+
+function getRealDataPointDistance(pointA, pointB) {
+  return Math.hypot(pointA.x - pointB.x, pointA.y - pointB.y);
+}
+
+function getRealDataTriangleCircumradius(pointA, pointB, pointC) {
+  const sideAB = getRealDataPointDistance(pointA, pointB);
+  const sideBC = getRealDataPointDistance(pointB, pointC);
+  const sideCA = getRealDataPointDistance(pointC, pointA);
+  const doubleArea = Math.abs(
+    (pointB.x - pointA.x) * (pointC.y - pointA.y) -
+    (pointB.y - pointA.y) * (pointC.x - pointA.x)
+  );
+
+  if (doubleArea <= 1e-9) return Infinity;
+  return (sideAB * sideBC * sideCA) / (2 * doubleArea);
+}
+
+function traceRealDataBoundaryLoops(boundaryEdges, normalizedPoints) {
+  if (boundaryEdges.length < 3) return [];
+
+  const adjacency = new Map();
+  boundaryEdges.forEach(([indexA, indexB]) => {
+    if (!adjacency.has(indexA)) adjacency.set(indexA, []);
+    if (!adjacency.has(indexB)) adjacency.set(indexB, []);
+    adjacency.get(indexA).push(indexB);
+    adjacency.get(indexB).push(indexA);
+  });
+
+  const unusedEdges = new Set(boundaryEdges.map(([indexA, indexB]) => getRealDataEdgeKey(indexA, indexB)));
+  const loops = [];
+
+  while (unusedEdges.size) {
+    const startKey = unusedEdges.values().next().value;
+    const [startIndex, nextIndexRaw] = startKey.split("|").map((value) => Number(value));
+    const loop = [startIndex];
+
+    let previousIndex = startIndex;
+    let currentIndex = nextIndexRaw;
+    unusedEdges.delete(startKey);
+
+    while (true) {
+      loop.push(currentIndex);
+
+      const currentNeighbors = adjacency.get(currentIndex) || [];
+      const availableNeighbors = currentNeighbors.filter((neighborIndex) => {
+        if (neighborIndex === previousIndex) return false;
+        return unusedEdges.has(getRealDataEdgeKey(currentIndex, neighborIndex));
+      });
+
+      if (!availableNeighbors.length) {
+        const closingKey = getRealDataEdgeKey(currentIndex, startIndex);
+        if (currentIndex !== startIndex && unusedEdges.has(closingKey)) {
+          unusedEdges.delete(closingKey);
+          currentIndex = startIndex;
+          continue;
+        }
+        break;
+      }
+
+      let nextIndex = availableNeighbors[0];
+
+      if (availableNeighbors.length > 1) {
+        const prevPoint = normalizedPoints[previousIndex];
+        const currentPoint = normalizedPoints[currentIndex];
+        const baseAngle = Math.atan2(currentPoint.y - prevPoint.y, currentPoint.x - prevPoint.x);
+
+        nextIndex = availableNeighbors
+          .map((neighborIndex) => {
+            const neighborPoint = normalizedPoints[neighborIndex];
+            let turn = Math.atan2(neighborPoint.y - currentPoint.y, neighborPoint.x - currentPoint.x) - baseAngle;
+            while (turn <= 0) turn += Math.PI * 2;
+            return { neighborIndex, turn };
+          })
+          .sort((left, right) => left.turn - right.turn)[0].neighborIndex;
+      }
+
+      unusedEdges.delete(getRealDataEdgeKey(currentIndex, nextIndex));
+      previousIndex = currentIndex;
+      currentIndex = nextIndex;
+
+      if (currentIndex === startIndex) break;
+    }
+
+    if (loop.length >= 4 && loop[loop.length - 1] === startIndex) {
+      loop.pop();
+    }
+
+    if (loop.length >= 3) {
+      loops.push(loop);
+    }
+  }
+
+  return loops;
+}
+
+function buildRealDataAlphaEnvelope(points, compactness = REAL_DATA_DEFAULT_COMPACTNESS) {
+  const normalizedPoints = getRealDataNormalizedPoints(points);
+  const delaunay = d3.Delaunay.from(normalizedPoints, (point) => point.x, (point) => point.y);
+  const nearestNeighborDistances = normalizedPoints
+    .map((point, index) => {
+      let minDistance = Infinity;
+      for (const neighborIndex of delaunay.neighbors(index)) {
+        minDistance = Math.min(minDistance, getRealDataPointDistance(point, normalizedPoints[neighborIndex]));
+      }
+      return minDistance;
+    })
+    .filter(Number.isFinite)
+    .sort((left, right) => left - right);
+
+  const medianDistance = nearestNeighborDistances.length
+    ? (d3.quantileSorted(nearestNeighborDistances, 0.5) ?? nearestNeighborDistances[Math.floor(nearestNeighborDistances.length / 2)])
+    : 0.04;
+  const upperDistance = nearestNeighborDistances.length
+    ? (d3.quantileSorted(nearestNeighborDistances, 0.9) ?? nearestNeighborDistances[nearestNeighborDistances.length - 1])
+    : medianDistance;
+  const compactnessRatio = getRealDataCompactnessRatio(compactness);
+  const baseRadius = Math.max(upperDistance * 2.8, medianDistance * 4.6, 0.02);
+  const candidateRadii = [
+    baseRadius * 0.16,
+    baseRadius * 0.22,
+    baseRadius * 0.3,
+    baseRadius * 0.42,
+    baseRadius * 0.58,
+    baseRadius * 0.78,
+    baseRadius,
+    baseRadius * 1.28,
+    baseRadius * 1.7,
+    baseRadius * 2.25,
+    baseRadius * 3,
+    baseRadius * 4,
+    baseRadius * 5.5,
+  ].map((radius) => Math.min(Math.max(radius, 0.01), 3));
+  const candidateShapes = [];
+  const seenCandidates = new Set();
+
+  for (const alphaRadius of candidateRadii) {
+    const edgeCounts = new Map();
+
+    for (let triangleIndex = 0; triangleIndex < delaunay.triangles.length; triangleIndex += 3) {
+      const indexA = delaunay.triangles[triangleIndex];
+      const indexB = delaunay.triangles[triangleIndex + 1];
+      const indexC = delaunay.triangles[triangleIndex + 2];
+      const circumradius = getRealDataTriangleCircumradius(
+        normalizedPoints[indexA],
+        normalizedPoints[indexB],
+        normalizedPoints[indexC]
+      );
+
+      if (!Number.isFinite(circumradius) || circumradius > alphaRadius) continue;
+
+      [
+        [indexA, indexB],
+        [indexB, indexC],
+        [indexC, indexA],
+      ].forEach(([startIndex, endIndex]) => {
+        const edgeKey = getRealDataEdgeKey(startIndex, endIndex);
+        edgeCounts.set(edgeKey, (edgeCounts.get(edgeKey) || 0) + 1);
+      });
+    }
+
+    const boundaryEdges = Array.from(edgeCounts.entries())
+      .filter(([, count]) => count === 1)
+      .map(([edgeKey]) => edgeKey.split("|").map((value) => Number(value)));
+    const loops = traceRealDataBoundaryLoops(boundaryEdges, normalizedPoints);
+
+    if (!loops.length) continue;
+
+    const outerLoop = loops
+      .map((loop) => ({
+        loop,
+        area: Math.abs(d3.polygonArea(loop.map((index) => [normalizedPoints[index].x, normalizedPoints[index].y]))),
+      }))
+      .sort((left, right) => right.area - left.area)[0]?.loop;
+
+    if (outerLoop?.length >= 3) {
+      const candidate = outerLoop.map((index) => points[index]);
+      if (!doesRealDataBoundaryContainPoints(candidate, points)) {
+        continue;
+      }
+
+      const candidateKey = candidate
+        .map((point) => `${point.t.toFixed(4)}|${point.w.toFixed(6)}`)
+        .join(";");
+      if (seenCandidates.has(candidateKey)) {
+        continue;
+      }
+
+      seenCandidates.add(candidateKey);
+      candidateShapes.push(candidate);
+    }
+  }
+
+  const hull = d3.polygonHull(points.map((point) => [point.t, point.w]));
+  if (hull && hull.length >= 3) {
+    const hullCandidate = hull.map(([t, w]) => ({ t, w }));
+    if (doesRealDataBoundaryContainPoints(hullCandidate, points)) {
+      candidateShapes.push(hullCandidate);
+    }
+  }
+
+  if (!candidateShapes.length) {
+    return [];
+  }
+
+  const sortedCandidates = candidateShapes
+    .map((candidate) => ({ candidate, area: getRealDataPolygonArea(candidate) }))
+    .sort((left, right) => left.area - right.area);
+  const targetIndex = sortedCandidates.length === 1
+    ? 0
+    : Math.round((1 - compactnessRatio) * (sortedCandidates.length - 1));
+  const loosenessScale = d3.interpolateNumber(1.32, 1.01)(compactnessRatio);
+  return scaleRealDataBoundary(sortedCandidates[targetIndex].candidate, loosenessScale, getRealDataPointBounds(points));
+}
+
+function getRealDataPointFromRow(row, humidityType, Patm) {
+  const t = Number(row?.tdb ?? row?.t ?? row?.temperature ?? row?.temp);
+  if (!Number.isFinite(t)) return null;
+
+  let humidityValue;
+  let w;
+
+  if (humidityType === "AH") {
+    humidityValue = Number(row?.ah ?? row?.absoluteHumidity ?? row?.absolute_humidity);
+    if (!Number.isFinite(humidityValue) || humidityValue < 0) return null;
+    w = getWFromAbsoluteHumidity(t, humidityValue, Patm);
+  } else if (humidityType === "W") {
+    humidityValue = Number(row?.w ?? row?.humidityRatio ?? row?.humidity_ratio);
+    if (!Number.isFinite(humidityValue) || humidityValue < 0) return null;
+    w = humidityValue;
+  } else {
+    humidityValue = Number(row?.rh ?? row?.relativeHumidity ?? row?.relative_humidity);
+    if (!Number.isFinite(humidityValue) || humidityValue < 0 || humidityValue > 100) return null;
+    const resolved = Psychro.solveRobust("Tdb", t, "RH", humidityValue, Patm);
+    w = resolved?.w;
+  }
+
+  if (!Number.isFinite(w) || w < 0) return null;
+  return { t, w };
+}
+
+function buildRealDataOval(points, Patm, compactness = REAL_DATA_DEFAULT_COMPACTNESS) {
+  if (points.length < 3) return [];
+
+  const bounds = getRealDataPointBounds(points);
+  const normalizedPoints = getRealDataNormalizedPoints(points, bounds);
+  const centroid = {
+    x: d3.mean(normalizedPoints, (point) => point.x) ?? 0.5,
+    y: d3.mean(normalizedPoints, (point) => point.y) ?? 0.5,
+  };
+
+  let covarianceXX = 0;
+  let covarianceYY = 0;
+  let covarianceXY = 0;
+
+  normalizedPoints.forEach((point) => {
+    const deltaX = point.x - centroid.x;
+    const deltaY = point.y - centroid.y;
+    covarianceXX += deltaX * deltaX;
+    covarianceYY += deltaY * deltaY;
+    covarianceXY += deltaX * deltaY;
+  });
+
+  const pointCount = Math.max(normalizedPoints.length, 1);
+  covarianceXX /= pointCount;
+  covarianceYY /= pointCount;
+  covarianceXY /= pointCount;
+
+  const trace = covarianceXX + covarianceYY;
+  const determinant = covarianceXX * covarianceYY - covarianceXY * covarianceXY;
+  const discriminant = Math.sqrt(Math.max(0, (trace * trace) / 4 - determinant));
+  const principalValue = trace / 2 + discriminant;
+
+  let majorAxis;
+  if (Math.abs(covarianceXY) > 1e-9) {
+    majorAxis = { x: principalValue - covarianceYY, y: covarianceXY };
+  } else {
+    majorAxis = covarianceXX >= covarianceYY ? { x: 1, y: 0 } : { x: 0, y: 1 };
+  }
+
+  const axisLength = Math.hypot(majorAxis.x, majorAxis.y) || 1;
+  majorAxis = { x: majorAxis.x / axisLength, y: majorAxis.y / axisLength };
+  const minorAxis = { x: -majorAxis.y, y: majorAxis.x };
+
+  const projectedDistances = normalizedPoints.map((point) => {
+    const deltaX = point.x - centroid.x;
+    const deltaY = point.y - centroid.y;
+    return {
+      major: Math.abs(deltaX * majorAxis.x + deltaY * majorAxis.y),
+      minor: Math.abs(deltaX * minorAxis.x + deltaY * minorAxis.y),
+    };
+  });
+
+  const majorDistances = projectedDistances.map((distance) => distance.major).sort((left, right) => left - right);
+  const minorDistances = projectedDistances.map((distance) => distance.minor).sort((left, right) => left - right);
+
+  const compactnessRatio = getRealDataCompactnessRatio(compactness);
+  const baseRadiusX = Math.max(d3.quantileSorted(majorDistances, 0.92) ?? d3.max(majorDistances) ?? 0.08, 0.04);
+  const baseRadiusY = Math.max(d3.quantileSorted(minorDistances, 0.92) ?? d3.max(minorDistances) ?? 0.05, 0.03);
+  const containmentScale = projectedDistances.reduce((maxScale, distance) => {
+    const ellipseDistance = Math.hypot(distance.major / baseRadiusX, distance.minor / baseRadiusY);
+    return Math.max(maxScale, ellipseDistance);
+  }, 1);
+  let expansion = d3.interpolateNumber(1.34, 1.01)(compactnessRatio);
+  const sampleCount = Math.max(72, 72 + Math.round((1 - compactnessRatio) * 36));
+
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    const radiusX = Math.max(baseRadiusX * containmentScale * expansion, 0.04);
+    const radiusY = Math.max(baseRadiusY * containmentScale * expansion, 0.03);
+    const ovalPoints = Array.from({ length: sampleCount }, (_, index) => {
+      const angle = (index / sampleCount) * Math.PI * 2;
+      const localX = Math.cos(angle) * radiusX;
+      const localY = Math.sin(angle) * radiusY;
+
+      return denormalizeRealDataPoint({
+        x: centroid.x + majorAxis.x * localX + minorAxis.x * localY,
+        y: centroid.y + majorAxis.y * localX + minorAxis.y * localY,
+      }, bounds);
+    });
+    const clippedOval = clipRealDataBoundaryToSaturation(ovalPoints, Patm, compactness);
+
+    if (doesRealDataBoundaryContainPoints(clippedOval, points)) {
+      return clippedOval;
+    }
+
+    expansion *= 1.08;
+  }
+
+  return [];
+}
+
+function buildRealDataEnvelope(points, Patm, compactness = REAL_DATA_DEFAULT_COMPACTNESS) {
+  if (points.length < 3) return [];
+
+  const alphaEnvelope = buildRealDataAlphaEnvelope(points, compactness);
+  if (alphaEnvelope.length >= 3) {
+    const clippedAlphaEnvelope = clipRealDataBoundaryToSaturation(alphaEnvelope, Patm, compactness);
+    if (doesRealDataBoundaryContainPoints(clippedAlphaEnvelope, points)) {
+      return clippedAlphaEnvelope;
+    }
+  }
+
+  const hull = d3.polygonHull(points.map((point) => [point.t, point.w]));
+  if (hull && hull.length >= 3) {
+    const hullPoints = hull.map(([t, w]) => ({ t, w }));
+    const expandedHullPoints = scaleRealDataBoundary(
+      hullPoints,
+      d3.interpolateNumber(1.28, 1.01)(getRealDataCompactnessRatio(compactness)),
+      getRealDataPointBounds(points)
+    );
+    const clippedHullPoints = clipRealDataBoundaryToSaturation(expandedHullPoints, Patm, compactness);
+    if (doesRealDataBoundaryContainPoints(clippedHullPoints, points)) {
+      return clippedHullPoints;
+    }
+  }
+
+  const minT = d3.min(points, (point) => point.t);
+  const maxT = d3.max(points, (point) => point.t);
+  const minW = d3.min(points, (point) => point.w);
+  const maxW = d3.max(points, (point) => point.w);
+
+  if (![minT, maxT, minW, maxW].every(Number.isFinite)) return [];
+  if (minT === maxT || minW === maxW) return [];
+
+  return clipRealDataBoundaryToSaturation([
+    { t: minT, w: minW },
+    { t: maxT, w: minW },
+    { t: maxT, w: maxW },
+    { t: minT, w: maxW },
+  ], Patm, compactness);
+}
+
+function getActiveRealDataZoneDraft() {
+  if (State.mode !== "zone" || State.zoneSubMode !== "plants" || !State.realDataZoneDraft) {
+    return null;
+  }
+
+  const normalizedKey = normalizeRealDataKey(State.realDataZoneDraft.key);
+  if (!normalizedKey) return null;
+
+  return {
+    key: normalizedKey,
+    ...normalizeRealDataZoneConfig(State.realDataZoneDraft),
+  };
+}
+
+function buildRealDataZone(definition, Patm, configOverride) {
+  const sourcePoints = normalizeRealDataSourcePoints(definition, Patm);
+  if (sourcePoints.length < 3) return null;
+
+  const zoneConfig = normalizeRealDataZoneConfig(configOverride || State.realDataZoneConfigs?.[definition.key]);
+  const zonePoints = zoneConfig.shape === "oval"
+    ? buildRealDataOval(sourcePoints, Patm, zoneConfig.compactness)
+    : definition.points.length
+      ? clipRealDataBoundaryToSaturation(sourcePoints, Patm, zoneConfig.compactness)
+      : buildRealDataEnvelope(sourcePoints, Patm, zoneConfig.compactness);
+  if (zonePoints.length < 3) return null;
+
+  return {
+    id: `real-data-${definition.key}`,
+    name: definition.name,
+    color: definition.color,
+    shape: zoneConfig.shape,
+    compactness: zoneConfig.compactness,
+    sourcePoints,
+    points: zonePoints,
+  };
+}
+
+function getVisibleRealDataZones(Patm) {
+  const draft = getActiveRealDataZoneDraft();
+
+  return realDataCatalog
+    .filter((definition) => State.realDataZoneVisibility[definition.key] !== false || draft?.key === definition.key)
+    .map((definition) => buildRealDataZone(
+      definition,
+      Patm,
+      draft?.key === definition.key ? draft : getRealDataZoneConfig(definition.key)
+    ))
+    .filter(Boolean);
+}
+
+async function loadRealDataCatalog() {
+  realDataLoadState = "loading";
+  realDataLoadError = "";
+  renderRealDataZoneSettings();
+
+  try {
+    const filePaths = await getRealDataFileList();
+    const nextCatalog = [];
+    let hadLoadError = false;
+
+    for (const filePath of filePaths) {
+      try {
+        const payload = await fetchRealDataJson(filePath);
+        nextCatalog.push(...extractRealDataDefinitions(payload, filePath));
+      } catch (error) {
+        hadLoadError = true;
+        console.warn(`Failed to load real-data file: ${filePath}`, error);
+      }
+    }
+
+    realDataCatalog = nextCatalog;
+    syncRealDataVisibilityDefaults();
+    syncRealDataZoneConfigDefaults();
+    realDataLoadState = realDataCatalog.length ? "ready" : hadLoadError ? "error" : "empty";
+  } catch (error) {
+    realDataCatalog = [];
+    realDataLoadState = "error";
+    realDataLoadError = error instanceof Error ? error.message : String(error || "");
+  }
+
+  renderRealDataZoneSettings();
+  populatePlantsZoneDatasetSelect();
+  drawChart();
+}
+
 const DEFAULT_CURSOR_FIELDS = ["tdb", "ah"];
 
+function normalizeInfoPrecisionDecimals(value) {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed)) return DEFAULT_INFO_PRECISION_DECIMALS;
+  return Math.max(0, Math.min(6, parsed));
+}
+
+function getInfoPrecisionDecimals() {
+  return normalizeInfoPrecisionDecimals(State.infoPrecisionDecimals);
+}
+
+function fmtInfo(value) {
+  return value.toFixed(getInfoPrecisionDecimals());
+}
+
 const CURSOR_FIELD_DEFINITIONS = [
-  { key: "tdb", label: "Dry Bulb Temperature", shortLabel: "Tdb", formatValue: (data) => `${data.Tdb.toFixed(1)} °C` },
-  { key: "ah", label: "Absolute Humidity", shortLabel: "AH", formatValue: (data) => `${data.AH.toFixed(1)} g/m3` },
-  { key: "twb", label: "Wet Bulb Temperature", shortLabel: "Twb", formatValue: (data) => `${data.Twb.toFixed(1)} °C` },
-  { key: "tdp", label: "Dew Point Temperature", shortLabel: "Tdp", formatValue: (data) => `${data.Tdp.toFixed(1)} °C` },
-  { key: "tf", label: "Frost Point Temperature", shortLabel: "Tf", formatValue: (data) => `${data.Tf.toFixed(1)} °C` },
-  { key: "w", label: "Humidity Ratio", shortLabel: "W", formatValue: (data) => `${data.W.toFixed(4)} kg/kg'` },
-  { key: "rh", label: "Relative Humidity", shortLabel: "RH", formatValue: (data) => `${data.RH.toFixed(1)} %` },
-  { key: "mu", label: "Moisture Content", shortLabel: "u", formatValue: (data) => `${data.mu.toFixed(1)} %` },
-  { key: "h", label: "Enthalpy", shortLabel: "h", formatValue: (data) => `${data.h.toFixed(1)} kJ/kg` },
-  { key: "cp", label: "Specific Heat Capacity", shortLabel: "Cp", formatValue: (data) => `${data.cp.toFixed(3)} kJ/(kg·°C)` },
-  { key: "v", label: "Specific Volume", shortLabel: "v", formatValue: (data) => `${data.v.toFixed(3)} m3/kg` },
-  { key: "rho", label: "Density", shortLabel: "rho", formatValue: (data) => `${data.rho.toFixed(2)} kg/m3` },
-  { key: "pw", label: "Vapor Partial Pressure", shortLabel: "Pw", formatValue: (data) => `${data.Pw.toFixed(0)} Pa` },
-  { key: "pws", label: "Saturation Vapor Pressure", shortLabel: "Pws", formatValue: (data) => `${data.Pws.toFixed(0)} Pa` },
-  { key: "vpd", label: "Vapor Pressure Deficit", shortLabel: "VPD", formatValue: (data) => `${data.VPD.toFixed(1)} Pa` },
-  { key: "hd", label: "Humidity Deficit", shortLabel: "HD", formatValue: (data) => `${data.HD.toFixed(4)} kg/kg'` },
-  { key: "wsat", label: "Saturation Humidity Ratio", shortLabel: "Wsat", formatValue: (data) => `${data.Wsat.toFixed(4)} kg/kg'` },
-  { key: "dvs", label: "Saturation Vapor Concentration", shortLabel: "Dvs", formatValue: (data) => `${data.Dvs.toFixed(1)} g/m3` },
-  { key: "vmr", label: "Volume Mixing Ratio", shortLabel: "VMR", formatValue: (data) => `${data.VMR.toFixed(1)} ppm` },
-  { key: "pd", label: "Psychrometric Difference", shortLabel: "PD", formatValue: (data) => `${data.PD.toFixed(1)} °C` },
+  { key: "tdb", label: "Dry Bulb Temperature", shortLabel: "Tdb", formatValue: (data) => `${fmtInfo(data.Tdb, 1)} °C` },
+  { key: "ah", label: "Absolute Humidity", shortLabel: "AH", formatValue: (data) => `${fmtInfo(data.AH, 1)} g/m3` },
+  { key: "twb", label: "Wet Bulb Temperature", shortLabel: "Twb", formatValue: (data) => `${fmtInfo(data.Twb, 1)} °C` },
+  { key: "tdp", label: "Dew Point Temperature", shortLabel: "Tdp", formatValue: (data) => `${fmtInfo(data.Tdp, 1)} °C` },
+  { key: "tf", label: "Frost Point Temperature", shortLabel: "Tf", formatValue: (data) => `${fmtInfo(data.Tf, 1)} °C` },
+  { key: "w", label: "Humidity Ratio", shortLabel: "W", formatValue: (data) => `${fmtInfo(data.W, 4)} kg/kg'` },
+  { key: "rh", label: "Relative Humidity", shortLabel: "RH", formatValue: (data) => `${fmtInfo(data.RH, 1)} %` },
+  { key: "mu", label: "Moisture Content", shortLabel: "u", formatValue: (data) => `${fmtInfo(data.mu, 1)} %` },
+  { key: "h", label: "Enthalpy", shortLabel: "h", formatValue: (data) => `${fmtInfo(data.h, 1)} kJ/kg` },
+  { key: "cp", label: "Specific Heat Capacity", shortLabel: "Cp", formatValue: (data) => `${fmtInfo(data.cp, 3)} kJ/(kg·°C)` },
+  { key: "v", label: "Specific Volume", shortLabel: "v", formatValue: (data) => `${fmtInfo(data.v, 3)} m3/kg` },
+  { key: "rho", label: "Density", shortLabel: "rho", formatValue: (data) => `${fmtInfo(data.rho, 2)} kg/m3` },
+  { key: "pw", label: "Vapor Partial Pressure", shortLabel: "Pw", formatValue: (data) => `${fmtInfo(data.Pw, 0)} Pa` },
+  { key: "pws", label: "Saturation Vapor Pressure", shortLabel: "Pws", formatValue: (data) => `${fmtInfo(data.Pws, 0)} Pa` },
+  { key: "vpd", label: "Vapor Pressure Deficit", shortLabel: "VPD", formatValue: (data) => `${fmtInfo(data.VPD, 1)} Pa` },
+  { key: "hd", label: "Humidity Deficit", shortLabel: "HD", formatValue: (data) => `${fmtInfo(data.HD, 4)} kg/kg'` },
+  { key: "wsat", label: "Saturation Humidity Ratio", shortLabel: "Wsat", formatValue: (data) => `${fmtInfo(data.Wsat, 4)} kg/kg'` },
+  { key: "dvs", label: "Saturation Vapor Concentration", shortLabel: "Dvs", formatValue: (data) => `${fmtInfo(data.Dvs, 1)} g/m3` },
+  { key: "vmr", label: "Volume Mixing Ratio", shortLabel: "VMR", formatValue: (data) => `${fmtInfo(data.VMR, 1)} ppm` },
+  { key: "pd", label: "Psychrometric Difference", shortLabel: "PD", formatValue: (data) => `${fmtInfo(data.PD, 1)} °C` },
 ];
 
 const CURSOR_FIELD_MAP = CURSOR_FIELD_DEFINITIONS.reduce((accumulator, definition) => {
@@ -1505,18 +2739,83 @@ function moveCursorField(key, direction) {
   queuePersistedStateSave();
 }
 
+function setInfoPrecisionDecimals(decimals) {
+  State.infoPrecisionDecimals = normalizeInfoPrecisionDecimals(decimals);
+  const el = document.getElementById("set-info-precision");
+  if (el) el.value = String(State.infoPrecisionDecimals);
+  updateLists();
+  queuePersistedStateSave();
+}
+
+function normalizeMinimapMode(value) {
+  const mode = String(value || "").trim().toLowerCase();
+  return ["auto", "show", "hide"].includes(mode) ? mode : "auto";
+}
+
+function shouldShowMinimapNow() {
+  const mode = normalizeMinimapMode(State.minimapMode);
+  if (mode === "show") return true;
+  if (mode === "hide") return false;
+  return Date.now() < minimapAutoVisibleUntil;
+}
+
+function updateMinimapVisibilityState() {
+  const container = document.getElementById("chart-minimap");
+  if (!container) return;
+  container.classList.toggle("is-visible", shouldShowMinimapNow());
+}
+
+function registerMinimapZoomActivity() {
+  if (normalizeMinimapMode(State.minimapMode) !== "auto") return;
+
+  minimapAutoVisibleUntil = Date.now() + MINIMAP_AUTO_VISIBLE_MS;
+  updateMinimapVisibilityState();
+
+  if (minimapAutoHideTimer) {
+    window.clearTimeout(minimapAutoHideTimer);
+  }
+
+  minimapAutoHideTimer = window.setTimeout(() => {
+    minimapAutoHideTimer = null;
+    updateMinimapVisibilityState();
+  }, MINIMAP_AUTO_VISIBLE_MS + 40);
+}
+
+function setMinimapMode(mode, options = {}) {
+  State.minimapMode = normalizeMinimapMode(mode);
+
+  const minimapModeInput = document.getElementById("set-minimap-mode");
+  if (minimapModeInput) {
+    minimapModeInput.value = State.minimapMode;
+  }
+
+  if (State.minimapMode !== "auto") {
+    minimapAutoVisibleUntil = 0;
+    if (minimapAutoHideTimer) {
+      window.clearTimeout(minimapAutoHideTimer);
+      minimapAutoHideTimer = null;
+    }
+  } else if (!options.keepAutoVisible) {
+    minimapAutoVisibleUntil = 0;
+  }
+
+  updateMinimapVisibilityState();
+  if (options.redraw === false) return;
+  drawChart();
+}
+
 function getInfoFieldMeta(field, data) {
   const axisX = State.chartType === "psychrometric"
-    ? { label: "Tdb", value: `${data.Tdb.toFixed(1)} °C` }
+    ? { label: "Tdb", value: `${fmtInfo(data.Tdb, 1)} °C` }
     : State.yAxisType === "absoluteHumidity"
-      ? { label: "AH", value: `${data.AH.toFixed(1)} g/m3` }
-      : { label: "W", value: `${data.W.toFixed(4)} kg/kg'` };
+      ? { label: "AH", value: `${fmtInfo(data.AH, 1)} g/m3` }
+      : { label: "W", value: `${fmtInfo(data.W, 4)} kg/kg'` };
 
   const axisY = State.chartType === "psychrometric"
     ? State.yAxisType === "absoluteHumidity"
-      ? { label: "AH", value: `${data.AH.toFixed(1)} g/m3` }
-      : { label: "W", value: `${data.W.toFixed(4)} kg/kg'` }
-    : { label: "Tdb", value: `${data.Tdb.toFixed(1)} °C` };
+      ? { label: "AH", value: `${fmtInfo(data.AH, 1)} g/m3` }
+      : { label: "W", value: `${fmtInfo(data.W, 4)} kg/kg'` }
+    : { label: "Tdb", value: `${fmtInfo(data.Tdb, 1)} °C` };
 
   const fieldMap = {
     "axis-x": axisX,
@@ -1892,8 +3191,7 @@ function updateLists() {
 
   zl.innerHTML = State.zones.length
     ? State.zones.map(buildZoneCard).join("")
-    : `${buildEmptyState("add_triangle", "No zones yet", "Create a zone manually, by input, by range, automatically, or with boolean logic to start mapping areas.")}
-      <style>.comfort-zone { display:none }</style>`;
+    : buildEmptyState("add_triangle", "No zones yet", "Create a zone manually, by input, by range, automatically, or with boolean logic to start mapping areas.");
 
   updateToolbarsVisibility();
   applyLanguage(document.getElementById("app-sidebar"));
@@ -2072,18 +3370,17 @@ function _showContextMenuLegacy(event, pointId = null, zoneId = null) {
         openFloatingInputWindow("zone");
       }, State.mode === "zone" && State.zoneSubMode === "input");
 
-      addContextMenuItem(submenu, "tune", "Range", () => {
-        hideContextMenu();
-        setMode("zone");
-        setZoneSubMode("range");
-        openFloatingRangeWindow();
-      }, State.mode === "zone" && State.zoneSubMode === "range");
-
       addContextMenuItem(submenu, "auto_awesome", "Auto Zone", () => {
         hideContextMenu();
         setMode("zone");
         setZoneSubMode("auto");
       }, State.mode === "zone" && State.zoneSubMode === "auto");
+
+      addContextMenuItem(submenu, "local_florist", "Plants", () => {
+        hideContextMenu();
+        setMode("zone");
+        setZoneSubMode("plants");
+      }, State.mode === "zone" && State.zoneSubMode === "plants");
 
       addContextMenuItem(submenu, "join", "Boolean", () => {
         hideContextMenu();
@@ -2817,13 +4114,6 @@ function buildKeyValueExportRows() {
   rows.push(["settings.showTwb", getCheckboxValue("set-show-twb")]);
   rows.push(["settings.showV", getCheckboxValue("set-show-v")]);
   rows.push(["settings.showSat", getCheckboxValue("set-show-sat")]);
-  rows.push(["settings.comfortZone.visible", getCheckboxValue("set-show-comfort-zone")]);
-  rows.push(["settings.comfortZone.preset", getInputValue("comfort-zone-preset")]);
-  rows.push(["settings.comfortZone.color", getInputValue("comfort-zone-color")]);
-  rows.push(["settings.comfortZone.tMin", getInputValue("comfort-tmin")]);
-  rows.push(["settings.comfortZone.tMax", getInputValue("comfort-tmax")]);
-  rows.push(["settings.comfortZone.rhMin", getInputValue("comfort-rhmin")]);
-  rows.push(["settings.comfortZone.rhMax", getInputValue("comfort-rhmax")]);
 
   State.points.forEach((p, i) => {
     rows.push([`points.${i}.name`, p.name || "Point"]);
@@ -3022,6 +4312,9 @@ function applyImportedSettings(settings) {
   if (settings.language !== undefined) {
     State.language = normalizeLanguage(settings.language);
   }
+  if (settings.realDataZoneVisibility !== undefined) {
+    setRealDataZoneVisibilityMap(settings.realDataZoneVisibility);
+  }
   const languageSelect = document.getElementById("set-language");
   if (languageSelect) {
     languageSelect.value = State.language;
@@ -3061,7 +4354,6 @@ function applyImportedSettings(settings) {
     "set-show-twb": settings.showTwb,
     "set-show-v": settings.showV,
     "set-show-sat": settings.showSat,
-    "set-show-comfort-zone": settings["comfortZone.visible"],
   };
 
   Object.keys(checkboxMap).forEach((id) => {
@@ -3075,32 +4367,18 @@ function applyImportedSettings(settings) {
   });
 
   renderCursorFieldSettings(getImportedCursorFields(settings));
+  if (settings.infoPrecisionDecimals !== undefined) {
+    setInfoPrecisionDecimals(settings.infoPrecisionDecimals);
+  } else if (settings.infoPrecisionOffset !== undefined) {
+    setInfoPrecisionDecimals((parseInt(settings.infoPrecisionOffset, 10) || 0) + DEFAULT_INFO_PRECISION_DECIMALS);
+  }
+  setMinimapMode(settings.minimapMode, { redraw: false });
   const labelInterval = document.getElementById("set-line-label-step");
   if (labelInterval && settings.labelInterval !== undefined) labelInterval.value = settings.labelInterval;
-
-  if (settings["comfortZone.preset"]) {
-    const preset = document.getElementById("comfort-zone-preset");
-    if (preset) {
-      preset.value = settings["comfortZone.preset"];
-      changeComfortZonePreset();
-    }
-  }
-
-  if (settings["comfortZone.color"]) {
-    const color = document.getElementById("comfort-zone-color");
-    if (color) color.value = settings["comfortZone.color"];
-  }
-
-  const tMin = document.getElementById("comfort-tmin");
-  if (tMin && settings["comfortZone.tMin"] !== undefined) tMin.value = settings["comfortZone.tMin"];
-  const tMax = document.getElementById("comfort-tmax");
-  if (tMax && settings["comfortZone.tMax"] !== undefined) tMax.value = settings["comfortZone.tMax"];
-  const rhMin = document.getElementById("comfort-rhmin");
-  if (rhMin && settings["comfortZone.rhMin"] !== undefined) rhMin.value = settings["comfortZone.rhMin"];
-  const rhMax = document.getElementById("comfort-rhmax");
-  if (rhMax && settings["comfortZone.rhMax"] !== undefined) rhMax.value = settings["comfortZone.rhMax"];
-
-  updateComfortZone();
+  syncRealDataVisibilityDefaults();
+  syncRealDataZoneConfigDefaults();
+  renderRealDataZoneSettings();
+  populatePlantsZoneDatasetSelect();
   drawChart();
   applyLanguage();
 }
@@ -3310,21 +4588,12 @@ function saveEditSettings() {
 }
 
 function finishZone() {
-  let finalPoints = [];
-
-  if (State.zoneSubMode === "range") {
-    if (State.rangePreview.length < 3) {
-      alert(translateLiteral("Invalid Range Zone"));
-      return;
-    }
-    finalPoints = [...State.rangePreview];
-  } else {
-    if (State.tempZone.length < 3) {
-      alert(translateLiteral("Min 3 points required."));
-      return;
-    }
-    finalPoints = [...State.tempZone];
+  if (State.tempZone.length < 3) {
+    alert(translateLiteral("Min 3 points required."));
+    return;
   }
+
+  const finalPoints = [...State.tempZone];
 
   State.zones.push({
     id: Date.now(),
@@ -3346,7 +4615,9 @@ function finishZone() {
 function cancelZone() {
   State.tempZone = [];
   State.rangePreview = [];
-  if (State.zoneSubMode === "range") updateRangeZone();
+  if (State.zoneSubMode !== "plants") {
+    State.realDataZoneDraft = null;
+  }
 
   drawChart();
   if (document.getElementById("zonePtCount"))
@@ -3465,6 +4736,263 @@ function getTandWFromCoords(mx, my, x, y, minT, maxT, maxH, Patm) {
   w = Math.max(0, Math.min(maxH, w));
 
   return { t, w };
+}
+
+function clampMinimapValue(value, minValue, maxValue, fallbackValue) {
+  const fallback = Number.isFinite(fallbackValue) ? fallbackValue : minValue;
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return fallback;
+  return Math.max(minValue, Math.min(maxValue, numericValue));
+}
+
+function getMinimapViewportBounds(Patm) {
+  const minTempInput = parseFloat(document.getElementById("minTemp")?.value);
+  const maxTempInput = parseFloat(document.getElementById("maxTemp")?.value);
+  const maxHumInput = parseFloat(document.getElementById("maxHum")?.value);
+  const maxAbsHumInput = parseFloat(document.getElementById("maxAbsHum")?.value);
+
+  let minT = clampMinimapValue(minTempInput, MINIMAP_T_MIN, MINIMAP_T_MAX - 1, MINIMAP_T_MIN);
+  let maxT = clampMinimapValue(maxTempInput, minT + 1, MINIMAP_T_MAX, MINIMAP_T_MAX);
+  if (maxT <= minT) {
+    maxT = Math.min(MINIMAP_T_MAX, minT + 1);
+  }
+
+  let minWSource = State.viewMinH;
+  let maxWSource = maxHumInput;
+
+  if (State.yAxisType === "absoluteHumidity") {
+    const anchorT = (minT + maxT) / 2;
+    const safePatm = Number.isFinite(Patm) ? Patm : getPressureInPa();
+    minWSource = getWFromAbsoluteHumidity(anchorT, State.viewMinAH, safePatm);
+    maxWSource = getWFromAbsoluteHumidity(anchorT, maxAbsHumInput, safePatm);
+  }
+
+  let minW = clampMinimapValue(minWSource, MINIMAP_W_MIN, MINIMAP_W_MAX - 0.0001, MINIMAP_W_MIN);
+  let maxW = clampMinimapValue(maxWSource, minW + 0.0001, MINIMAP_W_MAX, MINIMAP_W_MAX);
+  if (maxW <= minW) {
+    maxW = Math.min(MINIMAP_W_MAX, minW + 0.0001);
+  }
+
+  return { minT, maxT, minW, maxW };
+}
+
+function buildMinimapPolygonPoints(points, xScale, yScale) {
+  return points
+    .filter((point) => point && Number.isFinite(point.t) && Number.isFinite(point.w))
+    .map((point) => `${xScale(point.t)},${yScale(point.w)}`)
+    .join(" ");
+}
+
+function renderChartMinimap(Patm, realDataZones = []) {
+  const minimapContainer = document.getElementById("chart-minimap");
+  const minimapSvgNode = document.getElementById("chart-minimap-svg");
+  if (!minimapContainer || !minimapSvgNode) return;
+
+  const wrapperRect = chartWrapper.getBoundingClientRect();
+  const legendNode = chartWrapper.querySelector(".chart-legend");
+  if (legendNode) {
+    const legendRect = legendNode.getBoundingClientRect();
+    minimapContainer.style.left = `${Math.max(0, legendRect.left - wrapperRect.left)}px`;
+    minimapContainer.style.top = `${Math.max(0, legendRect.top - wrapperRect.top)}px`;
+  } else {
+    minimapContainer.style.left = `${chart_margin_left + 16}px`;
+    minimapContainer.style.top = `${chart_margin_top + 16}px`;
+  }
+
+  // Keep minimap height aligned with legend height; only width differs.
+  const visibleLegendCount = ["rh", "twb", "h", "v", "sat"].filter((key) => State.visibility?.[key]).length;
+  minimapContainer.style.height = `${30 + visibleLegendCount * 18}px`;
+
+  const minimapMode = normalizeMinimapMode(State.minimapMode);
+  if (minimapMode === "hide" || (minimapMode === "auto" && !shouldShowMinimapNow())) {
+    updateMinimapVisibilityState();
+    return;
+  }
+
+  const width = minimapContainer.clientWidth;
+  const height = minimapContainer.clientHeight;
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 30 || height <= 30) return;
+
+  const padding = 8;
+  const innerWidth = Math.max(1, width - padding * 2);
+  const innerHeight = Math.max(1, height - padding * 2);
+
+  const xMini = d3.scaleLinear().domain([MINIMAP_T_MIN, MINIMAP_T_MAX]).range([padding, padding + innerWidth]);
+  const yMini = d3.scaleLinear().domain([MINIMAP_W_MIN, MINIMAP_W_MAX]).range([padding + innerHeight, padding]);
+
+  const minimapSvg = d3
+    .select(minimapSvgNode)
+    .attr("viewBox", `0 0 ${width} ${height}`)
+    .attr("width", width)
+    .attr("height", height);
+
+  const defs = minimapSvg.selectAll("defs").data([null]).join("defs");
+  defs
+    .selectAll("clipPath#minimap-clip")
+    .data([null])
+    .join("clipPath")
+    .attr("id", "minimap-clip")
+    .selectAll("rect")
+    .data([null])
+    .join("rect")
+    .attr("x", padding)
+    .attr("y", padding)
+    .attr("width", innerWidth)
+    .attr("height", innerHeight);
+
+  const root = minimapSvg.selectAll("g.minimap-root").data([null]).join("g").attr("class", "minimap-root");
+
+  root
+    .selectAll("rect.minimap-plot-bg")
+    .data([null])
+    .join("rect")
+    .attr("class", "minimap-plot-bg")
+    .attr("x", padding)
+    .attr("y", padding)
+    .attr("width", innerWidth)
+    .attr("height", innerHeight)
+    .attr("rx", 6)
+    .attr("ry", 6);
+
+  const gridLayer = root
+    .selectAll("g.minimap-grid")
+    .data([null])
+    .join("g")
+    .attr("class", "minimap-grid")
+    .attr("clip-path", "url(#minimap-clip)");
+
+  gridLayer
+    .selectAll("line.minimap-grid-x")
+    .data(xMini.ticks(10))
+    .join("line")
+    .attr("class", "minimap-grid-x")
+    .attr("x1", (value) => xMini(value))
+    .attr("x2", (value) => xMini(value))
+    .attr("y1", padding)
+    .attr("y2", padding + innerHeight);
+
+  gridLayer
+    .selectAll("line.minimap-grid-y")
+    .data(yMini.ticks(8))
+    .join("line")
+    .attr("class", "minimap-grid-y")
+    .attr("x1", padding)
+    .attr("x2", padding + innerWidth)
+    .attr("y1", (value) => yMini(value))
+    .attr("y2", (value) => yMini(value));
+
+  const dataLayer = root
+    .selectAll("g.minimap-data")
+    .data([null])
+    .join("g")
+    .attr("class", "minimap-data")
+    .attr("clip-path", "url(#minimap-clip)");
+
+  const saturationPoints = [];
+  for (let t = MINIMAP_T_MIN; t <= MINIMAP_T_MAX; t += 1) {
+    const satW = Psychro.getWFromPw(Psychro.getSatVapPres(t), Patm);
+    if (!Number.isFinite(satW)) continue;
+    saturationPoints.push({
+      t,
+      w: clampMinimapValue(satW, MINIMAP_W_MIN, MINIMAP_W_MAX, MINIMAP_W_MIN),
+    });
+  }
+
+  dataLayer
+    .selectAll("path.minimap-saturation")
+    .data(saturationPoints.length ? [saturationPoints] : [])
+    .join("path")
+    .attr("class", "minimap-saturation")
+    .attr("d", d3.line().x((point) => xMini(point.t)).y((point) => yMini(point.w)));
+
+  dataLayer
+    .selectAll("polygon.minimap-real-data-zone")
+    .data(realDataZones, (zone) => zone.id)
+    .join("polygon")
+    .attr("class", "minimap-real-data-zone")
+    .attr("points", (zone) => buildMinimapPolygonPoints(zone.points || [], xMini, yMini))
+    .attr("fill", (zone) => {
+      const rgb = hexToRgb(zone.color || "#1b9e2a");
+      return `rgba(${rgb.r},${rgb.g},${rgb.b},0.18)`;
+    })
+    .attr("stroke", (zone) => zone.color || "#1b9e2a");
+
+  dataLayer
+    .selectAll("polygon.minimap-user-zone")
+    .data(State.zones, (zone) => zone.id)
+    .join("polygon")
+    .attr("class", "minimap-user-zone")
+    .attr("points", (zone) => buildMinimapPolygonPoints(zone.points || [], xMini, yMini))
+    .attr("fill", (zone) => {
+      const rgb = hexToRgb(zone.color || "#19cc2e");
+      return `rgba(${rgb.r},${rgb.g},${rgb.b},0.24)`;
+    })
+    .attr("stroke", (zone) => zone.color || "#19cc2e");
+
+  dataLayer
+    .selectAll("polyline.minimap-temp-zone")
+    .data(State.tempZone.length ? [State.tempZone] : [])
+    .join("polyline")
+    .attr("class", "minimap-temp-zone")
+    .attr("points", (points) => buildMinimapPolygonPoints(points, xMini, yMini));
+
+  dataLayer
+    .selectAll("polygon.minimap-range-preview")
+    .data(State.rangePreview.length ? [State.rangePreview] : [])
+    .join("polygon")
+    .attr("class", "minimap-range-preview")
+    .attr("points", (points) => buildMinimapPolygonPoints(points, xMini, yMini));
+
+  dataLayer
+    .selectAll("circle.minimap-point")
+    .data(State.points.filter((point) => Number.isFinite(point?.t) && Number.isFinite(point?.w)), (point) => point.id)
+    .join("circle")
+    .attr("class", "minimap-point")
+    .attr("cx", (point) => xMini(point.t))
+    .attr("cy", (point) => yMini(point.w))
+    .attr("r", 1.9)
+    .attr("fill", (point) => point.color || "#cc1919");
+
+  const probePoints = [State.probeA, State.probeB].filter((probe) => probe && Number.isFinite(probe.t) && Number.isFinite(probe.w));
+  dataLayer
+    .selectAll("circle.minimap-probe")
+    .data(probePoints)
+    .join("circle")
+    .attr("class", "minimap-probe")
+    .attr("cx", (probe) => xMini(probe.t))
+    .attr("cy", (probe) => yMini(probe.w))
+    .attr("r", 2.6);
+
+  const viewport = getMinimapViewportBounds(Patm);
+  const x0 = xMini(viewport.minT);
+  const x1 = xMini(viewport.maxT);
+  const y0 = yMini(viewport.maxW);
+  const y1 = yMini(viewport.minW);
+
+  const viewportLayer = root.selectAll("g.minimap-viewport").data([null]).join("g").attr("class", "minimap-viewport");
+  viewportLayer
+    .selectAll("rect.minimap-viewport-box")
+    .data([null])
+    .join("rect")
+    .attr("class", "minimap-viewport-box")
+    .attr("x", Math.min(x0, x1))
+    .attr("y", Math.min(y0, y1))
+    .attr("width", Math.max(2, Math.abs(x1 - x0)))
+    .attr("height", Math.max(2, Math.abs(y1 - y0)));
+
+  root
+    .selectAll("rect.minimap-frame")
+    .data([null])
+    .join("rect")
+    .attr("class", "minimap-frame")
+    .attr("x", padding)
+    .attr("y", padding)
+    .attr("width", innerWidth)
+    .attr("height", innerHeight)
+    .attr("rx", 6)
+    .attr("ry", 6);
+
+  updateMinimapVisibilityState();
 }
 
 function drawChart() {
@@ -3652,10 +5180,76 @@ function drawChart() {
   );
 
   zoneLayer.selectAll("*").remove();
-  
-  if (State.comfortZone.visible) {
-    drawComfortZone(zoneLayer, x, y, minT, maxT, maxH, Patm);
-  }
+
+  const visibleRealDataZones = getVisibleRealDataZones(Patm);
+  visibleRealDataZones.forEach((zone) => {
+    const displayPoints = zone.points.map((point) => {
+      if (State.chartType === "psychrometric") {
+        return {
+          x: x(point.t),
+          y: y(getYValue(point.t, point.w, Patm)),
+        };
+      }
+
+      return {
+        x: x(getYValue(point.t, point.w, Patm)),
+        y: y(point.t),
+      };
+    });
+    const displaySourcePoints = (zone.sourcePoints || zone.points).map((point) => {
+      if (State.chartType === "psychrometric") {
+        return {
+          x: x(point.t),
+          y: y(getYValue(point.t, point.w, Patm)),
+        };
+      }
+
+      return {
+        x: x(getYValue(point.t, point.w, Patm)),
+        y: y(point.t),
+      };
+    });
+    const polygonPoints = displayPoints.map((point) => [point.x, point.y].join(",")).join(" ");
+    const rgb = hexToRgb(zone.color);
+    const labelPoint = findZoneLabelPosition(displayPoints);
+
+    zoneLayer
+      .append("polygon")
+      .attr("points", polygonPoints)
+      .attr("class", "real-data-zone")
+      .attr("fill", `rgba(${rgb.r},${rgb.g},${rgb.b}, 0.18)`)
+      .attr("stroke", zone.color)
+      .attr("stroke-dasharray", "7 4")
+      .attr("stroke-width", 1.8)
+      .style("pointer-events", "none");
+
+    zoneLayer
+      .append("g")
+      .attr("class", "real-data-zone-points")
+      .selectAll("circle")
+      .data(displaySourcePoints)
+      .join("circle")
+      .attr("cx", (point) => point.x)
+      .attr("cy", (point) => point.y)
+      .attr("r", 2.6)
+      .attr("fill", zone.color)
+      .attr("stroke", "rgba(255,255,255,0.95)")
+      .attr("stroke-width", 0.8)
+      .attr("opacity", 0.92)
+      .style("pointer-events", "none");
+
+    zoneLayer
+      .append("text")
+      .attr("x", labelPoint.x)
+      .attr("y", labelPoint.y)
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "middle")
+      .attr("fill", zone.color)
+      .attr("font-size", "10px")
+      .attr("font-weight", "bold")
+      .text(zone.name)
+      .style("pointer-events", "none");
+  });
   
   State.zones.forEach((z) => {
     const displayPoints = z.points.map((p) => {
@@ -3822,7 +5416,7 @@ function drawChart() {
     const legItems = allLegItems.filter(item => State.visibility[item.key]);
     const legendWidth = 138;
     const rowHeight = 18;
-    const legendHeight = 20 + legItems.length * rowHeight;
+    const legendHeight = 30 + legItems.length * rowHeight;
 
     if (State.chartType === "psychrometric") {
       legG.attr("transform", `translate(16, 16)`);
@@ -3837,22 +5431,22 @@ function drawChart() {
       .attr("height", legendHeight)
       .attr("rx", 18);
 
-    legG
-      .append("text")
-      .text("")
-      .attr("class", "legend-eyebrow")
-      .attr("x", 12)
-      .attr("y", 14);
+    // legG
+    //   .append("text")
+    //   .text("")
+    //   .attr("class", "legend-eyebrow")
+    //   .attr("x", 12)
+    //   .attr("y", 14);
 
     legG
       .append("text")
       .text("Legends")
       .attr("class", "legend-title")
       .attr("x", 12)
-      .attr("y", 16);
+      .attr("y", 21);
 
     legItems.forEach((item, i) => {
-      const rowY = 22 + i * rowHeight;
+      const rowY = 27 + i * rowHeight;
       const row = legG.append("g").attr("transform", `translate(8, ${rowY})`);
 
       row
@@ -3880,6 +5474,8 @@ function drawChart() {
         .text(item.t);
     });
   }
+
+  renderChartMinimap(Patm, visibleRealDataZones);
   applyLanguage(document.getElementById("chart-wrapper"));
   queuePersistedStateSave();
 }
@@ -4658,9 +6254,9 @@ function setExploreSubMode(subMode) {
   if (icon) icon.textContent = icons[subMode] || "explore";
   if (label) label.textContent = translateLiteral(labels[subMode] || subMode);
 
-  document.getElementById("explore-hover-ui").style.display = subMode === "hover" ? "block" : "none";
-  document.getElementById("explore-lock-ui").style.display = subMode === "lock" ? "block" : "none";
-  document.getElementById("explore-compare-ui").style.display = subMode === "compare" ? "block" : "none";
+  document.getElementById("explore-hover-ui").style.display = subMode === "hover" ? "grid" : "none";
+  document.getElementById("explore-lock-ui").style.display = subMode === "lock" ? "grid" : "none";
+  document.getElementById("explore-compare-ui").style.display = subMode === "compare" ? "grid" : "none";
   if (subMode === "hover") clearProbeAll();
   if (subMode === "compare") setCompareTarget(State.compareTarget || "A");
   syncProbeAStatus();
@@ -4715,15 +6311,15 @@ function updateCompareDeltaPanel(dA, dB) {
   panel.innerHTML = `
     <div class="compare-delta-title">\u0394 (B \u2212 A)</div>
     <div class="compare-delta-grid">
-      <div class="delta-row"><span class="delta-label">\u0394Tdb</span><span class="delta-val ${cls(dA.Tdb,dB.Tdb)}">${df(dA.Tdb,dB.Tdb)} \u00b0C</span></div>
-      <div class="delta-row"><span class="delta-label">\u0394Twb</span><span class="delta-val ${cls(dA.Twb,dB.Twb)}">${df(dA.Twb,dB.Twb)} \u00b0C</span></div>
-      <div class="delta-row"><span class="delta-label">\u0394Tdp</span><span class="delta-val ${cls(dA.Tdp,dB.Tdp)}">${df(dA.Tdp,dB.Tdp)} \u00b0C</span></div>
-      <div class="delta-row"><span class="delta-label">\u0394RH</span><span class="delta-val ${cls(dA.RH,dB.RH)}">${df(dA.RH,dB.RH)} %</span></div>
-      <div class="delta-row"><span class="delta-label">\u0394W</span><span class="delta-val ${cls(dA.W,dB.W)}">${df(dA.W,dB.W,4)} kg/kg'</span></div>
-      <div class="delta-row"><span class="delta-label">\u0394VPD</span><span class="delta-val ${cls(dA.VPD,dB.VPD)}">${df(dA.VPD,dB.VPD,4)} kPa</span></div>
-      <div class="delta-row"><span class="delta-label">\u0394h</span><span class="delta-val ${cls(dA.h,dB.h)}">${df(dA.h,dB.h)} kJ/kg</span></div>
-      <div class="delta-row"><span class="delta-label">\u0394v</span><span class="delta-val ${cls(dA.v,dB.v)}">${df(dA.v,dB.v,4)} m\u00b3/kg</span></div>
-      <div class="delta-row"><span class="delta-label">\u0394AH</span><span class="delta-val ${cls(dA.AH,dB.AH)}">${df(dA.AH,dB.AH,2)} g/m\u00b3</span></div>
+      <div class="delta-row"><span class="delta-label">Tdb</span><span class="delta-val ${cls(dA.Tdb,dB.Tdb)}">${df(dA.Tdb,dB.Tdb)} \u00b0C</span></div>
+      <div class="delta-row"><span class="delta-label">Twb</span><span class="delta-val ${cls(dA.Twb,dB.Twb)}">${df(dA.Twb,dB.Twb)} \u00b0C</span></div>
+      <div class="delta-row"><span class="delta-label">Tdp</span><span class="delta-val ${cls(dA.Tdp,dB.Tdp)}">${df(dA.Tdp,dB.Tdp)} \u00b0C</span></div>
+      <div class="delta-row"><span class="delta-label">RH</span><span class="delta-val ${cls(dA.RH,dB.RH)}">${df(dA.RH,dB.RH)} %</span></div>
+      <div class="delta-row"><span class="delta-label">W</span><span class="delta-val ${cls(dA.W,dB.W)}">${df(dA.W,dB.W,4)} kg/kg'</span></div>
+      <div class="delta-row"><span class="delta-label">VPD</span><span class="delta-val ${cls(dA.VPD,dB.VPD)}">${df(dA.VPD,dB.VPD,4)} kPa</span></div>
+      <div class="delta-row"><span class="delta-label">h</span><span class="delta-val ${cls(dA.h,dB.h)}">${df(dA.h,dB.h)} kJ/kg</span></div>
+      <div class="delta-row"><span class="delta-label">v</span><span class="delta-val ${cls(dA.v,dB.v)}">${df(dA.v,dB.v,4)} m\u00b3/kg</span></div>
+      <div class="delta-row"><span class="delta-label">AH</span><span class="delta-val ${cls(dA.AH,dB.AH)}">${df(dA.AH,dB.AH,2)} g/m\u00b3</span></div>
     </div>`;
 }
 
@@ -5105,6 +6701,11 @@ function generateAutoZonePoints(paramType, minVal, maxVal, Patm, minT, maxT, max
 }
 
 function previewAutoZone() {
+  if (getAutoZoneMethod() === "double") {
+    updateRangeZone();
+    return;
+  }
+
   const paramType = document.getElementById("auto-zone-param").value;
   const minVal = parseFloat(document.getElementById("auto-zone-min").value);
   const maxVal = parseFloat(document.getElementById("auto-zone-max").value);
@@ -5122,6 +6723,33 @@ function previewAutoZone() {
 }
 
 function submitAutoZone() {
+  if (getAutoZoneMethod() === "double") {
+    updateRangeZone();
+    if (State.rangePreview.length < 3) {
+      alert(translateLiteral("Could not generate a valid zone. Check parameter values and chart bounds."));
+      return;
+    }
+
+    const tMin = parseFloat(document.getElementById("rangeTmin").value);
+    const tMax = parseFloat(document.getElementById("rangeTmax").value);
+    const paramType = document.getElementById("rangeParamType").value;
+    const pMin = parseFloat(document.getElementById("rangeP2min").value);
+    const pMax = parseFloat(document.getElementById("rangeP2max").value);
+
+    State.zones.push({
+      id: Date.now(),
+      name: `Auto Tdb/${paramType} ${tMin}\u2013${tMax} / ${pMin}\u2013${pMax}`,
+      color: "#7b1fa2",
+      points: [...State.rangePreview],
+    });
+
+    State.rangePreview = [];
+    historyManager.push(State);
+    updateLists();
+    drawChart();
+    return;
+  }
+
   const paramType = document.getElementById("auto-zone-param").value;
   const minVal = parseFloat(document.getElementById("auto-zone-min").value);
   const maxVal = parseFloat(document.getElementById("auto-zone-max").value);
@@ -5404,6 +7032,7 @@ function _applyChartZoom(factor, pixX, pixY) {
   document.getElementById("maxTemp").value = newMaxT.toFixed(1);
   if (State.yAxisType === "absoluteHumidity") _syncRatioFromAbsHum();
   else _syncAbsHum();
+  registerMinimapZoomActivity();
   drawChart();
 }
 
@@ -5466,7 +7095,11 @@ function _applyChartPan(vertFrac, horizFrac) {
     }
   }
 
-  if (changed) { _syncAbsHum(); drawChart(); }
+  if (changed) {
+    _syncAbsHum();
+    registerMinimapZoomActivity();
+    drawChart();
+  }
 }
 
 function _syncAbsHum() {
@@ -5633,181 +7266,15 @@ function downloadSvgAsSvg(svgSelector, fileName = 'chart.svg') {
   URL.revokeObjectURL(url);
 }
 
-// ==========================================
-// COMFORT ZONE
-// ==========================================
-
-const comfortZonePresets = {
-  "ashrae-summer": {
-    name: "ASHRAE 55 Summer",
-    tMin: 22.5,
-    tMax: 26,
-    rhMin: 30,
-    rhMax: 60
-  },
-  "ashrae-winter": {
-    name: "ASHRAE 55 Winter",
-    tMin: 20,
-    tMax: 25.5,
-    rhMin: 30,
-    rhMax: 60
-  },
-  "en15251-category-ii": {
-    name: "EN 15251 Cat II",
-    tMin: 22,
-    tMax: 26,
-    rhMin: 25,
-    rhMax: 60
-  },
-  "custom": {
-    name: "Custom",
-    tMin: 20,
-    tMax: 26,
-    rhMin: 30,
-    rhMax: 60
-  }
-};
-
-function toggleComfortZone() {
-  const checkbox = document.getElementById("set-show-comfort-zone");
-  const optionsDiv = document.getElementById("comfort-zone-options");
-  
-  State.comfortZone.visible = checkbox.checked;
-  optionsDiv.style.display = checkbox.checked ? "block" : "none";
-  
-  drawChart();
-}
-
-function changeComfortZonePreset() {
-  const preset = document.getElementById("comfort-zone-preset").value;
-  const customDiv = document.getElementById("comfort-zone-custom");
-  const config = comfortZonePresets[preset];
-  
-  State.comfortZone.preset = preset;
-  State.comfortZone.tMin = config.tMin;
-  State.comfortZone.tMax = config.tMax;
-  State.comfortZone.rhMin = config.rhMin;
-  State.comfortZone.rhMax = config.rhMax;
-  
-  // Show custom inputs if custom preset selected
-  customDiv.style.display = preset === "custom" ? "block" : "none";
-  
-  // Update input fields
-  if (preset === "custom") {
-    document.getElementById("comfort-tmin").value = config.tMin;
-    document.getElementById("comfort-tmax").value = config.tMax;
-    document.getElementById("comfort-rhmin").value = config.rhMin;
-    document.getElementById("comfort-rhmax").value = config.rhMax;
-  }
-  
-  drawChart();
-}
-
-function updateComfortZone() {
-  const tMin = parseFloat(document.getElementById("comfort-tmin").value) || 20;
-  const tMax = parseFloat(document.getElementById("comfort-tmax").value) || 26;
-  const rhMin = parseFloat(document.getElementById("comfort-rhmin").value) || 30;
-  const rhMax = parseFloat(document.getElementById("comfort-rhmax").value) || 60;
-  const color = document.getElementById("comfort-zone-color").value;
-  
-  State.comfortZone.tMin = tMin;
-  State.comfortZone.tMax = tMax;
-  State.comfortZone.rhMin = rhMin;
-  State.comfortZone.rhMax = rhMax;
-  State.comfortZone.color = color;
-  
-  drawChart();
-}
-
-function drawComfortZone(linesG, x, y, minT, maxT, maxH, Patm) {
-  const { tMin, tMax, rhMin, rhMax, color } = State.comfortZone;
-  
-  const polyPoints = [];
-  const step = 0.5;
-  
-  const getWFromTAndRH = (t, rh) => {
-    const Pws = Psychro.getSatVapPres(t);
-    const Pw = Pws * (rh / 100);
-    return Psychro.getWFromPw(Pw, Patm);
-  };
-  
-  for (let t = tMin; t <= tMax; t += step) {
-    const w = getWFromTAndRH(t, rhMax);
-    if (w >= 0 && w <= maxH * 1.5) {
-      polyPoints.push({ t: t, w: w });
-    }
-  }
-  
-  const wAtTMaxRhMax = getWFromTAndRH(tMax, rhMax);
-  if (wAtTMaxRhMax >= 0 && wAtTMaxRhMax <= maxH * 1.5) {
-    polyPoints.push({ t: tMax, w: wAtTMaxRhMax });
-  }
-  
-  for (let t = tMax; t >= tMin; t -= step) {
-    const w = getWFromTAndRH(t, rhMin);
-    if (w >= 0 && w <= maxH * 1.5) {
-      polyPoints.push({ t: t, w: w });
-    }
-  }
-  
-  const wAtTMinRhMin = getWFromTAndRH(tMin, rhMin);
-  if (wAtTMinRhMin >= 0 && wAtTMinRhMin <= maxH * 1.5) {
-    polyPoints.push({ t: tMin, w: wAtTMinRhMin });
-  }
-  
-  if (polyPoints.length > 2) {
-    const polyStr = polyPoints
-      .map((p) => {
-        if (State.chartType === "psychrometric") {
-          return [x(p.t), y(getYValue(p.t, p.w, Patm))].join(",");
-        } else {
-          return [x(getYValue(p.t, p.w, Patm)), y(p.t)].join(",");
-        }
-      })
-      .join(" ");
-    
-    const rgb = hexToRgb(color);
-    
-    linesG
-      .append("polygon")
-      .attr("points", polyStr)
-      .attr("fill", `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.25)`)
-      .attr("stroke", color)
-      .attr("stroke-width", 2)
-      .attr("stroke-dasharray", "5,3");
-    
-    const cx = d3.mean(polyPoints, p => x(p.t));
-    const cy = d3.mean(polyPoints, p => y(getYValue(p.t, p.w, Patm)));
-    
-    linesG
-      .append("text")
-      .attr("x", cx)
-      .attr("y", cy)
-      .attr("text-anchor", "middle")
-      .attr("fill", color)
-      .attr("font-size", "11px")
-      .attr("font-weight", "bold")
-      .text(translateLiteral("Comfort Zone"));
-  }
-}
-
 const inputHandlers = {
   "set-language": (event) => {
     setLanguage(event.target.value);
   },
-  "set-show-legend": (event) => {
-    const legend = document.querySelector(".chart-legend");
-    if (event.target.checked) {
-      if (legend) {
-        legend.classList.remove("none");
-      } else {
-        drawChart(); // Redraw to show legend
-      }
-    } else {
-      if (legend) {
-        legend.classList.add("none");
-      }
-    }
+  "set-show-legend": () => {
+    drawChart();
+  },
+  "set-minimap-mode": (event) => {
+    setMinimapMode(event.target.value);
   },
   "set-show-rh": (event) => {
     State.visibility.rh = event.target.checked;
@@ -5835,11 +7302,11 @@ const inputHandlers = {
       if (panel) panel.style.display = "none";
     }
   },
+  "set-info-precision": (event) => {
+    setInfoPrecisionDecimals(event.target.value);
+  },
   "set-line-label-step": () => {
     drawChart();
-  },
-  "set-show-comfort-zone": (event) => {
-    toggleComfortZone();
   },
 };
 
@@ -5891,6 +7358,7 @@ function captureSettingsSnapshot() {
   const infoFields = getSelectedInfoFields();
   return {
     language: State.language,
+    realDataZoneVisibility: cloneValue(State.realDataZoneVisibility),
     chartType: State.chartType,
     yAxisType: State.yAxisType,
     pressure: getInputValue("pressure"),
@@ -5900,9 +7368,12 @@ function captureSettingsSnapshot() {
     maxHum: getInputValue("maxHum"),
     maxAbsHum: getInputValue("maxAbsHum"),
     showInfoPanel: getCheckboxValue("set-show-info-panel"),
+    infoPrecisionDecimals: getInfoPrecisionDecimals(),
+    infoPrecisionOffset: getInfoPrecisionDecimals() - DEFAULT_INFO_PRECISION_DECIMALS,
     infoFields: infoFields.join("|"),
     infoPrimary: infoFields[0] || "",
     infoSecondary: infoFields[1] || "",
+    minimapMode: normalizeMinimapMode(State.minimapMode),
     showLegend: getCheckboxValue("set-show-legend"),
     labelInterval: getInputValue("set-line-label-step"),
     showRh: getCheckboxValue("set-show-rh"),
@@ -5910,13 +7381,6 @@ function captureSettingsSnapshot() {
     showTwb: getCheckboxValue("set-show-twb"),
     showV: getCheckboxValue("set-show-v"),
     showSat: getCheckboxValue("set-show-sat"),
-    "comfortZone.visible": getCheckboxValue("set-show-comfort-zone"),
-    "comfortZone.preset": getInputValue("comfort-zone-preset"),
-    "comfortZone.color": getInputValue("comfort-zone-color"),
-    "comfortZone.tMin": getInputValue("comfort-tmin"),
-    "comfortZone.tMax": getInputValue("comfort-tmax"),
-    "comfortZone.rhMin": getInputValue("comfort-rhmin"),
-    "comfortZone.rhMax": getInputValue("comfort-rhmax"),
   };
 }
 
@@ -5950,7 +7414,7 @@ function captureRuntimeSnapshot() {
 
 function buildPersistedSnapshot() {
   return {
-    version: 2,
+    version: 3,
     settings: captureSettingsSnapshot(),
     data: captureDataSnapshot(),
     runtime: captureRuntimeSnapshot(),
@@ -6020,18 +7484,21 @@ function resetWorkingCollections() {
 async function initializeApp() {
   isHydratingPersistedState = true;
   State.language = getStoredLanguage();
+  setRealDataZoneVisibilityMap(State.realDataZoneVisibility);
   const languageSelect = document.getElementById("set-language");
   if (languageSelect) {
     languageSelect.value = State.language;
   }
   renderCursorFieldSettings(DEFAULT_CURSOR_FIELDS);
   setSettingsTab("general");
+  setMinimapMode(State.minimapMode, { redraw: false });
   applyLanguage();
   try {
     const snapshot = await readPersistedSnapshot();
     if (snapshot?.settings) {
       applyImportedSettings(snapshot.settings);
     }
+    await loadRealDataCatalog();
     resetWorkingCollections();
     if (snapshot?.data) {
       applyImportedData(snapshot.data.points || [], snapshot.data.zones || []);
@@ -6048,6 +7515,7 @@ async function initializeApp() {
     drawChart();
     scheduleAnimatedTabRefresh();
   } catch (_) {
+    await loadRealDataCatalog();
     updateLists();
     drawChart();
     scheduleAnimatedTabRefresh();

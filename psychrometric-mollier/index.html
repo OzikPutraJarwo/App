@@ -58,6 +58,9 @@
     <div class="dd-item" onclick="closeTopbarDropdowns(); openImportDialog()">
       <span class="material-symbols-rounded">upload_file</span>Import CSV or Excel
     </div>
+    <a class="dd-item" href="./converter/">
+      <span class="material-symbols-rounded">conversion_path</span>Real-Data Converter
+    </a>
     <div class="dd-divider"></div>
     <div class="dd-item" onclick="closeTopbarDropdowns(); downloadSvgAsPng('#chart-container svg','chart.png',3)">
       <span class="material-symbols-rounded">image</span>PNG Image
@@ -119,8 +122,8 @@
         <div class="seg-control" id="zone-submode-indicator">
           <button class="seg-btn active" id="seg-zone-manual" onclick="setZoneSubMode('manual')" title="Click vertices"><span class="material-symbols-rounded">ads_click</span>Click</button>
           <button class="seg-btn" id="seg-zone-input" onclick="setZoneSubMode('input')" title="Input params"><span class="material-symbols-rounded">edit_note</span>Input</button>
-          <button class="seg-btn" id="seg-zone-range" onclick="setZoneSubMode('range')" title="Range sliders"><span class="material-symbols-rounded">tune</span>Range</button>
           <button class="seg-btn" id="seg-zone-auto" onclick="setZoneSubMode('auto')" title="Auto zone"><span class="material-symbols-rounded">auto_awesome</span>Auto</button>
+          <button class="seg-btn" id="seg-zone-plants" onclick="setZoneSubMode('plants')" title="Plant zones"><span class="material-symbols-rounded">local_florist</span>Plants</button>
           <button class="seg-btn" id="seg-zone-boolean" onclick="setZoneSubMode('boolean')" title="Boolean op"><span class="material-symbols-rounded">join</span>Bool</button>
         </div>
 
@@ -165,55 +168,18 @@
           </div>
         </div>
 
-        <div id="zone-range-ui" style="display:none">
-          <p class="panel-desc">Use sliders to define a rectangular zone by parameter ranges.</p>
-          <div class="range-block">
-            <div class="range-label-row">
-              <span>Dry Bulb Temp</span>
-              <input type="text" value="°C" disabled style="width:32px;text-align:center">
-            </div>
-            <div class="range-row">
-              <label>Min</label>
-              <input type="range" class="range-slider" id="sliderTmin" min="-10" max="60" value="20" oninput="syncRange('Tmin')">
-              <input type="number" class="range-val" id="rangeTmin" min="-10" max="60" value="20" oninput="updateRangeZone()">
-            </div>
-            <div class="range-row">
-              <label>Max</label>
-              <input type="range" class="range-slider" id="sliderTmax" min="-10" max="60" value="30" oninput="syncRange('Tmax')">
-              <input type="number" class="range-val" id="rangeTmax" min="-10" max="60" value="30" oninput="updateRangeZone()">
-            </div>
-          </div>
-          <div class="range-block">
-            <div class="range-label-row">
-              <span>2nd Parameter</span>
-              <select id="rangeParamType" onchange="setupRangeDefaults()">
-                <option value="RH">Rel. Humidity (%)</option>
-                <option value="Twb">Wet Bulb (°C)</option>
-                <option value="Tdp">Dew Point (°C)</option>
-                <option value="W">Humidity Ratio (kg/kg)</option>
-                <option value="h">Enthalpy (kJ/kg)</option>
-                <option value="v">Spec. Volume (m³/kg)</option>
+        <div id="zone-auto-ui" style="display:none">
+          <p class="panel-desc">Auto zone can use a single parameter band or a two-parameter boundary.</p>
+          <div class="param-grid single auto-zone-method-grid">
+            <div>
+              <label>Method</label>
+              <select id="auto-zone-method" onchange="syncAutoZoneMethod()">
+                <option value="single">Single Parameter</option>
+                <option value="double">Two Parameters</option>
               </select>
             </div>
-            <div class="range-row">
-              <label>Min</label>
-              <input type="range" class="range-slider" id="sliderP2min" oninput="syncRange('P2min')">
-              <input type="number" class="range-val" id="rangeP2min" step="0.1" oninput="updateRangeZone()">
-            </div>
-            <div class="range-row">
-              <label>Max</label>
-              <input type="range" class="range-slider" id="sliderP2max" oninput="syncRange('P2max')">
-              <input type="number" class="range-val" id="rangeP2max" step="0.1" oninput="updateRangeZone()">
-            </div>
           </div>
-          <div class="sb-btn-row">
-            <button class="sb-btn primary" onclick="finishZone()">Finish Zone</button>
-            <button class="sb-btn danger" onclick="cancelZone()">Cancel</button>
-          </div>
-        </div>
-
-        <div id="zone-auto-ui" style="display:none">
-          <p class="panel-desc">Generate a zone from iso-lines of a parameter between min and max bounds.</p>
+          <div id="auto-zone-single-ui">
           <div class="param-grid single">
             <div>
               <label>Parameter</label>
@@ -238,6 +204,84 @@
           <div class="sb-btn-row">
             <button class="sb-btn" onclick="previewAutoZone()">Preview</button>
             <button class="sb-btn primary" onclick="submitAutoZone()">Create</button>
+          </div>
+          </div>
+          <div id="auto-zone-double-ui" style="display:none">
+            <div class="range-block">
+              <div class="range-label-row">
+                <span>Dry Bulb Temp</span>
+                <input type="text" value="°C" disabled style="width:32px;text-align:center">
+              </div>
+              <div class="range-row">
+                <label>Min</label>
+                <input type="range" class="range-slider" id="sliderTmin" min="-10" max="60" value="20" oninput="syncRange('Tmin')">
+                <input type="number" class="range-val" id="rangeTmin" min="-10" max="60" value="20" oninput="updateRangeZone()">
+              </div>
+              <div class="range-row">
+                <label>Max</label>
+                <input type="range" class="range-slider" id="sliderTmax" min="-10" max="60" value="30" oninput="syncRange('Tmax')">
+                <input type="number" class="range-val" id="rangeTmax" min="-10" max="60" value="30" oninput="updateRangeZone()">
+              </div>
+            </div>
+            <div class="range-block">
+              <div class="range-label-row">
+                <span>2nd Parameter</span>
+                <select id="rangeParamType" onchange="setupRangeDefaults()">
+                  <option value="RH">Rel. Humidity (%)</option>
+                  <option value="Twb">Wet Bulb (°C)</option>
+                  <option value="Tdp">Dew Point (°C)</option>
+                  <option value="W">Humidity Ratio (kg/kg)</option>
+                  <option value="h">Enthalpy (kJ/kg)</option>
+                  <option value="v">Spec. Volume (m³/kg)</option>
+                </select>
+              </div>
+              <div class="range-row">
+                <label>Min</label>
+                <input type="range" class="range-slider" id="sliderP2min" oninput="syncRange('P2min')">
+                <input type="number" class="range-val" id="rangeP2min" step="0.1" oninput="updateRangeZone()">
+              </div>
+              <div class="range-row">
+                <label>Max</label>
+                <input type="range" class="range-slider" id="sliderP2max" oninput="syncRange('P2max')">
+                <input type="number" class="range-val" id="rangeP2max" step="0.1" oninput="updateRangeZone()">
+              </div>
+            </div>
+            <div class="sb-btn-row">
+              <button class="sb-btn" onclick="previewAutoZone()">Preview</button>
+              <button class="sb-btn primary" onclick="submitAutoZone()">Create</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="zone-plants-ui" style="display:none">
+          <p class="panel-desc">Configure a real-data plant zone with polygon or oval boundaries.</p>
+          <div class="param-grid single">
+            <div>
+              <label>Plant Dataset</label>
+              <select id="plants-zone-dataset" onchange="syncPlantsZoneSelection()"></select>
+            </div>
+            <div>
+              <label>Shape</label>
+              <select id="plants-zone-shape" onchange="previewPlantsZone()">
+                <option value="polygon">Polygon</option>
+                <option value="oval">Oval</option>
+              </select>
+            </div>
+          </div>
+          <div class="plants-zone-range">
+            <div class="range-label-row plants-range-header">
+              <span>Boundary</span>
+              <strong id="plants-zone-compactness-label">65%</strong>
+            </div>
+            <input type="range" class="range-slider" id="plants-zone-compactness" min="0" max="100" step="1" value="65" oninput="updatePlantsCompactnessLabel(); previewPlantsZone()">
+            <div class="plants-zone-scale">
+              <span>Loose</span>
+              <span>Compact</span>
+            </div>
+          </div>
+          <div class="plants-zone-note" id="plants-zone-note">Preview updates in real time. Click Apply to show this dataset on the chart.</div>
+          <div class="sb-btn-row">
+            <button class="sb-btn primary" onclick="applyPlantsZoneConfig()">Apply</button>
           </div>
         </div>
 
@@ -270,7 +314,7 @@
           <button class="seg-btn active" id="seg-point-manual" onclick="setPointSubMode('manual')" title="Click to place"><span class="material-symbols-rounded">ads_click</span>Click</button>
           <button class="seg-btn" id="seg-point-input" onclick="setPointSubMode('input')" title="Input params"><span class="material-symbols-rounded">edit_note</span>Input</button>
           <button class="seg-btn" id="seg-point-batch" onclick="setPointSubMode('batch')" title="Batch CSV"><span class="material-symbols-rounded">data_table</span>Batch</button>
-          <button class="seg-btn" id="seg-point-sensor" onclick="setPointSubMode('sensor')" title="Live sensor"><span class="material-symbols-rounded">sensors</span>Sensor</button>
+          <button class="seg-btn" id="seg-point-sensor" onclick="setPointSubMode('sensor')" title="Live sensor" disabled><span class="material-symbols-rounded">sensors</span>Sensor</button>
         </div>
 
         <div id="point-manual-ui">
@@ -377,6 +421,9 @@
     <main id="app-main">
       <div id="chart-wrapper">
         <div id="chart-container"></div>
+        <div id="chart-minimap" aria-hidden="true">
+          <svg id="chart-minimap-svg"></svg>
+        </div>
         <div id="info-panel">
           <div id="tooltip-grid"></div>
         </div>
@@ -405,14 +452,6 @@
           <span class="material-symbols-rounded">tune</span>
           Chart
         </button>
-        <button class="seg-btn" type="button" data-settings-tab-btn="range" onclick="setSettingsTab('range')">
-          <span class="material-symbols-rounded">straighten</span>
-          Range
-        </button>
-        <button class="seg-btn" type="button" data-settings-tab-btn="cursor" onclick="setSettingsTab('cursor')">
-          <span class="material-symbols-rounded">my_location</span>
-          Cursor
-        </button>
         <button class="seg-btn" type="button" data-settings-tab-btn="display" onclick="setSettingsTab('display')">
           <span class="material-symbols-rounded">visibility</span>
           Display
@@ -433,7 +472,7 @@
           </div>
 
           <button class="tool-btn danger tool-btn-reset" type="button" onclick="resetLocalState()">
-            <span class="material-symbols-rounded">restart_alt</span>Reset to Default
+            <span class="material-symbols-rounded">restart_alt</span>Reset All to Default
           </button>
         </section>
 
@@ -474,9 +513,7 @@
               </select>
             </div>
           </div>
-        </section>
 
-        <section class="settings-tab-panel" data-settings-tab="range">
           <div class="settings-group">
             <div class="settings-group-title">Temperature Range (°C)</div>
             <div class="settings-row2">
@@ -502,19 +539,23 @@
           </div>
         </section>
 
-        <section class="settings-tab-panel" data-settings-tab="cursor">
+        <section class="settings-tab-panel" data-settings-tab="display">
           <div class="settings-group">
             <div class="settings-group-title">Cursor</div>
-            <div class="settype-checkbox">
-              <input type="checkbox" name="set-show-info-panel" id="set-show-info-panel" checked>
-              <label for="set-show-info-panel">Show Info Panel</label>
+            <div class="settings-compact-grid">
+              <div class="settype-checkbox settings-checkbox-card">
+                <input type="checkbox" name="set-show-info-panel" id="set-show-info-panel" checked>
+                <label for="set-show-info-panel">Show Info Panel</label>
+              </div>
+              <div>
+                <label for="set-info-precision">Digits after decimal</label>
+                <input type="number" id="set-info-precision" min="0" max="6" step="1" value="2">
+              </div>
             </div>
-            <div class="settings-note">Choose the hover fields below. Selected fields appear first, and you can reorder them with the arrow buttons.</div>
+            <div class="settings-note">Choose how many digits are shown after the decimal point, then pick and sort the hover fields below.</div>
             <div id="cursor-fields-list" class="cursor-fields-list"></div>
           </div>
-        </section>
 
-        <section class="settings-tab-panel" data-settings-tab="display">
           <div class="settings-group">
             <div class="settings-group-title">Legends & Labels</div>
             <div class="advanced-controls-grid">
@@ -529,6 +570,14 @@
                   <option value="2" selected>Every 2nd line</option>
                   <option value="3">Every 3rd line</option>
                   <option value="4">Every 4th line</option>
+                </select>
+              </div>
+              <div>
+                <label for="set-minimap-mode">Minimap</label>
+                <select id="set-minimap-mode">
+                  <option value="auto" selected>Auto (Zoom Only)</option>
+                  <option value="show">Always Show</option>
+                  <option value="hide">Hide</option>
                 </select>
               </div>
             </div>
@@ -557,51 +606,6 @@
                 <input type="checkbox" name="set-show-sat" id="set-show-sat" checked>
                 <span>Saturation</span>
               </label>
-            </div>
-          </div>
-
-          <div class="settings-group">
-            <div class="settings-group-title">Comfort Zone</div>
-            <div class="settype-comfort-zone">
-              <div class="settype-checkbox">
-                <input type="checkbox" name="set-show-comfort-zone" id="set-show-comfort-zone" onchange="toggleComfortZone()">
-                <label for="set-show-comfort-zone">Show Comfort Zone</label>
-              </div>
-              <div class="comfort-zone-options" id="comfort-zone-options" style="display:none">
-                <div class="settype-select">
-                  <label for="comfort-zone-preset">Preset:</label>
-                  <select id="comfort-zone-preset" onchange="changeComfortZonePreset()">
-                    <option value="ashrae-summer">ASHRAE 55 Summer</option>
-                    <option value="ashrae-winter">ASHRAE 55 Winter</option>
-                    <option value="en15251-category-ii">EN 15251 Cat II</option>
-                    <option value="custom">Custom</option>
-                  </select>
-                </div>
-                <div class="comfort-zone-custom" id="comfort-zone-custom" style="display:none">
-                  <div class="comfort-zone-inputs">
-                    <div class="input-row">
-                      <label for="comfort-tmin">T Min (°C):</label>
-                      <input type="number" id="comfort-tmin" value="20" step="0.5" onchange="updateComfortZone()">
-                    </div>
-                    <div class="input-row">
-                      <label for="comfort-tmax">T Max (°C):</label>
-                      <input type="number" id="comfort-tmax" value="26" step="0.5" onchange="updateComfortZone()">
-                    </div>
-                    <div class="input-row">
-                      <label for="comfort-rhmin">RH Min (%):</label>
-                      <input type="number" id="comfort-rhmin" value="30" step="1" onchange="updateComfortZone()">
-                    </div>
-                    <div class="input-row">
-                      <label for="comfort-rhmax">RH Max (%):</label>
-                      <input type="number" id="comfort-rhmax" value="60" step="1" onchange="updateComfortZone()">
-                    </div>
-                  </div>
-                </div>
-                <div class="comfort-zone-color">
-                  <label for="comfort-zone-color">Color:</label>
-                  <input type="color" id="comfort-zone-color" value="#4caf50" onchange="updateComfortZone()">
-                </div>
-              </div>
             </div>
           </div>
         </section>

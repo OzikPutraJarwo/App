@@ -1,0 +1,2590 @@
+{
+  "id": "korean-zucchini",
+  "name": "Korean Zucchini",
+  "color": "#5d8a3c",
+  "humidityType": "RH",
+  "source": {
+    "timeField": "저장시간",
+    "temperatureField": "평균(내부온도(1+2))",
+    "humidityField": "평균(내부습도(1+2))",
+    "phaseField": "주야간상태"
+  },
+  "rows": [
+    {
+      "timestamp": "2026-03-01T08:00:00",
+      "tdb": 15.5,
+      "rh": 95,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-01T09:00:00",
+      "tdb": 16.1,
+      "rh": 99.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-01T10:00:00",
+      "tdb": 21.3,
+      "rh": 97.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-01T11:00:00",
+      "tdb": 24.6,
+      "rh": 95.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-01T12:00:00",
+      "tdb": 22.6,
+      "rh": 89.8,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-01T13:00:00",
+      "tdb": 23.4,
+      "rh": 92.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-01T14:00:00",
+      "tdb": 23.7,
+      "rh": 95.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-01T15:00:00",
+      "tdb": 23.4,
+      "rh": 95.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-01T16:00:00",
+      "tdb": 20.5,
+      "rh": 97,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-01T17:00:00",
+      "tdb": 18.6,
+      "rh": 99.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-01T18:00:00",
+      "tdb": 17.5,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-02T08:00:00",
+      "tdb": 16.6,
+      "rh": 96.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-02T09:00:00",
+      "tdb": 17,
+      "rh": 97.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-02T10:00:00",
+      "tdb": 17.8,
+      "rh": 98.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-02T11:00:00",
+      "tdb": 17.7,
+      "rh": 98.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-02T12:00:00",
+      "tdb": 20.2,
+      "rh": 97.8,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-02T13:00:00",
+      "tdb": 19.2,
+      "rh": 98.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-02T14:00:00",
+      "tdb": 18.2,
+      "rh": 99.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-02T15:00:00",
+      "tdb": 17.2,
+      "rh": 99.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-02T16:00:00",
+      "tdb": 17.6,
+      "rh": 98.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-02T17:00:00",
+      "tdb": 16.9,
+      "rh": 99.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-02T18:00:00",
+      "tdb": 15.2,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-03T08:00:00",
+      "tdb": 16.8,
+      "rh": 96.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-03T09:00:00",
+      "tdb": 16.1,
+      "rh": 98.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-03T10:00:00",
+      "tdb": 23,
+      "rh": 97.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-03T11:00:00",
+      "tdb": 22.4,
+      "rh": 94.7,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-03T12:00:00",
+      "tdb": 22.2,
+      "rh": 91.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-03T13:00:00",
+      "tdb": 24.4,
+      "rh": 96,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-03T14:00:00",
+      "tdb": 23,
+      "rh": 97.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-03T15:00:00",
+      "tdb": 24.3,
+      "rh": 92.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-03T16:00:00",
+      "tdb": 22.4,
+      "rh": 93.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-03T17:00:00",
+      "tdb": 20.3,
+      "rh": 98.7,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-03T18:00:00",
+      "tdb": 17.6,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-04T08:00:00",
+      "tdb": 14.1,
+      "rh": 97.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-04T09:00:00",
+      "tdb": 16.1,
+      "rh": 99,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-04T10:00:00",
+      "tdb": 21.8,
+      "rh": 97,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-04T11:00:00",
+      "tdb": 22.2,
+      "rh": 85.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-04T12:00:00",
+      "tdb": 22.7,
+      "rh": 77.8,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-04T13:00:00",
+      "tdb": 22.8,
+      "rh": 74.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-04T14:00:00",
+      "tdb": 22.4,
+      "rh": 73.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-04T15:00:00",
+      "tdb": 21.5,
+      "rh": 71.7,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-04T16:00:00",
+      "tdb": 23,
+      "rh": 85.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-04T17:00:00",
+      "tdb": 21.3,
+      "rh": 91.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-04T18:00:00",
+      "tdb": 18.3,
+      "rh": 95.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-05T07:00:00",
+      "tdb": 15.1,
+      "rh": 90.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-05T08:00:00",
+      "tdb": 15.5,
+      "rh": 89.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-05T09:00:00",
+      "tdb": 17.8,
+      "rh": 93.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-05T10:00:00",
+      "tdb": 24,
+      "rh": 90.8,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-05T11:00:00",
+      "tdb": 21.9,
+      "rh": 79.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-05T12:00:00",
+      "tdb": 24.1,
+      "rh": 74.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-05T13:00:00",
+      "tdb": 22.5,
+      "rh": 84.8,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-05T14:00:00",
+      "tdb": 21.1,
+      "rh": 91.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-05T15:00:00",
+      "tdb": 21.1,
+      "rh": 93.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-05T16:00:00",
+      "tdb": 22.3,
+      "rh": 93.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-05T17:00:00",
+      "tdb": 19.6,
+      "rh": 97.8,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-05T18:00:00",
+      "tdb": 17.8,
+      "rh": 97.7,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-06T07:00:00",
+      "tdb": 16.5,
+      "rh": 88.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-06T08:00:00",
+      "tdb": 16.4,
+      "rh": 88.8,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-06T09:00:00",
+      "tdb": 17.8,
+      "rh": 93.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-06T10:00:00",
+      "tdb": 19.5,
+      "rh": 94.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-06T11:00:00",
+      "tdb": 23.7,
+      "rh": 94.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-06T12:00:00",
+      "tdb": 21.1,
+      "rh": 96.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-06T13:00:00",
+      "tdb": 20.2,
+      "rh": 95.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-06T14:00:00",
+      "tdb": 20,
+      "rh": 95.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-06T15:00:00",
+      "tdb": 21.3,
+      "rh": 91.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-06T16:00:00",
+      "tdb": 20,
+      "rh": 94.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-06T17:00:00",
+      "tdb": 17.2,
+      "rh": 97.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-06T18:00:00",
+      "tdb": 15.4,
+      "rh": 97.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-07T07:00:00",
+      "tdb": 16.3,
+      "rh": 88.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-07T08:00:00",
+      "tdb": 15.7,
+      "rh": 89.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-07T09:00:00",
+      "tdb": 16.5,
+      "rh": 93.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-07T10:00:00",
+      "tdb": 17.4,
+      "rh": 94.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-07T11:00:00",
+      "tdb": 22.2,
+      "rh": 90.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-07T12:00:00",
+      "tdb": 22.5,
+      "rh": 88.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-07T13:00:00",
+      "tdb": 21.7,
+      "rh": 86.7,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-07T14:00:00",
+      "tdb": 24.3,
+      "rh": 78.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-07T15:00:00",
+      "tdb": 24.9,
+      "rh": 77.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-07T16:00:00",
+      "tdb": 22.8,
+      "rh": 79.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-07T17:00:00",
+      "tdb": 20.1,
+      "rh": 89,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-07T18:00:00",
+      "tdb": 16.5,
+      "rh": 93.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-08T07:00:00",
+      "tdb": 13.2,
+      "rh": 86,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-08T08:00:00",
+      "tdb": 12.4,
+      "rh": 87.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-08T09:00:00",
+      "tdb": 15.7,
+      "rh": 87.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-08T10:00:00",
+      "tdb": 21.3,
+      "rh": 89.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-08T11:00:00",
+      "tdb": 22,
+      "rh": 79,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-08T12:00:00",
+      "tdb": 22.1,
+      "rh": 73.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-08T13:00:00",
+      "tdb": 23.6,
+      "rh": 72.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-08T14:00:00",
+      "tdb": 19.9,
+      "rh": 61.7,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-08T15:00:00",
+      "tdb": 20.4,
+      "rh": 69.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-08T16:00:00",
+      "tdb": 22,
+      "rh": 81,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-08T17:00:00",
+      "tdb": 20.2,
+      "rh": 89.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-08T18:00:00",
+      "tdb": 16.8,
+      "rh": 91.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-09T07:00:00",
+      "tdb": 15.3,
+      "rh": 85.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-09T08:00:00",
+      "tdb": 15.7,
+      "rh": 85.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-09T09:00:00",
+      "tdb": 16.5,
+      "rh": 90.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-09T10:00:00",
+      "tdb": 17.8,
+      "rh": 87.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-09T11:00:00",
+      "tdb": 18.6,
+      "rh": 87.7,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-09T12:00:00",
+      "tdb": 19.9,
+      "rh": 89.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-09T13:00:00",
+      "tdb": 22.8,
+      "rh": 89.7,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-09T14:00:00",
+      "tdb": 24.3,
+      "rh": 88.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-09T15:00:00",
+      "tdb": 21.6,
+      "rh": 91.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-09T16:00:00",
+      "tdb": 20.6,
+      "rh": 92.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-09T17:00:00",
+      "tdb": 18.8,
+      "rh": 93.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-09T18:00:00",
+      "tdb": 16.2,
+      "rh": 94.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-10T07:00:00",
+      "tdb": 14.8,
+      "rh": 85,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-10T08:00:00",
+      "tdb": 13.2,
+      "rh": 86.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-10T09:00:00",
+      "tdb": 16.8,
+      "rh": 88.8,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-10T10:00:00",
+      "tdb": 22.9,
+      "rh": 87.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-10T11:00:00",
+      "tdb": 22.8,
+      "rh": 76.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-10T12:00:00",
+      "tdb": 23.6,
+      "rh": 71.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-10T13:00:00",
+      "tdb": 23.4,
+      "rh": 66.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-10T14:00:00",
+      "tdb": 23.5,
+      "rh": 60.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-10T15:00:00",
+      "tdb": 20.8,
+      "rh": 62.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-10T16:00:00",
+      "tdb": 23.7,
+      "rh": 75.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-10T17:00:00",
+      "tdb": 21.3,
+      "rh": 86.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-10T18:00:00",
+      "tdb": 18,
+      "rh": 91.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-11T07:00:00",
+      "tdb": 14.6,
+      "rh": 82.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-11T08:00:00",
+      "tdb": 13.6,
+      "rh": 85.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-11T09:00:00",
+      "tdb": 16.7,
+      "rh": 88.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-11T10:00:00",
+      "tdb": 22.5,
+      "rh": 88.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-11T11:00:00",
+      "tdb": 22.3,
+      "rh": 78.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-11T12:00:00",
+      "tdb": 22.7,
+      "rh": 75.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-11T13:00:00",
+      "tdb": 22.2,
+      "rh": 67.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-11T14:00:00",
+      "tdb": 21.7,
+      "rh": 66.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-11T15:00:00",
+      "tdb": 21.1,
+      "rh": 71.7,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-11T16:00:00",
+      "tdb": 20.9,
+      "rh": 79.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-11T17:00:00",
+      "tdb": 20.3,
+      "rh": 90.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-11T18:00:00",
+      "tdb": 17.3,
+      "rh": 94.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-12T07:00:00",
+      "tdb": 15.2,
+      "rh": 86.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-12T08:00:00",
+      "tdb": 14.9,
+      "rh": 87,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-12T09:00:00",
+      "tdb": 17.1,
+      "rh": 91.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-12T10:00:00",
+      "tdb": 23.5,
+      "rh": 88,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-12T11:00:00",
+      "tdb": 22.4,
+      "rh": 80.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-12T12:00:00",
+      "tdb": 21.9,
+      "rh": 74.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-12T13:00:00",
+      "tdb": 22.1,
+      "rh": 72.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-12T14:00:00",
+      "tdb": 21.8,
+      "rh": 73.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-12T15:00:00",
+      "tdb": 21.5,
+      "rh": 75.7,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-12T16:00:00",
+      "tdb": 23.7,
+      "rh": 82.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-12T17:00:00",
+      "tdb": 20.4,
+      "rh": 87.8,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-12T18:00:00",
+      "tdb": 18,
+      "rh": 93.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-13T07:00:00",
+      "tdb": 14.7,
+      "rh": 84.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-13T08:00:00",
+      "tdb": 14.3,
+      "rh": 87.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-13T09:00:00",
+      "tdb": 17.9,
+      "rh": 91.8,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-13T10:00:00",
+      "tdb": 23.9,
+      "rh": 94.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-13T11:00:00",
+      "tdb": 23.5,
+      "rh": 78.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-13T12:00:00",
+      "tdb": 24.3,
+      "rh": 68.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-13T13:00:00",
+      "tdb": 23.4,
+      "rh": 64.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-13T14:00:00",
+      "tdb": 24.6,
+      "rh": 67.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-13T15:00:00",
+      "tdb": 20.4,
+      "rh": 61.7,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-13T16:00:00",
+      "tdb": 21.2,
+      "rh": 71.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-13T17:00:00",
+      "tdb": 20.4,
+      "rh": 87.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-13T18:00:00",
+      "tdb": 18.3,
+      "rh": 93.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-14T07:00:00",
+      "tdb": 15.3,
+      "rh": 83.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-14T08:00:00",
+      "tdb": 14.7,
+      "rh": 86.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-14T09:00:00",
+      "tdb": 18.5,
+      "rh": 91.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-14T10:00:00",
+      "tdb": 22.9,
+      "rh": 81.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-14T11:00:00",
+      "tdb": 23.2,
+      "rh": 76.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-14T12:00:00",
+      "tdb": 23.4,
+      "rh": 67.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-14T13:00:00",
+      "tdb": 23.5,
+      "rh": 63.7,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-14T14:00:00",
+      "tdb": 22.5,
+      "rh": 57.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-14T15:00:00",
+      "tdb": 21.2,
+      "rh": 63.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-14T16:00:00",
+      "tdb": 21.5,
+      "rh": 70.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-14T17:00:00",
+      "tdb": 20.8,
+      "rh": 85.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-14T18:00:00",
+      "tdb": 18.4,
+      "rh": 93.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-15T07:00:00",
+      "tdb": 17,
+      "rh": 85.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-15T08:00:00",
+      "tdb": 16.8,
+      "rh": 88.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-15T09:00:00",
+      "tdb": 17.1,
+      "rh": 91.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-15T10:00:00",
+      "tdb": 18.5,
+      "rh": 90.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-15T11:00:00",
+      "tdb": 17.7,
+      "rh": 95.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-15T12:00:00",
+      "tdb": 23.3,
+      "rh": 90.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-15T13:00:00",
+      "tdb": 21.7,
+      "rh": 82.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-15T14:00:00",
+      "tdb": 21.6,
+      "rh": 81.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-15T15:00:00",
+      "tdb": 20.5,
+      "rh": 85.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-15T16:00:00",
+      "tdb": 20.4,
+      "rh": 90.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-15T17:00:00",
+      "tdb": 18.8,
+      "rh": 94,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-15T18:00:00",
+      "tdb": 17.5,
+      "rh": 92.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-16T07:00:00",
+      "tdb": 15.8,
+      "rh": 84.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-16T08:00:00",
+      "tdb": 15,
+      "rh": 87.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-16T09:00:00",
+      "tdb": 17.3,
+      "rh": 92,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-16T10:00:00",
+      "tdb": 19.7,
+      "rh": 91.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-16T11:00:00",
+      "tdb": 24.9,
+      "rh": 88.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-16T12:00:00",
+      "tdb": 23.1,
+      "rh": 83.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-16T13:00:00",
+      "tdb": 22.7,
+      "rh": 72.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-16T14:00:00",
+      "tdb": 23.7,
+      "rh": 77,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-16T15:00:00",
+      "tdb": 21.3,
+      "rh": 79.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-16T16:00:00",
+      "tdb": 20.4,
+      "rh": 90,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-16T17:00:00",
+      "tdb": 20.4,
+      "rh": 91.7,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-16T18:00:00",
+      "tdb": 18,
+      "rh": 95.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-17T07:00:00",
+      "tdb": 15.3,
+      "rh": 85.8,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-17T08:00:00",
+      "tdb": 14.6,
+      "rh": 88.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-17T09:00:00",
+      "tdb": 18.3,
+      "rh": 92.4,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-17T10:00:00",
+      "tdb": 23.3,
+      "rh": 87.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-17T11:00:00",
+      "tdb": 24.8,
+      "rh": 77.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-17T12:00:00",
+      "tdb": 25.2,
+      "rh": 69.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-17T13:00:00",
+      "tdb": 25.3,
+      "rh": 66.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-17T14:00:00",
+      "tdb": 26.8,
+      "rh": 70.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-17T15:00:00",
+      "tdb": 24.6,
+      "rh": 68.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-17T16:00:00",
+      "tdb": 23.3,
+      "rh": 76.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-17T17:00:00",
+      "tdb": 21.7,
+      "rh": 89.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-17T18:00:00",
+      "tdb": 19.2,
+      "rh": 94.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-18T07:00:00",
+      "tdb": 17.9,
+      "rh": 94.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-18T08:00:00",
+      "tdb": 16.6,
+      "rh": 97.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-18T09:00:00",
+      "tdb": 17.3,
+      "rh": 96.7,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-18T10:00:00",
+      "tdb": 17.7,
+      "rh": 97.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-18T11:00:00",
+      "tdb": 18.7,
+      "rh": 96.8,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-18T12:00:00",
+      "tdb": 18.1,
+      "rh": 97.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-18T13:00:00",
+      "tdb": 18.2,
+      "rh": 96.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-18T14:00:00",
+      "tdb": 18.1,
+      "rh": 94.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-18T15:00:00",
+      "tdb": 17.4,
+      "rh": 96.7,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-18T16:00:00",
+      "tdb": 18.1,
+      "rh": 95.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-18T17:00:00",
+      "tdb": 17.4,
+      "rh": 98.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-18T18:00:00",
+      "tdb": 16.4,
+      "rh": 99.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-19T07:00:00",
+      "tdb": 15.1,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-19T08:00:00",
+      "tdb": 14.3,
+      "rh": 99.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-19T09:00:00",
+      "tdb": 18.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-19T10:00:00",
+      "tdb": 22.4,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-19T11:00:00",
+      "tdb": 22.5,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-19T12:00:00",
+      "tdb": 22.9,
+      "rh": 99.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-19T13:00:00",
+      "tdb": 22.3,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-19T14:00:00",
+      "tdb": 22.1,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-19T15:00:00",
+      "tdb": 21.2,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-19T16:00:00",
+      "tdb": 24,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-19T17:00:00",
+      "tdb": 21.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-19T18:00:00",
+      "tdb": 18.9,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-20T07:00:00",
+      "tdb": 14.9,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-20T08:00:00",
+      "tdb": 14.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-20T09:00:00",
+      "tdb": 19,
+      "rh": 99.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-20T10:00:00",
+      "tdb": 19.9,
+      "rh": 97.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-20T11:00:00",
+      "tdb": 19.9,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-20T12:00:00",
+      "tdb": 21,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-20T13:00:00",
+      "tdb": 21.6,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-20T14:00:00",
+      "tdb": 20.9,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-20T15:00:00",
+      "tdb": 20.2,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-20T16:00:00",
+      "tdb": 19.3,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-20T17:00:00",
+      "tdb": 23.1,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-20T18:00:00",
+      "tdb": 19.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-21T07:00:00",
+      "tdb": 14.2,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-21T08:00:00",
+      "tdb": 13.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-21T09:00:00",
+      "tdb": 19,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-21T10:00:00",
+      "tdb": 23.1,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-21T11:00:00",
+      "tdb": 24.8,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-21T12:00:00",
+      "tdb": 25.5,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-21T13:00:00",
+      "tdb": 25.4,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-21T14:00:00",
+      "tdb": 24.3,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-21T15:00:00",
+      "tdb": 23.5,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-21T16:00:00",
+      "tdb": 22.4,
+      "rh": 99.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-21T17:00:00",
+      "tdb": 20.2,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-21T18:00:00",
+      "tdb": 18.5,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-22T07:00:00",
+      "tdb": 16,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-22T08:00:00",
+      "tdb": 16.9,
+      "rh": 99.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-22T09:00:00",
+      "tdb": 17.3,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-22T10:00:00",
+      "tdb": 22.4,
+      "rh": 98.3,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-22T11:00:00",
+      "tdb": 21.4,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-22T12:00:00",
+      "tdb": 21.6,
+      "rh": 98.8,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-22T13:00:00",
+      "tdb": 24.3,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-22T14:00:00",
+      "tdb": 21.8,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-22T15:00:00",
+      "tdb": 22.8,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-22T16:00:00",
+      "tdb": 21.8,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-22T17:00:00",
+      "tdb": 20,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-22T18:00:00",
+      "tdb": 18.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-23T07:00:00",
+      "tdb": 15.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-23T08:00:00",
+      "tdb": 16.1,
+      "rh": 99.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-23T09:00:00",
+      "tdb": 20.8,
+      "rh": 99.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-23T10:00:00",
+      "tdb": 19.4,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-23T11:00:00",
+      "tdb": 23.1,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-23T12:00:00",
+      "tdb": 23,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-23T13:00:00",
+      "tdb": 22.5,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-23T14:00:00",
+      "tdb": 22.6,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-23T15:00:00",
+      "tdb": 22.5,
+      "rh": 99.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-23T16:00:00",
+      "tdb": 20.8,
+      "rh": 99.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-23T17:00:00",
+      "tdb": 20.1,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-23T18:00:00",
+      "tdb": 19.2,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-24T07:00:00",
+      "tdb": 16.4,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-24T08:00:00",
+      "tdb": 16.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-24T09:00:00",
+      "tdb": 20,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-24T10:00:00",
+      "tdb": 23.3,
+      "rh": 98.8,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-24T11:00:00",
+      "tdb": 23.3,
+      "rh": 98.8,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-24T12:00:00",
+      "tdb": 22.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-24T13:00:00",
+      "tdb": 22.9,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-24T14:00:00",
+      "tdb": 23.1,
+      "rh": 99.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-24T15:00:00",
+      "tdb": 20.6,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-24T16:00:00",
+      "tdb": 20.1,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-24T17:00:00",
+      "tdb": 18.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-24T18:00:00",
+      "tdb": 17.9,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-25T07:00:00",
+      "tdb": 17.8,
+      "rh": 99.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-25T08:00:00",
+      "tdb": 17.8,
+      "rh": 99.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-25T09:00:00",
+      "tdb": 17.3,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-25T10:00:00",
+      "tdb": 18.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-25T11:00:00",
+      "tdb": 19.4,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-25T12:00:00",
+      "tdb": 22.4,
+      "rh": 96.7,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-25T13:00:00",
+      "tdb": 23.3,
+      "rh": 99.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-25T14:00:00",
+      "tdb": 23.6,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-25T15:00:00",
+      "tdb": 22,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-25T16:00:00",
+      "tdb": 21.9,
+      "rh": 99.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-25T17:00:00",
+      "tdb": 20.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-25T18:00:00",
+      "tdb": 19.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-26T07:00:00",
+      "tdb": 17.7,
+      "rh": 99.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-26T08:00:00",
+      "tdb": 17,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-26T09:00:00",
+      "tdb": 21,
+      "rh": 99.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-26T10:00:00",
+      "tdb": 23.5,
+      "rh": 99.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-26T11:00:00",
+      "tdb": 24.8,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-26T12:00:00",
+      "tdb": 25.8,
+      "rh": 99.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-26T13:00:00",
+      "tdb": 26.6,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-26T14:00:00",
+      "tdb": 24.5,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-26T15:00:00",
+      "tdb": 23.2,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-26T16:00:00",
+      "tdb": 22.9,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-26T17:00:00",
+      "tdb": 20.9,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-26T18:00:00",
+      "tdb": 19.5,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-27T07:00:00",
+      "tdb": 16.3,
+      "rh": 99,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-27T08:00:00",
+      "tdb": 16.8,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-27T09:00:00",
+      "tdb": 20.8,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-27T10:00:00",
+      "tdb": 23.3,
+      "rh": 99.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-27T11:00:00",
+      "tdb": 23.7,
+      "rh": 98,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-27T12:00:00",
+      "tdb": 26,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-27T13:00:00",
+      "tdb": 26.3,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-27T14:00:00",
+      "tdb": 23.3,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-27T15:00:00",
+      "tdb": 23.1,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-27T16:00:00",
+      "tdb": 21.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-27T17:00:00",
+      "tdb": 20.9,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-27T18:00:00",
+      "tdb": 19.2,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-28T07:00:00",
+      "tdb": 17,
+      "rh": 99.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-28T08:00:00",
+      "tdb": 16.5,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-28T09:00:00",
+      "tdb": 21.6,
+      "rh": 99.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-28T10:00:00",
+      "tdb": 23.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-28T11:00:00",
+      "tdb": 23.6,
+      "rh": 99.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-28T12:00:00",
+      "tdb": 24.2,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-28T13:00:00",
+      "tdb": 24.8,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-28T14:00:00",
+      "tdb": 22.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-28T15:00:00",
+      "tdb": 20.4,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-28T16:00:00",
+      "tdb": 21.8,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-28T17:00:00",
+      "tdb": 20,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-28T18:00:00",
+      "tdb": 19,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-29T07:00:00",
+      "tdb": 16,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-29T08:00:00",
+      "tdb": 17.4,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-29T09:00:00",
+      "tdb": 20.5,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-29T10:00:00",
+      "tdb": 21.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-29T11:00:00",
+      "tdb": 24.8,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-29T12:00:00",
+      "tdb": 25.2,
+      "rh": 99.2,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-29T13:00:00",
+      "tdb": 25,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-29T14:00:00",
+      "tdb": 25.9,
+      "rh": 99.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-29T15:00:00",
+      "tdb": 22.3,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-29T16:00:00",
+      "tdb": 22.6,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-29T17:00:00",
+      "tdb": 21.1,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-29T18:00:00",
+      "tdb": 20.2,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-30T07:00:00",
+      "tdb": 16.9,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-30T08:00:00",
+      "tdb": 17,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-30T09:00:00",
+      "tdb": 19.1,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-30T10:00:00",
+      "tdb": 22,
+      "rh": 99.6,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-30T11:00:00",
+      "tdb": 20.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-30T12:00:00",
+      "tdb": 20.3,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-30T13:00:00",
+      "tdb": 21.2,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-30T14:00:00",
+      "tdb": 21.5,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-30T15:00:00",
+      "tdb": 21.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-30T16:00:00",
+      "tdb": 20.2,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-30T17:00:00",
+      "tdb": 19.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-30T18:00:00",
+      "tdb": 18.4,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-31T07:00:00",
+      "tdb": 16.9,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-31T08:00:00",
+      "tdb": 16.9,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-31T09:00:00",
+      "tdb": 17.8,
+      "rh": 98.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-31T10:00:00",
+      "tdb": 20.5,
+      "rh": 98.7,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-31T11:00:00",
+      "tdb": 22.8,
+      "rh": 93.5,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-31T12:00:00",
+      "tdb": 24.4,
+      "rh": 98.1,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-31T13:00:00",
+      "tdb": 20.8,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-31T14:00:00",
+      "tdb": 25.8,
+      "rh": 98.9,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-31T15:00:00",
+      "tdb": 21.8,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-31T16:00:00",
+      "tdb": 21.7,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-31T17:00:00",
+      "tdb": 20.4,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    },
+    {
+      "timestamp": "2026-03-31T18:00:00",
+      "tdb": 20.5,
+      "rh": 100,
+      "phase": "day",
+      "phaseLabel": "주간"
+    }
+  ]
+}
