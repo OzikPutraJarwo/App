@@ -20,6 +20,17 @@
       <span id="app-title">PsychroMol</span>
     </div>
 
+    <div id="app-charttype" class="chart-type">
+      <button class="modebar-btn charttype-btn psychrometric active" id="btn-chart-psychrometric" value="psychrometric" onclick="changeChartType(this.value)" title="Psychrometric Chart">
+        <img class="charttype-icon" src="https://app.kodejarwo.com/icon/type-psychrometric.png" alt="">
+        Psychrometric
+      </button>
+      <button class="modebar-btn charttype-btn mollier" id="btn-chart-mollier" value="mollier" onclick="changeChartType(this.value)" title="Mollier Chart">
+        <img class="charttype-icon" src="https://app.kodejarwo.com/icon/type-mollier.png" alt="">
+        Mollier
+      </button>
+    </div>
+
     <div id="app-modebar">
       <button class="modebar-btn active" id="btn-view" onclick="setMode('view')" title="Explore mode">
         <span class="material-symbols-rounded">explore</span>Explore
@@ -87,7 +98,6 @@
       <div id="explore-controls" class="mode-panel">
         <div class="seg-control" id="explore-submode-indicator">
           <button class="seg-btn active" id="seg-explore-hover" onclick="setExploreSubMode('hover')" title="Hover"><span class="material-symbols-rounded">explore</span>Hover</button>
-          <button class="seg-btn" id="seg-explore-lock" onclick="setExploreSubMode('lock')" title="Lock probe"><span class="material-symbols-rounded">push_pin</span>Lock</button>
           <button class="seg-btn" id="seg-explore-compare" onclick="setExploreSubMode('compare')" title="Compare A/B"><span class="material-symbols-rounded">compare_arrows</span>A/B</button>
         </div>
 
@@ -95,13 +105,6 @@
           <p class="panel-desc">Move cursor over chart to inspect all psychrometric properties.</p>
         </div>
 
-        <div id="explore-lock-ui" style="display:none">
-          <p class="panel-desc">Click chart to pin a probe point.</p>
-          <div id="probe-a-status" class="probe-status"></div>
-          <button class="sb-btn danger" onclick="clearProbeAll()">
-            <span class="material-symbols-rounded">clear</span>Clear Probe
-          </button>
-        </div>
 
         <div id="explore-compare-ui" style="display:none">
           <p class="panel-desc">Select target A or B, then click the chart to place or replace that probe.</p>
@@ -145,7 +148,7 @@
                 <option value="Tdb">Dry Bulb (°C)</option>
                 <option value="Twb">Wet Bulb (°C)</option>
                 <option value="RH">Rel. Humidity (%)</option>
-                <option value="W">Humidity Ratio (kg/kg)</option>
+                <option value="W">Humidity Ratio (kg/kg')</option>
                 <option value="h">Enthalpy (kJ/kg)</option>
               </select>
               <input type="number" id="p1Val-zone" step="0.1" placeholder="Value" oninput="syncToolbarInputWithFloating('zone','p1Val')">
@@ -156,7 +159,7 @@
                 <option value="RH" selected>Rel. Humidity (%)</option>
                 <option value="Tdb">Dry Bulb (°C)</option>
                 <option value="Twb">Wet Bulb (°C)</option>
-                <option value="W">Humidity Ratio (kg/kg)</option>
+                <option value="W">Humidity Ratio (kg/kg')</option>
                 <option value="h">Enthalpy (kJ/kg)</option>
               </select>
               <input type="number" id="p2Val-zone" step="0.1" placeholder="Value" oninput="syncToolbarInputWithFloating('zone','p2Val')">
@@ -183,10 +186,10 @@
           <div class="param-grid single">
             <div>
               <label>Parameter</label>
-              <select id="auto-zone-param">
+              <select id="auto-zone-param" onchange="previewAutoZone()">
                 <option value="RH">Rel. Humidity (%)</option>
                 <option value="VPD">VPD (kPa)</option>
-                <option value="W">Humidity Ratio (kg/kg)</option>
+                <option value="W">Humidity Ratio (kg/kg')</option>
                 <option value="h">Enthalpy (kJ/kg)</option>
                 <option value="Twb">Wet Bulb Temp (°C)</option>
                 <option value="Tdp">Dew Point (°C)</option>
@@ -194,15 +197,14 @@
             </div>
             <div>
               <label>Min</label>
-              <input type="number" id="auto-zone-min" step="0.1" placeholder="e.g. 40">
+              <input type="number" id="auto-zone-min" step="0.1" placeholder="e.g. 40" oninput="previewAutoZone()">
             </div>
             <div>
               <label>Max</label>
-              <input type="number" id="auto-zone-max" step="0.1" placeholder="e.g. 70">
+              <input type="number" id="auto-zone-max" step="0.1" placeholder="e.g. 70" oninput="previewAutoZone()">
             </div>
           </div>
           <div class="sb-btn-row">
-            <button class="sb-btn" onclick="previewAutoZone()">Preview</button>
             <button class="sb-btn primary" onclick="submitAutoZone()">Create</button>
           </div>
           </div>
@@ -230,7 +232,7 @@
                   <option value="RH">Rel. Humidity (%)</option>
                   <option value="Twb">Wet Bulb (°C)</option>
                   <option value="Tdp">Dew Point (°C)</option>
-                  <option value="W">Humidity Ratio (kg/kg)</option>
+                  <option value="W">Humidity Ratio (kg/kg')</option>
                   <option value="h">Enthalpy (kJ/kg)</option>
                   <option value="v">Spec. Volume (m³/kg)</option>
                 </select>
@@ -247,7 +249,6 @@
               </div>
             </div>
             <div class="sb-btn-row">
-              <button class="sb-btn" onclick="previewAutoZone()">Preview</button>
               <button class="sb-btn primary" onclick="submitAutoZone()">Create</button>
             </div>
           </div>
@@ -330,7 +331,7 @@
                 <option value="Tdb">Dry Bulb (°C)</option>
                 <option value="Twb">Wet Bulb (°C)</option>
                 <option value="RH">Rel. Humidity (%)</option>
-                <option value="W">Humidity Ratio (kg/kg)</option>
+                <option value="W">Humidity Ratio (kg/kg')</option>
                 <option value="h">Enthalpy (kJ/kg)</option>
               </select>
               <input type="number" id="p1Val-point" step="0.1" placeholder="Value" oninput="syncToolbarInputWithFloating('point','p1Val')">
@@ -341,7 +342,7 @@
                 <option value="RH" selected>Rel. Humidity (%)</option>
                 <option value="Tdb">Dry Bulb (°C)</option>
                 <option value="Twb">Wet Bulb (°C)</option>
-                <option value="W">Humidity Ratio (kg/kg)</option>
+                <option value="W">Humidity Ratio (kg/kg')</option>
                 <option value="h">Enthalpy (kJ/kg)</option>
               </select>
               <input type="number" id="p2Val-point" step="0.1" placeholder="Value" oninput="syncToolbarInputWithFloating('point','p2Val')">
@@ -352,10 +353,9 @@
 
         <div id="point-batch-ui" style="display:none">
           <p class="panel-desc">Paste CSV: <code>name, Tdb, W</code> or <code>Tdb, W</code>. Lines starting with <code>#</code> are ignored.</p>
-          <textarea id="batch-csv-input" rows="5" placeholder="25.0, 0.010&#10;30.0, 0.012&#10;Sensor A, 22.5, 0.008"></textarea>
+          <textarea id="batch-csv-input" rows="5" placeholder="25.0, 0.010&#10;30.0, 0.012&#10;Sensor A, 22.5, 0.008" oninput="previewBatchPoints()"></textarea>
           <div id="batch-parse-preview"></div>
           <div class="sb-btn-row">
-            <button class="sb-btn" onclick="previewBatchPoints()">Preview</button>
             <button class="sb-btn primary" onclick="submitBatchPoints()">Add All</button>
           </div>
         </div>
@@ -478,27 +478,13 @@
 
         <section class="settings-tab-panel" data-settings-tab="chart">
           <div class="settings-group">
-            <div class="settings-group-title">Chart Type</div>
-            <div class="toolbar-button c2 chart-type">
-              <button class="tool-btn psychrometric active" value="psychrometric" onclick="changeChartType(this.value)">
-                <img src="https://app.kodejarwo.com/icon/type-psychrometric.png" alt="" style="width:18px">
-                Psychrometric
-              </button>
-              <button class="tool-btn mollier" value="mollier" onclick="changeChartType(this.value)">
-                <img src="https://app.kodejarwo.com/icon/type-mollier.png" alt="" style="width:18px">
-                Mollier
-              </button>
-            </div>
-          </div>
-
-          <div class="settings-group">
             <div class="settings-group-title">Y-Axis Type</div>
             <div class="toolbar-button c2 yAxis-type">
               <button class="tool-btn humidityRatio active" value="humidityRatio" onclick="changeYAxisType(this.value)">
-                <span class="material-symbols-rounded">water_do</span>kg/kg'
+                <span class="material-symbols-rounded">water_do</span>Humidity Ratio (kg/kg')
               </button>
               <button class="tool-btn absoluteHumidity" value="absoluteHumidity" onclick="changeYAxisType(this.value)">
-                <span class="material-symbols-rounded">salinity</span>g/m³
+                <span class="material-symbols-rounded">salinity</span>Absolute Humidity (g/m³)
               </button>
             </div>
           </div>
@@ -515,27 +501,45 @@
           </div>
 
           <div class="settings-group">
-            <div class="settings-group-title">Temperature Range (°C)</div>
+            <div class="settings-group-title">Dry Bulb Temperature Range (°C)</div>
             <div class="settings-row2">
               <div>
-                <label>Min DB Temp</label>
+                <label>Minimum</label>
                 <input type="number" id="minTemp" value="-10" oninput="drawChart()">
               </div>
               <div>
-                <label>Max DB Temp</label>
+                <label>Maximum</label>
                 <input type="number" id="maxTemp" value="50" oninput="drawChart()">
               </div>
             </div>
           </div>
 
           <div class="settings-group input-item ratio">
-            <div class="settings-group-title">Max Humidity Ratio (kg/kg')</div>
-            <input type="number" id="maxHum" value="0.030" step="0.001" min="0.001" oninput="State.viewMinH=0; State.viewMinAH=0; syncHumidityInputs('ratio')">
+            <div class="settings-group-title">Humidity Ratio (kg/kg')</div>
+            <div class="settings-row2">
+              <div>
+                <label>Minimum</label>
+                <input type="number" id="minHum" value="0" step="0.001" min="0" oninput="State.viewMinH=parseFloat(this.value)||0; State.viewMinAH=0; syncHumidityInputs('ratio')">
+              </div>
+              <div>
+                <label>Maximum</label>
+                <input type="number" id="maxHum" value="0.030" step="0.001" min="0.001" oninput="State.viewMinH=0; State.viewMinAH=0; syncHumidityInputs('ratio')">
+              </div>
+            </div>
           </div>
 
           <div class="settings-group input-item absolute none">
-            <div class="settings-group-title">Max Absolute Humidity (g/m³)</div>
-            <input type="number" id="maxAbsHum" value="31" step="1" oninput="State.viewMinH=0; State.viewMinAH=0; syncHumidityInputs('absolute')">
+            <div class="settings-group-title">Absolute Humidity (g/m³)</div>
+            <div class="settings-row2">
+              <div>
+                <label>Minimum</label>
+                <input type="number" id="minAbsHum" value="0" step="1" min="0" oninput="State.viewMinAH=parseFloat(this.value)||0; State.viewMinH=0; syncHumidityInputs('absolute')">
+              </div>
+              <div>
+                <label>Maximum</label>
+                <input type="number" id="maxAbsHum" value="31" step="1" oninput="State.viewMinAH=0; State.viewMinH=0; syncHumidityInputs('absolute')">
+              </div>
+            </div>
           </div>
         </section>
 
@@ -605,6 +609,10 @@
               <label class="settype-checkbox pill-check" for="set-show-sat">
                 <input type="checkbox" name="set-show-sat" id="set-show-sat" checked>
                 <span>Saturation</span>
+              </label>
+              <label class="settype-checkbox pill-check" for="set-show-tdp">
+                <input type="checkbox" name="set-show-tdp" id="set-show-tdp">
+                <span>Dew Point</span>
               </label>
             </div>
           </div>
@@ -715,7 +723,7 @@
           <option value="RH">Rel. Humidity (%)</option>
           <option value="Twb">Wet Bulb (°C)</option>
           <option value="Tdp">Dew Point (°C)</option>
-          <option value="W">Humidity Ratio (kg/kg)</option>
+          <option value="W">Humidity Ratio (kg/kg')</option>
           <option value="h">Enthalpy (kJ/kg)</option>
           <option value="v">Spec. Volume (m³/kg)</option>
         </select>

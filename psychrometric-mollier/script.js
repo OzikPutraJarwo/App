@@ -6,13 +6,14 @@ const chart_margin_top = 35,
   chart_margin_right = 60,
   chart_margin_bottom = 60,
   chart_margin_left = 70,
-  min_tdb = -100,
+  min_tdb = -30,
   max_tdb = 99,
   color_rh = "#ef5350",
   color_h = "#8e24aa",
   color_twb = "#43a047",
   color_v = "#fb8c00",
-  color_sat = "#0056b3";
+  color_sat = "#0056b3",
+  color_tdp = "#37474f";
 
 const MINIMAP_T_MIN = min_tdb;
 const MINIMAP_T_MAX = max_tdb;
@@ -113,7 +114,8 @@ const State = {
     h: true,
     twb: true,
     v: true,
-    sat: true
+    sat: true,
+    tdp: false
   },
   viewMinH: 0,  // lower bound of visible W window (for panning, always >= 0)
   viewMinAH: 0  // lower bound of visible AH window (g/m3)
@@ -165,8 +167,8 @@ const I18N_LITERAL_TRANSLATIONS = {
     "Y-Axis Type": "Y축 유형",
     "Atmospheric Pressure": "대기압",
     "Temperature Range (°C)": "온도 범위 (°C)",
-    "Min DB Temp": "최소 건구 온도",
-    "Max DB Temp": "최대 건구 온도",
+    "Minimum": "최소",
+    "Maximum": "최대",
     "Max Humidity Ratio (kg/kg')": "최대 습기비 (kg/kg')",
     "Max Absolute Humidity (g/m³)": "최대 절대 습도 (g/m³)",
     "Show Info Panel": "정보 패널 표시",
@@ -228,7 +230,6 @@ const I18N_LITERAL_TRANSLATIONS = {
     "Dry Bulb (°C)": "건구 온도 (°C)",
     "Wet Bulb (°C)": "습구 온도 (°C)",
     "Rel. Humidity (%)": "상대 습도 (%)",
-    "Humidity Ratio (kg/kg)": "습기비 (kg/kg)",
     "Humidity Ratio (kg/kg')": "습기비 (kg/kg')",
     "Add": "추가",
     "Finish": "완료",
@@ -852,21 +853,13 @@ function calculateAllProperties(t, w, Patm) {
 
 function changeChartType(type) {
   State.chartType = type;
+  document.querySelectorAll("#app-charttype .charttype-btn").forEach((button) => {
+    button.classList.toggle("active", button.value === type);
+  });
   drawChart();
 
   updateAxisLabels();
-
-  if (State.chartType === "psychrometric") {
-    document
-      .querySelector(".chart-type .psychrometric")
-      .classList.add("active");
-    document.querySelector(".chart-type .mollier").classList.remove("active");
-  } else {
-    document.querySelector(".chart-type .mollier").classList.add("active");
-    document
-      .querySelector(".chart-type .psychrometric")
-      .classList.remove("active");
-  }
+  scheduleAnimatedTabRefresh();
 }
 
 function updateAxisLabels() {
@@ -936,6 +929,12 @@ function _syncAbsHumFromRatio() {
   if (!elMaxAbsHum || isNaN(valW)) return;
   const avgT = (minT + maxT) / 2;
   elMaxAbsHum.value = calculateAbsoluteHumidity(avgT, valW, Patm).toFixed(1);
+  const elMinHum = document.getElementById("minHum");
+  const elMinAbsHum = document.getElementById("minAbsHum");
+  if (elMinHum && elMinAbsHum) {
+    const valMinW = parseFloat(elMinHum.value) || 0;
+    elMinAbsHum.value = valMinW > 0 ? calculateAbsoluteHumidity(avgT, valMinW, Patm).toFixed(1) : "0";
+  }
 }
 
 function _syncRatioFromAbsHum() {
@@ -948,6 +947,12 @@ function _syncRatioFromAbsHum() {
   if (!elMaxHum || isNaN(valAH)) return;
   const avgT = (minT + maxT) / 2;
   elMaxHum.value = getWFromAbsoluteHumidity(avgT, valAH, Patm).toFixed(4);
+  const elMinHum = document.getElementById("minHum");
+  const elMinAbsHum = document.getElementById("minAbsHum");
+  if (elMinHum && elMinAbsHum) {
+    const valMinAH = parseFloat(elMinAbsHum.value) || 0;
+    elMinHum.value = valMinAH > 0 ? getWFromAbsoluteHumidity(avgT, valMinAH, Patm).toFixed(4) : "0";
+  }
 }
 
 function updatePressureUnit() {
@@ -1100,7 +1105,7 @@ function validateRangeInputs(minId, maxId, type = "Tdb") {
   }
 }
 
-const ANIMATED_TAB_CONTAINERS = "#app-modebar, .seg-control";
+const ANIMATED_TAB_CONTAINERS = "#app-charttype, #app-modebar, .seg-control";
 let animatedTabResizeObserver = null;
 
 function ensureTabIndicator(container) {
@@ -1345,8 +1350,8 @@ function syncAutoZoneMethod() {
   const singlePanel = document.getElementById("auto-zone-single-ui");
   const doublePanel = document.getElementById("auto-zone-double-ui");
 
-  if (singlePanel) singlePanel.style.display = method === "single" ? "block" : "none";
-  if (doublePanel) doublePanel.style.display = method === "double" ? "block" : "none";
+  if (singlePanel) singlePanel.style.display = method === "single" ? "grid" : "none";
+  if (doublePanel) doublePanel.style.display = method === "double" ? "grid" : "none";
 
   State.rangePreview = [];
   if (method === "double") {
@@ -1360,7 +1365,7 @@ function syncAutoZoneMethod() {
 function setMode(mode) {
   State.mode = mode;
   document
-    .querySelectorAll(".toolbar .tool-btn, .modebar-btn")
+    .querySelectorAll(".toolbar .tool-btn, #app-modebar .modebar-btn")
     .forEach((b) => b.classList.remove("active"));
   if (document.getElementById("btn-" + mode))
     document.getElementById("btn-" + mode).classList.add("active");
@@ -3038,14 +3043,7 @@ function renderProbeStatusCard(probe) {
 }
 
 function syncProbeAStatus() {
-  const status = document.getElementById("probe-a-status");
-  const button = document.querySelector("#explore-lock-ui button");
-  if (!status) return;
-
-  const shouldShow = State.exploreSubMode === "lock" && !!State.probeA;
-  status.innerHTML = shouldShow ? renderProbeStatusCard(State.probeA) : "";
-  status.style.display = shouldShow ? "block" : "none";
-  button.style.display = shouldShow ? "inline-flex" : "none";
+  // Lock mode removed; nothing to sync
 }
 
 function refreshCompareProbeBadges() {
@@ -4103,6 +4101,8 @@ function buildKeyValueExportRows() {
   rows.push(["settings.maxTemp", getInputValue("maxTemp")]);
   rows.push(["settings.maxHum", getInputValue("maxHum")]);
   rows.push(["settings.maxAbsHum", getInputValue("maxAbsHum")]);
+  rows.push(["settings.minHum", getInputValue("minHum")]);
+  rows.push(["settings.minAbsHum", getInputValue("minAbsHum")]);
   rows.push(["settings.showInfoPanel", getCheckboxValue("set-show-info-panel")]);
   rows.push(["settings.infoFields", infoFields.join("|")]);
   rows.push(["settings.infoPrimary", infoFields[0] || ""]);
@@ -4114,6 +4114,7 @@ function buildKeyValueExportRows() {
   rows.push(["settings.showTwb", getCheckboxValue("set-show-twb")]);
   rows.push(["settings.showV", getCheckboxValue("set-show-v")]);
   rows.push(["settings.showSat", getCheckboxValue("set-show-sat")]);
+  rows.push(["settings.showTdp", getCheckboxValue("set-show-tdp")]);
 
   State.points.forEach((p, i) => {
     rows.push([`points.${i}.name`, p.name || "Point"]);
@@ -4345,6 +4346,10 @@ function applyImportedSettings(settings) {
   if (maxHum && settings.maxHum !== undefined) maxHum.value = settings.maxHum;
   const maxAbsHum = document.getElementById("maxAbsHum");
   if (maxAbsHum && settings.maxAbsHum !== undefined) maxAbsHum.value = settings.maxAbsHum;
+  const minHum = document.getElementById("minHum");
+  if (minHum && settings.minHum !== undefined) minHum.value = settings.minHum;
+  const minAbsHum = document.getElementById("minAbsHum");
+  if (minAbsHum && settings.minAbsHum !== undefined) minAbsHum.value = settings.minAbsHum;
 
   const checkboxMap = {
     "set-show-info-panel": settings.showInfoPanel,
@@ -4354,6 +4359,7 @@ function applyImportedSettings(settings) {
     "set-show-twb": settings.showTwb,
     "set-show-v": settings.showV,
     "set-show-sat": settings.showSat,
+    "set-show-tdp": settings.showTdp,
   };
 
   Object.keys(checkboxMap).forEach((id) => {
@@ -4800,7 +4806,7 @@ function renderChartMinimap(Patm, realDataZones = []) {
   }
 
   // Keep minimap height aligned with legend height; only width differs.
-  const visibleLegendCount = ["rh", "twb", "h", "v", "sat"].filter((key) => State.visibility?.[key]).length;
+  const visibleLegendCount = ["rh", "twb", "h", "v", "sat", "tdp"].filter((key) => State.visibility?.[key]).length;
   minimapContainer.style.height = `${30 + visibleLegendCount * 18}px`;
 
   const minimapMode = normalizeMinimapMode(State.minimapMode);
@@ -5039,11 +5045,13 @@ function drawChart() {
 
   let x, y;
   // Clamp viewport lower bounds so they never exceed the current upper bounds.
+  const minHumConfig = parseFloat(document.getElementById("minHum")?.value) || 0;
   const viewMinH = Math.min(State.viewMinH, maxH - 0.001);
-  State.viewMinH = Math.max(0, viewMinH);
+  State.viewMinH = Math.max(minHumConfig, viewMinH);
   const maxAH = parseFloat(document.getElementById("maxAbsHum").value);
+  const minAbsHumConfig = parseFloat(document.getElementById("minAbsHum")?.value) || 0;
   const viewMinAH = Math.min(State.viewMinAH, maxAH - 0.1);
-  State.viewMinAH = Math.max(0, viewMinAH);
+  State.viewMinAH = Math.max(minAbsHumConfig, viewMinAH);
 
   if (State.chartType === "psychrometric") {
     x = d3.scaleLinear().domain([minT, maxT]).range([0, w]);
@@ -5406,15 +5414,16 @@ function drawChart() {
     const legG = axesLayer.append("g").attr("class", "chart-legend");
 
     const allLegItems = [
-      { c: color_rh, t: "Rel. Humidity", d: "0", key: "rh" },
-      { c: color_h, t: "Enthalpy", d: "0", key: "h" },
-      { c: color_twb, t: "Wet Bulb Temp", d: "4", key: "twb" },
-      { c: color_v, t: "Spec. Volume", d: "0", key: "v" },
+      { c: color_rh, t: "Rel. Humidity (%)", d: "0", key: "rh" },
+      { c: color_h, t: "Enthalpy (kJ/kg)", d: "0", key: "h" },
+      { c: color_twb, t: "Wet Bulb (\u00b0C)", d: "4", key: "twb" },
+      { c: color_v, t: "Spec. Vol. (m\u00b3/kg)", d: "0", key: "v" },
       { c: color_sat, t: "Saturation", d: "0", key: "sat" },
+      { c: color_tdp, t: "Dew Point (\u00b0C)", d: "0", key: "tdp" },
     ];
     
     const legItems = allLegItems.filter(item => State.visibility[item.key]);
-    const legendWidth = 138;
+    const legendWidth = 162;
     const rowHeight = 18;
     const legendHeight = 30 + legItems.length * rowHeight;
 
@@ -5558,12 +5567,7 @@ function handleChartClick(e, x, y, minT, maxT, maxH, Patm) {
     updateZonePtCount();
     drawChart();
   } else {
-    if (State.exploreSubMode === "lock") {
-      const d = calculateAllProperties(t, w, Patm);
-      State.probeA = { t, w, data: d };
-      syncProbeAStatus();
-      drawChart();
-    } else if (State.exploreSubMode === "compare") {
+    if (State.exploreSubMode === "compare") {
       const d = calculateAllProperties(t, w, Patm);
       if (State.compareTarget === "B") {
         State.probeB = { t, w, data: d };
@@ -6023,6 +6027,57 @@ function drawPsychroLines(
     });
   }
 
+  // 5. DEW POINT LINES - Only render if visibility.tdp is true
+  if (State.visibility.tdp) {
+    // Draw iso-dew-point lines as labeled horizontal (psychrometric) lines at nice Tdp values
+    const tdpStep = (maxT - minT) > 30 ? 10 : 5;
+    const tdpStart = Math.ceil(minT / tdpStep) * tdpStep;
+    for (let tdp = tdpStart; tdp < maxT; tdp += tdpStep) {
+      const W_tdp = Psychro.getWFromPw(Psychro.getSatVapPres(tdp), Patm);
+      if (!Number.isFinite(W_tdp) || W_tdp <= 0 || W_tdp > maxH) continue;
+
+      const tdpLabel = `${tdp}`;
+      const isAbsHum = State.yAxisType === "absoluteHumidity";
+      const ahTdp = isAbsHum ? calculateAbsoluteHumidity((minT + maxT) / 2, W_tdp, Patm) : 0;
+
+      if (chartType === "psychrometric") {
+        // Horizontal line from the saturation curve (at T=tdp) rightward — never crosses saturation
+        const yPos = isAbsHum ? y(ahTdp) : y(W_tdp);
+        const xStart = Math.max(0, x(tdp));
+        linesG
+          .append("line")
+          .attr("class", "tdp-line")
+          .attr("y1", yPos)
+          .attr("y2", yPos)
+          .attr("x1", xStart)
+          .attr("x2", width);
+
+        if (isAbsHum) {
+          addLabel(yPos, tdpLabel, "lbl-tdp", "right", maxT, ahTdp);
+        } else {
+          addLabel(yPos, tdpLabel, "lbl-tdp", "right", maxT);
+        }
+      } else {
+        // Mollier: vertical line from top down to the saturation temperature (T=tdp)
+        const xPos = isAbsHum ? x(ahTdp) : x(W_tdp);
+        const yEnd = Math.min(height, y(tdp));
+        linesG
+          .append("line")
+          .attr("class", "tdp-line")
+          .attr("x1", xPos)
+          .attr("x2", xPos)
+          .attr("y1", 0)
+          .attr("y2", yEnd);
+
+        if (isAbsHum) {
+          addLabel(xPos, tdpLabel, "lbl-tdp", "top", minT, ahTdp);
+        } else {
+          addLabel(xPos, tdpLabel, "lbl-tdp", "top", minT);
+        }
+      }
+    }
+  }
+
   if (chartType === "psychrometric") {
     renderSmartLabels(
       labelsG,
@@ -6247,20 +6302,19 @@ function renderSmartLabels(
 
 function setExploreSubMode(subMode) {
   State.exploreSubMode = subMode;
-  const icons = { hover: "explore", lock: "push_pin", compare: "compare_arrows" };
-  const labels = { hover: "Hover", lock: "Lock / Probe", compare: "Compare A–B" };
+  const icons = { hover: "explore", compare: "compare_arrows" };
+  const labels = { hover: "Hover", compare: "Compare A–B" };
   const icon = document.getElementById("explore-submode-icon");
   const label = document.getElementById("explore-submode-label");
   if (icon) icon.textContent = icons[subMode] || "explore";
   if (label) label.textContent = translateLiteral(labels[subMode] || subMode);
 
   document.getElementById("explore-hover-ui").style.display = subMode === "hover" ? "grid" : "none";
-  document.getElementById("explore-lock-ui").style.display = subMode === "lock" ? "grid" : "none";
   document.getElementById("explore-compare-ui").style.display = subMode === "compare" ? "grid" : "none";
   if (subMode === "hover") clearProbeAll();
   if (subMode === "compare") setCompareTarget(State.compareTarget || "A");
   syncProbeAStatus();
-  ["hover","lock","compare"].forEach(m => {
+  ["hover","compare"].forEach(m => {
     const b = document.getElementById("seg-explore-" + m);
     if (b) b.classList.toggle("active", m === subMode);
   });
@@ -6710,8 +6764,11 @@ function previewAutoZone() {
   const minVal = parseFloat(document.getElementById("auto-zone-min").value);
   const maxVal = parseFloat(document.getElementById("auto-zone-max").value);
 
-  if (isNaN(minVal) || isNaN(maxVal)) { alert(translateLiteral("Enter valid min and max values.")); return; }
-  if (minVal >= maxVal) { alert(translateLiteral("Min must be less than max.")); return; }
+  if (isNaN(minVal) || isNaN(maxVal) || minVal >= maxVal) {
+    State.rangePreview = [];
+    drawChart();
+    return;
+  }
 
   const Patm = getPressureInPa();
   const minT = parseFloat(document.getElementById("minTemp").value);
@@ -7296,6 +7353,10 @@ const inputHandlers = {
     State.visibility.sat = event.target.checked;
     drawChart();
   },
+  "set-show-tdp": (event) => {
+    State.visibility.tdp = event.target.checked;
+    drawChart();
+  },
   "set-show-info-panel": (event) => {
     if (!event.target.checked) {
       const panel = document.getElementById("info-panel");
@@ -7367,6 +7428,8 @@ function captureSettingsSnapshot() {
     maxTemp: getInputValue("maxTemp"),
     maxHum: getInputValue("maxHum"),
     maxAbsHum: getInputValue("maxAbsHum"),
+    minHum: getInputValue("minHum"),
+    minAbsHum: getInputValue("minAbsHum"),
     showInfoPanel: getCheckboxValue("set-show-info-panel"),
     infoPrecisionDecimals: getInfoPrecisionDecimals(),
     infoPrecisionOffset: getInfoPrecisionDecimals() - DEFAULT_INFO_PRECISION_DECIMALS,
@@ -7381,6 +7444,7 @@ function captureSettingsSnapshot() {
     showTwb: getCheckboxValue("set-show-twb"),
     showV: getCheckboxValue("set-show-v"),
     showSat: getCheckboxValue("set-show-sat"),
+    showTdp: getCheckboxValue("set-show-tdp"),
   };
 }
 
@@ -7508,7 +7572,7 @@ async function initializeApp() {
     State.viewMinH = snapshot?.runtime?.viewMinH ?? DEFAULT_RUNTIME_SNAPSHOT.viewMinH;
     State.viewMinAH = snapshot?.runtime?.viewMinAH ?? DEFAULT_RUNTIME_SNAPSHOT.viewMinAH;
     setMode(snapshot?.runtime?.mode || DEFAULT_RUNTIME_SNAPSHOT.mode);
-    setExploreSubMode(snapshot?.runtime?.exploreSubMode || DEFAULT_RUNTIME_SNAPSHOT.exploreSubMode);
+    setExploreSubMode(["hover","compare"].includes(snapshot?.runtime?.exploreSubMode) ? snapshot.runtime.exploreSubMode : DEFAULT_RUNTIME_SNAPSHOT.exploreSubMode);
     setPointSubMode(snapshot?.runtime?.pointSubMode || DEFAULT_RUNTIME_SNAPSHOT.pointSubMode);
     setZoneSubMode(snapshot?.runtime?.zoneSubMode || DEFAULT_RUNTIME_SNAPSHOT.zoneSubMode);
     updateZonePtCount();

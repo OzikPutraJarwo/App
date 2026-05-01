@@ -253,10 +253,10 @@ input[type="color"]::-moz-color-swatch {
   color: var(--text);
 }
 
+#app-charttype,
 #app-modebar {
   display: flex;
   gap: 6px;
-  margin-right: auto;
   background: rgb(229 229 229 / 48%);
   border-radius: 20px;
   padding: 4px;
@@ -269,6 +269,21 @@ input[type="color"]::-moz-color-swatch {
   isolation: isolate;
 }
 
+#app-charttype {
+  flex-shrink: 0;
+}
+
+#app-charttype .charttype-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+#app-modebar {
+  margin-right: auto;
+}
+
+#app-charttype>.tab-indicator,
 #app-modebar>.tab-indicator,
 .seg-control>.tab-indicator {
   position: absolute;
@@ -286,6 +301,7 @@ input[type="color"]::-moz-color-swatch {
     opacity .18s ease;
 }
 
+#app-charttype>.tab-indicator,
 #app-modebar>.tab-indicator {
   background: linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(247, 250, 255, .9));
   box-shadow:
@@ -461,7 +477,7 @@ input[type="color"]::-moz-color-swatch {
   width: var(--sidebar-w);
   flex-shrink: 0;
   min-height: 0;
-  padding: 6px;
+  padding: 10px;
   background: linear-gradient(180deg, rgba(255, 255, 255, .82), rgba(248, 250, 255, .68));
   border: 1px solid var(--glass-border);
   border-radius: 34px;
@@ -472,7 +488,6 @@ input[type="color"]::-moz-color-swatch {
   gap: 6px;
   box-shadow: var(--shadow-card);
   backdrop-filter: blur(8px) saturate(150%);
-  scrollbar-gutter: stable;
   background-clip: padding-box;
 }
 
@@ -545,6 +560,10 @@ input[type="color"]::-moz-color-swatch {
 
 .param-grid.single {
   grid-template-columns: 1fr;
+}
+
+#auto-zone-single-ui, #auto-zone-double-ui {
+  gap: 10px
 }
 
 .param-grid>div>label {
@@ -1116,6 +1135,18 @@ input[type="color"]::-moz-color-swatch {
   fill: #fb8c00;
 }
 
+.tdp-line {
+  fill: none;
+  stroke: #37474f;
+  stroke-width: .7;
+  stroke-dasharray: 2, 4;
+  opacity: .45;
+}
+
+.lbl-tdp {
+  fill: #37474f;
+}
+
 /* ── User Points ──────────────────────────────────────────── */
 .user-point {
   stroke: #fff;
@@ -1459,7 +1490,6 @@ input[type="color"]::-moz-color-swatch {
 }
 
 #settings-panel .settings-tab-panel[data-settings-tab="chart"] {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
 }
 
@@ -2027,7 +2057,6 @@ input[type="color"]::-moz-color-swatch {
   color: var(--text-muted);
   margin-bottom: 4px;
   margin-top: 10px;
-  font-weight: 600;
 }
 
 .floating-window label:first-of-type {
@@ -2456,6 +2485,12 @@ input[type="color"]::-moz-color-swatch {
   background: linear-gradient(180deg, rgba(255, 241, 227, .98), rgba(255, 226, 190, .96));
 }
 
+#compare-delta-panel {
+  display: grid;
+  gap: 3px;
+  margin-top: 5px
+}
+
 .compare-delta-title {
   font-size: 10.5px;
   font-weight: 700;
@@ -2466,7 +2501,7 @@ input[type="color"]::-moz-color-swatch {
 .compare-delta-grid {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   margin-top: 5px
 }
 
@@ -2475,7 +2510,6 @@ input[type="color"]::-moz-color-swatch {
   justify-content: space-between;
   align-items: center;
   font-size: var(--fs-xs);
-  padding: 6px 0;
   border-radius: 14px;
 }
 
@@ -2673,6 +2707,7 @@ input[type="color"]::-moz-color-swatch {
     margin-right: 6px;
   }
 
+  #app-charttype,
   #app-modebar,
   #app-menubar {
     padding: 3px;
@@ -2717,7 +2752,6 @@ input[type="color"]::-moz-color-swatch {
     grid-template-columns: 1fr;
   }
 
-  #settings-panel .settings-tab-panel[data-settings-tab="chart"],
   .settings-compact-grid {
     grid-template-columns: 1fr;
   }
@@ -2758,6 +2792,7 @@ input[type="color"]::-moz-color-swatch {
     gap: 8px;
   }
 
+  #app-charttype,
   #app-modebar,
   #app-menubar {
     padding: 3px;
