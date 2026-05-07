@@ -118,7 +118,7 @@ const State = {
     tdp: false
   },
   viewMinH: 0,  // lower bound of visible W window (for panning, always >= 0)
-  viewMinAH: 0  // lower bound of visible AH window (g/m3)
+  viewMinAH: 0  // lower bound of visible AH window (g/m³)
 };
 
 historyManager.push(State);
@@ -613,6 +613,10 @@ const REAL_DATA_MANIFEST_FILES = ["index.json", "manifest.json"];
 const REAL_DATA_DEFAULT_COLOR = "#4b8b3b";
 const REAL_DATA_DEFAULT_SHAPE = "polygon";
 const REAL_DATA_DEFAULT_COMPACTNESS = 65;
+const REAL_DATA_DEFAULT_LABEL_POSITION = "inside";
+const REAL_DATA_DEFAULT_LABEL_FONT = "Instrument Sans, sans-serif";
+const REAL_DATA_LABEL_OUTSIDE_OFFSET = 18;
+const REAL_DATA_LABEL_EDGE_PADDING = 12;
 
 let realDataCatalog = [];
 let realDataLoadState = "loading";
@@ -1569,10 +1573,45 @@ function normalizeRealDataCompactness(value) {
   return Math.max(0, Math.min(Math.round(numericValue), 100));
 }
 
+function normalizeHexColorValue(value, fallback = REAL_DATA_DEFAULT_COLOR) {
+  const normalized = String(value || "").trim();
+  const shorthand = normalized.match(/^#([a-f\d]{3})$/i);
+  if (shorthand) {
+    return `#${shorthand[1].split("").map((char) => char + char).join("")}`.toLowerCase();
+  }
+
+  const full = normalized.match(/^#([a-f\d]{6})$/i);
+  return full ? `#${full[1].toLowerCase()}` : fallback;
+}
+
+function normalizeRealDataZoneTitle(value) {
+  return String(value ?? "").replace(/\s+/g, " ").trim().slice(0, 120);
+}
+
+function normalizeRealDataZoneLabelPosition(value) {
+  return String(value || "").trim().toLowerCase() === "outside"
+    ? "outside"
+    : REAL_DATA_DEFAULT_LABEL_POSITION;
+}
+
+function normalizeRealDataZoneLabelFont(value) {
+  const normalized = String(value ?? "").replace(/\s+/g, " ").trim();
+  return normalized ? normalized.slice(0, 120) : REAL_DATA_DEFAULT_LABEL_FONT;
+}
+
+function normalizeRealDataZoneShowSourcePoints(value) {
+  return value === true || value === "true" || value === 1 || value === "1";
+}
+
 function getDefaultRealDataZoneConfig() {
   return {
     shape: REAL_DATA_DEFAULT_SHAPE,
     compactness: REAL_DATA_DEFAULT_COMPACTNESS,
+    color: "",
+    title: "",
+    labelPosition: REAL_DATA_DEFAULT_LABEL_POSITION,
+    labelFontFamily: REAL_DATA_DEFAULT_LABEL_FONT,
+    showSourcePoints: false,
   };
 }
 
@@ -1596,6 +1635,11 @@ function normalizeRealDataZoneConfig(value) {
   return {
     shape: value.shape === "oval" ? "oval" : defaults.shape,
     compactness: normalizeRealDataCompactness(value.compactness ?? value.boundary ?? defaults.compactness),
+    color: normalizeHexColorValue(value.color, ""),
+    title: normalizeRealDataZoneTitle(value.title ?? value.name ?? value.label),
+    labelPosition: normalizeRealDataZoneLabelPosition(value.labelPosition ?? value.position),
+    labelFontFamily: normalizeRealDataZoneLabelFont(value.labelFontFamily ?? value.fontFamily ?? value.font),
+    showSourcePoints: normalizeRealDataZoneShowSourcePoints(value.showSourcePoints ?? value.showPoints ?? value.keepPointsVisible),
   };
 }
 
@@ -1655,6 +1699,11 @@ function setRealDataZoneConfigMap(value) {
 function getRealDataZoneConfig(key) {
   const normalizedKey = normalizeRealDataKey(key);
   return normalizeRealDataZoneConfig(State.realDataZoneConfigs?.[normalizedKey]);
+}
+
+function getRealDataDefinitionByKey(key) {
+  const normalizedKey = normalizeRealDataKey(key);
+  return realDataCatalog.find((definition) => definition.key === normalizedKey) || null;
 }
 
 function setRealDataZoneVisibilityMap(value) {
@@ -1730,15 +1779,26 @@ function getPlantsZoneDraftFromControls() {
   const datasetSelect = document.getElementById("plants-zone-dataset");
   const shapeSelect = document.getElementById("plants-zone-shape");
   const compactnessInput = document.getElementById("plants-zone-compactness");
+  const titleInput = document.getElementById("plants-zone-title");
+  const colorInput = document.getElementById("plants-zone-color");
+  const labelPositionSelect = document.getElementById("plants-zone-label-position");
+  const labelFontInput = document.getElementById("plants-zone-label-font");
+  const showPointsInput = document.getElementById("plants-zone-show-points");
   const normalizedKey = normalizeRealDataKey(datasetSelect?.value);
+  const definition = getRealDataDefinitionByKey(normalizedKey);
 
-  if (!normalizedKey || !realDataCatalog.some((definition) => definition.key === normalizedKey)) {
+  if (!normalizedKey || !definition) {
     return null;
   }
 
   const config = normalizeRealDataZoneConfig({
     shape: shapeSelect?.value,
     compactness: compactnessInput?.value,
+    title: titleInput?.value,
+    color: colorInput?.value || definition.color || REAL_DATA_DEFAULT_COLOR,
+    labelPosition: labelPositionSelect?.value,
+    labelFontFamily: labelFontInput?.value,
+    showSourcePoints: showPointsInput?.checked,
   });
 
   return {
@@ -1751,13 +1811,25 @@ function syncPlantsZoneSelection() {
   const datasetSelect = document.getElementById("plants-zone-dataset");
   const shapeSelect = document.getElementById("plants-zone-shape");
   const compactnessInput = document.getElementById("plants-zone-compactness");
+  const titleInput = document.getElementById("plants-zone-title");
+  const colorInput = document.getElementById("plants-zone-color");
+  const labelPositionSelect = document.getElementById("plants-zone-label-position");
+  const labelFontInput = document.getElementById("plants-zone-label-font");
+  const showPointsInput = document.getElementById("plants-zone-show-points");
   if (!datasetSelect || !shapeSelect || !compactnessInput) return;
 
   const normalizedKey = normalizeRealDataKey(datasetSelect.value);
+  const definition = getRealDataDefinitionByKey(normalizedKey);
+  if (!definition) return;
   const config = getRealDataZoneConfig(normalizedKey);
 
   shapeSelect.value = config.shape;
   compactnessInput.value = config.compactness;
+  if (titleInput) titleInput.value = config.title || definition.name;
+  if (colorInput) colorInput.value = config.color || definition.color || REAL_DATA_DEFAULT_COLOR;
+  if (labelPositionSelect) labelPositionSelect.value = config.labelPosition;
+  if (labelFontInput) labelFontInput.value = config.labelFontFamily || REAL_DATA_DEFAULT_LABEL_FONT;
+  if (showPointsInput) showPointsInput.checked = !!config.showSourcePoints;
   updatePlantsCompactnessLabel();
   previewPlantsZone();
 }
@@ -1810,20 +1882,55 @@ function applyPlantsZoneConfig() {
     return;
   }
 
+  const definition = getRealDataDefinitionByKey(draft.key);
+  const builtZone = definition
+    ? buildRealDataZone(definition, getPressureInPa(), draft)
+    : null;
+
+  if (!builtZone || !Array.isArray(builtZone.points) || builtZone.points.length < 3) {
+    alert(translateLiteral("Selected plant dataset could not generate a valid zone."));
+    return;
+  }
+
   State.realDataZoneConfigs = {
     ...normalizeRealDataZoneConfigMap(State.realDataZoneConfigs),
     [draft.key]: {
       shape: draft.shape,
       compactness: draft.compactness,
+      color: draft.color,
+      title: draft.title,
+      labelPosition: draft.labelPosition,
+      labelFontFamily: draft.labelFontFamily,
+      showSourcePoints: draft.showSourcePoints,
     },
   };
   State.realDataZoneVisibility = {
     ...normalizeRealDataVisibilityMap(State.realDataZoneVisibility),
-    [draft.key]: true,
+    [draft.key]: false,
   };
-  State.realDataZoneDraft = draft;
 
+  const finalZone = {
+    id: Date.now() + Math.random(),
+    name: builtZone.name,
+    color: builtZone.color,
+    points: builtZone.points.map((point) => ({ t: point.t, w: point.w })),
+    sourcePoints: (builtZone.sourcePoints || []).map((point) => ({ t: point.t, w: point.w })),
+    labelPosition: builtZone.labelPosition,
+    labelFontFamily: builtZone.labelFontFamily,
+    showSourcePoints: !!draft.showSourcePoints,
+    realDataKey: draft.key,
+    realDataShape: builtZone.shape,
+    realDataCompactness: builtZone.compactness,
+  };
+
+  State.zones.push(finalZone);
+  State.selectedZoneId = finalZone.id;
+  State.selectedPointId = null;
+  State.realDataZoneDraft = null;
+
+  historyManager.push(State);
   renderRealDataZoneSettings();
+  updateLists();
   drawChart();
   queuePersistedStateSave();
 }
@@ -1902,7 +2009,7 @@ function normalizeRealDataHumidityType(value) {
   const normalized = String(value || "RH").trim().toUpperCase();
   if (normalized === "ABSOLUTEHUMIDITY") return "AH";
   if (normalized === "HUMIDITYRATIO") return "W";
-  return ["RH", "AH", "W"].includes(normalized) ? normalized : "RH";
+  return ["RH", "AH", "W", "VPD"].includes(normalized) ? normalized : "RH";
 }
 
 function extractRealDataDefinitions(payload, filePath) {
@@ -2358,6 +2465,52 @@ function buildRealDataAlphaEnvelope(points, compactness = REAL_DATA_DEFAULT_COMP
 
 function getRealDataPointFromRow(row, humidityType, Patm) {
   const t = Number(row?.tdb ?? row?.t ?? row?.temperature ?? row?.temp);
+  const humidityRatio = Number(row?.w ?? row?.humidityRatio ?? row?.humidity_ratio);
+  const rh = Number(row?.rh ?? row?.relativeHumidity ?? row?.relative_humidity);
+  const vpd = Number(row?.vpd ?? row?.vaporPressureDeficit ?? row?.vapor_pressure_deficit);
+
+  if (Number.isFinite(t) && Number.isFinite(humidityRatio)) {
+    if (humidityRatio < 0) return null;
+    return { t, w: humidityRatio };
+  }
+
+  if (Number.isFinite(t) && Number.isFinite(rh)) {
+    if (rh < 0 || rh > 100) return null;
+    const Pws = Psychro.getSatVapPres(t);
+    const w = Psychro.getWFromPw(Pws * (rh / 100), Patm);
+    return Number.isFinite(w) && w >= 0 ? { t, w } : null;
+  }
+
+  if (Number.isFinite(t) && Number.isFinite(vpd)) {
+    if (vpd < 0) return null;
+    const Pws = Psychro.getSatVapPres(t);
+    const Pw = Pws - vpd * 1000;
+    if (!Number.isFinite(Pw) || Pw <= 0 || Pw > Pws) return null;
+    const w = Psychro.getWFromPw(Pw, Patm);
+    return Number.isFinite(w) && w >= 0 ? { t, w } : null;
+  }
+
+  if (Number.isFinite(rh) && Number.isFinite(vpd)) {
+    if (rh < 0 || rh >= 100 || vpd < 0) return null;
+    const Pws = (vpd * 1000) / (1 - rh / 100);
+    if (!Number.isFinite(Pws) || Pws <= 0) return null;
+    const resolvedT = Psychro.getTempFromSatPres(Pws);
+    const Pw = Pws * (rh / 100);
+    const w = Psychro.getWFromPw(Pw, Patm);
+    if (!Number.isFinite(resolvedT) || !Number.isFinite(w) || w < 0) return null;
+    return { t: resolvedT, w };
+  }
+
+  if (Number.isFinite(humidityRatio) && Number.isFinite(vpd)) {
+    if (humidityRatio < 0 || vpd < 0) return null;
+    const Pw = Psychro.getPwFromW(humidityRatio, Patm);
+    const Pws = Pw + vpd * 1000;
+    if (!Number.isFinite(Pw) || !Number.isFinite(Pws) || Pws <= 0 || Pws < Pw) return null;
+    const resolvedT = Psychro.getTempFromSatPres(Pws);
+    if (!Number.isFinite(resolvedT)) return null;
+    return { t: resolvedT, w: humidityRatio };
+  }
+
   if (!Number.isFinite(t)) return null;
 
   let humidityValue;
@@ -2532,6 +2685,8 @@ function buildRealDataZone(definition, Patm, configOverride) {
   if (sourcePoints.length < 3) return null;
 
   const zoneConfig = normalizeRealDataZoneConfig(configOverride || State.realDataZoneConfigs?.[definition.key]);
+  const zoneColor = zoneConfig.color || definition.color || REAL_DATA_DEFAULT_COLOR;
+  const zoneName = zoneConfig.title || definition.name;
   const zonePoints = zoneConfig.shape === "oval"
     ? buildRealDataOval(sourcePoints, Patm, zoneConfig.compactness)
     : definition.points.length
@@ -2541,10 +2696,12 @@ function buildRealDataZone(definition, Patm, configOverride) {
 
   return {
     id: `real-data-${definition.key}`,
-    name: definition.name,
-    color: definition.color,
+    name: zoneName,
+    color: zoneColor,
     shape: zoneConfig.shape,
     compactness: zoneConfig.compactness,
+    labelPosition: zoneConfig.labelPosition,
+    labelFontFamily: zoneConfig.labelFontFamily,
     sourcePoints,
     points: zonePoints,
   };
@@ -2616,7 +2773,7 @@ function fmtInfo(value) {
 
 const CURSOR_FIELD_DEFINITIONS = [
   { key: "tdb", label: "Dry Bulb Temperature", shortLabel: "Tdb", formatValue: (data) => `${fmtInfo(data.Tdb, 1)} °C` },
-  { key: "ah", label: "Absolute Humidity", shortLabel: "AH", formatValue: (data) => `${fmtInfo(data.AH, 1)} g/m3` },
+  { key: "ah", label: "Absolute Humidity", shortLabel: "AH", formatValue: (data) => `${fmtInfo(data.AH, 1)} g/m³` },
   { key: "twb", label: "Wet Bulb Temperature", shortLabel: "Twb", formatValue: (data) => `${fmtInfo(data.Twb, 1)} °C` },
   { key: "tdp", label: "Dew Point Temperature", shortLabel: "Tdp", formatValue: (data) => `${fmtInfo(data.Tdp, 1)} °C` },
   { key: "tf", label: "Frost Point Temperature", shortLabel: "Tf", formatValue: (data) => `${fmtInfo(data.Tf, 1)} °C` },
@@ -2626,13 +2783,13 @@ const CURSOR_FIELD_DEFINITIONS = [
   { key: "h", label: "Enthalpy", shortLabel: "h", formatValue: (data) => `${fmtInfo(data.h, 1)} kJ/kg` },
   { key: "cp", label: "Specific Heat Capacity", shortLabel: "Cp", formatValue: (data) => `${fmtInfo(data.cp, 3)} kJ/(kg·°C)` },
   { key: "v", label: "Specific Volume", shortLabel: "v", formatValue: (data) => `${fmtInfo(data.v, 3)} m3/kg` },
-  { key: "rho", label: "Density", shortLabel: "rho", formatValue: (data) => `${fmtInfo(data.rho, 2)} kg/m3` },
+  { key: "rho", label: "Density", shortLabel: "rho", formatValue: (data) => `${fmtInfo(data.rho, 2)} kg/m³` },
   { key: "pw", label: "Vapor Partial Pressure", shortLabel: "Pw", formatValue: (data) => `${fmtInfo(data.Pw, 0)} Pa` },
   { key: "pws", label: "Saturation Vapor Pressure", shortLabel: "Pws", formatValue: (data) => `${fmtInfo(data.Pws, 0)} Pa` },
   { key: "vpd", label: "Vapor Pressure Deficit", shortLabel: "VPD", formatValue: (data) => `${fmtInfo(data.VPD, 1)} Pa` },
   { key: "hd", label: "Humidity Deficit", shortLabel: "HD", formatValue: (data) => `${fmtInfo(data.HD, 4)} kg/kg'` },
   { key: "wsat", label: "Saturation Humidity Ratio", shortLabel: "Wsat", formatValue: (data) => `${fmtInfo(data.Wsat, 4)} kg/kg'` },
-  { key: "dvs", label: "Saturation Vapor Concentration", shortLabel: "Dvs", formatValue: (data) => `${fmtInfo(data.Dvs, 1)} g/m3` },
+  { key: "dvs", label: "Saturation Vapor Concentration", shortLabel: "Dvs", formatValue: (data) => `${fmtInfo(data.Dvs, 1)} g/m³` },
   { key: "vmr", label: "Volume Mixing Ratio", shortLabel: "VMR", formatValue: (data) => `${fmtInfo(data.VMR, 1)} ppm` },
   { key: "pd", label: "Psychrometric Difference", shortLabel: "PD", formatValue: (data) => `${fmtInfo(data.PD, 1)} °C` },
 ];
@@ -2813,12 +2970,12 @@ function getInfoFieldMeta(field, data) {
   const axisX = State.chartType === "psychrometric"
     ? { label: "Tdb", value: `${fmtInfo(data.Tdb, 1)} °C` }
     : State.yAxisType === "absoluteHumidity"
-      ? { label: "AH", value: `${fmtInfo(data.AH, 1)} g/m3` }
+      ? { label: "AH", value: `${fmtInfo(data.AH, 1)} g/m³` }
       : { label: "W", value: `${fmtInfo(data.W, 4)} kg/kg'` };
 
   const axisY = State.chartType === "psychrometric"
     ? State.yAxisType === "absoluteHumidity"
-      ? { label: "AH", value: `${fmtInfo(data.AH, 1)} g/m3` }
+      ? { label: "AH", value: `${fmtInfo(data.AH, 1)} g/m³` }
       : { label: "W", value: `${fmtInfo(data.W, 4)} kg/kg'` }
     : { label: "Tdb", value: `${fmtInfo(data.Tdb, 1)} °C` };
 
@@ -3008,10 +3165,105 @@ function findZoneLabelPosition(displayPoints) {
   return { x: displayPoints[0].x, y: displayPoints[0].y };
 }
 
+function getDisplayPolygonBounds(displayPoints) {
+  return displayPoints.reduce((bounds, point) => ({
+    minX: Math.min(bounds.minX, point.x),
+    maxX: Math.max(bounds.maxX, point.x),
+    minY: Math.min(bounds.minY, point.y),
+    maxY: Math.max(bounds.maxY, point.y),
+  }), {
+    minX: Infinity,
+    maxX: -Infinity,
+    minY: Infinity,
+    maxY: -Infinity,
+  });
+}
+
+function getRealDataZoneLabelPlacement(displayPoints, labelPosition, chartWidth, chartHeight) {
+  const insidePoint = findZoneLabelPosition(displayPoints);
+  if (normalizeRealDataZoneLabelPosition(labelPosition) !== "outside") {
+    return {
+      x: insidePoint.x,
+      y: insidePoint.y,
+      textAnchor: "middle",
+      dominantBaseline: "middle",
+      connector: null,
+    };
+  }
+
+  const bounds = getDisplayPolygonBounds(displayPoints);
+  const centerY = Math.min(
+    chartHeight - REAL_DATA_LABEL_EDGE_PADDING,
+    Math.max(REAL_DATA_LABEL_EDGE_PADDING, (bounds.minY + bounds.maxY) / 2)
+  );
+  const rightSpace = chartWidth - bounds.maxX;
+  const leftSpace = bounds.minX;
+
+  if (rightSpace >= leftSpace) {
+    const x = Math.min(chartWidth - REAL_DATA_LABEL_EDGE_PADDING, bounds.maxX + REAL_DATA_LABEL_OUTSIDE_OFFSET);
+    return {
+      x,
+      y: centerY,
+      textAnchor: "start",
+      dominantBaseline: "middle",
+      connector: [
+        { x: bounds.maxX + 4, y: centerY },
+        { x: x - 6, y: centerY },
+      ],
+    };
+  }
+
+  const x = Math.max(REAL_DATA_LABEL_EDGE_PADDING, bounds.minX - REAL_DATA_LABEL_OUTSIDE_OFFSET);
+  return {
+    x,
+    y: centerY,
+    textAnchor: "end",
+    dominantBaseline: "middle",
+    connector: [
+      { x: bounds.minX - 4, y: centerY },
+      { x: x + 6, y: centerY },
+    ],
+  };
+}
+
+function renderRealDataZoneLabel(zoneLayer, zone, displayPoints, chartWidth, chartHeight) {
+  const placement = getRealDataZoneLabelPlacement(displayPoints, zone.labelPosition, chartWidth, chartHeight);
+
+  if (placement.connector) {
+    zoneLayer
+      .append("line")
+      .attr("x1", placement.connector[0].x)
+      .attr("y1", placement.connector[0].y)
+      .attr("x2", placement.connector[1].x)
+      .attr("y2", placement.connector[1].y)
+      .attr("stroke", zone.color)
+      .attr("stroke-width", 1)
+      .attr("stroke-opacity", 0.9)
+      .style("pointer-events", "none");
+  }
+
+  zoneLayer
+    .append("text")
+    .attr("x", placement.x)
+    .attr("y", placement.y)
+    .attr("text-anchor", placement.textAnchor)
+    .attr("dominant-baseline", placement.dominantBaseline)
+    .attr("fill", zone.color)
+    .attr("font-family", zone.labelFontFamily || REAL_DATA_DEFAULT_LABEL_FONT)
+    .attr("font-size", 11)
+    .attr("font-weight", 700)
+    .attr("paint-order", "stroke")
+    .attr("stroke", "rgba(255,255,255,0.92)")
+    .attr("stroke-width", 3)
+    .attr("stroke-linejoin", "round")
+    .text(zone.name)
+    .style("pointer-events", "none");
+}
+
 function formatZoneArea(area) {
   if (!isFinite(area)) return "—";
   const decimals = area < 0.1 ? 4 : area < 10 ? 3 : 2;
-  const unit = State.yAxisType === "absoluteHumidity" ? "°C·g/m3" : "°C·kg/kg'";
+  const unit = State.yAxisType === "absoluteHumidity" ? "°C·g/m³" : "°C·kg/kg'";
   return `${area.toFixed(decimals)} ${unit}`;
 }
 
@@ -3046,21 +3298,32 @@ function syncProbeAStatus() {
   // Lock mode removed; nothing to sync
 }
 
+function updateCompareProbeBadge(badge, target, probe, isActive) {
+  if (!badge) return;
+
+  const title = badge.querySelector(".probe-ab-title");
+  const tdbTitle = badge.querySelector(".tdb .title");
+  const ahTitle = badge.querySelector(".ah .title");
+  const tdbValue = badge.querySelector(".tdb .value");
+  const ahValue = badge.querySelector(".ah .value");
+  const data = probe?.data || (probe ? calculateAllProperties(probe.t, probe.w, getPressureInPa()) : null);
+  const tdb = Number.isFinite(data?.Tdb) ? fmtInfo(data.Tdb) : "\u2014";
+  const ah = Number.isFinite(data?.AH) ? fmtInfo(data.AH) : "\u2014";
+
+  if (title) title.textContent = target;
+  if (tdbTitle) tdbTitle.textContent = "Tdb (°C)";
+  if (ahTitle) ahTitle.textContent = "AH (g/m³)";
+  if (tdbValue) tdbValue.textContent = tdb;
+  if (ahValue) ahValue.textContent = ah;
+
+  badge.classList.toggle("active", isActive);
+}
+
 function refreshCompareProbeBadges() {
   const badgeA = document.getElementById("probe-ab-a");
   const badgeB = document.getElementById("probe-ab-b");
-  if (badgeA) {
-    badgeA.textContent = State.probeA
-      ? formatI18n("compareBadgeValue", { target: "A", tdb: State.probeA.t.toFixed(1), w: State.probeA.w.toFixed(4) })
-      : formatI18n("compareBadgeEmpty", { target: "A" });
-    badgeA.classList.toggle("active", State.compareTarget === "A");
-  }
-  if (badgeB) {
-    badgeB.textContent = State.probeB
-      ? formatI18n("compareBadgeValue", { target: "B", tdb: State.probeB.t.toFixed(1), w: State.probeB.w.toFixed(4) })
-      : formatI18n("compareBadgeEmpty", { target: "B" });
-    badgeB.classList.toggle("active", State.compareTarget === "B");
-  }
+  updateCompareProbeBadge(badgeA, "A", State.probeA, State.compareTarget === "A");
+  updateCompareProbeBadge(badgeB, "B", State.probeB, State.compareTarget === "B");
 }
 
 function setCompareTarget(target) {
@@ -3083,7 +3346,7 @@ function buildZoneDetailContent(zone) {
   const axisValuesY = displayPoints.map((point) => point.y);
   const temps = zone.points.map((point) => point.t);
   const area = estimatePolygonArea(displayPoints);
-  const yUnit = State.yAxisType === "absoluteHumidity" ? "g/m3" : "kg/kg'";
+  const yUnit = State.yAxisType === "absoluteHumidity" ? "g/m³" : "kg/kg'";
   const vertices = buildVertexMarkup(displayPoints);
 
   return `
@@ -3139,9 +3402,7 @@ function buildPointCard(point, index) {
 }
 
 function buildZoneCard(zone, index) {
-  const displayPoints = getZoneDisplayPoints(zone);
   const subtitle = formatI18n("verticesCount", { count: zone.points.length });
-  const vertices = buildVertexMarkup(displayPoints);
   const displayName = getLocalizedDisplayName(zone.name, "zone", index + 1);
 
   return `
@@ -3164,12 +3425,6 @@ function buildZoneCard(zone, index) {
           <button class="icon-btn btn-delete" type="button" onclick="deleteZone(event, ${zone.id})" title="Delete zone">
             <span class="material-symbols-rounded">delete</span>
           </button>
-        </div>
-      </div>
-      <div class="item-body item-body-collapsible ${zone.id === State.selectedZoneId ? "show" : ""}">
-        <div class="item-details show">
-          <div class="item-details-title">Vertices</div>
-          <div class="vertex-list">${vertices}</div>
         </div>
       </div>
     </article>`;
@@ -5219,8 +5474,6 @@ function drawChart() {
     });
     const polygonPoints = displayPoints.map((point) => [point.x, point.y].join(",")).join(" ");
     const rgb = hexToRgb(zone.color);
-    const labelPoint = findZoneLabelPosition(displayPoints);
-
     zoneLayer
       .append("polygon")
       .attr("points", polygonPoints)
@@ -5246,17 +5499,7 @@ function drawChart() {
       .attr("opacity", 0.92)
       .style("pointer-events", "none");
 
-    zoneLayer
-      .append("text")
-      .attr("x", labelPoint.x)
-      .attr("y", labelPoint.y)
-      .attr("text-anchor", "middle")
-      .attr("dominant-baseline", "middle")
-      .attr("fill", zone.color)
-      .attr("font-size", "10px")
-      .attr("font-weight", "bold")
-      .text(zone.name)
-      .style("pointer-events", "none");
+    renderRealDataZoneLabel(zoneLayer, zone, displayPoints, w, h);
   });
   
   State.zones.forEach((z) => {
@@ -5287,19 +5530,41 @@ function drawChart() {
 
     if (z.id === State.selectedZoneId) poly.classed("selected", true);
 
-    const labelPoint = findZoneLabelPosition(displayPoints);
+    if (z.showSourcePoints && Array.isArray(z.sourcePoints) && z.sourcePoints.length) {
+      const displaySourcePoints = z.sourcePoints.map((point) => {
+        if (State.chartType === "psychrometric") {
+          return {
+            x: x(point.t),
+            y: y(getYValue(point.t, point.w, Patm)),
+          };
+        }
 
-    zoneLayer
-      .append("text")
-      .attr("x", labelPoint.x)
-      .attr("y", labelPoint.y)
-      .attr("text-anchor", "middle")
-      .attr("dominant-baseline", "middle")
-      .attr("fill", z.color)
-      .attr("font-size", "10px")
-      .attr("font-weight", "bold")
-      .text(getLocalizedDisplayName(z.name, "zone"))
-      .style("pointer-events", "none");
+        return {
+          x: x(getYValue(point.t, point.w, Patm)),
+          y: y(point.t),
+        };
+      });
+
+      zoneLayer
+        .append("g")
+        .attr("class", "user-zone-source-points")
+        .selectAll("circle")
+        .data(displaySourcePoints)
+        .join("circle")
+        .attr("cx", (point) => point.x)
+        .attr("cy", (point) => point.y)
+        .attr("r", 2.6)
+        .attr("fill", z.color)
+        .attr("stroke", "rgba(255,255,255,0.95)")
+        .attr("stroke-width", 0.8)
+        .attr("opacity", 0.92)
+        .style("pointer-events", "none");
+    }
+
+    renderRealDataZoneLabel(zoneLayer, {
+      ...z,
+      name: getLocalizedDisplayName(z.name, "zone"),
+    }, displayPoints, w, h);
   });
 
   // TEMP ZONES (Manual)

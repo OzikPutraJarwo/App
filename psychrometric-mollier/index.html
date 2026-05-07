@@ -109,8 +109,32 @@
         <div id="explore-compare-ui" style="display:none">
           <p class="panel-desc">Select target A or B, then click the chart to place or replace that probe.</p>
           <div class="compare-ab-status">
-            <button type="button" id="probe-ab-a" class="probe-ab-badge probe-ab-a active" onclick="setCompareTarget('A')">A: —</button>
-            <button type="button" id="probe-ab-b" class="probe-ab-badge probe-ab-b" onclick="setCompareTarget('B')">B: —</button>
+            <button type="button" id="probe-ab-a" class="probe-ab-badge probe-ab-a active" onclick="setCompareTarget('A')">
+              <span class="probe-ab-title">A</span>
+              <div>
+                <div class="tdb">
+                  <span class="title">Tdb (°C)</span>
+                  <span class="value"></span>
+                </div>
+                <div class="ah">
+                  <span class="title">AH (g/m³)</span>
+                  <span class="value"></span>
+                </div>
+              </div>
+            </button>
+            <button type="button" id="probe-ab-b" class="probe-ab-badge probe-ab-b" onclick="setCompareTarget('B')">
+              <span class="probe-ab-title">B</span>
+              <div>
+                <div class="tdb">
+                  <span class="title">Tdb (°C)</span>
+                  <span class="value"></span>
+                </div>
+                <div class="ah">
+                  <span class="title">AH (g/m³)</span>
+                  <span class="value"></span>
+                </div>
+              </div>
+            </button>
           </div>
           <div class="sb-btn-row">
             <button class="sb-btn" onclick="clearProbeA()">Reset A</button>
@@ -269,6 +293,40 @@
               </select>
             </div>
           </div>
+          <div class="param-grid single">
+            <div>
+              <label>Chart Title</label>
+              <input id="plants-zone-title" type="text" placeholder="Korean Summer Squash" oninput="previewPlantsZone()">
+            </div>
+          </div>
+          <div class="settings-row2">
+            <div>
+              <label>Zone Color</label>
+              <input id="plants-zone-color" class="color-picker" type="color" value="#4b8b3b" oninput="previewPlantsZone()">
+            </div>
+            <div>
+              <label>Title Position</label>
+              <select id="plants-zone-label-position" onchange="previewPlantsZone()">
+                <option value="inside">Inside zone</option>
+                <option value="outside">Outside nearby</option>
+              </select>
+            </div>
+          </div>
+          <div class="param-grid single">
+            <div>
+              <label>Title Font</label>
+              <input id="plants-zone-label-font" type="text" list="plants-zone-font-options" placeholder="Instrument Sans, sans-serif" oninput="previewPlantsZone()">
+              <datalist id="plants-zone-font-options">
+                <option value="Instrument Sans, sans-serif"></option>
+                <option value="Georgia, 'Times New Roman', serif"></option>
+                <option value="ui-monospace, 'SFMono-Regular', monospace"></option>
+              </datalist>
+            </div>
+          </div>
+          <label class="settype-checkbox pill-check">
+            <input id="plants-zone-show-points" type="checkbox" onchange="previewPlantsZone()">
+            <span>Keep source points visible after apply</span>
+          </label>
           <div class="plants-zone-range">
             <div class="range-label-row plants-range-header">
               <span>Boundary</span>
