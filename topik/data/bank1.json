@@ -1,0 +1,354 @@
+{
+  "pools": {
+    "topic": [
+      {
+        "id": "topic-01",
+        "box": "아버지는 회사원입니다. 어머니는 의사입니다.",
+        "choices": ["나라", "직업", "나이", "취미"],
+        "answer": 2,
+        "explanation": { "ko": "'회사원'과 '의사'는 직업입니다.", "en": "'Office worker' and 'doctor' are jobs (occupations)." }
+      },
+      {
+        "id": "topic-02",
+        "box": "오늘은 흐립니다. 비가 옵니다.",
+        "choices": ["날짜", "날씨", "장소", "운동"],
+        "answer": 2,
+        "explanation": { "ko": "'흐리다', '비가 오다'는 날씨에 대한 말입니다.", "en": "'Cloudy' and 'raining' describe the weather." }
+      },
+      {
+        "id": "topic-03",
+        "box": "저는 스무 살입니다. 동생은 열여덟 살입니다.",
+        "choices": ["시간", "나라", "나이", "이름"],
+        "answer": 3,
+        "explanation": { "ko": "'스무 살', '열여덟 살'은 나이입니다.", "en": "'Twenty years old' and 'eighteen years old' are ages." }
+      },
+      {
+        "id": "topic-04",
+        "box": "형이 있습니다. 누나도 있습니다.",
+        "choices": ["친구", "가족", "학교", "고향"],
+        "answer": 2,
+        "explanation": { "ko": "'형'과 '누나'는 가족입니다.", "en": "'Older brother' and 'older sister' are family members." }
+      },
+      {
+        "id": "topic-05",
+        "box": "저는 한국 사람입니다. 친구는 미국 사람입니다.",
+        "choices": ["나라", "직업", "날씨", "음식"],
+        "answer": 1,
+        "explanation": { "ko": "'한국', '미국'은 나라입니다.", "en": "'Korea' and 'America' are countries." }
+      },
+      {
+        "id": "topic-06",
+        "box": "수박이 쌉니다. 천 원입니다.",
+        "choices": ["값", "맛", "일", "집"],
+        "answer": 1,
+        "explanation": { "ko": "'싸다', '천 원'은 값에 대한 말입니다.", "en": "'Cheap' and '1,000 won' are about price." }
+      },
+      {
+        "id": "topic-07",
+        "box": "오늘은 금요일입니다. 내일은 토요일입니다.",
+        "choices": ["날씨", "요일", "시간", "방학"],
+        "answer": 2,
+        "explanation": { "ko": "'금요일', '토요일'은 요일입니다.", "en": "'Friday' and 'Saturday' are days of the week." }
+      },
+      {
+        "id": "topic-08",
+        "box": "저는 수영을 좋아합니다. 주말마다 수영장에 갑니다.",
+        "choices": ["취미", "여행", "공부", "약속"],
+        "answer": 1,
+        "explanation": { "ko": "좋아해서 자주 하는 일은 취미입니다.", "en": "Something you like and do often is a hobby." }
+      },
+      {
+        "id": "topic-09",
+        "box": "김치는 조금 맵습니다. 그렇지만 맛있습니다.",
+        "choices": ["맛", "값", "나라", "시간"],
+        "answer": 1,
+        "explanation": { "ko": "'맵다', '맛있다'는 맛에 대한 말입니다.", "en": "'Spicy' and 'delicious' describe taste." }
+      },
+      {
+        "id": "topic-10",
+        "box": "지금은 겨울입니다. 눈이 많이 옵니다.",
+        "choices": ["계절", "날짜", "장소", "운동"],
+        "answer": 1,
+        "explanation": { "ko": "'겨울'은 계절입니다.", "en": "'Winter' is a season." }
+      },
+      {
+        "id": "topic-11",
+        "box": "아침에 빵을 먹습니다. 우유도 마십니다.",
+        "choices": ["음식", "운동", "쇼핑", "사람"],
+        "answer": 1,
+        "explanation": { "ko": "'빵', '우유'는 음식입니다.", "en": "'Bread' and 'milk' are food." }
+      },
+      {
+        "id": "topic-12",
+        "box": "방학에 부산에 갈 겁니다. 바다를 볼 겁니다.",
+        "choices": ["여행", "공부", "이름", "날씨"],
+        "answer": 1,
+        "explanation": { "ko": "부산에 가서 바다를 보는 것은 여행입니다.", "en": "Going to Busan to see the sea is a trip (travel)." }
+      }
+    ],
+    "blank-particle": [
+      {
+        "id": "bp34-01",
+        "box": "친구가 학교(      ) 갑니다.",
+        "choices": ["가", "를", "에", "도"],
+        "answer": 3,
+        "explanation": { "ko": "가는 곳 뒤에는 '에'를 씁니다.", "en": "Use '에' after a destination." }
+      },
+      {
+        "id": "bp34-02",
+        "box": "저는 사과(      ) 좋아합니다.",
+        "choices": ["가", "를", "에", "은"],
+        "answer": 2,
+        "explanation": { "ko": "'좋아하다'의 목적어 뒤에는 '를'을 씁니다.", "en": "Use the object particle '를' before '좋아하다'." }
+      },
+      {
+        "id": "bp34-03",
+        "box": "동생(      ) 방에서 잡니다.",
+        "choices": ["이", "을", "에", "와"],
+        "answer": 1,
+        "explanation": { "ko": "문장의 주어 뒤에는 '이/가'를 씁니다.", "en": "Use the subject particle '이' after the subject." }
+      },
+      {
+        "id": "bp34-04",
+        "box": "도서관(      ) 책을 읽습니다.",
+        "choices": ["이", "를", "에서", "부터"],
+        "answer": 3,
+        "explanation": { "ko": "행동을 하는 장소 뒤에는 '에서'를 씁니다.", "en": "Use '에서' for the place where an action happens." }
+      },
+      {
+        "id": "bp34-05",
+        "box": "저는 커피를 마십니다. 주스(      ) 마십니다.",
+        "choices": ["가", "는", "도", "를"],
+        "answer": 3,
+        "explanation": { "ko": "앞의 것에 더할 때 '도'를 씁니다.", "en": "Use '도' (also) when adding to something mentioned before." }
+      },
+      {
+        "id": "bp34-06",
+        "box": "저는 언니(      ) 시장에 갑니다.",
+        "choices": ["와", "를", "도", "가"],
+        "answer": 1,
+        "explanation": { "ko": "같이 가는 사람 뒤에는 '와/과'를 씁니다.", "en": "Use '와/과' (with) for a person you do something together with." }
+      }
+    ],
+    "blank-noun": [
+      {
+        "id": "bn35-01",
+        "box": "(      )에 갑니다. 책을 빌립니다.",
+        "choices": ["병원", "도서관", "식당", "공항"],
+        "answer": 2,
+        "explanation": { "ko": "책을 빌리는 곳은 도서관입니다.", "en": "You borrow books at a library." }
+      },
+      {
+        "id": "bn35-02",
+        "box": "(      )에 갑니다. 머리를 자릅니다.",
+        "choices": ["미용실", "약국", "서점", "은행"],
+        "answer": 1,
+        "explanation": { "ko": "머리를 자르는 곳은 미용실입니다.", "en": "You get a haircut at a hair salon." }
+      },
+      {
+        "id": "bn35-03",
+        "box": "눈이 나쁩니다. (      )을 씁니다.",
+        "choices": ["안경", "우산", "모자", "장갑"],
+        "answer": 1,
+        "explanation": { "ko": "눈이 나쁘면 안경을 씁니다.", "en": "If your eyesight is bad, you wear glasses." }
+      },
+      {
+        "id": "bn35-04",
+        "box": "(      )에서 손을 씻습니다.",
+        "choices": ["화장실", "교실", "극장", "공원"],
+        "answer": 1,
+        "explanation": { "ko": "손은 화장실에서 씻습니다.", "en": "You wash your hands in the bathroom." }
+      },
+      {
+        "id": "bn35-05",
+        "box": "(      )을 신습니다. 밖에 나갑니다.",
+        "choices": ["신발", "모자", "장갑", "안경"],
+        "answer": 1,
+        "explanation": { "ko": "'신다'는 신발과 같이 씁니다. 모자는 '쓰다', 장갑은 '끼다'입니다.", "en": "The verb '신다' (put on) is used with shoes; hats use '쓰다', gloves use '끼다'." }
+      },
+      {
+        "id": "bn35-06",
+        "box": "내일은 (      )입니다. 학교에 안 갑니다.",
+        "choices": ["일요일", "월요일", "수요일", "금요일"],
+        "answer": 1,
+        "explanation": { "ko": "일요일에는 학교에 가지 않습니다.", "en": "There is no school on Sunday." }
+      }
+    ],
+    "blank-verb": [
+      {
+        "id": "bv36-01",
+        "box": "저는 요리사입니다. 음식을 (      ).",
+        "choices": ["만듭니다", "마십니다", "배웁니다", "벗습니다"],
+        "answer": 1,
+        "explanation": { "ko": "요리사는 음식을 만드는 사람입니다.", "en": "A cook is a person who makes food." }
+      },
+      {
+        "id": "bv36-02",
+        "box": "노래를 (      ). 기분이 좋습니다.",
+        "choices": ["부릅니다", "만납니다", "닫습니다", "씻습니다"],
+        "answer": 1,
+        "explanation": { "ko": "노래는 '부릅니다'와 같이 씁니다.", "en": "The verb '부르다' (sing) goes with '노래' (song)." }
+      },
+      {
+        "id": "bv36-03",
+        "box": "우표를 삽니다. 편지를 (      ).",
+        "choices": ["보냅니다", "먹습니다", "입습니다", "엽니다"],
+        "answer": 1,
+        "explanation": { "ko": "우표를 사서 편지를 보냅니다.", "en": "You buy a stamp to send a letter." }
+      },
+      {
+        "id": "bv36-04",
+        "box": "창문을 (      ). 바람이 들어옵니다.",
+        "choices": ["엽니다", "닫습니다", "삽니다", "그립니다"],
+        "answer": 1,
+        "explanation": { "ko": "창문을 열면 바람이 들어옵니다.", "en": "Wind comes in when you open the window." }
+      },
+      {
+        "id": "bv36-05",
+        "box": "한국 친구와 이야기합니다. 한국어를 (      ).",
+        "choices": ["배웁니다", "만듭니다", "마십니다", "신습니다"],
+        "answer": 1,
+        "explanation": { "ko": "친구와 이야기하면서 한국어를 배웁니다.", "en": "You learn Korean by talking with a Korean friend." }
+      },
+      {
+        "id": "bv36-06",
+        "box": "사진을 (      ). 카메라가 있습니다.",
+        "choices": ["찍습니다", "마십니다", "읽습니다", "던집니다"],
+        "answer": 1,
+        "explanation": { "ko": "사진은 '찍습니다'와 같이 씁니다.", "en": "The verb '찍다' (take) goes with '사진' (photo)." }
+      }
+    ],
+    "blank-adj": [
+      {
+        "id": "ba37-01",
+        "box": "가방이 (      ). 혼자 들 수 없습니다.",
+        "choices": ["무겁습니다", "가볍습니다", "쌉니다", "작습니다"],
+        "answer": 1,
+        "explanation": { "ko": "혼자 들 수 없으면 무거운 것입니다.", "en": "If you can't lift it alone, it is heavy." }
+      },
+      {
+        "id": "ba37-02",
+        "box": "날씨가 (      ). 창문을 닫습니다.",
+        "choices": ["춥습니다", "덥습니다", "맑습니다", "좋습니다"],
+        "answer": 1,
+        "explanation": { "ko": "추우면 창문을 닫습니다.", "en": "You close the window when it is cold." }
+      },
+      {
+        "id": "ba37-03",
+        "box": "이 옷은 (      ). 돈이 많이 필요합니다.",
+        "choices": ["비쌉니다", "쌉니다", "큽니다", "많습니다"],
+        "answer": 1,
+        "explanation": { "ko": "돈이 많이 필요하면 비싼 것입니다.", "en": "If you need a lot of money, it is expensive." }
+      },
+      {
+        "id": "ba37-04",
+        "box": "동생은 키가 (      ). 농구를 잘합니다.",
+        "choices": ["큽니다", "작습니다", "짧습니다", "넓습니다"],
+        "answer": 1,
+        "explanation": { "ko": "키가 크면 농구를 하기 좋습니다.", "en": "Being tall helps in basketball." }
+      },
+      {
+        "id": "ba37-05",
+        "box": "시험이 (      ). 열심히 공부해야 합니다.",
+        "choices": ["어렵습니다", "쉽습니다", "가깝습니다", "조용합니다"],
+        "answer": 1,
+        "explanation": { "ko": "시험이 어려우면 열심히 공부해야 합니다.", "en": "If the exam is difficult, you must study hard." }
+      },
+      {
+        "id": "ba37-06",
+        "box": "방이 (      ). 청소를 합니다.",
+        "choices": ["더럽습니다", "깨끗합니다", "시원합니다", "밝습니다"],
+        "answer": 1,
+        "explanation": { "ko": "방이 더러우면 청소를 합니다.", "en": "You clean the room when it is dirty." }
+      }
+    ],
+    "blank-adverb": [
+      {
+        "id": "bd38-01",
+        "box": "버스가 안 옵니다. 그래서 (      ) 기다립니다.",
+        "choices": ["오래", "아까", "제일", "별로"],
+        "answer": 1,
+        "explanation": { "ko": "버스가 안 오면 오래 기다립니다.", "en": "You wait a long time when the bus doesn't come." }
+      },
+      {
+        "id": "bd38-02",
+        "box": "시간이 없습니다. (      ) 갑시다.",
+        "choices": ["빨리", "천천히", "가끔", "아주"],
+        "answer": 1,
+        "explanation": { "ko": "시간이 없으면 빨리 가야 합니다.", "en": "When there is no time, you must go quickly." }
+      },
+      {
+        "id": "bd38-03",
+        "box": "한국어를 (      ) 공부했습니다. 그래서 시험을 잘 봤습니다.",
+        "choices": ["열심히", "조금", "늦게", "벌써"],
+        "answer": 1,
+        "explanation": { "ko": "열심히 공부하면 시험을 잘 봅니다.", "en": "Studying hard leads to doing well on the exam." }
+      },
+      {
+        "id": "bd38-04",
+        "box": "밤에 커피를 마셨습니다. 그래서 (      ) 잤습니다.",
+        "choices": ["늦게", "일찍", "많이", "같이"],
+        "answer": 1,
+        "explanation": { "ko": "커피를 마시면 잠이 안 와서 늦게 잡니다.", "en": "Coffee keeps you awake, so you sleep late." }
+      },
+      {
+        "id": "bd38-05",
+        "box": "동생과 저는 (      ) 학교에 갑니다. 같은 학교에 다닙니다.",
+        "choices": ["같이", "혼자", "먼저", "천천히"],
+        "answer": 1,
+        "explanation": { "ko": "같은 학교에 다니니까 같이 갑니다.", "en": "They attend the same school, so they go together." }
+      },
+      {
+        "id": "bd38-06",
+        "box": "음식이 많습니다. (      ) 드세요.",
+        "choices": ["많이", "조금", "아까", "늦게"],
+        "answer": 1,
+        "explanation": { "ko": "음식이 많으니까 많이 먹으라고 합니다.", "en": "There is a lot of food, so eat a lot." }
+      }
+    ],
+    "blank-verb2": [
+      {
+        "id": "bg39-01",
+        "box": "배가 고픕니다. 밥을 (      ) 싶습니다.",
+        "choices": ["먹고", "자고", "보고", "사고"],
+        "answer": 1,
+        "explanation": { "ko": "배가 고프면 밥을 먹고 싶습니다.", "en": "When hungry, you want to eat." }
+      },
+      {
+        "id": "bg39-02",
+        "box": "피곤합니다. 집에서 (      ) 싶습니다.",
+        "choices": ["쉬고", "걷고", "찾고", "팔고"],
+        "answer": 1,
+        "explanation": { "ko": "피곤하면 쉬고 싶습니다.", "en": "When tired, you want to rest." }
+      },
+      {
+        "id": "bg39-03",
+        "box": "고향 친구가 보고 싶습니다. 친구를 (      ) 싶습니다.",
+        "choices": ["만나고", "닫고", "배우고", "끝나고"],
+        "answer": 1,
+        "explanation": { "ko": "보고 싶은 친구를 만나고 싶습니다.", "en": "You want to meet the friend you miss." }
+      },
+      {
+        "id": "bg39-04",
+        "box": "노래방에 갑니다. 노래를 (      ) 싶습니다.",
+        "choices": ["부르고", "마시고", "신고", "읽고"],
+        "answer": 1,
+        "explanation": { "ko": "노래방에서 노래를 부릅니다.", "en": "You sing songs at a karaoke room." }
+      },
+      {
+        "id": "bg39-05",
+        "box": "새 옷이 없습니다. 옷을 (      ) 싶습니다.",
+        "choices": ["사고", "팔고", "벗고", "찾고"],
+        "answer": 1,
+        "explanation": { "ko": "새 옷이 없으면 옷을 사고 싶습니다.", "en": "If you have no new clothes, you want to buy some." }
+      },
+      {
+        "id": "bg39-06",
+        "box": "한국 영화를 좋아합니다. 영화관에 (      ) 싶습니다.",
+        "choices": ["가고", "오고", "앉고", "자고"],
+        "answer": 1,
+        "explanation": { "ko": "영화를 좋아하면 영화관에 가고 싶습니다.", "en": "If you like movies, you want to go to the cinema." }
+      }
+    ]
+  }
+}
