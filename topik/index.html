@@ -1,24 +1,26 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TOPIK Practice</title>
-  <meta name="description" content="TOPIK 온라인 연습 — TOPIK practice tests with timer, scoring, level estimate and history.">
+  <meta name="description" content="TOPIK practice tests with a timer, scoring, level estimate and history.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://app.kodejarwo.com/main.css">
+  <link rel="apple-touch-icon" href="../icon/TOPIK.webp">
+  <link rel="icon" type="image/x-icon" href="../icon/TOPIK.webp">
 </head>
 
 <body>
 
   <header>
     <div class="header wrap title-only">
-      <a href="#" class="site-back site-button" id="btn-home" title="처음으로 (Home)">
+      <a href="/" class="site-back site-button" id="btn-home" title="Home">
         <svg fill="#000000" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xml:space="preserve">
           <g>
             <path d="M490.667,234.667H158.17l112.915-112.915c8.331-8.331,8.331-21.839,0-30.17s-21.839-8.331-30.17,0L91.582,240.915
@@ -39,67 +41,85 @@
           </g>
         </svg>
       </a>
-      <div class="site-title">TOPIK 연습</div>
-      <span id="timer" class="timer">60:00</span>
-      <span id="answered-count" class="answered-count">0/40</span>
-      <button id="btn-submit" class="small"><span class="material-symbols-rounded"> send </span></button>
+      <div class="site-title">TOPIK</div>
+      <span id="timer" class="timer">
+        <span class="material-symbols-rounded">timer</span>
+        <span id="timer-value">60:00</span>
+      </span>
+      <span id="answered-count" class="answered-count" role="button" tabindex="0" aria-expanded="false" title="Show question list">
+        <span class="material-symbols-rounded">check_circle</span>
+        <span id="answered-value">0/40</span>
+        <span class="material-symbols-rounded" id="nav-toggle-icon">expand_more</span>
+      </span>
+      <button id="btn-submit" class="small" title="Submit"><span class="material-symbols-rounded">send</span></button>
     </div>
   </header>
+
+  <div id="nav-panel" class="nav-panel none">
+    <div id="nav-grid" class="nav-grid"></div>
+  </div>
 
   <main>
     <div class="main wrap">
 
-      <!-- ============ HOME ============ -->
+      <!-- ============ MAIN MENU ============ -->
       <section id="screen-main" class="screen">
 
         <div class="test-grid">
           <div class="item test-card">
             <div class="test-badge">TOPIK I</div>
-            <h2>읽기 <span class="en">Reading</span></h2>
+            <h2><span class="material-symbols-rounded">menu_book</span> Reading</h2>
             <ul class="test-meta">
-              <li>40문항 (31번 ~ 70번) <span class="en">40 questions</span></li>
-              <li>60분 · 100점 <span class="en">60 minutes · 100 points</span></li>
-              <li>매번 문제은행에서 무작위 출제 <span class="en">Randomized from a question bank every attempt</span></li>
-              <li>예상 등급: 1급 / 2급 <span class="en">Level estimate: Level 1 / 2</span></li>
+              <li>40 questions (No. 1–40)</li>
+              <li>60 minutes · 100 points</li>
             </ul>
 
-            <div id="resume-box" class="resume-box none">
-              <p>진행 중인 시험이 있습니다. <span class="en">You have a test in progress.</span></p>
+            <div id="resume-box-t1" class="resume-box none">
+              <p>You have a test in progress.</p>
               <div class="resume-actions">
-                <button id="btn-resume">이어서 하기 <span class="en">Continue</span></button>
-                <button id="btn-discard" class="btn-danger">저장된 시험 삭제 <span class="en">Discard</span></button>
+                <button id="btn-resume-t1"><span class="material-symbols-rounded">play_arrow</span> Continue</button>
+                <button id="btn-discard-t1" class="btn-danger"><span class="material-symbols-rounded">delete</span> Discard</button>
               </div>
             </div>
 
-            <button id="btn-start" class="btn-start">시험 시작 <span class="en">Start</span></button>
+            <button id="btn-start-t1" class="btn-start"><span class="material-symbols-rounded">rocket_launch</span> Start</button>
           </div>
 
-          <div class="item test-card disabled">
+          <div class="item test-card">
             <div class="test-badge t2">TOPIK II</div>
-            <h2>준비 중 <span class="en">Coming soon</span></h2>
+            <h2><span class="material-symbols-rounded">edit_note</span> Writing + Reading</h2>
             <ul class="test-meta">
-              <li>3급 ~ 6급 <span class="en">Levels 3–6</span></li>
-              <li>쓰기 · 읽기 · 듣기 <span class="en">Writing · Reading · Listening</span></li>
+              <li>54 questions (Writing 4 · Reading 50)</li>
+              <li>120 minutes · 200 points</li>
             </ul>
-            <button disabled>시험 시작 <span class="en">Start</span></button>
+
+            <div id="resume-box-t2" class="resume-box none">
+              <p>You have a test in progress.</p>
+              <div class="resume-actions">
+                <button id="btn-resume-t2"><span class="material-symbols-rounded">play_arrow</span> Continue</button>
+                <button id="btn-discard-t2" class="btn-danger"><span class="material-symbols-rounded">delete</span> Discard</button>
+              </div>
+            </div>
+
+            <button id="btn-start-t2" class="btn-start"><span class="material-symbols-rounded">rocket_launch</span> Start</button>
           </div>
         </div>
 
         <div class="item history-card">
           <div class="history-head">
-            <h2>기록 <span class="en">History</span></h2>
-            <button id="btn-clear-history" class="btn-danger small none">전체 삭제 <span class="en">Clear all</span></button>
+            <h2><span class="material-symbols-rounded">history</span> History</h2>
+            <button id="btn-clear-history" class="btn-danger small none"><span class="material-symbols-rounded">delete_sweep</span> Clear all</button>
           </div>
-          <p id="history-empty">아직 기록이 없습니다. 첫 시험을 시작해 보세요! <span class="en">No attempts yet — start your first test!</span></p>
+          <p id="history-empty">No attempts yet — start your first test!</p>
           <div class="scrollable-table none" id="history-wrap">
             <table id="history-table">
               <thead>
                 <tr>
-                  <th>날짜 <span class="en">Date</span></th>
-                  <th>시험 <span class="en">Test</span></th>
-                  <th>점수 <span class="en">Score</span></th>
-                  <th>예상 등급 <span class="en">Level</span></th>
-                  <th>시간 <span class="en">Time</span></th>
+                  <th>Date</th>
+                  <th>Test</th>
+                  <th>Score</th>
+                  <th>Level</th>
+                  <th>Time</th>
                   <th colspan="2"></th>
                 </tr>
               </thead>
@@ -109,10 +129,14 @@
         </div>
 
         <div class="item disclaimer-card">
-          실제 TOPIK I은 듣기(30문항)와 읽기(40문항)로 구성되며, 등급은 200점 만점 기준으로 결정됩니다(1급 80점 이상, 2급 140점 이상).
-          이 사이트의 예상 등급은 읽기 점수 × 2로 계산한 참고용 추정치입니다.
-          <span class="en">The real TOPIK I consists of Listening (30 Qs) + Reading (40 Qs), graded out of 200 (Level 1 ≥ 80, Level 2 ≥ 140).
-          The level shown here is an estimate based on reading × 2.</span>
+          <span class="material-symbols-rounded">info</span>
+          <span>
+            The real TOPIK I consists of Listening + Reading (200 points; Level 1 ≥ 80, Level 2 ≥ 140) and the real
+            TOPIK II consists of Listening + Writing + Reading (300 points; Level 3 ≥ 120, Level 4 ≥ 150,
+            Level 5 ≥ 190, Level 6 ≥ 230). Listening is not included here, so the level shown is an estimate:
+            TOPIK I Reading × 2, TOPIK II (Writing + Reading) × 1.5. TOPIK II writing answers are graded by
+            yourself using the provided model answers.
+          </span>
         </div>
 
         <div id="load-error" class="item error-box none"></div>
@@ -120,43 +144,41 @@
 
       <!-- ============ EXAM ============ -->
       <section id="screen-exam" class="screen none">
-        <div id="exam-toolbar" class="item">
-          <details id="nav-details">
-            <summary>문제 목록 <span class="en">Questions</span></summary>
-            <div id="nav-grid" class="nav-grid"></div>
-          </details>
-        </div>
-
         <div id="exam-body"></div>
 
         <div class="exam-bottom">
-          <button id="btn-submit-bottom" class="btn-start">제출하기 <span class="en">Submit</span></button>
+          <button id="btn-submit-bottom" class="btn-start"><span class="material-symbols-rounded">send</span> Submit</button>
         </div>
       </section>
 
       <!-- ============ RESULT ============ -->
       <section id="screen-result" class="screen none">
         <div class="item">
-          <h2 class="section-title">시험 결과 <span class="en">Result</span></h2>
+          <h2 class="section-title"><span class="material-symbols-rounded">emoji_events</span> Result</h2>
           <div id="score-panel"></div>
           <div id="result-meta" class="result-meta"></div>
+          <div id="writing-grade" class="writing-grade none">
+            <h3 class="grade-title"><span class="material-symbols-rounded">edit_note</span> Writing — grade yourself</h3>
+            <p class="grade-hint">Open <strong>Review</strong> to compare your writing with the model answers, then enter your scores below. The total and level update automatically and are saved to history.</p>
+            <div id="writing-grade-rows" class="grade-rows"></div>
+          </div>
           <div class="scrollable-table">
             <table id="breakdown-table">
               <thead>
                 <tr>
-                  <th>문항 <span class="en">No.</span></th>
-                  <th>유형 <span class="en">Type</span></th>
-                  <th>정답 <span class="en">Correct</span></th>
-                  <th>점수 <span class="en">Points</span></th>
+                  <th>No.</th>
+                  <th>Type</th>
+                  <th>Correct</th>
+                  <th>Points</th>
                 </tr>
               </thead>
               <tbody id="breakdown-body"></tbody>
             </table>
           </div>
           <div class="result-actions">
-            <button id="btn-review">문제 다시 보기 <span class="en">Review</span></button>
-            <button id="btn-new-test" class="btn-green">새 시험 시작 <span class="en">New test</span></button>
-            <button id="btn-result-home" class="btn-secondary">처음으로 <span class="en">Home</span></button>
+            <button id="btn-review"><span class="material-symbols-rounded">fact_check</span> Review</button>
+            <button id="btn-new-test" class="btn-green"><span class="material-symbols-rounded">refresh</span> New test</button>
+            <button id="btn-result-home" class="btn-secondary"><span class="material-symbols-rounded">home</span> Home</button>
           </div>
         </div>
       </section>
@@ -164,16 +186,16 @@
       <!-- ============ REVIEW ============ -->
       <section id="screen-review" class="screen none">
         <div class="item review-head">
-          <h2 class="section-title">문제 다시 보기 <span class="en">Review</span></h2>
+          <h2 class="section-title"><span class="material-symbols-rounded">fact_check</span> Review</h2>
           <p id="review-meta" class="review-meta"></p>
           <div class="result-actions">
-            <button id="btn-review-back" class="btn-secondary">결과로 돌아가기 <span class="en">Back to result</span></button>
-            <button id="btn-review-home" class="btn-secondary">처음으로 <span class="en">Home</span></button>
+            <button id="btn-review-back" class="btn-secondary"><span class="material-symbols-rounded">arrow_back</span> Back to result</button>
+            <button id="btn-review-home" class="btn-secondary"><span class="material-symbols-rounded">home</span> Home</button>
           </div>
         </div>
         <div id="review-body"></div>
         <div class="exam-bottom">
-          <button id="btn-review-home-bottom" class="btn-secondary">처음으로 <span class="en">Home</span></button>
+          <button id="btn-review-home-bottom" class="btn-secondary"><span class="material-symbols-rounded">home</span> Home</button>
         </div>
       </section>
 

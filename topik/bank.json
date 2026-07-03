@@ -1,0 +1,5256 @@
+{
+  "pools": {
+    "topic": [
+      {
+        "id": "topic-01",
+        "box": "아버지는 회사원입니다. 어머니는 의사입니다.",
+        "choices": [
+          "나라",
+          "직업",
+          "나이",
+          "취미"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "'회사원'과 '의사'는 직업입니다.",
+          "en": "'Office worker' and 'doctor' are jobs (occupations)."
+        }
+      },
+      {
+        "id": "topic-02",
+        "box": "오늘은 흐립니다. 비가 옵니다.",
+        "choices": [
+          "날짜",
+          "날씨",
+          "장소",
+          "운동"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "'흐리다', '비가 오다'는 날씨에 대한 말입니다.",
+          "en": "'Cloudy' and 'raining' describe the weather."
+        }
+      },
+      {
+        "id": "topic-03",
+        "box": "저는 스무 살입니다. 동생은 열여덟 살입니다.",
+        "choices": [
+          "시간",
+          "나라",
+          "나이",
+          "이름"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "'스무 살', '열여덟 살'은 나이입니다.",
+          "en": "'Twenty years old' and 'eighteen years old' are ages."
+        }
+      },
+      {
+        "id": "topic-04",
+        "box": "형이 있습니다. 누나도 있습니다.",
+        "choices": [
+          "친구",
+          "가족",
+          "학교",
+          "고향"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "'형'과 '누나'는 가족입니다.",
+          "en": "'Older brother' and 'older sister' are family members."
+        }
+      },
+      {
+        "id": "topic-05",
+        "box": "저는 한국 사람입니다. 친구는 미국 사람입니다.",
+        "choices": [
+          "나라",
+          "직업",
+          "날씨",
+          "음식"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "'한국', '미국'은 나라입니다.",
+          "en": "'Korea' and 'America' are countries."
+        }
+      },
+      {
+        "id": "topic-06",
+        "box": "수박이 쌉니다. 천 원입니다.",
+        "choices": [
+          "값",
+          "맛",
+          "일",
+          "집"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "'싸다', '천 원'은 값에 대한 말입니다.",
+          "en": "'Cheap' and '1,000 won' are about price."
+        }
+      },
+      {
+        "id": "topic-07",
+        "box": "오늘은 금요일입니다. 내일은 토요일입니다.",
+        "choices": [
+          "날씨",
+          "요일",
+          "시간",
+          "방학"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "'금요일', '토요일'은 요일입니다.",
+          "en": "'Friday' and 'Saturday' are days of the week."
+        }
+      },
+      {
+        "id": "topic-08",
+        "box": "저는 수영을 좋아합니다. 주말마다 수영장에 갑니다.",
+        "choices": [
+          "취미",
+          "여행",
+          "공부",
+          "약속"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "좋아해서 자주 하는 일은 취미입니다.",
+          "en": "Something you like and do often is a hobby."
+        }
+      },
+      {
+        "id": "topic-09",
+        "box": "김치는 조금 맵습니다. 그렇지만 맛있습니다.",
+        "choices": [
+          "맛",
+          "값",
+          "나라",
+          "시간"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "'맵다', '맛있다'는 맛에 대한 말입니다.",
+          "en": "'Spicy' and 'delicious' describe taste."
+        }
+      },
+      {
+        "id": "topic-10",
+        "box": "지금은 겨울입니다. 눈이 많이 옵니다.",
+        "choices": [
+          "계절",
+          "날짜",
+          "장소",
+          "운동"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "'겨울'은 계절입니다.",
+          "en": "'Winter' is a season."
+        }
+      },
+      {
+        "id": "topic-11",
+        "box": "아침에 빵을 먹습니다. 우유도 마십니다.",
+        "choices": [
+          "음식",
+          "운동",
+          "쇼핑",
+          "사람"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "'빵', '우유'는 음식입니다.",
+          "en": "'Bread' and 'milk' are food."
+        }
+      },
+      {
+        "id": "topic-12",
+        "box": "방학에 부산에 갈 겁니다. 바다를 볼 겁니다.",
+        "choices": [
+          "여행",
+          "공부",
+          "이름",
+          "날씨"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "부산에 가서 바다를 보는 것은 여행입니다.",
+          "en": "Going to Busan to see the sea is a trip (travel)."
+        }
+      }
+    ],
+    "blank-particle": [
+      {
+        "id": "bp34-01",
+        "box": "친구가 학교(      ) 갑니다.",
+        "choices": [
+          "가",
+          "를",
+          "에",
+          "도"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "가는 곳 뒤에는 '에'를 씁니다.",
+          "en": "Use '에' after a destination."
+        }
+      },
+      {
+        "id": "bp34-02",
+        "box": "저는 사과(      ) 좋아합니다.",
+        "choices": [
+          "가",
+          "를",
+          "에",
+          "은"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "'좋아하다'의 목적어 뒤에는 '를'을 씁니다.",
+          "en": "Use the object particle '를' before '좋아하다'."
+        }
+      },
+      {
+        "id": "bp34-03",
+        "box": "동생(      ) 방에서 잡니다.",
+        "choices": [
+          "이",
+          "을",
+          "에",
+          "와"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "문장의 주어 뒤에는 '이/가'를 씁니다.",
+          "en": "Use the subject particle '이' after the subject."
+        }
+      },
+      {
+        "id": "bp34-04",
+        "box": "도서관(      ) 책을 읽습니다.",
+        "choices": [
+          "이",
+          "를",
+          "에서",
+          "부터"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "행동을 하는 장소 뒤에는 '에서'를 씁니다.",
+          "en": "Use '에서' for the place where an action happens."
+        }
+      },
+      {
+        "id": "bp34-05",
+        "box": "저는 커피를 마십니다. 주스(      ) 마십니다.",
+        "choices": [
+          "가",
+          "는",
+          "도",
+          "를"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "앞의 것에 더할 때 '도'를 씁니다.",
+          "en": "Use '도' (also) when adding to something mentioned before."
+        }
+      },
+      {
+        "id": "bp34-06",
+        "box": "저는 언니(      ) 시장에 갑니다.",
+        "choices": [
+          "와",
+          "를",
+          "도",
+          "가"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "같이 가는 사람 뒤에는 '와/과'를 씁니다.",
+          "en": "Use '와/과' (with) for a person you do something together with."
+        }
+      }
+    ],
+    "blank-noun": [
+      {
+        "id": "bn35-01",
+        "box": "(      )에 갑니다. 책을 빌립니다.",
+        "choices": [
+          "병원",
+          "도서관",
+          "식당",
+          "공항"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "책을 빌리는 곳은 도서관입니다.",
+          "en": "You borrow books at a library."
+        }
+      },
+      {
+        "id": "bn35-02",
+        "box": "(      )에 갑니다. 머리를 자릅니다.",
+        "choices": [
+          "미용실",
+          "약국",
+          "서점",
+          "은행"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "머리를 자르는 곳은 미용실입니다.",
+          "en": "You get a haircut at a hair salon."
+        }
+      },
+      {
+        "id": "bn35-03",
+        "box": "눈이 나쁩니다. (      )을 씁니다.",
+        "choices": [
+          "안경",
+          "우산",
+          "모자",
+          "장갑"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "눈이 나쁘면 안경을 씁니다.",
+          "en": "If your eyesight is bad, you wear glasses."
+        }
+      },
+      {
+        "id": "bn35-04",
+        "box": "(      )에서 손을 씻습니다.",
+        "choices": [
+          "화장실",
+          "교실",
+          "극장",
+          "공원"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "손은 화장실에서 씻습니다.",
+          "en": "You wash your hands in the bathroom."
+        }
+      },
+      {
+        "id": "bn35-05",
+        "box": "(      )을 신습니다. 밖에 나갑니다.",
+        "choices": [
+          "신발",
+          "모자",
+          "장갑",
+          "안경"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "'신다'는 신발과 같이 씁니다. 모자는 '쓰다', 장갑은 '끼다'입니다.",
+          "en": "The verb '신다' (put on) is used with shoes; hats use '쓰다', gloves use '끼다'."
+        }
+      },
+      {
+        "id": "bn35-06",
+        "box": "내일은 (      )입니다. 학교에 안 갑니다.",
+        "choices": [
+          "일요일",
+          "월요일",
+          "수요일",
+          "금요일"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "일요일에는 학교에 가지 않습니다.",
+          "en": "There is no school on Sunday."
+        }
+      }
+    ],
+    "blank-verb": [
+      {
+        "id": "bv36-01",
+        "box": "저는 요리사입니다. 음식을 (      ).",
+        "choices": [
+          "만듭니다",
+          "마십니다",
+          "배웁니다",
+          "벗습니다"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "요리사는 음식을 만드는 사람입니다.",
+          "en": "A cook is a person who makes food."
+        }
+      },
+      {
+        "id": "bv36-02",
+        "box": "노래를 (      ). 기분이 좋습니다.",
+        "choices": [
+          "부릅니다",
+          "만납니다",
+          "닫습니다",
+          "씻습니다"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "노래는 '부릅니다'와 같이 씁니다.",
+          "en": "The verb '부르다' (sing) goes with '노래' (song)."
+        }
+      },
+      {
+        "id": "bv36-03",
+        "box": "우표를 삽니다. 편지를 (      ).",
+        "choices": [
+          "보냅니다",
+          "먹습니다",
+          "입습니다",
+          "엽니다"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "우표를 사서 편지를 보냅니다.",
+          "en": "You buy a stamp to send a letter."
+        }
+      },
+      {
+        "id": "bv36-04",
+        "box": "창문을 (      ). 바람이 들어옵니다.",
+        "choices": [
+          "엽니다",
+          "닫습니다",
+          "삽니다",
+          "그립니다"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "창문을 열면 바람이 들어옵니다.",
+          "en": "Wind comes in when you open the window."
+        }
+      },
+      {
+        "id": "bv36-05",
+        "box": "한국 친구와 이야기합니다. 한국어를 (      ).",
+        "choices": [
+          "배웁니다",
+          "만듭니다",
+          "마십니다",
+          "신습니다"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "친구와 이야기하면서 한국어를 배웁니다.",
+          "en": "You learn Korean by talking with a Korean friend."
+        }
+      },
+      {
+        "id": "bv36-06",
+        "box": "사진을 (      ). 카메라가 있습니다.",
+        "choices": [
+          "찍습니다",
+          "마십니다",
+          "읽습니다",
+          "던집니다"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "사진은 '찍습니다'와 같이 씁니다.",
+          "en": "The verb '찍다' (take) goes with '사진' (photo)."
+        }
+      }
+    ],
+    "blank-adj": [
+      {
+        "id": "ba37-01",
+        "box": "가방이 (      ). 혼자 들 수 없습니다.",
+        "choices": [
+          "무겁습니다",
+          "가볍습니다",
+          "쌉니다",
+          "작습니다"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "혼자 들 수 없으면 무거운 것입니다.",
+          "en": "If you can't lift it alone, it is heavy."
+        }
+      },
+      {
+        "id": "ba37-02",
+        "box": "날씨가 (      ). 창문을 닫습니다.",
+        "choices": [
+          "춥습니다",
+          "덥습니다",
+          "맑습니다",
+          "좋습니다"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "추우면 창문을 닫습니다.",
+          "en": "You close the window when it is cold."
+        }
+      },
+      {
+        "id": "ba37-03",
+        "box": "이 옷은 (      ). 돈이 많이 필요합니다.",
+        "choices": [
+          "비쌉니다",
+          "쌉니다",
+          "큽니다",
+          "많습니다"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "돈이 많이 필요하면 비싼 것입니다.",
+          "en": "If you need a lot of money, it is expensive."
+        }
+      },
+      {
+        "id": "ba37-04",
+        "box": "동생은 키가 (      ). 농구를 잘합니다.",
+        "choices": [
+          "큽니다",
+          "작습니다",
+          "짧습니다",
+          "넓습니다"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "키가 크면 농구를 하기 좋습니다.",
+          "en": "Being tall helps in basketball."
+        }
+      },
+      {
+        "id": "ba37-05",
+        "box": "시험이 (      ). 열심히 공부해야 합니다.",
+        "choices": [
+          "어렵습니다",
+          "쉽습니다",
+          "가깝습니다",
+          "조용합니다"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "시험이 어려우면 열심히 공부해야 합니다.",
+          "en": "If the exam is difficult, you must study hard."
+        }
+      },
+      {
+        "id": "ba37-06",
+        "box": "방이 (      ). 청소를 합니다.",
+        "choices": [
+          "더럽습니다",
+          "깨끗합니다",
+          "시원합니다",
+          "밝습니다"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "방이 더러우면 청소를 합니다.",
+          "en": "You clean the room when it is dirty."
+        }
+      }
+    ],
+    "blank-adverb": [
+      {
+        "id": "bd38-01",
+        "box": "버스가 안 옵니다. 그래서 (      ) 기다립니다.",
+        "choices": [
+          "오래",
+          "아까",
+          "제일",
+          "별로"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "버스가 안 오면 오래 기다립니다.",
+          "en": "You wait a long time when the bus doesn't come."
+        }
+      },
+      {
+        "id": "bd38-02",
+        "box": "시간이 없습니다. (      ) 갑시다.",
+        "choices": [
+          "빨리",
+          "천천히",
+          "가끔",
+          "아주"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "시간이 없으면 빨리 가야 합니다.",
+          "en": "When there is no time, you must go quickly."
+        }
+      },
+      {
+        "id": "bd38-03",
+        "box": "한국어를 (      ) 공부했습니다. 그래서 시험을 잘 봤습니다.",
+        "choices": [
+          "열심히",
+          "조금",
+          "늦게",
+          "벌써"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "열심히 공부하면 시험을 잘 봅니다.",
+          "en": "Studying hard leads to doing well on the exam."
+        }
+      },
+      {
+        "id": "bd38-04",
+        "box": "밤에 커피를 마셨습니다. 그래서 (      ) 잤습니다.",
+        "choices": [
+          "늦게",
+          "일찍",
+          "많이",
+          "같이"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "커피를 마시면 잠이 안 와서 늦게 잡니다.",
+          "en": "Coffee keeps you awake, so you sleep late."
+        }
+      },
+      {
+        "id": "bd38-05",
+        "box": "동생과 저는 (      ) 학교에 갑니다. 같은 학교에 다닙니다.",
+        "choices": [
+          "같이",
+          "혼자",
+          "먼저",
+          "천천히"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "같은 학교에 다니니까 같이 갑니다.",
+          "en": "They attend the same school, so they go together."
+        }
+      },
+      {
+        "id": "bd38-06",
+        "box": "음식이 많습니다. (      ) 드세요.",
+        "choices": [
+          "많이",
+          "조금",
+          "아까",
+          "늦게"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "음식이 많으니까 많이 먹으라고 합니다.",
+          "en": "There is a lot of food, so eat a lot."
+        }
+      }
+    ],
+    "blank-verb2": [
+      {
+        "id": "bg39-01",
+        "box": "배가 고픕니다. 밥을 (      ) 싶습니다.",
+        "choices": [
+          "먹고",
+          "자고",
+          "보고",
+          "사고"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "배가 고프면 밥을 먹고 싶습니다.",
+          "en": "When hungry, you want to eat."
+        }
+      },
+      {
+        "id": "bg39-02",
+        "box": "피곤합니다. 집에서 (      ) 싶습니다.",
+        "choices": [
+          "쉬고",
+          "걷고",
+          "찾고",
+          "팔고"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "피곤하면 쉬고 싶습니다.",
+          "en": "When tired, you want to rest."
+        }
+      },
+      {
+        "id": "bg39-03",
+        "box": "고향 친구가 보고 싶습니다. 친구를 (      ) 싶습니다.",
+        "choices": [
+          "만나고",
+          "닫고",
+          "배우고",
+          "끝나고"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "보고 싶은 친구를 만나고 싶습니다.",
+          "en": "You want to meet the friend you miss."
+        }
+      },
+      {
+        "id": "bg39-04",
+        "box": "노래방에 갑니다. 노래를 (      ) 싶습니다.",
+        "choices": [
+          "부르고",
+          "마시고",
+          "신고",
+          "읽고"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "노래방에서 노래를 부릅니다.",
+          "en": "You sing songs at a karaoke room."
+        }
+      },
+      {
+        "id": "bg39-05",
+        "box": "새 옷이 없습니다. 옷을 (      ) 싶습니다.",
+        "choices": [
+          "사고",
+          "팔고",
+          "벗고",
+          "찾고"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "새 옷이 없으면 옷을 사고 싶습니다.",
+          "en": "If you have no new clothes, you want to buy some."
+        }
+      },
+      {
+        "id": "bg39-06",
+        "box": "한국 영화를 좋아합니다. 영화관에 (      ) 싶습니다.",
+        "choices": [
+          "가고",
+          "오고",
+          "앉고",
+          "자고"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "영화를 좋아하면 영화관에 가고 싶습니다.",
+          "en": "If you like movies, you want to go to the cinema."
+        }
+      }
+    ],
+    "notmatch": [
+      {
+        "id": "nm-01",
+        "box": "노트북을 팝니다.\n6개월 사용했습니다.\n가격: 300,000원\n연락처: mina@hanguk.com",
+        "choices": [
+          "이 노트북은 삼십만 원입니다.",
+          "이 노트북은 새것입니다.",
+          "이 사람은 노트북을 팔고 싶어 합니다.",
+          "이메일로 연락하면 됩니다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "6개월 사용한 노트북이므로 새것이 아닙니다.",
+          "en": "The laptop was used for 6 months, so it is not new."
+        }
+      },
+      {
+        "id": "nm-02",
+        "box": "[문자 메시지]\n수진 씨,\n오늘 약속을 잊지 않으셨지요?\n여섯 시에 학교 앞 커피숍에서 만나요.\n제가 먼저 가서 기다리겠습니다.\n- 민호",
+        "choices": [
+          "민호 씨가 수진 씨에게 메시지를 보냈습니다.",
+          "두 사람은 오늘 만날 겁니다.",
+          "두 사람은 여섯 시에 만납니다.",
+          "수진 씨가 먼저 가서 기다릴 겁니다."
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "먼저 가서 기다리는 사람은 민호 씨입니다.",
+          "en": "Minho, not Sujin, will go first and wait."
+        }
+      },
+      {
+        "id": "nm-03",
+        "box": "생일 파티에 초대합니다!\n날짜: 7월 12일 토요일\n시간: 오후 6시\n장소: 우리 집 (사랑아파트 102동 301호)\n- 유나 드림",
+        "choices": [
+          "유나 씨의 생일 파티입니다.",
+          "파티는 주말에 합니다.",
+          "파티는 저녁에 시작합니다.",
+          "파티는 식당에서 합니다."
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "파티 장소는 식당이 아니라 유나 씨의 집입니다.",
+          "en": "The party is at Yuna's home, not a restaurant."
+        }
+      },
+      {
+        "id": "nm-04",
+        "box": "시립 도서관 이용 안내\n화요일 ~ 일요일: 오전 9시 ~ 오후 6시\n월요일은 쉽니다.\n책은 한 사람이 다섯 권까지 빌릴 수 있습니다.",
+        "choices": [
+          "도서관은 월요일에 문을 닫습니다.",
+          "도서관은 아침 아홉 시에 문을 엽니다.",
+          "책을 일곱 권 빌릴 수 있습니다.",
+          "일요일에도 도서관에 갈 수 있습니다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "책은 다섯 권까지만 빌릴 수 있습니다.",
+          "en": "You can borrow only up to five books, not seven."
+        }
+      },
+      {
+        "id": "nm-05",
+        "box": "감기약\n하루 세 번, 식사 후 30분에 드세요.\n3일 동안 드세요.\n한국약국 ☎ 02-1234-5678",
+        "choices": [
+          "이 약은 감기약입니다.",
+          "하루에 세 번 먹습니다.",
+          "밥을 먹기 전에 먹습니다.",
+          "삼 일 동안 먹습니다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "약은 식사 후 30분에 먹습니다.",
+          "en": "The medicine is taken 30 minutes after meals, not before."
+        }
+      },
+      {
+        "id": "nm-06",
+        "box": "한국어 말하기 교실\n기간: 9월 1일 ~ 11월 30일\n시간: 매주 수요일 저녁 7시 ~ 9시\n장소: 세계문화센터 2층\n수업료: 무료",
+        "choices": [
+          "수업은 세 달 동안 합니다.",
+          "일주일에 한 번 수업을 합니다.",
+          "수업은 두 시간 동안 합니다.",
+          "수업을 들으려면 돈을 내야 합니다."
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "수업료가 무료이므로 돈을 내지 않습니다.",
+          "en": "The class is free, so you don't pay."
+        }
+      },
+      {
+        "id": "nm-07",
+        "box": "하늘 커피\n아메리카노 3,000원\n카페라테 3,500원\n주스 4,000원\n※ 오전 10시 전에는 모든 메뉴가 500원 쌉니다.",
+        "choices": [
+          "주스가 제일 비쌉니다.",
+          "카페라테는 삼천오백 원입니다.",
+          "아침 열 시 전에는 더 싸게 살 수 있습니다.",
+          "아메리카노가 주스보다 비쌉니다."
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "아메리카노(3,000원)는 주스(4,000원)보다 쌉니다.",
+          "en": "An americano (3,000 won) is cheaper than juice (4,000 won)."
+        }
+      },
+      {
+        "id": "nm-08",
+        "box": "[문자 메시지]\n지훈 씨,\n미안하지만 내일 회사에 일이 있어서 못 만나요.\n토요일 두 시는 어때요?\n장소는 같은 식당으로 해요.\n- 서연",
+        "choices": [
+          "서연 씨는 내일 지훈 씨를 만날 수 없습니다.",
+          "서연 씨는 토요일에 만나고 싶어 합니다.",
+          "두 사람은 만나는 장소를 바꿀 겁니다.",
+          "서연 씨가 지훈 씨에게 메시지를 썼습니다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "장소는 같은 식당이므로 바꾸지 않습니다.",
+          "en": "The place stays the same restaurant; it is not changed."
+        }
+      },
+      {
+        "id": "nm-09",
+        "box": "가을 음악회\n기간: 10월 한 달 동안\n시간: 매주 금요일 저녁 8시\n장소: 한강공원\n입장료: 무료",
+        "choices": [
+          "음악회는 한 달 동안 합니다.",
+          "음악회는 금요일마다 있습니다.",
+          "음악회는 아침에 시작합니다.",
+          "돈을 내지 않고 볼 수 있습니다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "음악회는 저녁 8시에 시작합니다.",
+          "en": "The concert starts at 8 p.m., not in the morning."
+        }
+      }
+    ],
+    "match": [
+      {
+        "id": "mt-01",
+        "box": "저는 매일 아침 공원에서 달리기를 합니다. 주말에는 친구와 같이 자전거를 탑니다.",
+        "choices": [
+          "저는 저녁에 달리기를 합니다.",
+          "저는 주말에 혼자 자전거를 탑니다.",
+          "저는 아침마다 공원에 갑니다.",
+          "저는 매일 자전거를 탑니다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "매일 아침 공원에서 달리기를 하므로 아침마다 공원에 갑니다.",
+          "en": "The writer runs in the park every morning, so they go to the park every morning."
+        }
+      },
+      {
+        "id": "mt-02",
+        "box": "어제 백화점에서 구두를 샀습니다. 조금 비쌌지만 아주 예쁩니다. 내일 그 구두를 신고 회사에 갈 겁니다.",
+        "choices": [
+          "구두가 쌌습니다.",
+          "오늘 구두를 샀습니다.",
+          "저는 내일 회사에 갈 겁니다.",
+          "저는 시장에서 구두를 샀습니다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "내일 구두를 신고 회사에 간다고 했습니다.",
+          "en": "The writer will wear the shoes to work tomorrow."
+        }
+      },
+      {
+        "id": "mt-03",
+        "box": "제 동생은 요리를 잘합니다. 주말마다 가족을 위해 음식을 만듭니다. 저는 동생이 만든 불고기를 제일 좋아합니다.",
+        "choices": [
+          "저는 요리를 잘합니다.",
+          "동생은 주말에 음식을 만듭니다.",
+          "우리 가족은 주말에 식당에 갑니다.",
+          "저는 불고기를 만듭니다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "동생이 주말마다 음식을 만든다고 했습니다.",
+          "en": "The younger sibling cooks every weekend."
+        }
+      },
+      {
+        "id": "mt-04",
+        "box": "지난주에 제주도로 여행을 갔습니다. 바다가 아주 아름다웠습니다. 사진을 많이 찍었습니다.",
+        "choices": [
+          "저는 다음 주에 여행을 갈 겁니다.",
+          "저는 산에 갔습니다.",
+          "저는 사진을 많이 찍었습니다.",
+          "날씨가 나빠서 사진을 못 찍었습니다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "제주도에서 사진을 많이 찍었다고 했습니다.",
+          "en": "The writer took many photos on Jeju Island."
+        }
+      },
+      {
+        "id": "mt-05",
+        "box": "저는 한국 회사에서 일합니다. 회사는 집에서 가깝습니다. 그래서 걸어서 회사에 갑니다.",
+        "choices": [
+          "저는 버스로 회사에 갑니다.",
+          "회사가 집에서 멉니다.",
+          "저는 회사에 걸어서 갑니다.",
+          "저는 학교에 다닙니다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "회사가 가까워서 걸어서 간다고 했습니다.",
+          "en": "The office is close, so the writer walks to work."
+        }
+      },
+      {
+        "id": "mt-06",
+        "box": "오늘 오후에 비가 왔습니다. 저는 우산이 없었습니다. 그래서 친구의 우산을 같이 썼습니다.",
+        "choices": [
+          "아침에 비가 왔습니다.",
+          "저는 우산을 샀습니다.",
+          "친구는 우산이 있었습니다.",
+          "저는 혼자 우산을 썼습니다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "친구의 우산을 같이 썼으므로 친구는 우산이 있었습니다.",
+          "en": "They shared the friend's umbrella, so the friend had one."
+        }
+      },
+      {
+        "id": "mt-07",
+        "box": "다음 달에 한국어 시험이 있습니다. 그래서 요즘 날마다 두 시간씩 공부합니다. 시험이 끝나면 친구들과 여행을 갈 겁니다.",
+        "choices": [
+          "시험이 어제 끝났습니다.",
+          "저는 매일 한국어를 공부합니다.",
+          "저는 지난달에 여행을 갔습니다.",
+          "저는 일주일에 한 번 공부합니다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "날마다 두 시간씩 공부한다고 했습니다.",
+          "en": "The writer studies two hours every day."
+        }
+      },
+      {
+        "id": "mt-08",
+        "box": "저는 기숙사에 삽니다. 방을 친구와 같이 씁니다. 친구는 조용하고 친절해서 좋습니다.",
+        "choices": [
+          "저는 혼자 삽니다.",
+          "제 친구는 친절합니다.",
+          "저는 아파트에 삽니다.",
+          "저는 친구가 없습니다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "친구가 조용하고 친절하다고 했습니다.",
+          "en": "The roommate is quiet and kind."
+        }
+      },
+      {
+        "id": "mt-09",
+        "box": "어제는 제 생일이었습니다. 친구들이 우리 집에 와서 같이 저녁을 먹었습니다. 친구들이 케이크와 꽃을 사 왔습니다.",
+        "choices": [
+          "오늘은 제 생일입니다.",
+          "우리는 식당에서 만났습니다.",
+          "친구들이 케이크와 꽃을 가지고 왔습니다.",
+          "저는 케이크를 만들었습니다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "친구들이 케이크와 꽃을 사 왔다고 했습니다.",
+          "en": "The friends brought a cake and flowers."
+        }
+      }
+    ],
+    "mainidea": [
+      {
+        "id": "mi-01",
+        "box": "저는 지하철로 회사에 갑니다. 지하철은 빠르고 길이 막히지 않습니다. 그래서 저는 지하철이 제일 좋습니다.",
+        "choices": [
+          "저는 회사에서 일을 많이 합니다.",
+          "저는 지하철을 타는 것이 좋습니다.",
+          "저는 버스를 자주 탑니다.",
+          "저는 길이 막히는 것을 좋아합니다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "지하철이 제일 좋다는 것이 중심 생각입니다.",
+          "en": "The main idea is that the writer likes taking the subway best."
+        }
+      },
+      {
+        "id": "mi-02",
+        "box": "저는 아침을 꼭 먹습니다. 아침을 먹으면 힘이 나고 공부도 잘됩니다. 아침 식사는 정말 중요합니다.",
+        "choices": [
+          "아침을 먹는 것이 중요합니다.",
+          "저는 공부를 잘합니다.",
+          "아침에는 시간이 없습니다.",
+          "저는 요리하는 것을 좋아합니다."
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "아침 식사가 중요하다는 것이 중심 생각입니다.",
+          "en": "The main idea is that breakfast is important."
+        }
+      },
+      {
+        "id": "mi-03",
+        "box": "저는 주말에 등산을 합니다. 산에 가면 공기가 좋고 기분이 좋아집니다. 다음 주말에도 산에 갈 겁니다.",
+        "choices": [
+          "저는 등산하는 것을 좋아합니다.",
+          "주말에는 집에서 쉬는 것이 좋습니다.",
+          "산에는 사람이 많습니다.",
+          "저는 운동을 안 좋아합니다."
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "산에 가면 기분이 좋고 계속 가고 싶어 하므로 등산을 좋아합니다.",
+          "en": "The writer enjoys hiking and wants to keep going."
+        }
+      },
+      {
+        "id": "mi-04",
+        "box": "저는 책을 살 때 서점에 직접 갑니다. 책을 보고 고를 수 있어서 좋습니다. 그리고 서점 구경도 재미있습니다.",
+        "choices": [
+          "책은 인터넷으로 사는 것이 쌉니다.",
+          "저는 서점에서 책을 사는 것이 좋습니다.",
+          "저는 책을 많이 읽습니다.",
+          "서점은 집에서 가깝습니다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "서점에서 직접 책을 사는 것이 좋다는 내용입니다.",
+          "en": "The main idea is that buying books at a bookstore is enjoyable."
+        }
+      },
+      {
+        "id": "mi-05",
+        "box": "동생은 노래를 아주 잘합니다. 동생이 노래를 하면 가족들이 모두 좋아합니다. 저는 동생이 가수가 되면 좋겠습니다.",
+        "choices": [
+          "저는 노래를 잘합니다.",
+          "우리 가족은 음악을 안 듣습니다.",
+          "저는 동생이 가수가 되기를 바랍니다.",
+          "동생은 노래를 배우고 싶어 합니다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "동생이 가수가 되면 좋겠다는 것이 중심 생각입니다.",
+          "en": "The writer hopes the younger sibling becomes a singer."
+        }
+      },
+      {
+        "id": "mi-06",
+        "box": "요즘 날씨가 너무 덥습니다. 더울 때는 물을 자주 마셔야 합니다. 물을 안 마시면 몸에 나쁩니다.",
+        "choices": [
+          "여름에는 여행을 가야 합니다.",
+          "더운 날에는 물을 많이 마셔야 합니다.",
+          "저는 더운 날씨를 좋아합니다.",
+          "물은 시원해야 맛있습니다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "더울 때 물을 자주 마셔야 한다는 것이 중심 생각입니다.",
+          "en": "The main idea is to drink water often in hot weather."
+        }
+      },
+      {
+        "id": "mi-07",
+        "box": "저는 한국 드라마로 한국어를 공부합니다. 드라마를 보면 재미있어서 공부가 지루하지 않습니다. 여러분도 드라마로 공부해 보세요.",
+        "choices": [
+          "한국 드라마는 어렵습니다.",
+          "드라마로 공부하는 것이 좋습니다.",
+          "저는 텔레비전이 없습니다.",
+          "공부는 책으로 해야 합니다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "드라마로 공부하는 방법을 추천하고 있습니다.",
+          "en": "The writer recommends studying with dramas."
+        }
+      },
+      {
+        "id": "mi-08",
+        "box": "저는 일찍 자고 일찍 일어납니다. 아침에 일찍 일어나면 하루가 깁니다. 그래서 많은 일을 할 수 있습니다.",
+        "choices": [
+          "저는 밤에 일을 합니다.",
+          "일찍 일어나는 것이 좋습니다.",
+          "저는 아침에 피곤합니다.",
+          "잠을 많이 자야 합니다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "일찍 일어나면 좋다는 것이 중심 생각입니다.",
+          "en": "The main idea is that waking up early is good."
+        }
+      },
+      {
+        "id": "mi-09",
+        "box": "친구가 힘들 때는 이야기를 잘 들어 주는 것이 중요합니다. 좋은 말을 많이 하지 않아도 됩니다. 친구의 말을 들어 주는 것이 큰 도움이 됩니다.",
+        "choices": [
+          "친구와 이야기하면 재미있습니다.",
+          "힘들 때는 혼자 있는 것이 좋습니다.",
+          "친구의 이야기를 들어 주는 것이 중요합니다.",
+          "친구에게 좋은 말을 많이 해야 합니다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "이야기를 들어 주는 것이 중요하다는 내용입니다.",
+          "en": "The main idea is that listening to a friend matters most."
+        }
+      }
+    ],
+    "pair-49-50": [
+      {
+        "id": "p4950-01",
+        "sharedBox": "제 취미는 빵 만들기입니다. 주말마다 집에서 빵을 만듭니다. 빵을 만들어서 이웃들에게 나누어 줍니다. ( ㉠ ) 빵을 먹은 이웃들은 모두 좋아합니다. 저는 그때 기분이 아주 좋습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "제가 만든",
+              "제가 산",
+              "이웃이 판",
+              "이웃이 만든"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "글쓴이가 만든 빵을 이웃들이 먹습니다.",
+              "en": "The neighbors eat the bread that the writer made."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "저는 빵집에서 빵을 삽니다.",
+              "저는 주말에 빵을 만듭니다.",
+              "이웃들이 저에게 빵을 줍니다.",
+              "저는 빵을 만들어서 팝니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "주말마다 집에서 빵을 만든다고 했습니다.",
+              "en": "The writer bakes bread at home every weekend."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p4950-02",
+        "sharedBox": "우리 동네에는 작은 공원이 있습니다. 저는 매일 아침 그 공원에서 운동을 합니다. 공원에는 꽃과 나무가 많습니다. ( ㉠ ) 사람들도 많습니다. 그래서 아침 공원은 언제나 즐겁습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "운동을 하는",
+              "잠을 자는",
+              "요리를 하는",
+              "수영을 하는"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "아침 공원에는 운동을 하는 사람들이 많습니다.",
+              "en": "In the morning park there are many people exercising."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "공원이 아주 큽니다.",
+              "저는 아침마다 공원에 갑니다.",
+              "공원에는 나무가 없습니다.",
+              "저는 저녁에 운동을 합니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "매일 아침 공원에서 운동을 한다고 했습니다.",
+              "en": "The writer exercises in the park every morning."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p4950-03",
+        "sharedBox": "제 언니는 사진 찍는 것을 좋아합니다. 여행을 갈 때마다 사진을 많이 찍습니다. 그리고 예쁜 사진을 골라서 방에 겁니다. 언니 방에는 ( ㉠ ) 사진이 많습니다. 그래서 언니 방은 작은 사진관 같습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "언니가 찍은",
+              "언니가 그린",
+              "친구가 보낸",
+              "가게에서 산"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "언니가 여행에서 직접 찍은 사진입니다.",
+              "en": "They are photos the sister took herself."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "언니는 그림을 잘 그립니다.",
+              "언니는 여행을 안 좋아합니다.",
+              "언니 방에는 사진이 많습니다.",
+              "저는 사진 찍는 것을 좋아합니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "언니 방에 사진이 많아서 사진관 같다고 했습니다.",
+              "en": "The sister's room is full of photos, like a photo studio."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p4950-04",
+        "sharedBox": "저는 요즘 요리를 배웁니다. 요리 학원은 우리 집 근처에 있습니다. 수업이 끝나면 ( ㉠ ) 음식을 집에 가지고 갑니다. 가족들이 그 음식을 맛있게 먹습니다. 그래서 저는 요리 시간이 기다려집니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "수업에서 만든",
+              "식당에서 시킨",
+              "어머니가 만든",
+              "시장에서 산"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "요리 수업에서 만든 음식을 집에 가지고 갑니다.",
+              "en": "The writer takes home the food made in class."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "요리 학원이 집에서 멉니다.",
+              "가족들은 제 음식을 안 먹습니다.",
+              "저는 요리를 가르칩니다.",
+              "저는 요즘 요리를 배우고 있습니다."
+            ],
+            "answer": 4,
+            "explanation": {
+              "ko": "요즘 요리 학원에서 요리를 배운다고 했습니다.",
+              "en": "The writer is currently learning to cook."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p4950-05",
+        "sharedBox": "우리 회사 앞에는 작은 식당이 있습니다. 그 식당은 값이 싸고 음식이 맛있습니다. 점심시간에는 ( ㉠ ) 사람들이 많아서 자리가 없습니다. 그래서 저는 조금 일찍 갑니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "밥을 먹으러 온",
+              "요리를 배우는",
+              "집에 돌아가는",
+              "사진을 찍는"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "점심시간에 밥을 먹으러 온 사람들이 많습니다.",
+              "en": "Many people come to eat at lunchtime."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "식당이 회사 안에 있습니다.",
+              "식당 음식은 비쌉니다.",
+              "점심시간에는 식당에 사람이 많습니다.",
+              "저는 점심을 늦게 먹습니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "점심시간에는 사람이 많아서 자리가 없다고 했습니다.",
+              "en": "At lunchtime the restaurant is crowded with no seats."
+            }
+          }
+        ]
+      }
+    ],
+    "pair-51-52": [
+      {
+        "id": "p5152-01",
+        "sharedBox": "김치는 한국의 유명한 음식입니다. 김치는 배추나 무로 만듭니다. 지역마다 김치의 맛이 조금씩 ( ㉠ ). 그래서 여러 가지 김치를 먹어 보는 것도 재미있습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "다릅니다",
+              "비쌉니다",
+              "작습니다",
+              "어립니다"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "지역마다 맛이 조금씩 다릅니다.",
+              "en": "The taste differs slightly by region."
+            }
+          },
+          {
+            "stem": "무엇에 대한 이야기인지 고르십시오.",
+            "choices": [
+              "한국의 음식 김치",
+              "김치를 파는 곳",
+              "배추를 기르는 방법",
+              "한국의 식당"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "한국 음식인 김치를 소개하는 글입니다.",
+              "en": "The passage introduces kimchi, a Korean food."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p5152-02",
+        "sharedBox": "요즘에는 은행에 가지 않고 휴대폰으로 돈을 보내는 사람이 많습니다. 휴대폰을 사용하면 은행에 가지 않아서 시간을 ( ㉠ ) 수 있습니다. 그래서 휴대폰으로 돈을 보내는 사람이 점점 많아지고 있습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "아낄",
+              "보낼",
+              "만날",
+              "열"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "은행에 안 가면 시간을 아낄 수 있습니다.",
+              "en": "You can save time by not going to the bank."
+            }
+          },
+          {
+            "stem": "무엇에 대한 이야기인지 고르십시오.",
+            "choices": [
+              "휴대폰으로 돈 보내기",
+              "은행에서 일하는 사람",
+              "휴대폰을 싸게 사는 방법",
+              "시간을 지키는 방법"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "휴대폰으로 돈을 보내는 것에 대한 글입니다.",
+              "en": "The passage is about sending money with a phone."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p5152-03",
+        "sharedBox": "박물관에서는 큰 소리로 이야기하면 안 됩니다. 그리고 물건을 손으로 ( ㉠ ) 안 됩니다. 사진을 찍고 싶으면 먼저 물어봐야 합니다. 이런 약속을 잘 지키면 모두가 즐겁게 구경할 수 있습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "만지면",
+              "만들면",
+              "다니면",
+              "마시면"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "박물관 물건은 손으로 만지면 안 됩니다.",
+              "en": "You must not touch the exhibits with your hands."
+            }
+          },
+          {
+            "stem": "무엇에 대한 이야기인지 고르십시오.",
+            "choices": [
+              "박물관에서 지켜야 할 일",
+              "박물관에 가는 방법",
+              "사진을 잘 찍는 방법",
+              "박물관에서 파는 물건"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "박물관에서 지켜야 하는 약속에 대한 글입니다.",
+              "en": "The passage is about rules to follow in a museum."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p5152-04",
+        "sharedBox": "산에 갈 때는 물과 간단한 음식을 준비해야 합니다. 산에는 가게가 ( ㉠ ) 때문입니다. 그리고 산의 날씨는 자주 바뀌기 때문에 따뜻한 옷도 필요합니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "없기",
+              "많기",
+              "크기",
+              "좋기"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "산에는 가게가 없어서 물과 음식을 준비해야 합니다.",
+              "en": "There are no stores on the mountain, so you must prepare."
+            }
+          },
+          {
+            "stem": "무엇에 대한 이야기인지 고르십시오.",
+            "choices": [
+              "산에 갈 때 준비할 것",
+              "산에서 파는 음식",
+              "겨울 옷을 사는 곳",
+              "날씨를 아는 방법"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "등산 갈 때 준비물에 대한 글입니다.",
+              "en": "The passage is about what to prepare for hiking."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p5152-05",
+        "sharedBox": "잠을 잘 자려면 자기 전에 휴대폰을 보지 않는 것이 좋습니다. 휴대폰의 밝은 빛을 보면 잠이 잘 ( ㉠ ) 않습니다. 휴대폰 대신 책을 읽으면 잠을 자는 데 도움이 됩니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "오지",
+              "가지",
+              "사지",
+              "열지"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "'잠이 오다'라고 말합니다. 밝은 빛을 보면 잠이 잘 오지 않습니다.",
+              "en": "In Korean, sleep 'comes' (잠이 오다); bright light keeps it from coming."
+            }
+          },
+          {
+            "stem": "무엇에 대한 이야기인지 고르십시오.",
+            "choices": [
+              "잠을 잘 자는 방법",
+              "좋은 휴대폰을 고르는 방법",
+              "재미있는 책",
+              "아침에 일찍 일어나는 방법"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "잠을 잘 자는 방법에 대한 글입니다.",
+              "en": "The passage is about how to sleep well."
+            }
+          }
+        ]
+      }
+    ],
+    "pair-53-54": [
+      {
+        "id": "p5354-01",
+        "sharedBox": "저는 한국에 온 지 여섯 달이 되었습니다. 처음에는 한국말을 몰라서 시장에 가는 것이 ( ㉠ ). 요즘은 한국어를 배워서 혼자 시장에 갑니다. 아주머니들과 이야기도 합니다. 한국 생활이 점점 재미있어집니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "힘들었습니다",
+              "재미있었습니다",
+              "기뻤습니다",
+              "시원했습니다"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "한국말을 몰라서 시장에 가는 것이 힘들었습니다.",
+              "en": "Not knowing Korean made going to the market hard."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "저는 한국에 온 지 일 년이 되었습니다.",
+              "저는 지금 혼자 시장에 갈 수 있습니다.",
+              "저는 한국어를 안 배웠습니다.",
+              "한국 생활이 재미없습니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "요즘은 혼자 시장에 간다고 했습니다.",
+              "en": "The writer now goes to the market alone."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p5354-02",
+        "sharedBox": "저는 커피를 아주 좋아해서 하루에 다섯 잔씩 마셨습니다. 그런데 밤에 잠을 못 자서 요즘은 커피를 하루에 한 잔만 ( ㉠ ) 했습니다. 지금은 잠을 잘 잡니다. 몸도 더 건강해진 것 같습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "마시기로",
+              "만들기로",
+              "팔기로",
+              "버리기로"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "하루에 한 잔만 마시기로 결정했습니다.",
+              "en": "The writer decided to drink only one cup a day."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "저는 요즘 커피를 안 마십니다.",
+              "저는 요즘 잠을 잘 잡니다.",
+              "저는 커피를 싫어합니다.",
+              "저는 하루에 다섯 잔씩 마시기로 했습니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "커피를 줄인 후 지금은 잠을 잘 잡니다.",
+              "en": "After cutting down on coffee, the writer sleeps well now."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p5354-03",
+        "sharedBox": "지난 주말에 처음으로 한복을 입어 봤습니다. 친구가 사진을 많이 찍어 주었습니다. 한복은 조금 불편했지만 아주 ( ㉠ ). 다음에는 가족과 같이 한복을 입고 고궁에 가고 싶습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "예뻤습니다",
+              "무거웠습니다",
+              "쉬웠습니다",
+              "바빴습니다"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "불편했지만 예뻤다는 내용이 자연스럽습니다.",
+              "en": "It was a bit uncomfortable but very pretty."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "저는 한복을 자주 입습니다.",
+              "제가 친구의 사진을 찍었습니다.",
+              "저는 가족과 고궁에 가고 싶습니다.",
+              "한복이 아주 편했습니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "다음에는 가족과 고궁에 가고 싶다고 했습니다.",
+              "en": "The writer wants to visit a palace with family next time."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p5354-04",
+        "sharedBox": "우리 집 근처에 새 수영장이 생겼습니다. 저는 지난달부터 거기에서 수영을 배웁니다. 아직 잘 못하지만 수영을 하면 기분이 ( ㉠ ). 그래서 수영장에 가는 날이 기다려집니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "좋아집니다",
+              "나빠집니다",
+              "없어집니다",
+              "어두워집니다"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "수영장 가는 날을 기다리므로 기분이 좋아집니다.",
+              "en": "The writer looks forward to it, so swimming lifts their mood."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "수영장이 집에서 멉니다.",
+              "저는 수영을 아주 잘합니다.",
+              "저는 지난달부터 수영을 배웁니다.",
+              "저는 수영장에 가기 싫습니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "지난달부터 수영을 배운다고 했습니다.",
+              "en": "The writer has been learning to swim since last month."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p5354-05",
+        "sharedBox": "어제 회사에 지갑을 놓고 왔습니다. 버스를 타려고 할 때 지갑이 없는 것을 알았습니다. 그때 회사 동료가 전화를 해서 지갑이 사무실 책상 위에 ( ㉠ ) 말해 주었습니다. 정말 고마웠습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "있다고",
+              "없다고",
+              "크다고",
+              "많다고"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "지갑이 책상 위에 있다고 말해 주었습니다.",
+              "en": "The coworker said the wallet was on the desk."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "저는 지갑을 집에 놓고 왔습니다.",
+              "회사 동료가 저에게 전화했습니다.",
+              "저는 지갑을 잃어버려서 새로 샀습니다.",
+              "지갑은 버스에 있었습니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "동료가 전화해서 지갑이 있는 곳을 알려 주었습니다.",
+              "en": "A coworker called to tell where the wallet was."
+            }
+          }
+        ]
+      }
+    ],
+    "pair-55-56": [
+      {
+        "id": "p5556-01",
+        "sharedBox": "저는 자전거로 학교에 다닙니다. 자전거를 타면 운동이 됩니다. ( ㉠ ) 버스비도 아낄 수 있습니다. 그래서 저는 날마다 자전거를 탑니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "그리고",
+              "그러면",
+              "그렇지만",
+              "그런데"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "좋은 점을 하나 더 말하므로 '그리고'가 맞습니다.",
+              "en": "'그리고' (and) adds another advantage."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "저는 버스로 학교에 갑니다.",
+              "자전거를 타면 돈이 많이 듭니다.",
+              "저는 매일 자전거를 탑니다.",
+              "자전거 타기는 운동이 안 됩니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "날마다 자전거를 탄다고 했습니다.",
+              "en": "The writer rides a bicycle every day."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p5556-02",
+        "sharedBox": "저는 매운 음식을 잘 못 먹습니다. ( ㉠ ) 떡볶이는 좋아해서 자주 먹습니다. 떡볶이를 먹을 때는 우유를 같이 마십니다. 그러면 덜 맵습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "그렇지만",
+              "그래서",
+              "그리고",
+              "그러면"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "앞과 반대되는 내용이므로 '그렇지만'이 맞습니다.",
+              "en": "'그렇지만' (but) shows contrast with the previous sentence."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "저는 매운 음식을 잘 먹습니다.",
+              "저는 떡볶이를 자주 먹습니다.",
+              "우유를 마시면 더 맵습니다.",
+              "저는 떡볶이를 싫어합니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "떡볶이를 좋아해서 자주 먹는다고 했습니다.",
+              "en": "The writer likes tteokbokki and eats it often."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p5556-03",
+        "sharedBox": "다음 주에 친한 친구가 결혼을 합니다. 저는 선물을 사고 싶었습니다. ( ㉠ ) 무엇을 사야 할지 몰랐습니다. 그래서 친구에게 물어보고 필요한 것을 사기로 했습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "그런데",
+              "그래서",
+              "그러면",
+              "그리고"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "사고 싶었지만 문제가 생겼으므로 '그런데'가 맞습니다.",
+              "en": "'그런데' (however) introduces the problem."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "친구가 지난주에 결혼했습니다.",
+              "저는 선물을 벌써 샀습니다.",
+              "저는 친구에게 물어보고 선물을 살 겁니다.",
+              "친구는 선물이 필요 없다고 했습니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "친구에게 물어보고 필요한 것을 사기로 했습니다.",
+              "en": "The writer will ask the friend and buy what is needed."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p5556-04",
+        "sharedBox": "저는 노래 부르는 것을 좋아합니다. 노래를 부르면 스트레스가 풀립니다. ( ㉠ ) 저는 시간이 있을 때마다 노래방에 갑니다. 친구들과 같이 가면 더 즐겁습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "그래서",
+              "그렇지만",
+              "그런데",
+              "그러면"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "앞 내용이 이유가 되므로 '그래서'가 맞습니다.",
+              "en": "'그래서' (so) shows the result of liking singing."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "저는 노래를 안 좋아합니다.",
+              "노래를 부르면 스트레스가 풀립니다.",
+              "저는 노래방에 혼자만 갑니다.",
+              "저는 시간이 없어서 노래방에 못 갑니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "노래를 부르면 스트레스가 풀린다고 했습니다.",
+              "en": "Singing relieves the writer's stress."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p5556-05",
+        "sharedBox": "저녁에 늦게 먹으면 건강에 좋지 않습니다. ( ㉠ ) 저녁을 너무 안 먹는 것도 좋지 않습니다. 저녁에는 가벼운 음식을 조금 먹는 것이 좋습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "그렇지만",
+              "그래서",
+              "그러면",
+              "그리고"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "앞과 반대되는 내용이 나오므로 '그렇지만'이 맞습니다.",
+              "en": "'그렇지만' (however) contrasts with the previous sentence."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "저녁은 늦게 먹는 것이 좋습니다.",
+              "저녁을 안 먹으면 건강에 좋습니다.",
+              "저녁에는 가벼운 음식이 좋습니다.",
+              "저녁에는 많이 먹어야 합니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "저녁에는 가벼운 음식을 조금 먹는 것이 좋다고 했습니다.",
+              "en": "A light, small dinner is recommended."
+            }
+          }
+        ]
+      }
+    ],
+    "ordering": [
+      {
+        "id": "or-01",
+        "box": "(가) 어제 친구와 영화를 봤습니다.\n(나) 그래서 우리는 다른 영화를 봤습니다.\n(다) 그런데 표가 모두 팔렸습니다.\n(라) 처음에는 코미디 영화를 보고 싶었습니다.",
+        "choices": [
+          "(가)-(나)-(다)-(라)",
+          "(가)-(라)-(다)-(나)",
+          "(가)-(다)-(라)-(나)",
+          "(가)-(라)-(나)-(다)"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "영화를 봤다 → 처음엔 코미디를 원했다 → 표가 없었다 → 다른 영화를 봤다.",
+          "en": "Saw a movie → wanted a comedy first → tickets sold out → watched another movie."
+        }
+      },
+      {
+        "id": "or-02",
+        "box": "(가) 저는 어제 시장에 갔습니다.\n(나) 그 과일로 주스를 만들었습니다.\n(다) 주스가 아주 맛있었습니다.\n(라) 시장에서 과일을 많이 샀습니다.",
+        "choices": [
+          "(가)-(나)-(라)-(다)",
+          "(가)-(다)-(나)-(라)",
+          "(가)-(라)-(나)-(다)",
+          "(가)-(라)-(다)-(나)"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "시장에 갔다 → 과일을 샀다 → 주스를 만들었다 → 맛있었다.",
+          "en": "Went to the market → bought fruit → made juice → it was delicious."
+        }
+      },
+      {
+        "id": "or-03",
+        "box": "(가) 오늘 아침에 늦게 일어났습니다.\n(나) 그래서 택시를 탔습니다.\n(다) 그렇지만 회사에 늦게 도착했습니다.\n(라) 버스를 기다릴 시간이 없었습니다.",
+        "choices": [
+          "(가)-(나)-(다)-(라)",
+          "(가)-(라)-(나)-(다)",
+          "(가)-(다)-(나)-(라)",
+          "(가)-(나)-(라)-(다)"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "늦게 일어났다 → 버스 기다릴 시간이 없었다 → 택시를 탔다 → 그래도 늦었다.",
+          "en": "Woke up late → no time for the bus → took a taxi → still arrived late."
+        }
+      },
+      {
+        "id": "or-04",
+        "box": "(가) 저는 개를 한 마리 키웁니다.\n(나) 그러면 개가 아주 좋아합니다.\n(다) 저는 매일 저녁 개와 같이 산책을 합니다.\n(라) 개 이름은 '복실이'입니다.",
+        "choices": [
+          "(가)-(라)-(다)-(나)",
+          "(가)-(다)-(라)-(나)",
+          "(가)-(나)-(라)-(다)",
+          "(가)-(라)-(나)-(다)"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "개를 키운다 → 이름은 복실이다 → 매일 산책한다 → 그러면 좋아한다.",
+          "en": "Has a dog → its name is Boksil → walks it daily → then it is happy."
+        }
+      },
+      {
+        "id": "or-05",
+        "box": "(가) 다음 주에 친구가 한국에 옵니다.\n(나) 그래서 오늘 기차표를 예매했습니다.\n(다) 친구와 부산에 가기로 했습니다.\n(라) 친구는 바다를 보고 싶어 합니다.",
+        "choices": [
+          "(가)-(다)-(라)-(나)",
+          "(가)-(라)-(다)-(나)",
+          "(가)-(나)-(다)-(라)",
+          "(가)-(다)-(나)-(라)"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "친구가 온다 → 바다를 보고 싶어 한다 → 부산에 가기로 했다 → 표를 예매했다.",
+          "en": "Friend is coming → wants to see the sea → decided on Busan → booked tickets."
+        }
+      },
+      {
+        "id": "or-06",
+        "box": "(가) 저는 지난달부터 태권도를 배웁니다.\n(나) 지금은 조금 잘하게 되었습니다.\n(다) 처음에는 아주 어려웠습니다.\n(라) 그래서 매일 연습을 했습니다.",
+        "choices": [
+          "(가)-(나)-(다)-(라)",
+          "(가)-(라)-(다)-(나)",
+          "(가)-(다)-(라)-(나)",
+          "(가)-(다)-(나)-(라)"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "태권도를 배운다 → 처음엔 어려웠다 → 매일 연습했다 → 지금은 잘한다.",
+          "en": "Learning taekwondo → hard at first → practiced daily → better now."
+        }
+      },
+      {
+        "id": "or-07",
+        "box": "(가) 어제는 어머니 생신이었습니다.\n(나) 어머니가 아주 기뻐하셨습니다.\n(다) 그리고 저녁에 미역국을 끓였습니다.\n(라) 저는 아침에 꽃을 사 왔습니다.",
+        "choices": [
+          "(가)-(라)-(다)-(나)",
+          "(가)-(다)-(라)-(나)",
+          "(가)-(나)-(라)-(다)",
+          "(가)-(라)-(나)-(다)"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "생신이었다 → 아침에 꽃을 샀다 → 저녁에 미역국을 끓였다 → 기뻐하셨다.",
+          "en": "Mother's birthday → bought flowers in the morning → cooked soup → she was happy."
+        }
+      },
+      {
+        "id": "or-08",
+        "box": "(가) 저는 편의점에서 아르바이트를 합니다.\n(나) 그래서 지금은 실수를 하지 않습니다.\n(다) 일을 시작했을 때는 실수가 많았습니다.\n(라) 사장님이 친절하게 가르쳐 주셨습니다.",
+        "choices": [
+          "(가)-(다)-(라)-(나)",
+          "(가)-(라)-(다)-(나)",
+          "(가)-(나)-(다)-(라)",
+          "(가)-(다)-(나)-(라)"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "아르바이트를 한다 → 처음엔 실수가 많았다 → 사장님이 가르쳐 주셨다 → 지금은 실수하지 않는다.",
+          "en": "Works part-time → made mistakes at first → the boss taught kindly → no mistakes now."
+        }
+      }
+    ],
+    "pair-59-60": [
+      {
+        "id": "p5960-01",
+        "sharedBox": "저는 지난주에 이사를 했습니다. ( ㉠ ) 새집은 지하철역에서 가깝습니다. ( ㉡ ) 그리고 집 앞에 큰 공원도 있습니다. ( ㉢ ) 저는 매일 아침 그 공원에서 산책을 합니다. ( ㉣ )",
+        "questions": [
+          {
+            "stem": "다음 문장이 들어갈 곳을 고르십시오.",
+            "box": "그래서 회사에 갈 때 아주 편합니다.",
+            "choices": [
+              "㉠",
+              "㉡",
+              "㉢",
+              "㉣"
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "지하철역에서 가깝다는 문장 뒤에 오는 것이 자연스럽습니다.",
+              "en": "It naturally follows the sentence about being near the subway station."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "저는 다음 주에 이사를 할 겁니다.",
+              "새집은 지하철역에서 멉니다.",
+              "집 앞에 공원이 있습니다.",
+              "저는 저녁에 산책을 합니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "집 앞에 큰 공원이 있다고 했습니다.",
+              "en": "There is a big park in front of the house."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p5960-02",
+        "sharedBox": "어제 처음으로 한국 시장에 갔습니다. ( ㉠ ) 시장에는 맛있는 음식이 아주 많았습니다. ( ㉡ ) 그중에서 호떡이 제일 맛있었습니다. ( ㉢ ) 다음에는 친구와 같이 또 가고 싶습니다. ( ㉣ )",
+        "questions": [
+          {
+            "stem": "다음 문장이 들어갈 곳을 고르십시오.",
+            "box": "그래서 호떡을 두 개나 먹었습니다.",
+            "choices": [
+              "㉠",
+              "㉡",
+              "㉢",
+              "㉣"
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "호떡이 제일 맛있었다는 문장 뒤에 오는 것이 자연스럽습니다.",
+              "en": "It naturally follows the sentence about hotteok being the best."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "저는 시장에 자주 갔습니다.",
+              "시장에 맛있는 음식이 많았습니다.",
+              "호떡이 맛없었습니다.",
+              "어제 친구와 같이 갔습니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "시장에 맛있는 음식이 아주 많았다고 했습니다.",
+              "en": "The market had a lot of delicious food."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p5960-03",
+        "sharedBox": "우리 학교 도서관은 아주 큽니다. ( ㉠ ) 책도 많고 조용해서 공부하기 좋습니다. ( ㉡ ) 그래서 시험 때는 자리가 없을 때가 많습니다. ( ㉢ ) 저는 자리에 앉으려고 아침 일찍 도서관에 갑니다. ( ㉣ )",
+        "questions": [
+          {
+            "stem": "다음 문장이 들어갈 곳을 고르십시오.",
+            "box": "시험 때는 학생들이 도서관에 많이 옵니다.",
+            "choices": [
+              "㉠",
+              "㉡",
+              "㉢",
+              "㉣"
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "'그래서 자리가 없다' 앞에 이유가 되는 문장이 와야 합니다.",
+              "en": "The reason sentence must come before 'so there are often no seats.'"
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "도서관이 작습니다.",
+              "도서관은 시끄럽습니다.",
+              "시험 때는 자리가 많습니다.",
+              "저는 아침 일찍 도서관에 갑니다."
+            ],
+            "answer": 4,
+            "explanation": {
+              "ko": "자리에 앉으려고 아침 일찍 간다고 했습니다.",
+              "en": "The writer goes early in the morning to get a seat."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p5960-04",
+        "sharedBox": "저는 주말에 친구와 북한산에 갔습니다. ( ㉠ ) 산 아래에서는 날씨가 맑았습니다. ( ㉡ ) 그런데 산 위에서 갑자기 비가 왔습니다. ( ㉢ ) 다음부터는 산에 갈 때 우산을 꼭 가지고 갈 겁니다. ( ㉣ )",
+        "questions": [
+          {
+            "stem": "다음 문장이 들어갈 곳을 고르십시오.",
+            "box": "우산이 없어서 비를 다 맞았습니다.",
+            "choices": [
+              "㉠",
+              "㉡",
+              "㉢",
+              "㉣"
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "비가 왔다는 문장 뒤, 우산을 가져가겠다는 문장 앞이 자연스럽습니다.",
+              "en": "It fits after the rain started and before deciding to bring an umbrella."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "저는 혼자 산에 갔습니다.",
+              "산 위에서 비가 왔습니다.",
+              "저는 우산을 가지고 갔습니다.",
+              "하루 종일 날씨가 맑았습니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "산 위에서 갑자기 비가 왔다고 했습니다.",
+              "en": "It suddenly rained at the top of the mountain."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p5960-05",
+        "sharedBox": "다음 달에 어머니 생신이 있습니다. ( ㉠ ) 저는 어머니께 드릴 선물을 생각해 봤습니다. ( ㉡ ) 어머니는 꽃을 아주 좋아하십니다. ( ㉢ ) 그리고 생신 날 아침에는 제가 미역국도 끓일 겁니다. ( ㉣ )",
+        "questions": [
+          {
+            "stem": "다음 문장이 들어갈 곳을 고르십시오.",
+            "box": "그래서 예쁜 꽃을 선물하기로 했습니다.",
+            "choices": [
+              "㉠",
+              "㉡",
+              "㉢",
+              "㉣"
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "어머니가 꽃을 좋아하신다는 문장 뒤에 오는 것이 자연스럽습니다.",
+              "en": "It follows the sentence about the mother loving flowers."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "어머니 생신은 이번 주입니다.",
+              "어머니는 꽃을 싫어하십니다.",
+              "저는 생신 날 미역국을 끓일 겁니다.",
+              "저는 선물을 벌써 샀습니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "생신 날 아침에 미역국을 끓일 거라고 했습니다.",
+              "en": "The writer will cook seaweed soup on the birthday morning."
+            }
+          }
+        ]
+      }
+    ],
+    "pair-61-62": [
+      {
+        "id": "p6162-01",
+        "sharedBox": "저는 요즘 아침마다 사과를 하나씩 먹습니다. 아침에 먹는 사과는 몸에 아주 좋다고 합니다. 사과를 먹기 시작한 후부터 몸이 ( ㉠ ) 것 같습니다. 그래서 가족들에게도 아침에 사과를 먹으라고 이야기합니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "건강해진",
+              "나빠진",
+              "무거워진",
+              "작아진"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "사과가 몸에 좋아서 몸이 건강해졌습니다.",
+              "en": "Apples are good for you, so the writer became healthier."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "저는 저녁에 사과를 먹습니다.",
+              "저는 아침마다 사과를 먹습니다.",
+              "가족들이 저에게 사과를 줍니다.",
+              "사과는 몸에 안 좋습니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "아침마다 사과를 하나씩 먹는다고 했습니다.",
+              "en": "The writer eats an apple every morning."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6162-02",
+        "sharedBox": "옛날에는 편지로 소식을 전했습니다. 편지가 도착할 때까지 여러 날이 걸렸습니다. 하지만 지금은 휴대폰으로 소식을 ( ㉠ ) 전할 수 있습니다. 세상이 정말 편리해졌습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "바로",
+              "늦게",
+              "어렵게",
+              "무겁게"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "휴대폰으로는 소식을 바로 전할 수 있습니다.",
+              "en": "With a phone, news can be delivered right away."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "옛날에는 소식을 전할 수 없었습니다.",
+              "편지는 빨리 도착했습니다.",
+              "지금은 소식을 빨리 전할 수 있습니다.",
+              "휴대폰은 사용하기 불편합니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "지금은 휴대폰으로 소식을 바로 전할 수 있습니다.",
+              "en": "Now news can be sent instantly by phone."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6162-03",
+        "sharedBox": "우리 동네에는 매주 토요일에 작은 시장이 열립니다. 사람들이 직접 만든 물건과 음식을 가지고 나옵니다. 값도 싸고 구경하는 ( ㉠ ) 있습니다. 그래서 토요일마다 시장에 사람이 많습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "재미도",
+              "값도",
+              "일도",
+              "힘도"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "값이 싸고 구경하는 재미도 있습니다.",
+              "en": "It is cheap and also fun to look around."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "시장은 매일 열립니다.",
+              "시장 물건은 비쌉니다.",
+              "토요일에 시장에 사람이 많습니다.",
+              "시장에서는 음식을 안 팝니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "토요일마다 시장에 사람이 많다고 했습니다.",
+              "en": "The market is crowded every Saturday."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6162-04",
+        "sharedBox": "저는 외국어를 공부할 때 소리 내서 읽습니다. 눈으로만 읽으면 금방 ( ㉠ ). 하지만 소리 내서 읽으면 오래 기억할 수 있습니다. 발음 연습도 같이 되어서 좋습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "잊어버립니다",
+              "기억합니다",
+              "배웁니다",
+              "시작합니다"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "눈으로만 읽으면 금방 잊어버립니다.",
+              "en": "Reading only with the eyes makes you forget quickly."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "눈으로만 읽으면 오래 기억합니다.",
+              "소리 내서 읽으면 발음 연습이 됩니다.",
+              "저는 외국어를 안 배웁니다.",
+              "발음 연습은 필요 없습니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "소리 내서 읽으면 발음 연습도 된다고 했습니다.",
+              "en": "Reading aloud also serves as pronunciation practice."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6162-05",
+        "sharedBox": "지난주부터 우리 회사 앞에 무인 카페가 생겼습니다. 이 카페에는 일하는 사람이 없습니다. 기계에서 직접 커피를 ( ㉠ ) 됩니다. 값이 싸서 회사 사람들이 자주 이용합니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "사면",
+              "팔면",
+              "버리면",
+              "만나면"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "기계에서 직접 커피를 사면 됩니다.",
+              "en": "You just buy coffee directly from the machine."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "카페에 일하는 사람이 많습니다.",
+              "카페는 오래전에 생겼습니다.",
+              "이 카페는 커피 값이 쌉니다.",
+              "회사 사람들은 카페에 안 갑니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "값이 싸서 사람들이 자주 이용한다고 했습니다.",
+              "en": "The coffee is cheap, so people use it often."
+            }
+          }
+        ]
+      }
+    ],
+    "pair-63-64": [
+      {
+        "id": "p6364-01",
+        "sharedBox": "받는 사람: 한국어 3반 학생들\n제목: 다음 주 수업 안내\n보낸 사람: 김민지 선생님\n\n여러분, 안녕하세요?\n다음 주 월요일은 공휴일입니다.\n그래서 한국어 수업이 없습니다.\n화요일에 수업에서 만나요.\n숙제를 꼭 해 오세요.\n- 김민지 드림",
+        "questions": [
+          {
+            "stem": "김민지 씨는 왜 이 글을 썼습니까?",
+            "choices": [
+              "수업이 없는 것을 알려 주려고",
+              "새 학생을 소개하려고",
+              "시험 날짜를 바꾸려고",
+              "책을 팔려고"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "월요일에 수업이 없는 것을 알려 주는 글입니다.",
+              "en": "The email announces that there is no class on Monday."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "월요일에 수업이 있습니다.",
+              "다음 주 월요일은 공휴일입니다.",
+              "숙제는 안 해도 됩니다.",
+              "수요일에 수업에서 만납니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "다음 주 월요일은 공휴일이라고 했습니다.",
+              "en": "Next Monday is a public holiday."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6364-02",
+        "sharedBox": "받는 사람: 등산 동아리 회원들\n제목: 모임 장소 안내\n보낸 사람: 박준호\n\n동아리 여러분, 안녕하세요?\n이번 주 금요일 모임 장소가 바뀌었습니다.\n학생회관이 공사 중이라서 도서관 3층에서 모입니다.\n시간은 오후 5시로 같습니다.\n금요일에 봅시다.\n- 회장 박준호",
+        "questions": [
+          {
+            "stem": "박준호 씨는 왜 이 글을 썼습니까?",
+            "choices": [
+              "모임 장소가 바뀐 것을 알려 주려고",
+              "모임 시간을 바꾸려고",
+              "새 회원을 뽑으려고",
+              "모임을 취소하려고"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "모임 장소가 바뀐 것을 알리는 글입니다.",
+              "en": "The email informs members of the changed meeting place."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "모임 시간이 바뀌었습니다.",
+              "이번 모임은 학생회관에서 합니다.",
+              "모임은 금요일 오후 5시에 합니다.",
+              "도서관이 공사 중입니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "시간은 오후 5시로 같고 모임은 금요일입니다.",
+              "en": "The meeting is Friday at 5 p.m.; the time did not change."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6364-03",
+        "sharedBox": "받는 사람: 반 친구들\n제목: 이번 주 토요일에 시간 있어요?\n보낸 사람: 링링\n\n친구들에게\n이번 주 토요일이 제 생일입니다.\n그래서 우리 집에서 작은 파티를 하려고 합니다.\n저녁 7시까지 오세요.\n음식은 제가 준비하겠습니다.\n- 링링",
+        "questions": [
+          {
+            "stem": "링링 씨는 왜 이 글을 썼습니까?",
+            "choices": [
+              "친구들을 파티에 초대하려고",
+              "생일 선물을 부탁하려고",
+              "파티 장소를 물어보려고",
+              "음식을 주문하려고"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "생일 파티에 친구들을 초대하는 글입니다.",
+              "en": "The email invites friends to a birthday party."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "파티는 일요일에 합니다.",
+              "파티는 식당에서 합니다.",
+              "친구들이 음식을 준비해야 합니다.",
+              "파티는 저녁 일곱 시에 시작합니다."
+            ],
+            "answer": 4,
+            "explanation": {
+              "ko": "저녁 7시까지 오라고 했습니다.",
+              "en": "Guests are asked to come by 7 p.m."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6364-04",
+        "sharedBox": "받는 사람: 왕웨이 님\n제목: 도서 반납 안내\n보낸 사람: 시립 도서관\n\n안녕하세요, 시립 도서관입니다.\n빌려 가신 책 두 권을 이번 주 일요일까지 반납해 주십시오.\n반납이 늦으면 다음 달에 책을 빌릴 수 없습니다.\n일요일에는 도서관 앞 반납함을 이용하시면 됩니다.\n감사합니다.",
+        "questions": [
+          {
+            "stem": "도서관은 왜 이 글을 썼습니까?",
+            "choices": [
+              "책을 반납해 달라고 하려고",
+              "새 책을 소개하려고",
+              "도서관 시간을 알려 주려고",
+              "회원 카드를 만들어 주려고"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "빌린 책을 반납해 달라는 안내입니다.",
+              "en": "The email asks the reader to return borrowed books."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "왕웨이 씨는 책을 한 권 빌렸습니다.",
+              "책은 이번 주 일요일까지 반납해야 합니다.",
+              "반납이 늦어도 괜찮습니다.",
+              "일요일에는 반납할 수 없습니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "이번 주 일요일까지 반납해 달라고 했습니다.",
+              "en": "The books must be returned by this Sunday."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6364-05",
+        "sharedBox": "받는 사람: 사라 님\n제목: 요리 교실 신청 감사\n보낸 사람: 한마음 문화센터\n\n안녕하세요, 한마음 문화센터입니다.\n요리 교실을 신청해 주셔서 감사합니다.\n첫 수업은 다음 주 목요일 오전 10시에 시작합니다.\n앞치마는 저희가 준비합니다.\n늦지 않게 와 주세요.",
+        "questions": [
+          {
+            "stem": "문화센터는 왜 이 글을 썼습니까?",
+            "choices": [
+              "첫 수업 시간을 알려 주려고",
+              "수업 신청을 받으려고",
+              "수업료를 돌려주려고",
+              "요리 방법을 가르쳐 주려고"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "첫 수업 시간과 장소 정보를 알려 주는 글입니다.",
+              "en": "The email informs about the first class time."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "첫 수업은 오후에 시작합니다.",
+              "앞치마를 가지고 가야 합니다.",
+              "첫 수업은 다음 주 목요일입니다.",
+              "사라 씨는 수업을 신청하지 않았습니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "첫 수업은 다음 주 목요일 오전 10시입니다.",
+              "en": "The first class is next Thursday at 10 a.m."
+            }
+          }
+        ]
+      }
+    ],
+    "pair-65-66": [
+      {
+        "id": "p6566-01",
+        "sharedBox": "생강차는 몸을 따뜻하게 해 주는 차입니다. 그래서 사람들은 보통 날씨가 ( ㉠ ) 생강차를 많이 마십니다. 생강차는 감기에 걸렸을 때도 좋습니다. 저는 겨울이 되면 생강차를 만들어서 가족과 마십니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "추울 때",
+              "더울 때",
+              "맑을 때",
+              "좋을 때"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "몸을 따뜻하게 하는 차라서 추울 때 마십니다.",
+              "en": "It warms the body, so people drink it in cold weather."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "생강차는 몸을 차갑게 합니다.",
+              "생강차는 감기에 걸렸을 때 좋습니다.",
+              "저는 여름에 생강차를 마십니다.",
+              "생강차는 만들기 아주 어렵습니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "감기에 걸렸을 때도 좋다고 했습니다.",
+              "en": "Ginger tea is also good when you have a cold."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6566-02",
+        "sharedBox": "손을 자주 씻으면 병에 잘 걸리지 않습니다. 특히 밖에서 ( ㉠ ) 손을 꼭 씻어야 합니다. 손을 씻을 때는 비누로 30초 동안 씻는 것이 좋습니다. 이 작은 습관이 건강을 지켜 줍니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "돌아온 후에",
+              "일어나기 전에",
+              "잠을 자기 전에",
+              "쉬는 동안에"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "밖에서 돌아온 후에 손을 씻어야 합니다.",
+              "en": "You should wash your hands after coming back from outside."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "손을 씻으면 병에 잘 걸립니다.",
+              "비누는 사용하지 않아도 됩니다.",
+              "손은 30초 동안 씻는 것이 좋습니다.",
+              "손 씻기는 건강과 관계가 없습니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "비누로 30초 동안 씻는 것이 좋다고 했습니다.",
+              "en": "Washing with soap for 30 seconds is recommended."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6566-03",
+        "sharedBox": "낮잠은 피곤할 때 도움이 됩니다. 하지만 낮잠을 너무 ( ㉠ ) 밤에 잠이 안 옵니다. 낮잠은 20분에서 30분 정도가 좋습니다. 짧은 낮잠 후에는 일도 공부도 더 잘됩니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "오래 자면",
+              "짧게 자면",
+              "일찍 일어나면",
+              "안 자면"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "낮잠을 너무 오래 자면 밤에 잠이 안 옵니다.",
+              "en": "Napping too long makes it hard to sleep at night."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "낮잠은 몸에 나쁩니다.",
+              "낮잠은 길게 잘수록 좋습니다.",
+              "낮잠은 20분에서 30분 정도가 좋습니다.",
+              "낮잠을 자면 일이 안됩니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "낮잠은 20~30분 정도가 좋다고 했습니다.",
+              "en": "A 20–30 minute nap is recommended."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6566-04",
+        "sharedBox": "시장에 갈 때는 사고 싶은 것을 미리 종이에 ( ㉠ ) 가는 것이 좋습니다. 그러면 필요 없는 물건을 사지 않습니다. 돈도 아낄 수 있고 시간도 아낄 수 있습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "쓰고",
+              "붙이고",
+              "접고",
+              "버리고"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "사고 싶은 것을 종이에 쓰고 갑니다.",
+              "en": "You write what you want to buy on paper before going."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "시장에서는 아무거나 사도 됩니다.",
+              "메모를 하면 돈을 아낄 수 있습니다.",
+              "필요 없는 물건도 많이 사야 합니다.",
+              "종이에 쓰는 것은 필요 없습니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "미리 쓰고 가면 돈과 시간을 아낄 수 있습니다.",
+              "en": "Making a list saves money and time."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6566-05",
+        "sharedBox": "자기 전에 따뜻한 물로 샤워를 하면 잠이 잘 옵니다. 몸이 따뜻해지면 마음도 ( ㉠ ) 때문입니다. 하지만 너무 뜨거운 물은 좋지 않습니다. 잠이 더 안 올 수 있습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "편해지기",
+              "바빠지기",
+              "나빠지기",
+              "추워지기"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "몸이 따뜻해지면 마음도 편해집니다.",
+              "en": "When the body warms up, the mind relaxes too."
+            }
+          },
+          {
+            "stem": "이 글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "차가운 물로 샤워하면 잠이 잘 옵니다.",
+              "아주 뜨거운 물이 제일 좋습니다.",
+              "따뜻한 물로 샤워하면 잠이 잘 옵니다.",
+              "샤워는 아침에 해야 합니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "따뜻한 물 샤워가 잠에 도움이 된다고 했습니다.",
+              "en": "A warm shower before bed helps you sleep."
+            }
+          }
+        ]
+      }
+    ],
+    "pair-67-68": [
+      {
+        "id": "p6768-01",
+        "sharedBox": "요즘 계단을 이용하는 사람들이 많아졌습니다. 계단을 오르내리면 따로 시간을 내지 않아도 운동을 ( ㉠ ) 있습니다. 처음부터 높은 층까지 걸어가면 힘듭니다. 그럴 때는 두세 층만 걷고 그다음에는 엘리베이터를 ( ㉡ ). 조금씩 늘리면 몸도 점점 건강해집니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "할 수",
+              "하는 것",
+              "하기로",
+              "한 지"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "'-을 수 있다'는 가능을 나타냅니다.",
+              "en": "'-을 수 있다' expresses possibility (can do)."
+            }
+          },
+          {
+            "stem": "㉡에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "타면 됩니다",
+              "타지 않습니다",
+              "탈 수 없습니다",
+              "타기 싫어합니다"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "두세 층만 걷고 그다음은 엘리베이터를 타면 됩니다.",
+              "en": "Walk a few floors, then simply take the elevator."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6768-02",
+        "sharedBox": "밤에 잠을 잘 자는 것은 아주 중요합니다. 잠을 잘 자면 피로가 풀리고 기분이 ( ㉠ ). 하지만 잠을 못 자면 낮에 일을 하기가 힘듭니다. 그래서 매일 같은 시간에 자고 같은 시간에 ( ㉡ ) 것이 좋습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "좋아집니다",
+              "나빠집니다",
+              "없어집니다",
+              "무거워집니다"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "잠을 잘 자면 기분이 좋아집니다.",
+              "en": "Sleeping well improves your mood."
+            }
+          },
+          {
+            "stem": "㉡에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "일어나는",
+              "일어나도",
+              "일어나서",
+              "일어나지만"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "'-는 것이 좋다' 앞에는 관형형이 옵니다.",
+              "en": "The pattern '-는 것이 좋다' needs the modifier form '일어나는'."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6768-03",
+        "sharedBox": "음식을 만들 때 소금을 너무 많이 넣으면 건강에 좋지 않습니다. 소금을 적게 먹으려면 국물을 조금만 ( ㉠ ) 좋습니다. 그리고 소금 대신 레몬이나 채소로 맛을 낼 수도 있습니다. 이렇게 하면 건강한 음식을 ( ㉡ ) 수 있습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "먹는 것이",
+              "먹은 후에",
+              "먹기 전에",
+              "먹을 때"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "'국물을 조금만 먹는 것이 좋습니다'가 자연스럽습니다.",
+              "en": "'It is good to eat only a little broth' fits the sentence."
+            }
+          },
+          {
+            "stem": "㉡에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "만들",
+              "만드는",
+              "만들어",
+              "만들고"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "'-을 수 있다' 앞에는 '만들'이 옵니다.",
+              "en": "Before '-수 있다', use the future modifier form '만들'."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6768-04",
+        "sharedBox": "여행을 가기 전에 날씨를 미리 확인하는 것이 좋습니다. 날씨를 알면 필요한 옷과 물건을 ( ㉠ ) 수 있습니다. 비 소식이 있으면 우산을 넣고, 더운 곳에 가면 모자를 넣습니다. 이렇게 준비하면 여행이 훨씬 ( ㉡ ).",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "준비할",
+              "준비한",
+              "준비하는",
+              "준비해서"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "'-을 수 있다' 앞에는 '준비할'이 옵니다.",
+              "en": "Before '-수 있다', use the future modifier form '준비할'."
+            }
+          },
+          {
+            "stem": "㉡에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "즐거워집니다",
+              "힘들어집니다",
+              "짧아집니다",
+              "비싸집니다"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "잘 준비하면 여행이 즐거워집니다.",
+              "en": "Good preparation makes the trip more enjoyable."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6768-05",
+        "sharedBox": "식물을 잘 키우려면 관심이 필요합니다. 물은 흙이 말랐을 때만 ( ㉠ ) 됩니다. 물을 너무 자주 주면 식물이 죽을 수 있습니다. 그리고 식물을 햇빛이 잘 ( ㉡ ) 곳에 놓아야 합니다. 그러면 식물이 건강하게 자랍니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "주면",
+              "사면",
+              "팔면",
+              "열면"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "물은 흙이 말랐을 때만 주면 됩니다.",
+              "en": "Water the plant only when the soil is dry."
+            }
+          },
+          {
+            "stem": "㉡에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "들어오는",
+              "나가는",
+              "닫히는",
+              "떨어지는"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "햇빛이 잘 들어오는 곳에 놓아야 합니다.",
+              "en": "Place it where sunlight comes in well."
+            }
+          }
+        ]
+      }
+    ],
+    "pair-69-70": [
+      {
+        "id": "p6970-01",
+        "sharedBox": "저는 어릴 때부터 피아노를 배우고 싶었습니다. 하지만 시간이 없어서 ( ㉠ ) 못했습니다. 지난달에 회사 근처에 피아노 학원이 생겼습니다. 그래서 퇴근 후에 피아노를 배우기 시작했습니다. 아직 잘 못 치지만 어릴 때 꿈을 이루고 있어서 행복합니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "배우지",
+              "만들지",
+              "팔지",
+              "그리지"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "시간이 없어서 피아노를 배우지 못했습니다.",
+              "en": "The writer couldn't learn piano due to lack of time."
+            }
+          },
+          {
+            "stem": "이 글의 내용으로 알 수 있는 것을 고르십시오.",
+            "choices": [
+              "저는 피아노를 아주 잘 칩니다.",
+              "저는 요즘 피아노를 배우고 있습니다.",
+              "피아노 학원이 집 근처에 있습니다.",
+              "저는 회사를 그만두었습니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "지난달부터 퇴근 후에 피아노를 배우고 있습니다.",
+              "en": "The writer started learning piano after work last month."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6970-02",
+        "sharedBox": "지난주에 길에서 지갑을 주웠습니다. 지갑 안에는 돈과 학생증이 ( ㉠ ). 저는 학생증을 보고 지갑 주인의 학교로 갔습니다. 지갑을 받은 학생은 저에게 여러 번 고맙다고 말했습니다. 저도 기분이 좋았습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "들어 있었습니다",
+              "팔고 있었습니다",
+              "만들고 있었습니다",
+              "다니고 있었습니다"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "지갑 안에 돈과 학생증이 들어 있었습니다.",
+              "en": "Money and a student ID were inside the wallet."
+            }
+          },
+          {
+            "stem": "이 글의 내용으로 알 수 있는 것을 고르십시오.",
+            "choices": [
+              "저는 지갑을 잃어버렸습니다.",
+              "지갑 주인은 학생입니다.",
+              "지갑 안에는 아무것도 없었습니다.",
+              "저는 지갑을 경찰서에 주었습니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "학생증이 있었고 주인이 학생이었습니다.",
+              "en": "The wallet had a student ID; its owner was a student."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6970-03",
+        "sharedBox": "우리 할아버지는 일흔이 넘으셨지만 매일 새벽에 일어나서 운동을 하십니다. 그리고 스마트폰으로 사진 찍는 것을 ( ㉠ ). 가족 모임이 있을 때마다 할아버지가 사진을 찍어 주십니다. 할아버지의 사진첩에는 우리 가족의 웃는 얼굴이 가득합니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "좋아하십니다",
+              "싫어하십니다",
+              "모르십니다",
+              "무서워하십니다"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "가족 모임마다 사진을 찍으시므로 사진 찍기를 좋아하십니다.",
+              "en": "He takes photos at every gathering, so he loves photography."
+            }
+          },
+          {
+            "stem": "이 글의 내용으로 알 수 있는 것을 고르십시오.",
+            "choices": [
+              "할아버지는 운동을 안 하십니다.",
+              "할아버지는 사진 찍는 것을 즐기십니다.",
+              "가족들은 모임을 안 합니다.",
+              "할아버지는 스마트폰이 없으십니다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "스마트폰으로 사진 찍는 것을 좋아하십니다.",
+              "en": "The grandfather enjoys taking photos with his smartphone."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6970-04",
+        "sharedBox": "저는 작년부터 한국 회사에서 일하고 있습니다. 처음에는 회의 시간에 한국어를 잘 몰라서 ( ㉠ ). 그래서 매일 아침 30분씩 한국어 공부를 했습니다. 지금은 회의에서 제 생각을 한국어로 말할 수 있습니다. 동료들도 저를 많이 칭찬해 줍니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "힘들었습니다",
+              "즐거웠습니다",
+              "반가웠습니다",
+              "시원했습니다"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "한국어를 몰라서 회의가 힘들었습니다.",
+              "en": "Meetings were hard because of the language barrier."
+            }
+          },
+          {
+            "stem": "이 글의 내용으로 알 수 있는 것을 고르십시오.",
+            "choices": [
+              "저는 한국어 공부를 포기했습니다.",
+              "저는 지금도 회의에서 말을 못 합니다.",
+              "저는 꾸준히 공부해서 한국어가 늘었습니다.",
+              "동료들은 저에게 관심이 없습니다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "매일 공부해서 지금은 회의에서 말할 수 있습니다.",
+              "en": "Daily study improved the writer's Korean."
+            }
+          }
+        ]
+      },
+      {
+        "id": "p6970-05",
+        "sharedBox": "어제 버스에서 할머니 한 분이 무거운 짐을 들고 서 계셨습니다. 저는 할머니께 제 ( ㉠ ) 드렸습니다. 할머니는 고맙다고 하시면서 사탕을 하나 주셨습니다. 작은 일이었지만 하루 종일 기분이 좋았습니다.",
+        "questions": [
+          {
+            "stem": "㉠에 들어갈 알맞은 말을 고르십시오.",
+            "choices": [
+              "자리를",
+              "지갑을",
+              "시간을",
+              "사진을"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "서 계신 할머니께 자리를 드렸습니다.",
+              "en": "The writer gave their seat to the standing grandmother."
+            }
+          },
+          {
+            "stem": "이 글의 내용으로 알 수 있는 것을 고르십시오.",
+            "choices": [
+              "저는 버스에 앉아 있었습니다.",
+              "할머니는 짐이 없으셨습니다.",
+              "할머니가 저에게 자리를 주셨습니다.",
+              "저는 하루 종일 기분이 나빴습니다."
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "자리를 드릴 수 있었으므로 앉아 있었습니다.",
+              "en": "The writer had a seat to give, so they were sitting."
+            }
+          }
+        ]
+      }
+    ],
+    "t2w-51": [
+      {
+        "id": "t2w51-01",
+        "task": "blanks",
+        "box": "받는 사람: kimyh@hanguk.ac.kr\n제목: 교수님, 안녕하세요? 마리아입니다.\n\n교수님께\n안녕하세요? 마리아입니다.\n다음 주 금요일에 유학생 말하기 대회가 있습니다.\n제가 그 대회에 나가게 되어서 요즘 발표 연습을 하고 있습니다.\n그런데 혼자서 준비하기가 어려워서 교수님께 (        ㉠        ).\n바쁘시겠지만 도와주시면 정말 감사하겠습니다.\n실례지만 언제 시간이 (        ㉡        )?\n말씀해 주시면 그 시간에 연구실로 찾아가겠습니다.\n마리아 올림",
+        "blanks": [
+          "㉠",
+          "㉡"
+        ],
+        "model": [
+          "도움을 부탁드리고 싶습니다 / 발표 연습을 좀 봐 주시기를 부탁드리려고 합니다",
+          "괜찮으십니까 / 되십니까"
+        ],
+        "explanation": {
+          "ko": "㉠에는 부탁하는 표현을, ㉡에는 '언제 시간이'와 어울리는 의문 표현을 높임말로 써야 합니다.",
+          "en": "㉠ needs a polite request; ㉡ needs a polite question that fits 'when would ... be (convenient)'. Use honorific style throughout."
+        }
+      },
+      {
+        "id": "t2w51-02",
+        "task": "blanks",
+        "box": "[안내문]\n\n안녕하십니까? 관리사무소입니다.\n다음 주 월요일 오전 10시부터 오후 5시까지 아파트 물탱크 청소를 실시합니다.\n청소하는 동안에는 물이 (        ㉠        ).\n그러므로 그 시간 전에 필요한 물을 미리 (        ㉡        ).\n주민 여러분의 협조를 부탁드립니다.\n불편을 드려서 죄송합니다.",
+        "blanks": [
+          "㉠",
+          "㉡"
+        ],
+        "model": [
+          "나오지 않습니다 / 안 나옵니다",
+          "받아 놓으시기 바랍니다 / 준비해 두시기 바랍니다"
+        ],
+        "explanation": {
+          "ko": "㉠은 청소의 결과(단수)를, ㉡은 안내문에 어울리는 '-으시기 바랍니다' 형태의 요청을 써야 합니다.",
+          "en": "㉠ states the consequence (no water); ㉡ should be a formal notice-style request like '-으시기 바랍니다'."
+        }
+      },
+      {
+        "id": "t2w51-03",
+        "task": "blanks",
+        "box": "[회원 모집]\n\n안녕하세요? 세계 요리 동아리 '맛나'입니다.\n우리 동아리에서 함께 요리를 배울 새 회원을 (        ㉠        ).\n요리를 전혀 못해도 괜찮습니다.\n관심이 있으신 분은 이번 주 금요일까지 신청서를 (        ㉡        ).\n신청서는 학생회관 1층 안내 데스크에서 받을 수 있습니다.\n많은 참여를 기다립니다.",
+        "blanks": [
+          "㉠",
+          "㉡"
+        ],
+        "model": [
+          "모집하고 있습니다 / 모집합니다",
+          "내 주시기 바랍니다 / 제출해 주시기 바랍니다"
+        ],
+        "explanation": {
+          "ko": "㉠은 모집 안내에 쓰는 표현을, ㉡은 기한과 함께 쓰는 제출 요청 표현을 써야 합니다.",
+          "en": "㉠ announces recruiting; ㉡ requests submission by the deadline in formal notice style."
+        }
+      }
+    ],
+    "t2w-52": [
+      {
+        "id": "t2w52-01",
+        "task": "blanks",
+        "box": "사람들은 기분이 좋을 때 웃는다. 그런데 반대로 웃음이 기분을 좋게 만들기도 한다. 한 연구에 따르면 일부러 웃는 표정을 지은 사람들은 그렇지 않은 사람들보다 스트레스가 빨리 (        ㉠        ). 그러므로 기분이 안 좋을 때일수록 얼굴을 찡그리지 말고 (        ㉡        ). 그러면 기분이 조금씩 나아질 것이다.",
+        "blanks": [
+          "㉠",
+          "㉡"
+        ],
+        "model": [
+          "줄어드는 것으로 나타났다 / 줄어들었다",
+          "웃는 것이 좋다 / 웃어 보는 것이 좋다"
+        ],
+        "explanation": {
+          "ko": "㉠은 연구 결과를 나타내는 문어체 표현을, ㉡은 '그러므로'와 어울리는 권유 표현을 써야 합니다.",
+          "en": "㉠ reports the research finding in written style; ㉡ gives a recommendation that follows '그러므로' (therefore)."
+        }
+      },
+      {
+        "id": "t2w52-02",
+        "task": "blanks",
+        "box": "물건을 정리할 때는 자주 쓰는 물건과 자주 쓰지 않는 물건을 나누는 것이 좋다. 자주 쓰는 물건은 손이 닿기 쉬운 곳에 (        ㉠        ). 반대로 자주 쓰지 않는 물건은 높은 곳이나 안쪽에 두면 된다. 이렇게 사용 빈도에 따라 물건을 정리해 두면 필요한 물건을 (        ㉡        ). 그래서 물건을 찾는 시간도 크게 줄일 수 있다.",
+        "blanks": [
+          "㉠",
+          "㉡"
+        ],
+        "model": [
+          "두는 것이 좋다 / 놓아야 한다",
+          "빨리 찾을 수 있다 / 쉽게 찾을 수 있다"
+        ],
+        "explanation": {
+          "ko": "㉠은 앞뒤 문장과 대비되는 정리 방법을, ㉡은 정리의 결과(장점)를 써야 합니다.",
+          "en": "㉠ states where frequently used items should go; ㉡ states the benefit — items can be found quickly."
+        }
+      },
+      {
+        "id": "t2w52-03",
+        "task": "blanks",
+        "box": "식물도 스트레스를 받으면 소리를 낸다는 연구 결과가 있다. 물이 부족하거나 잎이 잘린 식물은 그렇지 않은 식물보다 소리를 훨씬 자주 (        ㉠        ). 다만 이 소리는 사람이 들을 수 없을 만큼 높은 소리이다. 그래서 사람들은 바로 옆에 있어도 식물이 내는 소리를 (        ㉡        ). 과학자들도 특별한 기계를 사용해서야 이 소리를 확인할 수 있었다.",
+        "blanks": [
+          "㉠",
+          "㉡"
+        ],
+        "model": [
+          "내는 것으로 나타났다 / 냈다",
+          "들을 수 없다 / 듣지 못한다"
+        ],
+        "explanation": {
+          "ko": "㉠은 연구 결과 표현을, ㉡은 '들을 수 없을 만큼 높은 소리'라는 앞 내용과 이어지는 결과를 써야 합니다.",
+          "en": "㉠ reports the finding; ㉡ follows from the sound being too high-pitched — people cannot hear it."
+        }
+      }
+    ],
+    "t2w-53": [
+      {
+        "id": "t2w53-01",
+        "task": "essay",
+        "min": 200,
+        "max": 300,
+        "box": "다음은 '직장인의 아침 식사'에 대해 직장인 500명을 대상으로 실시한 설문 조사 자료이다. 이 내용을 200~300자의 글로 쓰시오.\n\n[아침 식사를 합니까?]\n- 한다: 35%\n- 안 한다: 65%\n\n[아침 식사를 안 하는 이유]\n- 1위: 시간이 없어서 (58%)\n- 2위: 입맛이 없어서 (27%)\n- 3위: 살을 빼려고 (15%)",
+        "model": "직장인 500명을 대상으로 아침 식사를 하는지 조사한 결과, '한다'는 응답은 35%에 그친 반면 '안 한다'는 응답은 65%에 달했다. 아침 식사를 하지 않는 이유로는 '시간이 없어서'가 58%로 가장 많았고, '입맛이 없어서'가 27%로 그 뒤를 이었다. 마지막으로 '살을 빼려고'라는 응답도 15%를 차지했다. 이 조사 결과를 통해 직장인의 절반 이상이 아침 식사를 하지 않고 있으며, 그 가장 큰 원인은 시간 부족이라는 사실을 알 수 있다.",
+        "explanation": {
+          "ko": "조사 대상과 조사 내용 소개 → 수치 비교(대조 표현: ~에 그친 반면, ~에 달했다) → 순위 나열(가장 많았고, 뒤를 이었다) → 결과 요약의 순서로 씁니다.",
+          "en": "Introduce the survey, compare the figures with contrast expressions, list the rankings, then summarize what the results show. Use formal written style (-다)."
+        }
+      },
+      {
+        "id": "t2w53-02",
+        "task": "essay",
+        "min": 200,
+        "max": 300,
+        "box": "다음은 '여가 시간에 주로 하는 활동'에 대해 20대와 60대 각각 300명을 대상으로 조사한 자료이다. 이 내용을 200~300자의 글로 쓰시오.\n\n[20대]\n- 1위: 동영상 시청 (45%)\n- 2위: 게임 (30%)\n- 3위: 운동 (25%)\n\n[60대]\n- 1위: 등산 (40%)\n- 2위: 텔레비전 시청 (35%)\n- 3위: 여행 (25%)",
+        "model": "20대와 60대 각각 300명을 대상으로 여가 시간에 주로 하는 활동을 조사하였다. 그 결과 20대는 '동영상 시청'이 45%로 가장 많았고, '게임'이 30%, '운동'이 25%로 그 뒤를 이었다. 반면 60대는 '등산'이 40%로 1위를 차지했으며, '텔레비전 시청'이 35%, '여행'이 25% 순으로 나타났다. 이를 통해 20대는 주로 실내에서 디지털 기기를 이용한 여가를 즐기는 반면, 60대는 등산이나 여행과 같은 야외 활동을 더 선호한다는 것을 알 수 있다.",
+        "explanation": {
+          "ko": "두 집단을 비교하는 자료이므로 '반면', '~와 달리' 같은 대조 표현을 사용해 차이점을 정리하는 것이 중요합니다.",
+          "en": "This is a comparison between two groups — use contrast expressions (반면, ~와 달리) and end with what the difference shows."
+        }
+      },
+      {
+        "id": "t2w53-03",
+        "task": "essay",
+        "min": 200,
+        "max": 300,
+        "box": "다음은 '인주시 자전거 이용자 수'에 대한 자료이다. 이 내용을 200~300자의 글로 쓰시오.\n\n[인주시 자전거 이용자 수 변화]\n- 2015년: 5만 명\n- 2020년: 12만 명\n- 2024년: 20만 명\n\n[증가 원인]\n- 자전거 도로 확대\n- 공용 자전거 서비스 시작",
+        "model": "인주시의 자전거 이용자 수는 2015년 5만 명에서 2020년 12만 명으로 늘었고, 2024년에는 20만 명에 이르렀다. 십 년도 되지 않는 기간에 이용자가 네 배로 증가한 것이다. 이처럼 자전거 이용자가 크게 늘어난 원인으로는 두 가지를 들 수 있다. 첫째, 자전거 도로가 확대되어 시민들이 안전하고 편리하게 자전거를 탈 수 있게 되었다. 둘째, 공용 자전거 서비스가 시작되면서 자전거가 없는 사람도 쉽게 자전거를 이용할 수 있게 되었기 때문이다.",
+        "explanation": {
+          "ko": "변화(증가) 서술 → 변화의 정도 강조(네 배로 증가) → 원인 나열(첫째, 둘째)의 순서로 씁니다.",
+          "en": "Describe the change over time, emphasize its scale, then present the causes with 첫째/둘째. Use formal written style."
+        }
+      }
+    ],
+    "t2w-54": [
+      {
+        "id": "t2w54-01",
+        "task": "essay",
+        "min": 600,
+        "max": 700,
+        "box": "다음을 주제로 하여 600~700자로 글을 쓰십시오.\n\n칭찬은 사람의 마음을 움직이는 큰 힘이 있습니다. 그러나 칭찬이 언제나 좋은 결과를 가져오는 것은 아닙니다. '올바른 칭찬의 방법'에 대해 아래의 내용을 중심으로 자신의 생각을 쓰십시오.\n\n- 칭찬은 우리에게 어떤 긍정적인 영향을 줍니까?\n- 잘못된 칭찬은 어떤 문제를 일으킬 수 있습니까?\n- 올바르게 칭찬하는 방법은 무엇입니까?",
+        "model": "칭찬은 사람에게 큰 힘을 주는 말이다. 칭찬을 들으면 자신감이 생기고, 자신의 노력을 인정받았다는 생각에 더 열심히 하고 싶은 마음이 든다. 특히 성장기의 아이들은 칭찬을 통해 자신이 가치 있는 존재라고 느끼며, 이러한 긍정적인 경험은 새로운 일에 도전하는 용기로 이어진다.\n그러나 모든 칭찬이 좋은 결과를 가져오는 것은 아니다. 결과만을 칭찬하면 사람들은 좋은 결과가 보장되는 쉬운 일만 하려고 하게 된다. 또한 '넌 머리가 좋구나'와 같이 타고난 능력을 칭찬받은 사람은 실패했을 때 자신의 능력이 부족하다고 여겨 쉽게 포기하는 경향을 보인다. 지나친 칭찬 역시 부담이 되어 오히려 실패에 대한 두려움을 키울 수 있다.\n따라서 올바른 칭찬은 결과가 아니라 과정에 초점을 맞추어야 한다. '시험을 잘 봤구나'보다는 '포기하지 않고 꾸준히 공부하는 모습이 멋지다'와 같이 구체적인 노력을 칭찬하는 것이 좋다. 과정을 칭찬받은 사람은 결과와 상관없이 도전 자체를 소중하게 여기게 되기 때문이다. 결국 올바른 칭찬이란 상대방을 기분 좋게 만드는 말을 넘어서, 그 사람의 노력과 성장을 진심으로 응원하는 말이라고 할 수 있다.",
+        "explanation": {
+          "ko": "서론(칭찬의 긍정적 영향) → 본론(잘못된 칭찬의 문제점) → 결론(올바른 칭찬 방법)의 3단 구성으로, 제시된 세 가지 질문에 모두 답해야 합니다. 문어체(-다)를 사용하십시오.",
+          "en": "Answer all three prompts in a three-part structure (positive effects → problems of wrong praise → the right way to praise), in formal written style (-다)."
+        }
+      },
+      {
+        "id": "t2w54-02",
+        "task": "essay",
+        "min": 600,
+        "max": 700,
+        "box": "다음을 주제로 하여 600~700자로 글을 쓰십시오.\n\n사람은 누구나 살면서 크고 작은 실패를 경험합니다. 실패는 고통스럽지만 우리에게 많은 것을 가르쳐 주기도 합니다. '실패의 가치'에 대해 아래의 내용을 중심으로 자신의 생각을 쓰십시오.\n\n- 사람들이 실패를 두려워하는 이유는 무엇입니까?\n- 실패는 우리에게 어떤 가치가 있습니까?\n- 실패를 대하는 바람직한 자세는 무엇입니까?",
+        "model": "사람들이 실패를 두려워하는 가장 큰 이유는 실패를 곧 자신의 능력 부족으로 여기기 때문이다. 실패하면 주변의 시선이 차가워질 것이라는 걱정, 그동안 들인 시간과 노력이 물거품이 된다는 생각도 두려움을 키운다. 그래서 많은 사람들이 실패할 가능성이 있는 일은 아예 시도조차 하지 않으려 한다.\n그러나 실패에는 성공이 주지 못하는 특별한 가치가 있다. 실패는 자신의 부족한 점을 정확하게 알려 주는 가장 솔직한 선생님이다. 우리는 실패를 통해 어떤 방법이 통하지 않는지를 배우고, 다음 도전에서 같은 잘못을 반복하지 않게 된다. 또한 실패를 겪으며 어려움을 견디는 힘이 길러지는데, 이 힘은 이후의 삶에서 어떤 성공보다도 든든한 재산이 된다.\n따라서 우리는 실패를 끝이 아니라 과정으로 받아들이는 자세를 가져야 한다. 실패했을 때 중요한 것은 자신을 탓하는 것이 아니라 실패의 원인을 차분히 분석하고 다시 일어서는 것이다. 실패를 두려워하여 아무것도 하지 않는 사람은 아무것도 배울 수 없다. 실패는 도전한 사람만이 얻을 수 있는 값진 경험이라는 점에서, 실패를 두려워하지 않는 태도야말로 성장의 출발점이라고 할 수 있다.",
+        "explanation": {
+          "ko": "세 가지 질문(두려워하는 이유 → 실패의 가치 → 바람직한 자세)에 순서대로 답하며 문단을 나누어 쓰십시오.",
+          "en": "Address the three prompts in order (why people fear failure → its value → the right attitude), one paragraph each, in formal written style."
+        }
+      },
+      {
+        "id": "t2w54-03",
+        "task": "essay",
+        "min": 600,
+        "max": 700,
+        "box": "다음을 주제로 하여 600~700자로 글을 쓰십시오.\n\n인공지능 기술이 빠르게 발전하면서 우리의 생활과 일하는 방식이 크게 달라지고 있습니다. '인공지능 시대에 인간에게 필요한 능력'에 대해 아래의 내용을 중심으로 자신의 생각을 쓰십시오.\n\n- 인공지능의 발전은 우리 사회에 어떤 변화를 가져왔습니까?\n- 그럼에도 불구하고 인간에게 꼭 필요한 능력은 무엇입니까?\n- 그 능력을 기르기 위해 어떤 노력을 해야 합니까?",
+        "model": "인공지능의 발전은 우리 사회의 모습을 빠르게 바꾸어 놓았다. 번역, 글쓰기, 그림 그리기처럼 사람만이 할 수 있다고 여겨졌던 일들을 이제는 인공지능이 몇 초 만에 해낸다. 이에 따라 단순하고 반복적인 일은 점점 기계가 대신하게 되었고, 사람들은 일자리의 변화라는 큰 도전 앞에 서게 되었다.\n그럼에도 불구하고 인간에게 꼭 필요한 능력이 있다. 바로 질문하는 능력과 공감하는 능력이다. 인공지능은 주어진 질문에 훌륭하게 대답하지만, 무엇이 문제인지 스스로 발견하고 질문을 던지지는 못한다. 또한 상대방의 마음을 헤아리고 함께 아파하는 공감 능력은 기계가 흉내 낼 수는 있어도 진심으로 가질 수는 없는, 인간 고유의 힘이다. 앞으로의 시대에는 정답을 외우는 사람보다 좋은 질문을 하고 다른 사람과 마음을 나눌 줄 아는 사람이 더욱 필요해질 것이다.\n이러한 능력을 기르기 위해서는 먼저 세상에 대한 호기심을 잃지 말아야 한다. 책을 읽고 다양한 경험을 하면서 당연해 보이는 것에도 '왜'라고 물어보는 습관이 필요하다. 아울러 여러 사람과 직접 만나 대화하고 협력하는 경험을 쌓아야 한다. 기술이 발전할수록 결국 중요해지는 것은 인간다움이기 때문이다.",
+        "explanation": {
+          "ko": "변화 서술 → 필요한 능력 제시(근거 포함) → 능력을 기르는 방법의 구성으로, 자신의 주장이 분명히 드러나야 합니다.",
+          "en": "Describe the changes, argue which human abilities remain essential and why, then propose how to develop them. State your position clearly."
+        }
+      }
+    ],
+    "t2r-gram": [
+      {
+        "id": "t2g-01",
+        "box": "동생은 요즘 시험 준비를 (        ) 아주 바쁘다.",
+        "choices": [
+          "하도록",
+          "하느라고",
+          "하다가는",
+          "하자마자"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "'-느라고'는 어떤 일 때문에 다른 상황(바쁨)이 생겼음을 나타냅니다.",
+          "en": "'-느라고' marks the activity as the reason for being busy."
+        }
+      },
+      {
+        "id": "t2g-02",
+        "box": "내일 비가 (        ) 행사는 예정대로 진행됩니다.",
+        "choices": [
+          "오는 바람에",
+          "올수록",
+          "오더라도",
+          "오는 대신에"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "'-더라도'는 앞의 일이 일어나도 뒤의 일에 영향이 없음을 나타냅니다.",
+          "en": "'-더라도' means 'even if it rains, the event goes ahead as planned'."
+        }
+      },
+      {
+        "id": "t2g-03",
+        "box": "고향에 계신 부모님이 (        ) 옛날 사진을 꺼내 본다.",
+        "choices": [
+          "보고 싶을 때마다",
+          "보고 싶은 채로",
+          "보고 싶은 대신에",
+          "보고 싶다고 해도"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "'-을 때마다'는 그 상황이 생길 때마다 반복함을 나타냅니다.",
+          "en": "'-을 때마다' means 'every time (I) miss them'."
+        }
+      },
+      {
+        "id": "t2g-04",
+        "box": "한국에 온 지 벌써 삼 년이 (        ).",
+        "choices": [
+          "되곤 한다",
+          "되는 편이다",
+          "될 지경이다",
+          "되어 간다"
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "'-어 가다'는 어떤 상태에 점점 가까워짐을 나타냅니다.",
+          "en": "'-어 가다' expresses gradually approaching a point (almost three years now)."
+        }
+      },
+      {
+        "id": "t2g-05",
+        "box": "청소를 막 (        ) 친구에게서 전화가 왔다.",
+        "choices": [
+          "하는 김에",
+          "하려던 참에",
+          "한 탓에",
+          "하는 반면에"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "'-으려던 참에'는 무엇을 막 하려고 하는 바로 그때를 나타냅니다.",
+          "en": "'-으려던 참에' means 'just as I was about to (clean)'."
+        }
+      },
+      {
+        "id": "t2g-06",
+        "box": "그 영화가 너무 슬퍼서 하마터면 눈물이 (        ).",
+        "choices": [
+          "나는 셈이다",
+          "나기 나름이다",
+          "날 뻔했다",
+          "난 척했다"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "'하마터면 -을 뻔했다'는 어떤 일이 거의 일어날 뻔했음을 나타냅니다.",
+          "en": "'하마터면 -을 뻔했다' means it almost happened (I almost cried)."
+        }
+      }
+    ],
+    "t2r-sim": [
+      {
+        "id": "t2s-01",
+        "box": "수업이 {u}끝나자마자{/u} 학생들이 교실에서 나갔다.",
+        "choices": [
+          "끝나는 바람에",
+          "끝나기가 무섭게",
+          "끝나는 반면에",
+          "끝날까 봐"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "'-자마자'와 '-기가 무섭게'는 모두 앞의 일이 끝난 직후를 나타냅니다.",
+          "en": "Both '-자마자' and '-기가 무섭게' mean 'as soon as'."
+        }
+      },
+      {
+        "id": "t2s-02",
+        "box": "그 소식을 듣고 {u}놀라지 않을 수 없었다{/u}.",
+        "choices": [
+          "놀랄 수밖에 없었다",
+          "놀라지 않아도 됐다",
+          "놀란 척했다",
+          "놀랄 리가 없었다"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "'-지 않을 수 없다'는 '-을 수밖에 없다'와 같이 어쩔 수 없음을 나타냅니다.",
+          "en": "'-지 않을 수 없다' = '-을 수밖에 없다', 'couldn't help but be surprised'."
+        }
+      },
+      {
+        "id": "t2s-03",
+        "box": "동생은 피곤했는지 소파에 {u}앉은 채로{/u} 잠이 들었다.",
+        "choices": [
+          "앉는 바람에",
+          "앉기 위해서",
+          "앉은 상태로",
+          "앉을 정도로"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "'-은 채로'는 어떤 상태가 유지되는 것을 나타내며 '-은 상태로'와 비슷합니다.",
+          "en": "'-은 채로' means 'while remaining in that state', same as '-은 상태로'."
+        }
+      },
+      {
+        "id": "t2s-04",
+        "box": "약을 먹었더니 감기가 {u}씻은 듯이{/u} 나았다.",
+        "choices": [
+          "갑자기",
+          "조금씩",
+          "잠깐",
+          "완전히"
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "'씻은 듯이 낫다'는 병이 흔적도 없이 완전히 나았다는 뜻입니다.",
+          "en": "'씻은 듯이' means the cold went away completely, without a trace."
+        }
+      },
+      {
+        "id": "t2s-05",
+        "box": "이 문제는 어린아이도 {u}풀 만큼{/u} 쉽다.",
+        "choices": [
+          "풀 정도로",
+          "풀기 전에",
+          "풀자마자",
+          "풀도록"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "'-을 만큼'과 '-을 정도로'는 모두 어떤 수준이나 정도를 나타냅니다.",
+          "en": "'-을 만큼' and '-을 정도로' both express degree ('easy enough for a child to solve')."
+        }
+      },
+      {
+        "id": "t2s-06",
+        "box": "언니는 {u}바쁜 와중에도{/u} 나를 도와주었다.",
+        "choices": [
+          "바쁘기 때문에",
+          "바쁜 가운데에도",
+          "바쁜 덕분에",
+          "바쁜 반면에"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "'-는 와중에도'는 '-는 가운데에도'와 같이 그 상황 속에서도 라는 뜻입니다.",
+          "en": "'와중에도' = '가운데에도', 'even in the middle of being busy'."
+        }
+      }
+    ],
+    "t2r-ad": [
+      {
+        "id": "t2a-01",
+        "box": "발끝까지 편안하게~\n하루 종일 걸어도 피곤하지 않습니다.",
+        "choices": [
+          "모자",
+          "가방",
+          "신발",
+          "안경"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "'발끝', '걸어도'라는 표현에서 신발 광고임을 알 수 있습니다.",
+          "en": "'Toes' and 'walking all day' point to a shoe ad."
+        }
+      },
+      {
+        "id": "t2a-02",
+        "box": "한 방울로 되찾는 촉촉함!\n자연에서 온 순한 성분을 그대로 담았습니다.",
+        "choices": [
+          "화장품",
+          "장난감",
+          "문구류",
+          "운동화"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "'한 방울', '촉촉함', '순한 성분'은 화장품 광고에 쓰이는 표현입니다.",
+          "en": "'A drop', 'moisture' and 'mild ingredients' indicate cosmetics."
+        }
+      },
+      {
+        "id": "t2a-03",
+        "box": "졸리면 쉬어 가세요.\n깜빡 조는 사이에 행복이 사라집니다.",
+        "choices": [
+          "전기 절약",
+          "건강 검진",
+          "환경 보호",
+          "안전 운전"
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "졸음운전을 조심하라는 안전 운전 표어입니다.",
+          "en": "It warns against drowsy driving — a safe-driving slogan."
+        }
+      },
+      {
+        "id": "t2a-04",
+        "box": "버리면 쓰레기, 나누면 기쁨!\n안 입는 옷이 이웃의 겨울을 따뜻하게 합니다.",
+        "choices": [
+          "쇼핑",
+          "기부",
+          "이사",
+          "청소"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "안 입는 옷을 이웃과 나누자는 기부 안내입니다.",
+          "en": "It encourages donating unused clothes to neighbors."
+        }
+      },
+      {
+        "id": "t2a-05",
+        "box": "새 책처럼 깨끗하게, 반값보다 더 싸게!\n읽고 난 책, 사고팝니다.",
+        "choices": [
+          "도서관",
+          "인쇄소",
+          "중고 서점",
+          "문구점"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "읽은 책을 사고판다는 것에서 중고 서점임을 알 수 있습니다.",
+          "en": "Buying and selling used books indicates a secondhand bookstore."
+        }
+      },
+      {
+        "id": "t2a-06",
+        "box": "물은 잠글수록, 지구는 웃을수록!\n양치할 때는 컵을 사용하세요.",
+        "choices": [
+          "물 절약",
+          "시간 절약",
+          "건강 관리",
+          "화재 예방"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "물을 잠그고 컵을 쓰라는 내용으로 물 절약 캠페인입니다.",
+          "en": "Turning off the tap and using a cup — a water-saving campaign."
+        }
+      },
+      {
+        "id": "t2a-07",
+        "box": "쿵쿵 뛰는 발소리, 아랫집에는 천둥소리!\n실내에서는 사뿐사뿐 걸어 주세요.",
+        "choices": [
+          "질서 유지",
+          "에너지 절약",
+          "안전 점검",
+          "소음 방지"
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "발소리가 아랫집에 피해를 준다는 층간 소음 방지 안내입니다.",
+          "en": "It asks residents to walk quietly — noise prevention between floors."
+        }
+      },
+      {
+        "id": "t2a-08",
+        "box": "첫 달 회비 0원!\n지금 등록하면 운동복까지 드립니다.",
+        "choices": [
+          "직원 채용",
+          "회원 모집",
+          "제품 판매",
+          "공연 안내"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "회비 할인과 등록 혜택을 내세운 회원 모집 광고입니다.",
+          "en": "Fee discounts and sign-up gifts indicate a membership recruitment ad."
+        }
+      }
+    ],
+    "t2r-info-notice": [
+      {
+        "id": "t2n-01",
+        "box": "제5회 인주시 밤길 걷기 대회\n\n- 일시: 10월 12일(토) 저녁 7시 ~ 10시\n- 코스: 인주천 산책로 8km\n- 신청: 10월 4일까지 홈페이지에서 접수 (참가비 무료)\n- 참가자 전원에게 기념 티셔츠를 드립니다.",
+        "choices": [
+          "대회는 오전에 시작한다.",
+          "참가하려면 참가비를 내야 한다.",
+          "신청은 대회 당일에도 할 수 있다.",
+          "참가하는 사람은 모두 티셔츠를 받는다."
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "참가자 전원에게 기념 티셔츠를 준다고 안내되어 있습니다.",
+          "en": "The notice says every participant receives a T-shirt."
+        }
+      },
+      {
+        "id": "t2n-02",
+        "box": "엘리베이터 정기 점검 안내\n\n- 일시: 7월 9일(수) 오전 9시 ~ 12시\n- 대상: 1동 전체 엘리베이터\n- 점검 중에는 계단을 이용해 주시기 바랍니다.\n- 문의: 관리사무소 (031-123-4567)",
+        "choices": [
+          "점검은 오후에 진행된다.",
+          "점검은 이틀 동안 계속된다.",
+          "점검하는 동안 계단을 이용해야 한다.",
+          "2동 엘리베이터도 함께 점검한다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "점검 중에는 계단을 이용해 달라고 안내하고 있습니다.",
+          "en": "Residents are asked to use the stairs during the inspection."
+        }
+      },
+      {
+        "id": "t2n-03",
+        "box": "인주도서관 겨울 독서 교실\n\n- 대상: 초등학생 20명 (선착순 모집)\n- 기간: 1월 6일 ~ 1월 24일, 매주 월·수·금 오전 10시\n- 장소: 도서관 3층 강의실\n- 수강료: 무료 (교재는 도서관에서 제공)",
+        "choices": [
+          "신청 인원에 제한이 없다.",
+          "수업은 일주일에 세 번 있다.",
+          "교재를 직접 사야 한다.",
+          "수업은 오후에 진행된다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "매주 월·수·금, 즉 일주일에 세 번 수업이 있습니다.",
+          "en": "Classes run Mon/Wed/Fri — three times a week."
+        }
+      },
+      {
+        "id": "t2n-04",
+        "box": "사진 공모전 '우리 동네의 사계절'\n\n- 접수 기간: 3월 1일 ~ 5월 31일\n- 제출 방법: 이메일 접수 (photo@inju.go.kr)\n- 결과 발표: 6월 20일, 시청 홈페이지\n- 수상작은 시청 1층에서 한 달간 전시됩니다.",
+        "choices": [
+          "사진은 시청에 직접 방문해서 내야 한다.",
+          "결과는 개인에게 전화로 알려 준다.",
+          "접수 기간은 석 달 동안이다.",
+          "수상작 전시는 일주일 동안 한다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "접수 기간이 3월 1일부터 5월 31일까지, 즉 석 달입니다.",
+          "en": "Submissions run March 1–May 31, i.e. three months."
+        }
+      }
+    ],
+    "t2r-info-graph": [
+      {
+        "id": "t2gr-01",
+        "box": "[성인의 하루 평균 운동 시간]\n(조사 대상: 인주시 성인 1,000명)\n\n- 30분 미만: 42%\n- 30분 ~ 1시간: 33%\n- 1시간 이상: 25%",
+        "choices": [
+          "'1시간 이상' 운동하는 사람이 가장 많다.",
+          "'30분 미만'이라는 응답이 절반을 넘는다.",
+          "'30분~1시간' 응답 비율이 두 번째로 높다.",
+          "조사 대상은 인주시 학생들이다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "33%인 '30분~1시간'이 42%에 이어 두 번째로 높습니다.",
+          "en": "'30 min–1 hour' (33%) is the second highest after 42%."
+        }
+      },
+      {
+        "id": "t2gr-02",
+        "box": "[인주시 1인 가구 수 변화]\n\n- 2014년: 8만 가구\n- 2019년: 12만 가구\n- 2024년: 17만 가구",
+        "choices": [
+          "1인 가구 수가 계속 늘고 있다.",
+          "2019년에 1인 가구가 줄어들었다.",
+          "2024년 1인 가구는 20만이 넘는다.",
+          "지난 10년간 1인 가구 수에 변화가 없다."
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "8만 → 12만 → 17만으로 계속 증가하고 있습니다.",
+          "en": "The number keeps rising: 80k → 120k → 170k."
+        }
+      },
+      {
+        "id": "t2gr-03",
+        "box": "[여름휴가 때 하고 싶은 활동]\n(조사 대상: 직장인 600명)\n\n- 1위: 국내 여행 (38%)\n- 2위: 집에서 휴식 (29%)\n- 3위: 해외여행 (21%)\n- 4위: 취미 활동 (12%)",
+        "choices": [
+          "해외여행이 1위를 차지했다.",
+          "'집에서 휴식'이 '취미 활동'보다 응답률이 높다.",
+          "국내 여행을 원하는 사람이 절반을 넘는다.",
+          "조사 대상은 대학생이다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "'집에서 휴식'(29%)이 '취미 활동'(12%)보다 높습니다.",
+          "en": "'Rest at home' (29%) ranks above 'hobbies' (12%)."
+        }
+      },
+      {
+        "id": "t2gr-04",
+        "box": "[중고 거래를 하는 이유]\n(조사 대상: 20~30대 500명)\n\n- 1위: 돈을 아낄 수 있어서 (47%)\n- 2위: 필요 없는 물건을 정리할 수 있어서 (31%)\n- 3위: 환경에 도움이 되어서 (22%)",
+        "choices": [
+          "환경 때문이라는 응답이 가장 많다.",
+          "조사 대상은 40대와 50대이다.",
+          "물건 정리를 이유로 꼽은 사람이 가장 적다.",
+          "돈을 아낄 수 있어서라는 응답이 절반에 가깝다."
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "'돈을 아낄 수 있어서'가 47%로 절반에 가까운 1위입니다.",
+          "en": "'To save money' is nearly half (47%), the top reason."
+        }
+      }
+    ],
+    "t2r-info-text": [
+      {
+        "id": "t2t-01",
+        "box": "인주시의 한 카페에서는 로봇이 커피를 만들어 준다. 손님이 화면에서 메뉴를 고르고 결제하면 로봇 팔이 3분 안에 음료를 완성한다. 처음에는 신기해서 찾아오는 손님이 많았지만 지금은 커피 맛이 좋아서 다시 오는 손님이 더 많다. 카페 주인은 로봇 덕분에 인건비를 줄여 커피 가격을 낮출 수 있었다고 말했다.",
+        "choices": [
+          "이 카페에서는 사람이 직접 커피를 만든다.",
+          "음료가 완성되기까지 삼십 분이 걸린다.",
+          "다시 찾아오는 손님들은 주로 맛 때문에 온다.",
+          "로봇을 쓰면서 커피 가격이 올랐다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "지금은 맛이 좋아서 다시 오는 손님이 더 많다고 했습니다.",
+          "en": "Returning customers now come mainly for the taste."
+        }
+      },
+      {
+        "id": "t2t-02",
+        "box": "지난 5일 인주 앞바다에서 60대 어부가 그물에 걸린 바다거북을 발견했다. 어부는 거북이 다치지 않도록 그물을 조심스럽게 잘라 거북을 바다로 돌려보냈다. 이 모습을 옆에 있던 동료가 촬영해 인터넷에 올렸고 영상이 화제가 되자 인주시는 어부에게 감사장을 주기로 했다.",
+        "choices": [
+          "거북은 크게 다쳐서 치료를 받았다.",
+          "어부가 직접 영상을 찍어서 올렸다.",
+          "인주시는 어부에게 감사장을 줄 예정이다.",
+          "거북은 수족관으로 보내졌다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "영상이 화제가 되자 시가 감사장을 주기로 했다고 했습니다.",
+          "en": "The city decided to give the fisherman a certificate of appreciation."
+        }
+      },
+      {
+        "id": "t2t-03",
+        "box": "인주시립미술관은 다음 달부터 매월 마지막 주 수요일에 야간 개장을 한다. 관람 시간은 저녁 6시부터 밤 10시까지이며 입장료는 낮과 같다. 미술관 측은 퇴근 후에 문화생활을 즐기고 싶다는 직장인들의 요청이 많아 야간 개장을 결정했다고 밝혔다.",
+        "choices": [
+          "야간 개장은 매주 수요일마다 한다.",
+          "직장인들의 요청으로 야간 개장이 결정됐다.",
+          "밤에는 입장료가 더 비싸다.",
+          "야간 관람은 밤 12시까지 할 수 있다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "직장인들의 요청이 많아서 야간 개장을 결정했다고 했습니다.",
+          "en": "The museum cited office workers' requests as the reason."
+        }
+      },
+      {
+        "id": "t2t-04",
+        "box": "다음 주 월요일부터 인주역 앞 버스 정류장의 위치가 바뀐다. 역 앞 도로 공사 때문에 정류장이 50미터 떨어진 은행 앞으로 옮겨지는 것이다. 공사는 두 달 동안 계속될 예정이며 공사가 끝나면 정류장은 원래 자리로 돌아온다.",
+        "choices": [
+          "정류장이 완전히 없어질 예정이다.",
+          "공사는 일주일 만에 끝난다.",
+          "정류장은 공사 후에도 은행 앞에 남는다.",
+          "정류장 위치가 바뀌는 것은 도로 공사 때문이다."
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "역 앞 도로 공사 때문에 정류장을 옮긴다고 했습니다.",
+          "en": "The stop is being moved because of road construction."
+        }
+      },
+      {
+        "id": "t2t-05",
+        "box": "인주초등학교 학생들이 직접 기른 채소를 팔아서 모은 돈을 이웃에게 기부했다. 학생들은 지난봄부터 학교 텃밭에서 상추와 토마토를 길렀고 지난주 학교 축제에서 이를 판매했다. 판매 금액 전부는 혼자 사시는 동네 어르신들을 위한 반찬을 만드는 데 쓰였다.",
+        "choices": [
+          "학생들은 채소를 시장에서 사 왔다.",
+          "채소를 판 돈은 전부 기부되었다.",
+          "채소는 축제에서 무료로 나누어 주었다.",
+          "기부금은 학교 도서 구입에 쓰였다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "판매 금액 전부가 어르신들을 위해 쓰였다고 했습니다.",
+          "en": "All the sales money was donated for elderly neighbors' meals."
+        }
+      },
+      {
+        "id": "t2t-06",
+        "box": "올여름 계속된 무더위로 인주시의 전기 사용량이 역대 최고치를 기록했다. 시는 전력 부족에 대비해 공공기관의 실내 온도를 26도 이상으로 유지하도록 했고, 시민들에게도 사용하지 않는 전자 제품의 플러그를 뽑아 달라고 요청했다.",
+        "choices": [
+          "올여름 전기 사용량이 역대 가장 많았다.",
+          "공공기관은 실내 온도를 20도로 낮췄다.",
+          "시는 시민들에게 전기를 더 쓰라고 했다.",
+          "전기 사용량이 작년보다 줄었다."
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "전기 사용량이 역대 최고치를 기록했다고 했습니다.",
+          "en": "Electricity use hit an all-time high this summer."
+        }
+      }
+    ],
+    "t2r-order": [
+      {
+        "id": "t2o-01",
+        "box": "(가) 그래서 프랑스에서는 대회까지 열어 가장 맛있는 바게트를 뽑는다.\n(나) 바게트는 프랑스 사람들이 매일 먹는 빵이다.\n(다) 우승한 빵집은 일 년 동안 대통령궁에 빵을 납품하게 된다.\n(라) 매일 먹는 만큼 빵 맛에 대한 관심도 아주 높다.",
+        "choices": [
+          "(나)-(라)-(가)-(다)",
+          "(나)-(가)-(다)-(라)",
+          "(라)-(나)-(가)-(다)",
+          "(라)-(다)-(나)-(가)"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "바게트 소개 → 관심이 높음 → 그래서 대회 개최 → 우승 혜택의 순서입니다.",
+          "en": "Introduce baguettes → high interest → so a contest is held → the winner's reward."
+        }
+      },
+      {
+        "id": "t2o-02",
+        "box": "(가) 이 습관은 적의 공격을 경계하던 야생 시절의 흔적이다.\n(나) 그래서 고양이는 잘 때도 작은 소리가 나면 바로 깬다.\n(다) 고양이는 하루의 절반이 넘는 시간을 잠으로 보낸다.\n(라) 하지만 그 잠의 대부분은 깊은 잠이 아니다.",
+        "choices": [
+          "(다)-(나)-(가)-(라)",
+          "(가)-(다)-(라)-(나)",
+          "(다)-(라)-(나)-(가)",
+          "(가)-(나)-(다)-(라)"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "많이 잔다 → 하지만 깊은 잠이 아니다 → 그래서 바로 깬다 → 야생 시절의 흔적이다.",
+          "en": "Cats sleep a lot → but not deeply → so they wake instantly → a trace of their wild past."
+        }
+      },
+      {
+        "id": "t2o-03",
+        "box": "(가) 그런데 얼마 지나지 않아 지우개 달린 연필이 나오면서 인기가 시들해졌다.\n(나) 19세기에는 모자에 지우개를 붙인 발명품이 나온 적이 있다.\n(다) 이처럼 아무리 새로워도 쓰기 불편하면 외면받기 마련이다.\n(라) 모자를 쓴 채로 글씨를 지우기가 불편했기 때문이다.",
+        "choices": [
+          "(나)-(라)-(가)-(다)",
+          "(나)-(가)-(라)-(다)",
+          "(다)-(가)-(나)-(라)",
+          "(다)-(나)-(라)-(가)"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "발명품 소개 → 인기가 식음 → 그 이유(불편함) → 교훈의 순서입니다.",
+          "en": "The invention → it lost popularity → the reason (inconvenience) → the lesson."
+        }
+      },
+      {
+        "id": "t2o-04",
+        "box": "(가) 소금을 뿌리면 얼음이 녹으면서 주변의 열을 빼앗기 때문이다.\n(나) 옛날에는 냉장고 없이도 아이스크림을 만들었다.\n(다) 이 원리로 통 안의 재료가 얼어서 아이스크림이 된다.\n(라) 얼음에 소금을 뿌린 뒤 그 위에 재료를 담은 통을 올려 두는 것이다.",
+        "choices": [
+          "(나)-(가)-(라)-(다)",
+          "(라)-(나)-(다)-(가)",
+          "(라)-(다)-(가)-(나)",
+          "(나)-(라)-(가)-(다)"
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "냉장고 없이 만들었다 → 방법 소개 → 원리(열을 빼앗음) → 결과의 순서입니다.",
+          "en": "No fridge needed → the method → the principle (salt draws heat) → the result."
+        }
+      },
+      {
+        "id": "t2o-05",
+        "box": "(가) 항구에 도착한 바나나는 그제야 노랗게 익기 시작한다.\n(나) 바나나는 초록색일 때 배에 실려 수출된다.\n(다) 다 익은 바나나는 먼 거리를 이동하는 동안 상하기 쉽기 때문이다.\n(라) 그래서 우리가 마트에서 보는 바나나는 대부분 노란색이다.",
+        "choices": [
+          "(다)-(나)-(라)-(가)",
+          "(나)-(다)-(가)-(라)",
+          "(나)-(가)-(다)-(라)",
+          "(다)-(라)-(나)-(가)"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "초록색일 때 수출 → 그 이유 → 도착 후 익기 시작 → 그래서 마트에서는 노란색.",
+          "en": "Shipped green → the reason → ripens after arrival → so they look yellow in stores."
+        }
+      },
+      {
+        "id": "t2o-06",
+        "box": "(가) 그 결과 참가자 대부분이 가짜 약을 먹고도 통증이 줄었다고 답했다.\n(나) 한 연구팀이 약효가 전혀 없는 가짜 약으로 실험을 했다.\n(다) 이는 나을 것이라는 믿음이 실제로 몸에 영향을 준다는 것을 보여 준다.\n(라) 참가자들에게는 그것이 새로 개발된 진통제라고 알려 주었다.",
+        "choices": [
+          "(나)-(라)-(가)-(다)",
+          "(나)-(다)-(라)-(가)",
+          "(가)-(나)-(라)-(다)",
+          "(가)-(라)-(나)-(다)"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "실험 소개 → 참가자에게 알린 내용 → 결과 → 결과의 의미 순서입니다.",
+          "en": "The experiment → what participants were told → the result → what it shows."
+        }
+      },
+      {
+        "id": "t2o-07",
+        "box": "(가) 반면 습도가 낮은 날에는 소리가 잘 퍼지지 않아 작게 들린다.\n(나) 비가 오기 전에는 멀리 있는 기차 소리가 유난히 크게 들리곤 한다.\n(다) 공기 중에 물기가 많으면 소리가 더 멀리까지 전달되기 때문이다.\n(라) 그래서 옛사람들은 기차 소리가 크게 들리면 비가 올 거라고 짐작했다.",
+        "choices": [
+          "(다)-(가)-(나)-(라)",
+          "(나)-(가)-(다)-(라)",
+          "(다)-(나)-(라)-(가)",
+          "(나)-(다)-(가)-(라)"
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "현상 소개 → 이유(습도) → 반대 경우 → 옛사람들의 지혜 순서입니다.",
+          "en": "The phenomenon → the reason (humidity) → the opposite case → how people used it."
+        }
+      }
+    ],
+    "t2r-blank1": [
+      {
+        "id": "t2b1-01",
+        "box": "실내 온도는 너무 높아도, 너무 낮아도 좋지 않다. 연구에 따르면 사람의 집중력은 22도 안팎에서 가장 높았고 온도가 그보다 오르내릴수록 떨어졌다. 일의 효율을 높이고 싶다면 먼저 실내 온도부터 (                ) 필요가 있다.",
+        "choices": [
+          "크게 올릴",
+          "확인해 볼",
+          "자주 바꿀",
+          "무시해 볼"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "온도가 집중력에 영향을 주므로 온도를 확인해 보라는 흐름입니다.",
+          "en": "Since temperature affects focus, the advice is to check the room temperature first."
+        }
+      },
+      {
+        "id": "t2b1-02",
+        "box": "사람들은 보통 금붕어가 3초밖에 기억하지 못한다고 알고 있다. 그러나 실험 결과 금붕어는 먹이를 주는 시간과 장소를 며칠이 지나도 기억해 냈다. 금붕어의 기억력이 나쁘다는 생각은 (                ) 셈이다.",
+        "choices": [
+          "과학적으로 증명된",
+          "최근에 새로 밝혀진",
+          "사실과 다른 잘못된 믿음인",
+          "실험으로 다시 확인된"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "실험 결과가 통념과 반대이므로 그 생각은 잘못된 믿음입니다.",
+          "en": "The experiment contradicts the common belief, so it is a false belief."
+        }
+      },
+      {
+        "id": "t2b1-03",
+        "box": "박물관이나 미술관의 벽은 대부분 흰색이다. 흰 벽은 작품을 돋보이게 하고 관람객이 (                ) 도와주기 때문이다. 벽이 화려하면 시선이 벽으로 분산되어 정작 작품에 집중하기가 어렵다.",
+        "choices": [
+          "작품에만 집중하도록",
+          "벽을 감상하도록",
+          "사진을 찍도록",
+          "빨리 이동하도록"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "화려한 벽은 시선을 분산시킨다는 뒷문장과 대비되는 내용입니다.",
+          "en": "White walls help visitors focus only on the artwork, unlike showy walls."
+        }
+      },
+      {
+        "id": "t2b1-04",
+        "box": "종이 빨대는 플라스틱 빨대보다 환경에 좋다고 알려져 있다. 그러나 종이 빨대를 만드는 과정에서도 적지 않은 에너지가 쓰이고, 표면의 코팅 때문에 재활용이 어려운 경우도 많다. 따라서 종이 빨대가 언제나 (                ) 보기는 어렵다.",
+        "choices": [
+          "비싼 제품이라고",
+          "새로운 발명품이라고",
+          "편리한 도구라고",
+          "친환경적인 선택이라고"
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "에너지 사용과 재활용 문제 때문에 '언제나 친환경적'이라고 할 수 없습니다.",
+          "en": "Because of energy use and recycling issues, paper straws are not always eco-friendly."
+        }
+      },
+      {
+        "id": "t2b1-05",
+        "box": "달리기를 할 때 음악을 들으면 덜 힘들게 느껴진다. 흥겨운 음악이 뇌의 주의를 끌어서 몸이 보내는 피로 신호에 (                ) 만들기 때문이다. 실제로 많은 선수들이 훈련할 때 음악을 활용한다.",
+        "choices": [
+          "더 민감해지게",
+          "덜 집중하게",
+          "빨리 반응하게",
+          "크게 놀라게"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "음악이 주의를 끌면 피로 신호에 덜 집중하게 되어 덜 힘들게 느낍니다.",
+          "en": "Music draws the brain's attention away, so we focus less on fatigue signals."
+        }
+      },
+      {
+        "id": "t2b1-06",
+        "box": "온라인 회의가 늘면서 회의 피로를 호소하는 사람이 많아졌다. 화면 속 자신의 모습을 계속 보게 되는 것이 큰 원인 중 하나다. 전문가들은 회의 중에 (                ) 기능을 사용하는 것만으로도 피로가 줄어든다고 조언한다.",
+        "choices": [
+          "자기 화면을 숨기는",
+          "소리를 더 키우는",
+          "배경을 바꾸는",
+          "회의를 녹화하는"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "자기 모습을 계속 보는 것이 원인이므로 자기 화면을 숨기면 됩니다.",
+          "en": "Since seeing yourself causes fatigue, hiding your own video helps."
+        }
+      },
+      {
+        "id": "t2b1-07",
+        "box": "전통 시장의 골목이 좁은 데에는 이유가 있다. 골목이 좁으면 여름에는 햇볕이 덜 들어와 시원하고, 겨울에는 찬 바람이 덜 불어 따뜻하다. 좁은 골목은 불편해 보이지만 사실은 (                ) 설계인 것이다.",
+        "choices": [
+          "공간을 낭비하는",
+          "최근에 유행하는",
+          "날씨를 고려한 지혜로운",
+          "보기에만 좋은"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "여름과 겨울의 날씨에 유리하다는 앞 내용을 요약하는 표현입니다.",
+          "en": "The narrow alleys are a wise design that accounts for the weather."
+        }
+      }
+    ],
+    "t2r-head": [
+      {
+        "id": "t2h-01",
+        "box": "채소값 고공 행진, 장바구니 '한숨'",
+        "choices": [
+          "채소 가격이 계속 올라 소비자들의 부담이 커지고 있다.",
+          "채소 가격이 내려서 소비자들이 기뻐하고 있다.",
+          "채소 판매량이 줄어 상인들이 걱정하고 있다.",
+          "채소 수확이 늘어 가격이 안정되고 있다."
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "'고공 행진'은 가격이 계속 높다는 뜻이고 '한숨'은 소비자의 부담을 나타냅니다.",
+          "en": "'고공 행진' means prices stay high; '한숨' (sigh) shows consumers' burden."
+        }
+      },
+      {
+        "id": "t2h-02",
+        "box": "겨울 축제 '대박', 작은 산골 마을에 관광객 발길 이어져",
+        "choices": [
+          "겨울 축제가 취소되어 관광객이 크게 줄었다.",
+          "산골 마을이 축제 준비에 어려움을 겪고 있다.",
+          "겨울 축제가 성공해 산골 마을을 찾는 관광객이 많아졌다.",
+          "관광객이 줄어서 축제 규모가 작아졌다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "'대박'은 큰 성공, '발길 이어져'는 방문객이 계속 온다는 뜻입니다.",
+          "en": "'대박' means a big success; '발길 이어져' means visitors keep coming."
+        }
+      },
+      {
+        "id": "t2h-03",
+        "box": "출퇴근길 '지옥철' 해소되나, 열차 추가 투입 눈앞",
+        "choices": [
+          "지하철 요금이 올라서 승객들의 불만이 크다.",
+          "출퇴근 시간 지하철 혼잡이 열차 추가로 곧 나아질 전망이다.",
+          "열차 고장으로 출퇴근길 혼잡이 더 심해졌다.",
+          "지하철 이용객이 줄어 열차 수를 줄이기로 했다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "'지옥철 해소'와 '열차 추가 투입 눈앞'은 혼잡이 곧 개선된다는 뜻입니다.",
+          "en": "Extra trains are about to be added, so the crowding is expected to ease."
+        }
+      },
+      {
+        "id": "t2h-04",
+        "box": "신인 감독의 첫 영화, 예상 밖 흥행 질주",
+        "choices": [
+          "신인 감독의 영화가 관객들의 외면을 받았다.",
+          "유명 감독의 새 영화가 개봉을 앞두고 있다.",
+          "신인 감독이 영화 촬영을 중단하기로 했다.",
+          "신인 감독의 영화가 기대 이상으로 흥행에 성공하고 있다."
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "'예상 밖 흥행 질주'는 기대보다 훨씬 잘되고 있다는 뜻입니다.",
+          "en": "'예상 밖 흥행 질주' means the film is doing far better than expected."
+        }
+      },
+      {
+        "id": "t2h-05",
+        "box": "손끝 하나로 은행 업무 '끝', 고령층엔 '먼 얘기'",
+        "choices": [
+          "모바일 뱅킹이 편리해졌지만 고령층은 이용에 어려움을 겪고 있다.",
+          "고령층의 모바일 뱅킹 이용이 크게 늘었다.",
+          "은행 지점이 늘어나 고령층의 이용이 편해졌다.",
+          "모바일 뱅킹 사고가 늘어 이용자가 줄고 있다."
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "'먼 얘기'는 고령층에게는 아직 어려운 일이라는 뜻입니다.",
+          "en": "'먼 얘기' implies it is still out of reach for the elderly."
+        }
+      },
+      {
+        "id": "t2h-06",
+        "box": "가뭄 끝 단비, 농민들 '이제야 숨통'",
+        "choices": [
+          "큰비가 내려서 농작물 피해가 심각하다.",
+          "가뭄이 계속되어 농민들의 시름이 깊어지고 있다.",
+          "오랜 가뭄 끝에 비가 내려 농민들이 한시름 놓았다.",
+          "비가 오지 않아 농산물 가격이 오르고 있다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "'단비'는 반가운 비, '숨통이 트이다'는 어려움에서 벗어났다는 뜻입니다.",
+          "en": "'단비' is welcome rain; '숨통' means farmers can finally breathe again."
+        }
+      },
+      {
+        "id": "t2h-07",
+        "box": "전기차 충전소 '하늘의 별 따기'... 이용자 불만 폭주",
+        "choices": [
+          "전기차 충전 요금이 내려서 이용자가 늘었다.",
+          "전기차 충전소를 찾기가 어려워 이용자들의 불만이 크다.",
+          "전기차 판매가 줄어 충전소가 문을 닫고 있다.",
+          "충전소가 곳곳에 생겨서 이용이 편리해졌다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "'하늘의 별 따기'는 매우 어렵다는 뜻으로, 충전소 부족을 나타냅니다.",
+          "en": "'하늘의 별 따기' (picking stars) means finding a charger is very hard."
+        }
+      }
+    ],
+    "t2r-blank2": [
+      {
+        "id": "t2b2-01",
+        "box": "악수는 원래 손에 무기가 없다는 것을 보여 주기 위한 행동에서 시작되었다고 한다. 낯선 사람을 만났을 때 빈손을 내밀어 (                ) 뜻을 전한 것이다. 이 행동이 오늘날에는 반가움과 신뢰를 나타내는 인사가 되었다.",
+        "choices": [
+          "싸울 생각이 없다는",
+          "선물을 주겠다는",
+          "길을 알려 주겠다는",
+          "힘이 세다는"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "무기가 없는 빈손은 싸울 뜻이 없음을 보여 줍니다.",
+          "en": "An empty hand showed one had no weapon and no intent to fight."
+        }
+      },
+      {
+        "id": "t2b2-02",
+        "box": "영화관의 팝콘은 유난히 고소한 냄새로 관객을 유혹한다. 많은 영화관이 매장 안쪽이 아니라 입구 가까운 곳에서 팝콘을 튀기는데, 이는 냄새가 (                ) 하기 위한 전략이다. 냄새에 이끌린 관객은 계획에 없던 팝콘을 사게 된다.",
+        "choices": [
+          "빨리 사라지게",
+          "밖으로 나가지 못하게",
+          "들어오는 관객에게 잘 퍼지게",
+          "기계에 배지 않게"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "입구에서 튀기는 이유는 냄새가 관객에게 잘 퍼지게 하기 위해서입니다.",
+          "en": "Popping near the entrance spreads the smell to arriving customers."
+        }
+      },
+      {
+        "id": "t2b2-03",
+        "box": "비행기 창문은 모서리가 둥근 모양이다. 초기의 비행기는 사각형 창문을 달았는데 비행 중 창문 모서리에 힘이 집중되어 금이 가는 사고가 잇따랐다. 이후 모서리를 둥글게 만들어 힘이 한곳에 (                ) 했고, 그 결과 사고가 크게 줄었다.",
+        "choices": [
+          "더 많이 모이도록",
+          "몰리지 않고 고르게 퍼지도록",
+          "보이지 않게 숨도록",
+          "빠르게 이동하도록"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "모서리에 힘이 집중되는 문제를 해결하려면 힘이 고르게 퍼져야 합니다.",
+          "en": "Rounded corners spread the stress evenly instead of concentrating it."
+        }
+      },
+      {
+        "id": "t2b2-04",
+        "box": "마트의 계산대 앞에는 껌이나 초콜릿 같은 작은 상품들이 놓여 있다. 계산을 기다리는 동안 소비자는 특별한 고민 없이 이런 상품을 집어 들곤 한다. 기다리면서 느끼는 (                ) 구매로 이어지게 만드는 전략인 것이다.",
+        "choices": [
+          "지루함을",
+          "즐거움을",
+          "고마움을",
+          "부러움을"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "기다리는 동안의 지루함이 충동구매로 이어지도록 한 전략입니다.",
+          "en": "The boredom of waiting in line is turned into impulse purchases."
+        }
+      },
+      {
+        "id": "t2b2-05",
+        "box": "높은 산에 올라가면 과자 봉지가 빵빵하게 부풀어 오른다. 산 위는 공기의 압력이 낮아서 봉지 (                ) 때문이다. 반대로 깊은 바닷속에 봉지를 가져가면 강한 압력에 눌려 납작해진다.",
+        "choices": [
+          "안의 공기가 모두 빠져나가기",
+          "안의 과자가 무거워지기",
+          "밖의 온도가 높아지기",
+          "안의 공기를 누르는 힘이 약해지기"
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "바깥 압력이 낮아지면 봉지 안 공기를 누르는 힘이 약해져 부풀어 오릅니다.",
+          "en": "Lower outside pressure means less force pressing on the air inside, so the bag inflates."
+        }
+      },
+      {
+        "id": "t2b2-06",
+        "box": "우리는 처음 본 사람의 인상을 몇 초 만에 판단하곤 한다. 문제는 이렇게 빠르게 만들어진 첫인상이 (                ) 데 있다. 한번 굳어진 인상은 이후에 반대되는 모습을 보아도 좀처럼 바뀌지 않는다. 그래서 사람을 평가할 때는 충분한 시간을 두고 여러 모습을 보려는 노력이 필요하다.",
+        "choices": [
+          "금방 잊힌다는",
+          "쉽게 바뀌지 않는다는",
+          "언제나 정확하다는",
+          "상대에게 전달된다는"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "뒤 문장의 '좀처럼 바뀌지 않는다'가 빈칸의 근거입니다.",
+          "en": "The next sentence explains: once formed, first impressions rarely change."
+        }
+      },
+      {
+        "id": "t2b2-07",
+        "box": "도시의 가로등 불빛은 사람에게는 편리하지만 나무에게는 그렇지 않다. 가로등 옆 나무는 밤에도 계속 빛을 받아 (                ) 계절의 변화를 늦게 알아차린다. 그래서 가을이 되어도 잎을 늦게 떨어뜨려 겨울 추위에 피해를 입기도 한다.",
+        "choices": [
+          "낮이 길어진 것으로 착각해",
+          "더 빨리 자라게 되어",
+          "빛을 피해 다니느라",
+          "뿌리가 약해져서"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "밤에도 빛을 받으면 나무는 낮이 긴 계절로 착각하게 됩니다.",
+          "en": "Constant light makes trees mistake the season for one with long days."
+        }
+      },
+      {
+        "id": "t2b2-08",
+        "box": "박수 소리는 공연장의 분위기를 순식간에 바꾼다. 한 사람이 치기 시작한 박수는 곧 주변으로 번져 나간다. 사람에게는 주위 사람의 행동을 (                ) 경향이 있기 때문이다. 이런 현상은 하품이 옆 사람에게 옮는 것에서도 확인할 수 있다.",
+        "choices": [
+          "큰 소리로 비판하는",
+          "오랫동안 기억하는",
+          "무의식적으로 따라 하는",
+          "일부러 무시하는"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "박수와 하품이 옮는 것은 남의 행동을 무의식적으로 따라 하기 때문입니다.",
+          "en": "Applause and yawning spread because people unconsciously imitate others."
+        }
+      }
+    ],
+    "t2r-match": [
+      {
+        "id": "t2m-01",
+        "box": "가위바위보에서 이길 확률을 높이는 방법이 연구된 적이 있다. 연구에 따르면 사람들은 이겼을 때는 같은 것을 다시 내고, 졌을 때는 다른 것으로 바꾸는 경향이 있었다. 즉 방금 이긴 상대는 같은 것을 다시 낼 가능성이 높으므로 그것을 이기는 것을 내면 유리하다. 물론 상대도 이 전략을 알고 있다면 결과는 달라질 수 있다.",
+        "choices": [
+          "사람들은 이기면 다음에 다른 것을 내는 경향이 있다.",
+          "방금 이긴 상대는 같은 것을 다시 낼 가능성이 높다.",
+          "이 전략은 상대가 알고 있어도 항상 통한다.",
+          "가위바위보의 확률은 연구된 적이 없다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "이긴 사람은 같은 것을 다시 내는 경향이 있다고 했습니다.",
+          "en": "Winners tend to repeat their previous move."
+        }
+      },
+      {
+        "id": "t2m-02",
+        "box": "지폐에는 눈이 불편한 사람들을 위한 장치가 숨어 있다. 한국의 지폐에는 금액에 따라 서로 다른 개수의 볼록한 점이 찍혀 있어서 손끝으로 만져 금액을 구분할 수 있다. 또 지폐마다 길이를 다르게 만들어서 길이를 비교하는 것만으로도 금액을 알 수 있도록 했다.",
+        "choices": [
+          "지폐의 볼록한 점은 장식을 위한 것이다.",
+          "우리나라 지폐의 길이는 모두 같다.",
+          "이 장치는 외국 지폐에만 있다.",
+          "손으로 만져서 지폐의 금액을 알 수 있다."
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "볼록한 점을 만져서 금액을 구분할 수 있다고 했습니다.",
+          "en": "The raised dots let people identify the value by touch."
+        }
+      },
+      {
+        "id": "t2m-03",
+        "box": "혼잣말은 어린아이의 성장에 중요한 역할을 한다. 아이들은 놀면서 자기가 할 일을 소리 내어 말하곤 하는데, 이는 스스로 행동을 계획하고 조절하는 연습이 된다. 실제로 연구에서 어려운 과제를 할 때 혼잣말을 한 아이들이 그렇지 않은 아이들보다 과제를 더 잘 해냈다. 이런 혼잣말은 나이가 들면서 점차 소리 없는 속말로 바뀐다.",
+        "choices": [
+          "혼잣말은 아이의 성장을 방해한다.",
+          "혼잣말을 한 아이들이 과제를 더 잘 해냈다.",
+          "혼잣말은 어른이 되어도 소리 내어 하게 된다.",
+          "아이들은 혼잣말을 거의 하지 않는다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "혼잣말을 한 아이들이 과제를 더 잘 해냈다는 연구 결과가 있습니다.",
+          "en": "Children who talked to themselves performed the tasks better."
+        }
+      },
+      {
+        "id": "t2m-04",
+        "box": "세계에서 가장 오래된 신발은 약 5,500년 전의 가죽신으로, 한 동굴 안에서 발견되었다. 신발이 이렇게 오래 보존될 수 있었던 것은 동굴 안의 서늘하고 건조한 환경, 그리고 신발을 덮고 있던 양의 배설물 덕분이었다. 배설물이 공기를 차단해서 가죽이 썩지 않도록 보호한 것이다.",
+        "choices": [
+          "이 신발은 바닷속에서 발견되었다.",
+          "이 신발은 천으로 만들어졌다.",
+          "동굴의 환경이 신발 보존에 도움이 되었다.",
+          "이 신발은 천 년 전에 만들어진 것이다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "서늘하고 건조한 동굴 환경 덕분에 신발이 보존되었다고 했습니다.",
+          "en": "The cave's cool, dry conditions helped preserve the shoe."
+        }
+      },
+      {
+        "id": "t2m-05",
+        "box": "한 커피 회사는 카페에서 나오는 커피 찌꺼기로 버섯을 기르는 사업을 시작했다. 커피 찌꺼기에는 버섯이 자라는 데 필요한 영양분이 풍부하기 때문이다. 이 회사는 다 자란 버섯을 식당에 판매하고, 버섯을 기르고 남은 찌꺼기는 다시 농장의 비료로 보낸다. 버려지던 쓰레기가 두 번이나 다시 쓰이는 셈이다.",
+        "choices": [
+          "커피 찌꺼기는 버섯 재배에 쓸모가 없다.",
+          "이 회사는 기른 버섯을 직접 먹는다.",
+          "커피 찌꺼기는 한 번만 재사용된다.",
+          "버섯을 기르고 남은 찌꺼기는 비료로 쓰인다."
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "버섯을 기른 뒤 남은 찌꺼기는 농장의 비료로 보낸다고 했습니다.",
+          "en": "The leftover grounds are sent to farms as fertilizer."
+        }
+      },
+      {
+        "id": "t2m-06",
+        "box": "'북튜버'는 책을 소개하는 영상을 만드는 사람들이다. 책 읽는 인구가 줄어드는 가운데 북튜버의 영상은 책에 대한 관심을 다시 불러일으키고 있다. 실제로 한 북튜버가 소개한 오래된 소설이 방송 후 서점 베스트셀러에 오르기도 했다. 출판사들도 신간이 나오면 북튜버에게 먼저 책을 보내는 등 이들과의 협력을 늘리고 있다.",
+        "choices": [
+          "북튜버가 소개한 책이 베스트셀러가 된 적이 있다.",
+          "북튜버는 책을 직접 판매하는 사람이다.",
+          "출판사들은 북튜버와 협력하지 않는다.",
+          "책을 읽는 인구가 계속 늘고 있다."
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "북튜버가 소개한 소설이 베스트셀러에 올랐다고 했습니다.",
+          "en": "An old novel became a bestseller after a BookTuber featured it."
+        }
+      },
+      {
+        "id": "t2m-07",
+        "box": "바코드는 굵기가 다른 세로줄로 정보를 표시하는 기술이다. 그런데 최초의 바코드는 지금과 달리 동그란 과녁 모양이었다. 어느 방향에서 읽어도 인식이 가능하도록 한 것이다. 하지만 인쇄 과정에서 잉크가 번지면 인식이 어려워지는 문제가 있어서 지금의 세로줄 모양으로 바뀌게 되었다.",
+        "choices": [
+          "최초의 바코드는 세로줄 모양이었다.",
+          "바코드의 모양은 처음부터 지금까지 같다.",
+          "동그란 바코드는 잉크가 번지면 읽기 어려웠다.",
+          "동그란 바코드는 한 방향에서만 읽을 수 있었다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "잉크가 번지면 인식이 어려워서 세로줄 모양으로 바뀌었다고 했습니다.",
+          "en": "Ink smudges made the round barcode hard to scan, so it was replaced."
+        }
+      }
+    ],
+    "t2r-theme": [
+      {
+        "id": "t2th-01",
+        "box": "회의에서 아무도 반대하지 않는 결정이 늘 좋은 결정인 것은 아니다. 반대가 없다는 것은 구성원들이 충분히 고민하지 않았거나 의견 말하기를 꺼린다는 신호일 수 있다. 건강한 조직은 반대 의견을 막지 않고 오히려 그것을 통해 결정의 약점을 보완한다. 서로 다른 의견이 자유롭게 오가는 분위기를 만드는 것이야말로 조직의 경쟁력이다.",
+        "choices": [
+          "회의 시간은 짧을수록 좋다.",
+          "반대 의견을 존중하는 조직이 더 나은 결정을 내린다.",
+          "반대 의견은 조직의 결정을 방해할 뿐이다.",
+          "구성원의 수가 많을수록 좋은 결정이 나온다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "반대 의견이 결정의 약점을 보완해 준다는 것이 글의 중심 내용입니다.",
+          "en": "The main point: organizations that welcome dissent make better decisions."
+        }
+      },
+      {
+        "id": "t2th-02",
+        "box": "칭찬에도 기술이 필요하다. 결과만 칭찬하면 아이는 좋은 결과를 얻지 못할 것 같은 일은 아예 피하려 한다. 반면 노력한 과정을 칭찬받은 아이는 어려운 일에도 기꺼이 도전하려는 태도를 보인다. 아이를 진정으로 성장시키는 칭찬은 '참 똑똑하구나'가 아니라 '끝까지 열심히 했구나'이다.",
+        "choices": [
+          "아이에게는 칭찬을 많이 할수록 좋다.",
+          "아이는 칭찬보다 선물을 더 좋아한다.",
+          "칭찬은 아이를 소극적으로 만든다.",
+          "결과보다 과정을 칭찬하는 것이 아이의 성장에 도움이 된다."
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "과정을 칭찬해야 도전하는 태도가 길러진다는 것이 주제입니다.",
+          "en": "Praising effort, not results, fosters a willingness to take on challenges."
+        }
+      },
+      {
+        "id": "t2th-03",
+        "box": "무료 견본 상품을 받으면 왠지 그 상품을 사 줘야 할 것 같은 마음이 든다. 무엇인가를 받으면 갚아야 한다고 느끼는 심리 때문이다. 기업들은 바로 이 심리를 이용해서 공짜 견본을 나눠 주고 매출을 올린다. 공짜가 결코 공짜가 아닌 이유를 알아야 현명한 소비자가 될 수 있다.",
+        "choices": [
+          "기업은 소비자의 심리를 이용해 무료 견본으로 구매를 유도한다.",
+          "무료 견본 상품은 품질이 떨어진다.",
+          "공짜 상품은 많이 받을수록 이익이다.",
+          "소비자는 견본 상품을 신뢰하지 않는다."
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "보답 심리를 이용한 무료 견본 전략을 알고 소비해야 한다는 내용입니다.",
+          "en": "Free samples exploit the urge to reciprocate — consumers should know this."
+        }
+      },
+      {
+        "id": "t2th-04",
+        "box": "걷기는 몸의 운동일 뿐 아니라 생각의 운동이기도 하다. 걷는 동안 뇌로 가는 혈류가 늘어나면서 창의적인 생각이 활발해지기 때문이다. 실제로 한 실험에서 참가자들은 앉아 있을 때보다 걸을 때 새로운 아이디어를 훨씬 많이 냈다. 좋은 생각이 떠오르지 않을 때는 책상 앞을 지키기보다 일단 걸어 볼 일이다.",
+        "choices": [
+          "운동은 몸의 건강에만 영향을 준다.",
+          "아이디어는 책상 앞에 앉아 있을 때 잘 떠오른다.",
+          "걷기는 창의적인 생각을 하는 데 도움이 된다.",
+          "걷기 운동은 시간이 많이 들어 비효율적이다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "걷기가 창의적 사고를 활발하게 한다는 것이 글의 주제입니다.",
+          "en": "Walking boosts creative thinking — the passage's main idea."
+        }
+      },
+      {
+        "id": "t2th-05",
+        "box": "약속 시간에 늘 늦는 사람은 시간을 낙관적으로 계산하는 습관이 있다. 이동 시간과 준비 시간을 실제보다 짧게 어림잡는 것이다. 지각하는 버릇을 고치고 싶다면 의지만 다질 것이 아니라 자신이 각 일에 실제로 쓰는 시간을 기록해 보아야 한다. 문제를 정확히 알아야 해결도 가능하기 때문이다.",
+        "choices": [
+          "약속 시간은 여유 있게 정하는 것이 좋다.",
+          "지각 습관을 고치려면 자신의 시간 사용을 정확히 파악해야 한다.",
+          "지각은 의지가 부족해서 생기는 문제일 뿐이다.",
+          "시간은 낙관적으로 계산할수록 좋다."
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "실제 시간 사용을 기록해서 문제를 파악해야 한다는 주장이 핵심입니다.",
+          "en": "Track how long things really take — knowing the problem enables the fix."
+        }
+      },
+      {
+        "id": "t2th-06",
+        "box": "박물관의 유물 설명은 짧고 쉬울수록 좋다는 인식이 퍼져 있다. 그러나 지나치게 단순한 설명은 관람객의 호기심을 오히려 꺾어 버린다. 관람객은 생각보다 깊이 있는 이야기를 원하기 때문이다. 중요한 것은 설명의 길이를 줄이는 것이 아니라, 어려운 내용을 흥미로운 이야기로 풀어내는 방식이다.",
+        "choices": [
+          "유물 설명은 무조건 짧게 써야 한다.",
+          "관람객들은 유물 설명을 읽지 않는다.",
+          "박물관은 전시하는 유물의 수를 늘려야 한다.",
+          "어려운 내용을 흥미롭게 풀어내는 설명 방식이 중요하다."
+        ],
+        "answer": 4,
+        "explanation": {
+          "ko": "길이보다 내용을 흥미롭게 풀어내는 방식이 중요하다는 주제입니다.",
+          "en": "What matters is presenting difficult content in an engaging way."
+        }
+      },
+      {
+        "id": "t2th-07",
+        "box": "실수한 직원을 심하게 꾸짖는 조직에서는 실수가 사라지는 것이 아니라 숨겨진다. 문제가 감춰지면 같은 실수가 반복되고 결국 더 큰 사고로 이어진다. 반대로 실수를 보고해도 안전하다고 느끼는 조직에서는 문제가 빨리 드러나 개선이 이루어진다. 실수를 대하는 태도가 조직의 안전을 결정하는 것이다.",
+        "choices": [
+          "실수를 숨기지 않는 조직 문화가 큰 사고를 막는다.",
+          "실수한 직원은 반드시 엄하게 처벌해야 한다.",
+          "실수는 개인의 능력 문제일 뿐이다.",
+          "조직의 안전은 규칙의 수에 달려 있다."
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "실수를 드러낼 수 있는 문화가 사고를 막는다는 것이 중심 생각입니다.",
+          "en": "A culture where mistakes can be reported safely prevents bigger accidents."
+        }
+      },
+      {
+        "id": "t2th-08",
+        "box": "여행지에서 사진만 찍다가 정작 그 순간을 제대로 느끼지 못하는 사람들이 많다. 사진은 기억을 저장해 주지만, 카메라 화면 너머로만 본 풍경은 마음에 오래 남지 않는다. 때로는 카메라를 내려놓고 눈과 귀로 그 순간을 충분히 누릴 필요가 있다. 가장 선명한 기록은 마음에 남는 기억이기 때문이다.",
+        "choices": [
+          "여행지에서는 사진을 최대한 많이 찍어야 한다.",
+          "사진은 여행을 기록하는 가장 좋은 방법이다.",
+          "사진에만 집중하기보다 그 순간을 직접 느끼는 것이 중요하다.",
+          "여행은 기록을 남기기 위해서 하는 것이다."
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "카메라를 내려놓고 순간을 직접 느끼라는 것이 글쓴이의 생각입니다.",
+          "en": "Put the camera down sometimes and experience the moment directly."
+        }
+      }
+    ],
+    "t2r-insert": [
+      {
+        "id": "t2i-01",
+        "box": "그런데 이 방법은 시간이 오래 걸린다는 단점이 있었다.",
+        "box2": "옛날에는 소금을 얻기 위해서 바닷물을 끓였다. ( ㉠ ) 불을 계속 피워야 해서 나무도 많이 들었다. ( ㉡ ) 그래서 사람들은 넓은 밭에 바닷물을 가두어 놓고 햇볕에 말리는 방법을 생각해 냈다. ( ㉢ ) 이렇게 만든 소금밭이 바로 오늘날의 염전이다. ( ㉣ )",
+        "choices": [
+          "㉠",
+          "㉡",
+          "㉢",
+          "㉣"
+        ],
+        "answer": 1,
+        "explanation": {
+          "ko": "바닷물을 끓이는 방법 소개 바로 뒤, 또 다른 단점(나무) 앞에 오는 것이 자연스럽습니다.",
+          "en": "It follows the boiling method and precedes the additional drawback about firewood."
+        }
+      },
+      {
+        "id": "t2i-02",
+        "box": "그 결과 참가자 대부분이 처음보다 훨씬 정확하게 얼굴을 기억해 냈다.",
+        "box2": "사람의 기억력은 훈련으로 나아질 수 있을까? ( ㉠ ) 한 연구팀이 이를 알아보기 위해 실험을 했다. ( ㉡ ) 참가자들에게 얼굴 사진의 특징을 말로 설명하면서 외우는 방법을 가르치고 한 달 동안 연습하게 했다. ( ㉢ ) 연구팀은 이를 근거로 기억력이 타고나는 것만은 아니라고 설명했다. ( ㉣ )",
+        "choices": [
+          "㉠",
+          "㉡",
+          "㉢",
+          "㉣"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "연습 과정 설명 뒤, '이를 근거로'라는 결론 앞에 결과 문장이 와야 합니다.",
+          "en": "The result sentence belongs after the training and before the conclusion that cites it."
+        }
+      },
+      {
+        "id": "t2i-03",
+        "box": "하지만 소리가 들리지 않는 번개도 있다.",
+        "box2": "번개가 치면 곧이어 천둥소리가 들린다. ( ㉠ ) 빛이 소리보다 빠르기 때문에 번개가 먼저 보이고 소리는 나중에 들리는 것이다. ( ㉡ ) 아주 멀리에서 친 번개는 빛은 보여도 소리가 우리에게까지 닿지 못하기 때문이다. ( ㉢ ) 사람들은 이런 번개를 '마른번개'라고 부르기도 한다. ( ㉣ )",
+        "choices": [
+          "㉠",
+          "㉡",
+          "㉢",
+          "㉣"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "'~닿지 못하기 때문이다'라는 이유 문장 앞에 소리 없는 번개 이야기가 나와야 합니다.",
+          "en": "It must come right before the sentence explaining why the sound doesn't reach us."
+        }
+      },
+      {
+        "id": "t2i-04",
+        "box": "이 문제를 해결한 것이 바로 회전문이다.",
+        "box2": "높은 건물의 1층에는 회전문이 많다. ( ㉠ ) 고층 건물에서는 건물 위아래의 압력 차이 때문에 일반 문을 열면 강한 바람이 드나든다. ( ㉡ ) 그러면 문이 잘 닫히지 않고 냉난방 에너지도 크게 낭비된다. ( ㉢ ) 회전문은 늘 닫혀 있는 것과 같아서 공기의 흐름을 막아 주기 때문이다. ( ㉣ )",
+        "choices": [
+          "㉠",
+          "㉡",
+          "㉢",
+          "㉣"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "문제점 설명이 끝난 뒤, 회전문이 해결책인 이유 앞에 와야 합니다.",
+          "en": "It follows the description of the problem and precedes why revolving doors solve it."
+        }
+      },
+      {
+        "id": "t2i-05",
+        "box": "반면 너무 큰 목표는 시작하기도 전에 사람을 지치게 만든다.",
+        "box2": "새해 계획이 늘 실패하는 데에는 이유가 있다. ( ㉠ ) 목표가 구체적이지 않으면 무엇부터 해야 할지 몰라서 자꾸 미루게 된다. ( ㉡ ) 그래서 전문가들은 '매일 10분 걷기'처럼 작고 구체적인 목표에서 시작하라고 조언한다. ( ㉢ ) 작은 성공이 쌓이면 더 큰 목표에 도전할 힘도 생긴다. ( ㉣ )",
+        "choices": [
+          "㉠",
+          "㉡",
+          "㉢",
+          "㉣"
+        ],
+        "answer": 2,
+        "explanation": {
+          "ko": "구체적이지 않은 목표의 문제 뒤에 '반면 너무 큰 목표'의 문제가 이어져야 합니다.",
+          "en": "After the problem of vague goals, the contrasting problem of oversized goals fits."
+        }
+      },
+      {
+        "id": "t2i-06",
+        "box": "그제야 사람들은 그의 그림에 담긴 가치를 알아보기 시작했다.",
+        "box2": "화가 반 고흐는 살아 있는 동안 그림을 거의 팔지 못했다. ( ㉠ ) 그의 그림이 당시의 유행과 너무 달랐기 때문이다. ( ㉡ ) 그가 세상을 떠난 뒤에 열린 전시회에서 그의 작품들이 큰 주목을 받았다. ( ㉢ ) 오늘날 그의 그림은 세계에서 가장 비싼 그림 중 하나가 되었다. ( ㉣ )",
+        "choices": [
+          "㉠",
+          "㉡",
+          "㉢",
+          "㉣"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "사후 전시회에서 주목받았다는 문장 뒤에 '그제야'가 자연스럽게 이어집니다.",
+          "en": "'그제야' (only then) follows the posthumous exhibition that drew attention."
+        }
+      },
+      {
+        "id": "t2i-07",
+        "box": "이렇게 모인 동전은 매년 자선 단체에 기부된다.",
+        "box2": "이탈리아 로마의 트레비 분수에는 매일 수많은 동전이 던져진다. ( ㉠ ) 동전을 던지면 로마에 다시 오게 된다는 이야기 때문이다. ( ㉡ ) 분수에 쌓인 동전은 일주일에 한 번씩 수거된다. ( ㉢ ) 관광객의 작은 소원이 어려운 이웃을 돕는 큰 힘이 되는 셈이다. ( ㉣ )",
+        "choices": [
+          "㉠",
+          "㉡",
+          "㉢",
+          "㉣"
+        ],
+        "answer": 3,
+        "explanation": {
+          "ko": "동전 수거 문장 뒤, 이웃을 돕는다는 평가 앞에 기부 문장이 와야 합니다.",
+          "en": "It follows the collection of coins and precedes the closing comment about helping others."
+        }
+      }
+    ],
+    "t2r-pair-a": [
+      {
+        "id": "t2pa-01",
+        "sharedBox": "말을 잘하는 사람은 목소리가 큰 사람이 아니라 잘 멈추는 사람이다. 중요한 내용을 말하기 전에 잠깐 멈추면 듣는 사람의 주의를 끌 수 있다. (        ) 말하는 중간의 짧은 침묵은 상대에게 생각할 시간을 준다. 쉬지 않고 이어지는 말보다 적절한 멈춤이 있는 말이 오히려 더 힘이 있는 것이다.",
+        "questions": [
+          {
+            "stem": "(        )에 들어갈 말로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "과연",
+              "또한",
+              "만약",
+              "결코"
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "멈춤의 장점을 하나 더 덧붙이고 있으므로 '또한'이 알맞습니다.",
+              "en": "'또한' (also) adds another advantage of pausing."
+            }
+          },
+          {
+            "stem": "윗글의 주제로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "말은 크고 빠르게 해야 잘 전달된다.",
+              "중요한 내용은 여러 번 반복하는 것이 좋다.",
+              "말을 잘하려면 적절히 멈출 줄 알아야 한다.",
+              "듣는 사람은 침묵을 불편하게 여긴다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "적절한 멈춤이 있는 말이 더 힘이 있다는 것이 글의 주제입니다.",
+              "en": "The theme: good speakers know how to pause effectively."
+            }
+          }
+        ]
+      },
+      {
+        "id": "t2pa-02",
+        "sharedBox": "손으로 글씨를 쓰면서 메모를 하면 키보드로 칠 때보다 내용이 기억에 오래 남는다. 손으로 쓰는 동안 내용을 자연스럽게 요약하고 정리하게 되기 때문이다. (        ) 키보드로 칠 때는 들리는 대로 빠르게 받아 적게 되어 내용을 깊이 생각할 기회가 줄어든다. 꼭 기억해야 할 내용이라면 손으로 써 보는 것이 좋다.",
+        "questions": [
+          {
+            "stem": "(        )에 들어갈 말로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "반면",
+              "게다가",
+              "비록",
+              "결코"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "손글씨와 키보드의 차이를 대조하고 있으므로 '반면'이 알맞습니다.",
+              "en": "'반면' (on the other hand) contrasts handwriting with typing."
+            }
+          },
+          {
+            "stem": "윗글의 주제로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "키보드가 손글씨보다 기록에 유리하다.",
+              "메모는 무조건 빨리 하는 것이 중요하다.",
+              "손글씨는 시간이 오래 걸려 비효율적이다.",
+              "기억해야 할 내용은 손으로 써 보는 것이 효과적이다."
+            ],
+            "answer": 4,
+            "explanation": {
+              "ko": "손으로 쓰면 기억에 오래 남는다는 것이 글의 중심 내용입니다.",
+              "en": "Handwriting helps memory — the passage's main point."
+            }
+          }
+        ]
+      },
+      {
+        "id": "t2pa-03",
+        "sharedBox": "여행의 즐거움은 꼭 유명한 장소에서만 오는 것이 아니다. 골목의 작은 가게나 우연히 들어간 식당에서 더 큰 즐거움을 얻기도 한다. (        ) 계획에 없던 일을 만났을 때 여행은 특별해진다. 일정을 빈틈없이 짜기보다 여유를 남겨 두는 것도 좋은 여행의 방법이다.",
+        "questions": [
+          {
+            "stem": "(        )에 들어갈 말로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "결코",
+              "오히려",
+              "만약",
+              "비록"
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "예상과 반대로 계획에 없던 일이 여행을 특별하게 만든다는 뜻이므로 '오히려'가 알맞습니다.",
+              "en": "'오히려' (rather/contrary to expectation) fits the unexpected being special."
+            }
+          },
+          {
+            "stem": "윗글의 주제로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "여행 일정은 최대한 자세히 짜야 한다.",
+              "유명한 장소일수록 여행의 즐거움이 크다.",
+              "계획에 없던 경험이 여행을 특별하게 만든다.",
+              "여행지에서는 낯선 가게를 피하는 것이 좋다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "여유를 남겨 두고 우연한 경험을 즐기라는 것이 글의 주제입니다.",
+              "en": "Leave room for the unplanned — that's what makes travel special."
+            }
+          }
+        ]
+      }
+    ],
+    "t2r-pair-b": [
+      {
+        "id": "t2pb-01",
+        "sharedBox": "우리 동네 전통 시장의 상인들은 손님이 줄어 걱정이 많았다. 상인들은 시장을 살리기 위해 (                ) 의논한 끝에 저녁마다 먹거리 골목을 열기로 했다. 낮에는 물건을 팔고 저녁에는 골목에 음식 좌판을 펼친 것이다. 음식이 맛있다는 소문이 나면서 젊은 손님들이 몰려들었고 시장은 다시 활기를 찾았다.",
+        "questions": [
+          {
+            "stem": "(                )에 들어갈 말로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "발을 빼고",
+              "머리를 맞대고",
+              "손을 씻고",
+              "큰소리를 치고"
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "'머리를 맞대다'는 여럿이 모여 함께 의논한다는 뜻의 관용 표현입니다.",
+              "en": "'머리를 맞대다' (put heads together) means to discuss together."
+            }
+          },
+          {
+            "stem": "윗글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "이 시장은 저녁마다 먹거리 골목을 연다.",
+              "상인들은 시장 살리기를 포기했다.",
+              "시장을 찾는 손님이 계속 줄고 있다.",
+              "먹거리 골목은 아침에만 문을 연다."
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "저녁마다 먹거리 골목을 열기로 했다고 했습니다.",
+              "en": "The market opens a food alley every evening."
+            }
+          }
+        ]
+      },
+      {
+        "id": "t2pb-02",
+        "sharedBox": "신입 사원 시절에 나는 실수가 잦아서 늘 (                ) 지냈다. 그때 옆자리 선배가 자기도 처음에는 그랬다면서 직접 정리한 업무 노트를 건네주었다. 그 노트 덕분에 나는 일을 빨리 배울 수 있었다. 그리고 지금은 나도 후배들이 들어오면 똑같이 노트를 만들어 전해 주고 있다.",
+        "questions": [
+          {
+            "stem": "(                )에 들어갈 말로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "어깨를 펴고",
+              "배를 두드리며",
+              "가슴을 졸이며",
+              "콧노래를 부르며"
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "'가슴을 졸이다'는 불안하고 초조해한다는 뜻의 관용 표현입니다.",
+              "en": "'가슴을 졸이다' means to be anxious and on edge."
+            }
+          },
+          {
+            "stem": "윗글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "나는 처음부터 일을 잘했다.",
+              "나는 선배의 노트를 받지 않았다.",
+              "나는 후배들에게 아무것도 주지 않는다.",
+              "선배는 나에게 업무 노트를 주었다."
+            ],
+            "answer": 4,
+            "explanation": {
+              "ko": "선배가 직접 정리한 업무 노트를 건네주었다고 했습니다.",
+              "en": "The senior colleague handed over a self-made work notebook."
+            }
+          }
+        ]
+      },
+      {
+        "id": "t2pb-03",
+        "sharedBox": "작은 빵집을 운영하는 김 씨는 매일 팔고 남은 빵을 버리는 것이 늘 마음에 걸렸다. 고민 끝에 그는 (                ) 이 문제를 해결할 방법을 찾아 나섰다. 문을 닫기 한 시간 전부터 남은 빵을 반값에 파는 '마감 할인'을 시작한 것이다. 소문을 들은 손님들이 저녁마다 몰려들면서 이제 이 가게에서 버려지는 빵은 거의 없다.",
+        "questions": [
+          {
+            "stem": "(                )에 들어갈 말로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "팔을 걷어붙이고",
+              "발을 동동 구르고",
+              "딴전을 피우고",
+              "허리띠를 졸라매고"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "'팔을 걷어붙이다'는 어떤 일에 적극적으로 나선다는 뜻의 관용 표현입니다.",
+              "en": "'팔을 걷어붙이다' (roll up one's sleeves) means to tackle something actively."
+            }
+          },
+          {
+            "stem": "윗글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "이 가게는 남은 빵을 모두 버리고 있다.",
+              "마감 할인은 가게 문을 열자마자 시작된다.",
+              "마감 할인을 시작한 후 버려지는 빵이 크게 줄었다.",
+              "손님들은 마감 할인에 관심이 없다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "마감 할인 후 버려지는 빵이 거의 없다고 했습니다.",
+              "en": "After the closing-time sale began, almost no bread is thrown away."
+            }
+          }
+        ]
+      }
+    ],
+    "t2r-pair-c": [
+      {
+        "id": "t2pc-01",
+        "sharedBox": "초등학교 입학식 날, 아이는 내 손을 꼭 잡고 놓지 않았다. 교실 앞에서 아이가 자꾸 뒤를 돌아볼 때마다 나는 웃으면서 손을 흔들어 주었다. 아이가 교실로 들어가고 문이 닫히자 {u}나는 한참 동안 그 자리를 떠나지 못했다{/u}. 집에 돌아와서도 텅 빈 아이 방을 자꾸 들여다보았다. 저녁이 되어 아이가 학교에서 있었던 일을 신나게 이야기하는 것을 듣고서야 겨우 마음이 놓였다.",
+        "questions": [
+          {
+            "stem": "밑줄 친 부분에 나타난 '나'의 심정으로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "지루하다",
+              "허전하다",
+              "부럽다",
+              "답답하다"
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "아이를 처음 떼어 놓고 마음 한구석이 빈 것 같은 '허전한' 심정입니다.",
+              "en": "'허전하다' — a feeling of emptiness after letting the child go."
+            }
+          },
+          {
+            "stem": "윗글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "아이는 입학식 날 학교에 들어가지 않았다.",
+              "나는 입학식이 끝나자마자 바로 회사에 갔다.",
+              "아이는 학교에서 있었던 일을 즐겁게 이야기했다.",
+              "나는 아이의 방을 한 번도 들여다보지 않았다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "저녁에 아이가 학교 이야기를 신나게 했다고 했습니다.",
+              "en": "In the evening the child excitedly talked about the school day."
+            }
+          }
+        ]
+      },
+      {
+        "id": "t2pc-02",
+        "sharedBox": "이사를 하다가 오래된 상자 하나를 발견했다. 상자 안에는 대학 시절 친구들과 주고받은 편지가 가득했다. 시험에 떨어져서 힘들어할 때 친구가 보낸 편지에는 서툰 글씨로 '너는 반드시 해낼 거야'라고 적혀 있었다. {u}나는 편지를 손에 든 채 한동안 아무 말도 할 수 없었다{/u}. 그날 밤 나는 십 년 만에 그 친구에게 전화를 걸었다.",
+        "questions": [
+          {
+            "stem": "밑줄 친 부분에 나타난 '나'의 심정으로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "뭉클하다",
+              "억울하다",
+              "후련하다",
+              "따분하다"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "친구의 응원이 담긴 옛 편지에 마음이 뭉클해진 상황입니다.",
+              "en": "'뭉클하다' — deeply touched by the old letter of encouragement."
+            }
+          },
+          {
+            "stem": "윗글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "편지는 회사 동료가 보낸 것이다.",
+              "나는 이사를 하다가 편지 상자를 발견했다.",
+              "나는 그 친구에게 연락하지 않았다.",
+              "편지에는 아무 내용도 적혀 있지 않았다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "이사를 하다가 편지가 가득한 상자를 발견했다고 했습니다.",
+              "en": "The box of letters was found while moving house."
+            }
+          }
+        ]
+      },
+      {
+        "id": "t2pc-03",
+        "sharedBox": "마라톤 대회에 처음 나간 날이었다. 30킬로미터 지점을 지나자 다리가 무거워지면서 포기하고 싶은 마음뿐이었다. 그때 길가에서 응원하던 한 아이가 '아저씨, 조금만 더요!' 하고 소리쳤다. 그 말에 다시 힘을 내서 나는 끝까지 달렸다. 결승선을 통과하는 순간 {u}나도 모르게 두 팔이 하늘로 올라갔다{/u}. 기록은 좋지 않았지만 나는 나와의 약속을 지켰다.",
+        "questions": [
+          {
+            "stem": "밑줄 친 부분에 나타난 '나'의 심정으로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "창피하다",
+              "불안하다",
+              "서운하다",
+              "감격스럽다"
+            ],
+            "answer": 4,
+            "explanation": {
+              "ko": "포기하지 않고 완주한 순간의 벅찬 감정, 즉 '감격스러운' 심정입니다.",
+              "en": "'감격스럽다' — overwhelmed with emotion at finishing the race."
+            }
+          },
+          {
+            "stem": "윗글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "나는 대회 중간에 포기하고 말았다.",
+              "아이의 응원이 나에게 큰 힘이 되었다.",
+              "나는 좋은 기록으로 대회에서 우승했다.",
+              "나는 마라톤 대회에 여러 번 나간 적이 있다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "아이의 응원에 다시 힘을 냈다고 했습니다.",
+              "en": "The child's cheer gave the runner strength to finish."
+            }
+          }
+        ]
+      }
+    ],
+    "t2r-pair-d": [
+      {
+        "id": "t2pd-01",
+        "sharedBox": "합격자 발표 날 아침, 민수는 휴대폰을 손에 쥔 채 방 안을 서성거렸다. 몇 번이나 화면을 켰다가 다시 끄기를 반복했다. {u}심장이 빠르게 뛰어서 숨이 제대로 쉬어지지 않았다.{/u} 재수까지 하면서 매달린 시험이었다. 부엌에서는 어머니가 아무 말 없이 그릇만 달그락거리셨다. 마침내 민수는 눈을 질끈 감고 확인 버튼을 눌렀다. 잠시 후, 부엌에서 어머니의 울음 섞인 웃음소리가 들려왔다.",
+        "questions": [
+          {
+            "stem": "밑줄 친 부분에 나타난 '민수'의 심정으로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "초조하다",
+              "지루하다",
+              "서운하다",
+              "부럽다"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "결과 확인을 앞두고 몹시 불안하고 조마조마한 '초조한' 심정입니다.",
+              "en": "'초조하다' — extremely anxious right before checking the result."
+            }
+          },
+          {
+            "stem": "윗글의 내용으로 알 수 있는 것을 고르십시오.",
+            "choices": [
+              "민수는 이 시험에 처음 도전했다.",
+              "민수는 두 번째로 이 시험을 준비했다.",
+              "어머니는 시험 결과에 관심이 없었다.",
+              "민수는 끝내 결과를 확인하지 못했다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "'재수까지 하면서'라는 표현에서 두 번째 도전임을 알 수 있습니다.",
+              "en": "'재수' means retaking — it was his second attempt."
+            }
+          }
+        ]
+      },
+      {
+        "id": "t2pd-02",
+        "sharedBox": "지호는 이삿짐 상자 사이에서 낡은 야구 글러브를 발견했다. 초등학교 때 아버지가 사 주신 것이었다. 주말마다 아버지와 공을 주고받던 동네 놀이터가 떠올랐다. 바쁘다는 핑계로 아버지와 야구를 안 한 지 십 년이 넘었다. {u}지호는 글러브를 낀 손을 한참 동안 내려다보았다.{/u} 그날 저녁 지호는 아버지에게 전화를 걸어서 이번 주말에 공원에서 만나자고 말했다.",
+        "questions": [
+          {
+            "stem": "밑줄 친 부분에 나타난 '지호'의 심정으로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "후련하다",
+              "못마땅하다",
+              "애틋하다",
+              "허무하다"
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "아버지와의 추억이 떠올라 그립고 안타까운 '애틋한' 심정입니다.",
+              "en": "'애틋하다' — a tender, wistful longing for the memories with his father."
+            }
+          },
+          {
+            "stem": "윗글의 내용으로 알 수 있는 것을 고르십시오.",
+            "choices": [
+              "지호는 글러브를 최근에 새로 샀다.",
+              "아버지는 지호의 전화를 받지 않았다.",
+              "지호는 어릴 때 야구를 싫어했다.",
+              "지호는 아버지와 주말에 만나기로 했다."
+            ],
+            "answer": 4,
+            "explanation": {
+              "ko": "전화를 걸어 이번 주말에 공원에서 만나자고 했습니다.",
+              "en": "Jiho called his father and arranged to meet this weekend."
+            }
+          }
+        ]
+      },
+      {
+        "id": "t2pd-03",
+        "sharedBox": "수아가 우리 반에 전학을 온 날, 아이들은 아무도 먼저 말을 걸지 않았다. 나도 괜히 쭈뼛거리면서 눈치만 보았다. 점심시간이 되자 수아는 혼자 창가 자리에 앉아서 조용히 도시락을 꺼냈다. 나는 내 도시락을 들고 자리에서 일어났다. 다리가 조금 떨렸지만 수아 앞에 앉으면서 말했다. '같이 먹어도 돼?' 수아가 고개를 들었다. {u}수아의 얼굴에 환한 웃음이 번졌다.{/u} 그날 이후로 우리는 매일 점심을 같이 먹는다.",
+        "questions": [
+          {
+            "stem": "밑줄 친 부분에 나타난 '수아'의 심정으로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "아쉽다",
+              "반갑다",
+              "억울하다",
+              "불안하다"
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "먼저 다가와 준 친구가 고맙고 기쁜 '반가운' 심정입니다.",
+              "en": "'반갑다' — glad and delighted that someone approached her first."
+            }
+          },
+          {
+            "stem": "윗글의 내용으로 알 수 있는 것을 고르십시오.",
+            "choices": [
+              "수아는 전학 온 날부터 친구가 많았다.",
+              "아이들은 수아를 반갑게 맞아 주었다.",
+              "나는 수아에게 먼저 다가가 말을 걸었다.",
+              "수아는 혼자 밥 먹는 것을 좋아한다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "'나'가 도시락을 들고 가서 먼저 말을 걸었습니다.",
+              "en": "The narrator approached Sua first with the lunchbox."
+            }
+          }
+        ]
+      }
+    ],
+    "t2r-pair-e": [
+      {
+        "id": "t2pe-01",
+        "sharedBox": "우리나라의 전통 정원은 자연을 (                ) 데에 특징이 있다. 서양의 정원이 나무를 다듬고 길을 반듯하게 내어 인공적인 아름다움을 추구했다면, 한국의 정원은 있는 그대로의 지형과 나무를 살려서 자연의 일부처럼 만들어졌다. 연못을 파더라도 주변 산세와 어울리게 했고, 정자는 경치가 가장 잘 보이는 자리에 소박하게 세웠다. 사람이 자연을 지배하는 것이 아니라 자연 속에 스며들고자 했던 옛사람들의 생각이 정원에 그대로 담겨 있는 것이다.",
+        "questions": [
+          {
+            "stem": "(                )에 들어갈 말로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "화려하게 바꾸어 놓는",
+              "거스르지 않고 그대로 살리는",
+              "멀리하고 피하려 하는",
+              "작게 줄여서 옮겨 놓는"
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "지형과 나무를 있는 그대로 살렸다는 뒤 내용과 이어집니다.",
+              "en": "Korean gardens preserve the terrain and trees as they are."
+            }
+          },
+          {
+            "stem": "윗글의 주제로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "한국의 전통 정원은 서양 정원보다 만들기 쉽다.",
+              "전통 정원은 유지하고 관리하기가 어렵다.",
+              "서양의 정원이 한국의 정원보다 아름답다.",
+              "한국의 전통 정원에는 자연과 조화를 이루려는 정신이 담겨 있다."
+            ],
+            "answer": 4,
+            "explanation": {
+              "ko": "자연 속에 스며들고자 한 정신이 정원에 담겨 있다는 것이 주제입니다.",
+              "en": "The theme: Korean gardens embody harmony with nature."
+            }
+          }
+        ]
+      },
+      {
+        "id": "t2pe-02",
+        "sharedBox": "'느린 텔레비전'이라고 불리는 방송이 있다. 기차가 일곱 시간 동안 달리는 모습이나 장작불이 타는 모습을 편집 없이 그대로 보여 주는 프로그램이다. 자극적인 장면이 하나도 없는 이 방송은 뜻밖에도 높은 시청률을 기록했다. 빠르고 시끄러운 일상에 지친 사람들이 아무 일도 일어나지 않는 화면을 보면서 오히려 (                ) 것이다. 이 방송의 인기는 현대인들에게 필요한 것이 더 많은 자극이 아니라 쉼이라는 사실을 잘 보여 준다.",
+        "questions": [
+          {
+            "stem": "(                )에 들어갈 말로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "마음의 안정을 얻었던",
+              "새로운 정보를 찾았던",
+              "지루함을 참지 못했던",
+              "빠른 전개를 기대했던"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "지친 사람들이 조용한 화면에서 쉼을 얻었다는 흐름입니다.",
+              "en": "Tired viewers found calm in the uneventful footage."
+            }
+          },
+          {
+            "stem": "윗글의 주제로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "방송은 자극적일수록 인기가 많다.",
+              "시청률은 방송의 질과 관계가 없다.",
+              "느린 방송의 인기는 쉼을 원하는 현대인의 마음을 보여 준다.",
+              "기차 여행은 지루한 경험일 뿐이다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "현대인에게 필요한 것이 쉼이라는 마지막 문장이 주제를 담고 있습니다.",
+              "en": "The popularity of slow TV shows modern people's need for rest."
+            }
+          }
+        ]
+      },
+      {
+        "id": "t2pe-03",
+        "sharedBox": "채소나 과일은 모양이 조금만 이상해도 맛과 영양에 아무 문제가 없는데 팔리지 못하고 버려지는 경우가 많다. 이렇게 버려지는 농산물이 전체 생산량의 상당한 부분을 차지한다. 최근 이런 '못난이 농산물'을 싸게 파는 가게들이 곳곳에 생겨나고 있다. 소비자는 (                ) 농산물을 살 수 있고, 농민은 버릴 뻔한 작물로 소득을 얻는다. 나아가 못난이 농산물의 소비는 버려지는 음식물을 줄여서 환경을 지키는 데에도 큰 도움이 된다.",
+        "questions": [
+          {
+            "stem": "(                )에 들어갈 말로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "모양이 완벽하고 값비싼",
+              "수입된 지 오래되어 신선한",
+              "품질에는 문제가 없으면서 값싼",
+              "영양이 부족하지만 예쁜"
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "맛과 영양에 문제가 없는데 싸게 판다는 앞 내용과 이어집니다.",
+              "en": "The produce is fine in quality but sold cheaply."
+            }
+          },
+          {
+            "stem": "윗글의 주제로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "못난이 농산물의 소비는 소비자, 농민, 환경에 모두 이롭다.",
+              "모양이 예쁜 농산물이 건강에 더 좋다.",
+              "농산물의 가격이 계속해서 오르고 있다.",
+              "못난이 농산물은 맛이 없어서 인기가 없다."
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "소비자·농민·환경 모두에 도움이 된다는 것이 글의 중심 내용입니다.",
+              "en": "Ugly produce benefits consumers, farmers and the environment alike."
+            }
+          }
+        ]
+      }
+    ],
+    "t2r-pair-f": [
+      {
+        "id": "t2pf-01",
+        "sharedBox": "최근 일부 지방 자치 단체들이 관광객을 끌어들이기 위해 경쟁적으로 케이블카 설치를 추진하고 있다. 케이블카가 지역 경제에 도움이 될 것이라는 기대 때문이다. 그러나 이미 운영 중인 전국의 케이블카 상당수가 적자를 면하지 못하고 있다. 관광객이 일시적으로 늘더라도 그 효과가 오래가지 않는 경우가 많았던 것이다. 무엇보다 설치 과정에서 산림이 훼손되면 이를 복구하는 데에는 수십 년이 걸린다. 눈앞의 이익만 보고 무리하게 사업을 추진하다가는 경제적 손실과 환경 파괴라는 이중의 부담을 떠안게 될 수 있다.",
+        "questions": [
+          {
+            "stem": "윗글에 나타난 필자의 태도로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "케이블카 설치를 성급하게 추진하는 것을 우려하고 있다.",
+              "케이블카의 경제적 효과를 확신하고 있다.",
+              "케이블카 기술의 발전에 감탄하고 있다.",
+              "케이블카 요금의 인상을 요구하고 있다."
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "적자와 환경 훼손을 근거로 무리한 추진을 걱정하고 있습니다.",
+              "en": "The writer worries about hasty cable car projects, citing losses and damage."
+            }
+          },
+          {
+            "stem": "윗글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "전국의 케이블카는 대부분 흑자를 내고 있다.",
+              "케이블카 설치는 환경에 영향을 주지 않는다.",
+              "훼손된 산림을 복구하는 데에는 오랜 시간이 걸린다.",
+              "관광객 증가 효과는 계속해서 유지된다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "산림 복구에 수십 년이 걸린다고 했습니다.",
+              "en": "Restoring damaged forests takes decades."
+            }
+          }
+        ]
+      },
+      {
+        "id": "t2pf-02",
+        "sharedBox": "인공지능으로 세상을 떠난 가수의 목소리를 되살린 공연이 화제가 되고 있다. 기술의 발전이 놀랍기는 하지만 이를 마냥 반길 수만은 없다. 고인은 자신의 목소리가 이런 방식으로 쓰이는 데에 동의한 적이 없기 때문이다. 유족의 허락을 받았다고 해도 그것이 고인의 뜻과 같다고 볼 수는 없다. 목소리를 되살리는 것이 고인을 기리는 일인지, 아니면 고인을 상업적으로 이용하는 일인지에 대해 지금이라도 사회적 논의를 시작해야 한다.",
+        "questions": [
+          {
+            "stem": "윗글에 나타난 필자의 태도로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "인공지능 기술의 완성도를 높이 평가하고 있다.",
+              "고인의 목소리를 복원하는 일에 신중한 접근을 요구하고 있다.",
+              "공연의 상업적 성공을 기대하고 있다.",
+              "유족의 결정을 전적으로 지지하고 있다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "동의 문제를 지적하며 사회적 논의가 필요하다고 주장하고 있습니다.",
+              "en": "The writer calls for caution and public discussion about consent."
+            }
+          },
+          {
+            "stem": "윗글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "고인은 생전에 목소리 사용에 동의했다.",
+              "유족의 허락은 곧 고인의 뜻과 같다.",
+              "이런 공연은 아직 열린 적이 없다.",
+              "이 문제에 대한 사회적 논의가 필요하다."
+            ],
+            "answer": 4,
+            "explanation": {
+              "ko": "지금이라도 사회적 논의를 시작해야 한다고 했습니다.",
+              "en": "The passage urges society to start discussing this issue now."
+            }
+          }
+        ]
+      },
+      {
+        "id": "t2pf-03",
+        "sharedBox": "일회용 컵 보증금 제도는 음료를 살 때 보증금을 내고 컵을 반납하면 돌려받는 제도로, 일회용 컵의 재활용률을 높이기 위해 도입되었다. 그런데 이 제도가 일부 지역에서만 시행되면서 형평성 논란이 일고 있다. 같은 브랜드의 카페인데도 지역에 따라 보증금을 내기도 하고 내지 않기도 하는 상황이 벌어지고 있는 것이다. 제도의 취지가 아무리 좋아도 시행 방식이 공정하지 않으면 국민의 호응을 얻기 어렵다. 정부는 하루빨리 제도를 전국으로 확대해서 형평성 문제를 해소해야 할 것이다.",
+        "questions": [
+          {
+            "stem": "윗글에 나타난 필자의 태도로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "제도의 폐지를 강하게 주장하고 있다.",
+              "보증금 액수의 인상을 제안하고 있다.",
+              "제도의 전국적인 확대 시행을 촉구하고 있다.",
+              "카페 업계의 손해를 걱정하고 있다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "제도를 전국으로 확대해야 한다고 촉구하고 있습니다.",
+              "en": "The writer urges nationwide expansion of the deposit system."
+            }
+          },
+          {
+            "stem": "윗글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "이 제도는 전국에서 동시에 시작되었다.",
+              "지역에 따라 보증금 적용이 다르다.",
+              "이 제도는 재활용과는 관계가 없다.",
+              "국민 모두가 이 제도에 호응하고 있다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "일부 지역에서만 시행되어 지역마다 다르다고 했습니다.",
+              "en": "The system applies only in some regions, causing inconsistency."
+            }
+          }
+        ]
+      }
+    ],
+    "t2r-pair-g": [
+      {
+        "id": "t2pg-01",
+        "sharedBox": "출산율 감소로 문을 닫는 학교가 해마다 늘고 있다. 폐교는 방치되면 마을의 흉물이 되지만 잘 활용하면 지역의 소중한 자산이 된다. 실제로 일부 지역에서는 폐교를 미술관, 캠핑장, 노인 복지 시설 등으로 바꾸어 지역에 활기를 불어넣고 있다. 그러나 폐교 활용이 성공하려면 몇 가지 조건이 필요하다. 우선 시설을 바꾸기 전에 지역 주민의 의견을 충분히 들어서 실제 수요에 (                ) 한다. 외부 방문객만을 겨냥한 시설은 주민들의 외면을 받아 오래가지 못하기 때문이다. 또한 초기 공사비 지원에 그치지 말고 운영비까지 고려한 장기적인 계획이 뒷받침되어야 한다. 폐교는 오랫동안 마을의 중심이었던 공간인 만큼, 신중한 계획을 통해 다시 주민의 품으로 돌아가야 할 것이다.",
+        "questions": [
+          {
+            "stem": "윗글을 쓴 목적으로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "폐교 활용이 성공하기 위한 조건을 제시하기 위해서",
+              "폐교가 늘어나는 원인을 분석하기 위해서",
+              "학교 통합의 필요성을 주장하기 위해서",
+              "폐교 시설의 위험성을 경고하기 위해서"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "폐교 활용의 성공 조건(주민 의견, 장기 계획)을 제시하는 글입니다.",
+              "en": "The text lays out conditions for successfully reusing closed schools."
+            }
+          },
+          {
+            "stem": "(                )에 들어갈 말로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "상관없이 결정해야",
+              "맞는 시설을 만들어야",
+              "드는 비용을 아껴야",
+              "반대되는 계획을 세워야"
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "주민 의견을 들어 실제 수요에 맞는 시설을 만들어야 한다는 흐름입니다.",
+              "en": "Facilities should match residents' actual needs."
+            }
+          },
+          {
+            "stem": "윗글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "폐교는 어떻게 활용해도 마을에 도움이 된다.",
+              "폐교 활용에는 초기 공사비만 지원하면 충분하다.",
+              "일부 폐교는 복지 시설 등으로 바뀌어 쓰이고 있다.",
+              "지역 주민의 의견은 활용 계획에 중요하지 않다."
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "폐교가 미술관, 캠핑장, 복지 시설 등으로 바뀐 사례가 있다고 했습니다.",
+              "en": "Some closed schools have become galleries, campsites and welfare centers."
+            }
+          }
+        ]
+      },
+      {
+        "id": "t2pg-02",
+        "sharedBox": "직장인들 사이에서 '조용한 퇴사'라는 말이 퍼지고 있다. 회사를 실제로 그만두는 것이 아니라 정해진 업무만 최소한으로 하면서 회사 일에 마음을 쏟지 않는 태도를 말한다. 이런 현상을 개인의 성실성 문제로만 돌리는 시각이 있지만 이는 문제의 본질을 놓친 것이다. 조용한 퇴사는 열심히 일해도 (                ) 조직 문화에 대한 반응인 경우가 많다. 노력이 승진이나 보상으로 이어지지 않고 초과 근무가 당연하게 여겨지는 환경에서 구성원들은 마음의 문을 닫는다. 기업이 이 현상을 바꾸고 싶다면 직원을 탓하기 전에 공정한 평가와 보상 체계부터 점검해야 한다. 구성원의 열정은 요구한다고 생기는 것이 아니라 합당한 대우에서 나오는 것이기 때문이다.",
+        "questions": [
+          {
+            "stem": "윗글을 쓴 목적으로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "퇴사 절차를 자세히 안내하기 위해서",
+              "직장인의 성실한 태도를 칭찬하기 위해서",
+              "기업의 우수한 성과를 홍보하기 위해서",
+              "조용한 퇴사의 원인이 조직에 있음을 지적하기 위해서"
+            ],
+            "answer": 4,
+            "explanation": {
+              "ko": "개인이 아니라 조직 문화에 원인이 있다고 지적하는 글입니다.",
+              "en": "The writer argues the cause lies in organizational culture, not individuals."
+            }
+          },
+          {
+            "stem": "(                )에 들어갈 말로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "정당한 보상을 받지 못하는",
+              "늘 칭찬만 받게 되는",
+              "업무가 계속 줄어드는",
+              "승진이 보장되어 있는"
+            ],
+            "answer": 1,
+            "explanation": {
+              "ko": "노력이 보상으로 이어지지 않는다는 뒤 문장과 이어집니다.",
+              "en": "Effort not leading to fair rewards explains the phenomenon."
+            }
+          },
+          {
+            "stem": "윗글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "조용한 퇴사는 회사를 실제로 그만두는 것이다.",
+              "노력에 대한 보상 부족이 조용한 퇴사의 원인이 되기도 한다.",
+              "구성원의 열정은 회사가 요구하면 생긴다.",
+              "이 현상은 개인의 성실성 문제일 뿐이다."
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "보상으로 이어지지 않는 환경이 원인이 된다고 했습니다.",
+              "en": "Lack of reward for effort is cited as a cause of quiet quitting."
+            }
+          }
+        ]
+      },
+      {
+        "id": "t2pg-03",
+        "sharedBox": "야간에도 대낮처럼 밝은 도시의 빛이 새로운 공해로 떠오르고 있다. 과도한 인공조명은 사람의 수면을 방해할 뿐 아니라 생태계에도 심각한 영향을 미친다. 빛 때문에 방향을 잃은 철새가 건물에 부딪히는가 하면, 밤에 활동하는 곤충의 수도 눈에 띄게 줄었다. 문제는 이 빛의 상당수가 (                ) 데에 있다. 영업이 끝난 뒤에도 켜져 있는 간판이나 필요 이상으로 밝은 옥외 조명이 대표적이다. 이미 여러 나라에서는 심야 시간에 옥외 조명의 밝기를 제한하는 제도를 시행하고 있다. 우리도 빛을 무조건 밝히는 것이 아니라 필요한 곳에 필요한 만큼만 쓰는 방향으로 정책을 정비해야 한다.",
+        "questions": [
+          {
+            "stem": "윗글을 쓴 목적으로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "도시 조명 기술의 발전 과정을 설명하기 위해서",
+              "빛 공해의 심각성을 알리고 대책 마련을 촉구하기 위해서",
+              "야간 관광의 경제적 장점을 소개하기 위해서",
+              "조명 제품의 우수성을 홍보하기 위해서"
+            ],
+            "answer": 2,
+            "explanation": {
+              "ko": "빛 공해의 피해를 알리고 정책 정비를 촉구하는 글입니다.",
+              "en": "It raises awareness of light pollution and urges policy action."
+            }
+          },
+          {
+            "stem": "(                )에 들어갈 말로 가장 알맞은 것을 고르십시오.",
+            "choices": [
+              "자연에서 나오는 빛이라는",
+              "밝기가 부족한 빛이라는",
+              "꼭 필요하지 않은 빛이라는",
+              "전기를 아껴 주는 빛이라는"
+            ],
+            "answer": 3,
+            "explanation": {
+              "ko": "영업 후에도 켜진 간판 등 불필요한 빛이 문제라는 흐름입니다.",
+              "en": "Much of the light — like signs left on after hours — is unnecessary."
+            }
+          },
+          {
+            "stem": "윗글의 내용과 같은 것을 고르십시오.",
+            "choices": [
+              "인공조명은 생태계에 영향을 주지 않는다.",
+              "철새는 도시의 빛을 잘 피해서 날아간다.",
+              "우리나라는 이미 관련 제도를 완비했다.",
+              "여러 나라가 심야에 옥외 조명의 밝기를 제한하고 있다."
+            ],
+            "answer": 4,
+            "explanation": {
+              "ko": "여러 나라에서 심야 조명 제한 제도를 시행하고 있다고 했습니다.",
+              "en": "Several countries already restrict outdoor lighting late at night."
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -18,6 +18,48 @@ button .en {
   display: none !important;
 }
 
+/* Material Symbols Rounded — used throughout for icon+text buttons/labels */
+.material-symbols-rounded {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-size: 1.15em;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+}
+
+.test-card h2,
+.history-head h2,
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.disclaimer-card,
+.error-box {
+  display: flex;
+  align-items: flex-start;
+  gap: .6rem;
+}
+
+.disclaimer-card .material-symbols-rounded,
+.error-box .material-symbols-rounded {
+  flex: 0 0 auto;
+  margin-top: .1rem;
+}
+
+.review-status .material-symbols-rounded,
+.result-meta .material-symbols-rounded {
+  font-size: 1em;
+  margin-right: .25rem;
+}
+
 .main.wrap {
   max-width: 960px;
   display: flex;
@@ -37,7 +79,7 @@ button .en {
 }
 
 html .header.wrap.title-only {
-  grid-template-columns: 31px 1fr 40px 30px 43px !important;
+  grid-template-columns: 31px 1fr 60px 72px 43px !important
 }
 
 .main #timer,
@@ -265,6 +307,7 @@ tbody tr:hover {
 
 td.actions-cell {
   padding: .4rem;
+  justify-items: center;
 }
 
 .disclaimer-card {
@@ -288,18 +331,14 @@ td.actions-cell {
   font-size: .9rem;
 }
 
-#exam-toolbar {
-  position: sticky;
-  top: 61px;
-  z-index: 5;
-  padding: 1rem 1.5rem;
-  font-family: var(--kr-sans);
-}
-
 .timer {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
   color: var(--blue);
   text-align: center;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .timer.warn {
@@ -312,29 +351,42 @@ td.actions-cell {
 }
 
 .answered-count {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
   margin-left: auto;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: #515151;
   white-space: nowrap;
-}
-
-#nav-details {
-  margin-top: .6rem;
-}
-
-#nav-details summary {
   cursor: pointer;
-  font-size: .8rem;
-  color: #767676;
   user-select: none;
+}
+
+.answered-count:hover {
+  color: var(--blue);
+}
+
+.nav-panel {
+  position: fixed;
+  top: 61px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  max-width: 960px;
+  z-index: 15;
+  background: #fff;
+  box-shadow: var(--box-shadow);
+  border-radius: 0 0 1rem 1rem;
+  padding: 1rem 1.5rem;
+  max-height: calc(100vh - 61px);
+  overflow-y: auto;
 }
 
 .nav-grid {
   display: grid;
   grid-template-columns: repeat(10, 1fr);
   gap: .4rem;
-  padding-top: .75rem;
 }
 
 .nav-grid button {
@@ -513,7 +565,7 @@ td.actions-cell {
 }
 
 .exam-bottom button {
-  min-width: 16rem;
+  width: 100%;
 }
 
 .conclusion {
@@ -663,6 +715,174 @@ td.actions-cell {
   display: block;
 }
 
+/* ===== TOPIK II: badge & writing questions ===== */
+.test-badge.t2 {
+  background-color: var(--green);
+}
+
+body:not(.exam-active) #timer,
+body:not(.exam-active) #answered-count,
+body:not(.exam-active) #btn-submit {
+  display: none;
+}
+
+.write-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .2rem;
+  font-family: var(--kr-sans);
+  font-size: .7rem;
+  font-weight: 700;
+  color: var(--green-hover);
+  background-color: #d4edda;
+  border-radius: .4rem;
+  padding: .1rem .5rem;
+  vertical-align: middle;
+}
+
+.question.write textarea {
+  width: 100%;
+  background: var(--bg-color);
+  border: none;
+  border-radius: .5rem;
+  padding: .7rem 1rem;
+  font-family: var(--kr-sans);
+  font-size: .95rem;
+  line-height: 1.7;
+  resize: vertical;
+}
+
+.write-blank {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  gap: .5rem;
+  align-items: start;
+  margin: .5rem 0;
+}
+
+.write-blank-label {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: 1.05rem;
+  padding-top: .4rem;
+  display: inline-block;
+  margin-right: .5rem;
+}
+
+.char-counter {
+  text-align: right;
+  font-family: var(--kr-sans);
+  font-size: .8rem;
+  color: #767676;
+  margin-top: .3rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.char-counter.bad {
+  color: var(--red-hover);
+  font-weight: 700;
+}
+
+.write-answer {
+  font-family: var(--kr-sans);
+  background: var(--bg-color);
+  border-radius: .5rem;
+  padding: .7rem 1rem;
+  margin: .5rem 0;
+  line-height: 1.8;
+}
+
+.write-answer.empty {
+  color: #9a9aa0;
+  font-style: italic;
+}
+
+.write-answer .char-note {
+  display: block;
+  text-align: right;
+  font-size: .75rem;
+  color: #767676;
+}
+
+.model-box {
+  font-family: var(--kr-sans);
+  border-left: .25rem solid var(--green);
+  background-color: #d4edda;
+  border-radius: 0 .5rem .5rem 0;
+  padding: .7rem 1rem;
+  margin-top: .7rem;
+  font-size: .9rem;
+  line-height: 1.8;
+}
+
+.model-box .model-title {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  font-weight: 700;
+  color: #155724;
+  margin-bottom: .35rem;
+}
+
+/* ===== Result: writing self-grade panel ===== */
+.writing-grade {
+  background-color: var(--bg-color);
+  border-radius: .7rem;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0 1.25rem;
+  font-family: var(--kr-sans);
+}
+
+.grade-title {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: 1.05rem;
+  font-weight: 900;
+  margin-bottom: .4rem;
+}
+
+.grade-hint {
+  font-size: .82rem;
+  color: #767676;
+  margin-bottom: .75rem;
+  line-height: 1.6;
+}
+
+.grade-rows {
+  display: grid;
+  gap: .5rem;
+}
+
+.grade-row {
+  display: grid;
+  grid-template-columns: 1fr 5.5rem auto;
+  gap: .6rem;
+  align-items: center;
+}
+
+.grade-row .grade-label {
+  font-weight: 700;
+  font-size: .9rem;
+}
+
+.grade-row input {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #cfd8dc;
+  border-radius: .4rem;
+  padding: .4rem .6rem;
+  font-size: .9rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.grade-row .grade-max {
+  font-size: .85rem;
+  color: #767676;
+  white-space: nowrap;
+}
+
 @media (max-width: 760px) {
   .test-grid {
     grid-template-columns: 1fr;
@@ -674,8 +894,9 @@ td.actions-cell {
 }
 
 @media (max-width: 480px) {
-  #exam-toolbar {
+  .nav-panel {
     padding: .75rem 1rem;
+    top: 59px;
   }
 
   .nav-grid {
