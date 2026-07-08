@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TOPIK Practice</title>
-  <meta name="description" content="TOPIK practice tests with a timer, scoring, level estimate and history.">
+  <title>TOPIK</title>
+  <meta name="description" content="Practice tests and structured study modules for TOPIK I and TOPIK II.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
@@ -20,173 +20,40 @@
 
   <header></header>
 
-  <div id="nav-panel" class="nav-panel none">
-    <div id="nav-grid" class="nav-grid"></div>
-  </div>
-
-  <!-- Floating dock: exam controls (shown while a test is active) -->
-  <div id="exam-dock" class="dock">
-    <span id="timer" class="timer">
-      <span class="material-symbols-rounded">timer</span>
-      <span id="timer-value">60:00</span>
-    </span>
-    <span class="dock-sep"></span>
-    <span id="answered-count" class="answered-count" role="button" tabindex="0" aria-expanded="false" title="Show question list">
-      <span class="material-symbols-rounded">check_circle</span>
-      <span id="answered-value">0/40</span>
-      <span class="material-symbols-rounded" id="nav-toggle-icon">expand_less</span>
-    </span>
-    <button id="btn-submit" class="small" title="Submit"><span class="material-symbols-rounded">send</span></button>
-  </div>
-
   <main>
     <div class="main wrap">
 
-      <!-- ============ MAIN MENU ============ -->
-      <section id="screen-main" class="screen">
+      <section class="screen">
 
-        <div class="test-grid">
-          <div class="item test-card">
-            <div class="test-badge">TOPIK I</div>
-            <h2><span class="material-symbols-rounded">menu_book</span> Reading</h2>
-            <ul class="test-meta">
-              <li>40 questions (No. 1–40)</li>
-              <li>60 minutes · 100 points</li>
-            </ul>
-
-            <div id="resume-box-t1" class="resume-box none">
-              <p>You have a test in progress.</p>
-              <div class="resume-actions">
-                <button id="btn-resume-t1"><span class="material-symbols-rounded">play_arrow</span> Continue</button>
-                <button id="btn-discard-t1" class="btn-danger"><span class="material-symbols-rounded">delete</span> Discard</button>
-              </div>
-            </div>
-
-            <button id="btn-start-t1" class="btn-start"><span class="material-symbols-rounded">rocket_launch</span> Start</button>
-          </div>
-
-          <div class="item test-card">
-            <div class="test-badge t2">TOPIK II</div>
-            <h2><span class="material-symbols-rounded">edit_note</span> Writing + Reading</h2>
-            <ul class="test-meta">
-              <li>54 questions (Writing 4 · Reading 50)</li>
-              <li>120 minutes · 200 points</li>
-            </ul>
-
-            <div id="resume-box-t2" class="resume-box none">
-              <p>You have a test in progress.</p>
-              <div class="resume-actions">
-                <button id="btn-resume-t2"><span class="material-symbols-rounded">play_arrow</span> Continue</button>
-                <button id="btn-discard-t2" class="btn-danger"><span class="material-symbols-rounded">delete</span> Discard</button>
-              </div>
-            </div>
-
-            <button id="btn-start-t2" class="btn-start"><span class="material-symbols-rounded">rocket_launch</span> Start</button>
-          </div>
+        <div class="item topik-hero">
+          <h2 class="section-title"><span class="material-symbols-rounded">translate</span> TOPIK</h2>
+          <p>Practice tests and structured study modules for TOPIK I and TOPIK II.</p>
         </div>
 
-        <div class="item history-card">
-          <div class="history-head">
-            <h2><span class="material-symbols-rounded">history</span> History</h2>
-            <button id="btn-clear-history" class="btn-danger small none"><span class="material-symbols-rounded">delete_sweep</span> Clear all</button>
-          </div>
-          <p id="history-empty">No attempts yet — start your first test!</p>
-          <div class="scrollable-table none" id="history-wrap">
-            <table id="history-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Test</th>
-                  <th>Score</th>
-                  <th>Level</th>
-                  <th>Time</th>
-                  <th colspan="2"></th>
-                </tr>
-              </thead>
-              <tbody id="history-body"></tbody>
-            </table>
-          </div>
+        <div class="mode-grid">
+          <a href="test/" class="item mode-card">
+            <div class="test-badge">Test</div>
+            <h2><span class="material-symbols-rounded">rocket_launch</span> Take a Test</h2>
+            <p>Timed practice exams drawn from the question bank, with scoring, a level estimate and history.</p>
+            <span class="btn-start"><span class="material-symbols-rounded">arrow_forward</span> Start</span>
+          </a>
+
+          <a href="learn/" class="item mode-card">
+            <div class="test-badge t2">Learn</div>
+            <h2><span class="material-symbols-rounded">school</span> Learning Hub</h2>
+            <p>Grammar, vocabulary and question strategies from Level 1 to 6, with live practice questions.</p>
+            <span class="btn-start"><span class="material-symbols-rounded">arrow_forward</span> Open</span>
+          </a>
         </div>
 
-        <div class="item disclaimer-card">
-          <span class="material-symbols-rounded">info</span>
-          <span>
-            The real TOPIK I consists of Listening + Reading (200 points; Level 1 ≥ 80, Level 2 ≥ 140) and the real
-            TOPIK II consists of Listening + Writing + Reading (300 points; Level 3 ≥ 120, Level 4 ≥ 150,
-            Level 5 ≥ 190, Level 6 ≥ 230). Listening is not included here, so the level shown is an estimate:
-            TOPIK I Reading × 2, TOPIK II (Writing + Reading) × 1.5. TOPIK II writing answers are graded by
-            yourself using the provided model answers.
-          </span>
-        </div>
-
-        <div id="load-error" class="item error-box none"></div>
       </section>
-
-      <!-- ============ EXAM ============ -->
-      <section id="screen-exam" class="screen none">
-        <div id="exam-body"></div>
-
-        <div class="exam-bottom">
-          <button id="btn-submit-bottom" class="btn-start"><span class="material-symbols-rounded">send</span> Submit</button>
-        </div>
-      </section>
-
-      <!-- ============ RESULT ============ -->
-      <section id="screen-result" class="screen none">
-        <div class="item">
-          <h2 class="section-title"><span class="material-symbols-rounded">emoji_events</span> Result</h2>
-          <div id="score-panel"></div>
-          <div id="result-meta" class="result-meta"></div>
-          <div id="writing-grade" class="writing-grade none">
-            <h3 class="grade-title"><span class="material-symbols-rounded">edit_note</span> Writing — grade yourself</h3>
-            <p class="grade-hint">Open <strong>Review</strong> to compare your writing with the model answers, then enter your scores below. The total and level update automatically and are saved to history.</p>
-            <div id="writing-grade-rows" class="grade-rows"></div>
-          </div>
-          <div class="scrollable-table">
-            <table id="breakdown-table">
-              <thead>
-                <tr>
-                  <th>No.</th>
-                  <th>Type</th>
-                  <th>Correct</th>
-                  <th>Points</th>
-                </tr>
-              </thead>
-              <tbody id="breakdown-body"></tbody>
-            </table>
-          </div>
-          <div class="result-actions">
-            <button id="btn-review"><span class="material-symbols-rounded">fact_check</span> Review</button>
-            <button id="btn-new-test" class="btn-green"><span class="material-symbols-rounded">refresh</span> New test</button>
-            <button id="btn-result-home" class="btn-secondary"><span class="material-symbols-rounded">home</span> Home</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- ============ REVIEW ============ -->
-      <section id="screen-review" class="screen none">
-        <div class="item review-head">
-          <h2 class="section-title"><span class="material-symbols-rounded">fact_check</span> Review</h2>
-          <p id="review-meta" class="review-meta"></p>
-          <div class="result-actions">
-            <button id="btn-review-back" class="btn-secondary"><span class="material-symbols-rounded">arrow_back</span> Back to result</button>
-            <button id="btn-review-home" class="btn-secondary"><span class="material-symbols-rounded">home</span> Home</button>
-          </div>
-        </div>
-        <div id="review-body"></div>
-        <div class="exam-bottom">
-          <button id="btn-review-home-bottom" class="btn-secondary"><span class="material-symbols-rounded">home</span> Home</button>
-        </div>
-      </section>
-
     </div>
   </main>
 
   <div id="notification"></div>
 
-  <script src="script.js"></script>
-    <footer></footer>
-    <script src="../main.js"></script>
+  <footer></footer>
+  <script src="../main.js"></script>
 </body>
 
 </html>

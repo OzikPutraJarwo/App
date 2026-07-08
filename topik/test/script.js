@@ -16,7 +16,7 @@
  *   deletable) including the drawn items + answers.
  * ========================================================= */
 
-const BANK_FILE = "bank.json";
+const BANK_FILE = "../bank.json";
 const HISTORY_KEY = "topik-history-v1";
 
 const CIRCLED = ["①", "②", "③", "④"];
@@ -326,12 +326,15 @@ const state = {
   pools: null,
   testId: "t1",
   exam: null,        // { groups: [{ bp, sharedBox, chosenIds, items:[...] }] }
+  steps: [],         // flat list of { group, item, firstInGroup } — one per question
+  current: 0,        // index into steps (single-question view)
   answers: {},       // number -> 1..4 (MCQ) | string / string[] (writing)
   selfScores: {},    // number -> self-graded points (writing)
   limit: 0,
   remaining: 0,
   timerId: null,
   finished: false,
+  paused: false,     // true while the exam is paused (timer frozen)
   mode: null,        // "exam" while a test is running
   lastResult: null
 };
@@ -349,7 +352,16 @@ document.addEventListener("DOMContentLoaded", init);
 async function init() {
   // $("btn-home").addEventListener("click", (e) => { e.preventDefault(); goHome(); });
   $("btn-submit").addEventListener("click", () => submit(false));
-  $("btn-submit-bottom").addEventListener("click", () => submit(false));
+  $("btn-prev").addEventListener("click", () => goToStep(state.current - 1));
+  $("btn-next").addEventListener("click", () => {
+    if (state.current >= state.steps.length - 1) submit(false);
+    else goToStep(state.current + 1);
+  });
+  $("btn-jump").addEventListener("click", () => toggleNavPanel());
+  $("btn-pause").addEventListener("click", pauseExam);
+  $("btn-resume-exam").addEventListener("click", unpauseExam);
+  $("btn-quit-exam").addEventListener("click", quitExam);
+  document.addEventListener("keydown", onExamKey);
   $("btn-clear-history").addEventListener("click", clearHistoryAll);
   $("btn-review").addEventListener("click", () => openReviewFromResult());
   $("btn-new-test").addEventListener("click", () => startExam(state.testId));
@@ -368,14 +380,10 @@ async function init() {
     });
   }
 
-  $("answered-count").addEventListener("click", () => toggleNavPanel());
-  $("answered-count").addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleNavPanel(); }
-  });
   document.addEventListener("click", (e) => {
     const panel = $("nav-panel");
     if (panel.classList.contains("none")) return;
-    if (panel.contains(e.target) || $("answered-count").contains(e.target)) return;
+    if (panel.contains(e.target) || $("btn-jump").contains(e.target)) return;
     closeNavPanel();
   });
 
@@ -431,6 +439,10 @@ function showScreen(name) {
   for (const s of SCREENS) $("screen-" + s).classList.toggle("none", s !== name);
   document.body.classList.toggle("main", name === "main");
   document.body.classList.toggle("exam-active", name === "exam");
+  if (name !== "exam") {
+    state.paused = false;
+    $("pause-overlay").classList.add("none");
+  }
   closeNavPanel();
   window.scrollTo(0, 0);
 }
@@ -442,14 +454,12 @@ function toggleNavPanel() {
 
 function openNavPanel() {
   $("nav-panel").classList.remove("none");
-  $("answered-count").setAttribute("aria-expanded", "true");
-  $("nav-toggle-icon").textContent = "expand_more";
+  $("btn-jump").setAttribute("aria-expanded", "true");
 }
 
 function closeNavPanel() {
   $("nav-panel").classList.add("none");
-  $("answered-count").setAttribute("aria-expanded", "false");
-  $("nav-toggle-icon").textContent = "expand_less";
+  $("btn-jump").setAttribute("aria-expanded", "false");
 }
 
 function goHome() {
@@ -490,6 +500,7 @@ function resumeSaved(testId) {
   state.exam = exam;
   state.answers = saved.answers || {};
   state.selfScores = {};
+  state.current = typeof saved.current === "number" ? saved.current : 0;
   state.limit = typeof saved.limit === "number" ? saved.limit : timeLimitSeconds();
   state.remaining = typeof saved.remaining === "number" ? saved.remaining : state.limit;
   state.finished = false;
@@ -612,6 +623,7 @@ function saveProgress() {
     testId: state.testId,
     chosen: chosenMap(state.exam),
     answers: state.answers,
+    current: state.current,
     limit: state.limit,
     remaining: state.remaining,
     t: Date.now()
@@ -729,6 +741,7 @@ function startExam(testId) {
   state.exam = sampleExam();
   state.answers = {};
   state.selfScores = {};
+  state.current = 0;
   state.limit = timeLimitSeconds();
   state.remaining = state.limit;
   state.finished = false;
@@ -738,10 +751,29 @@ function startExam(testId) {
 }
 
 function enterExamScreen() {
-  renderExam();
+  state.paused = false;
+  $("pause-overlay").classList.add("none");
+  buildExam();
   updateAnswerUI();
+  goToStep(state.current);
   showScreen("exam");
   startTimer();
+}
+
+function onExamKey(e) {
+  if (state.mode !== "exam" || state.finished) return;
+  if (e.key === "Escape") { state.paused ? unpauseExam() : pauseExam(); return; }
+  if (state.paused) return;
+  const tag = (e.target && e.target.tagName || "").toLowerCase();
+  if (tag === "textarea" || tag === "input") return;
+  if (e.key === "ArrowRight") {
+    if (state.current < state.steps.length - 1) goToStep(state.current + 1);
+  } else if (e.key === "ArrowLeft") {
+    if (state.current > 0) goToStep(state.current - 1);
+  } else if (["1", "2", "3", "4"].includes(e.key)) {
+    const step = state.steps[state.current];
+    if (step && step.item.type !== "write") selectAnswer(step.item.number, Number(e.key));
+  }
 }
 
 /* ---------------- timer ---------------- */
@@ -762,6 +794,36 @@ function startTimer() {
 
 function stopTimer() {
   if (state.timerId) { clearInterval(state.timerId); state.timerId = null; }
+}
+
+/* ---------------- pause / resume / quit ---------------- */
+
+function pauseExam() {
+  if (state.mode !== "exam" || state.finished || state.paused) return;
+  state.paused = true;
+  stopTimer();
+  saveProgress();
+  $("pause-remaining").textContent = $("timer-value").textContent;
+  $("pause-overlay").classList.remove("none");
+  closeNavPanel();
+}
+
+function unpauseExam() {
+  if (!state.paused) return;
+  state.paused = false;
+  $("pause-overlay").classList.add("none");
+  startTimer();
+}
+
+/* Save and leave to the main menu (resumable later). */
+function quitExam() {
+  state.paused = false;
+  $("pause-overlay").classList.add("none");
+  saveProgress();
+  stopTimer();
+  state.mode = null;
+  renderHome();
+  showScreen("main");
 }
 
 function renderTimer() {
@@ -794,37 +856,85 @@ function fmt(s) {
 
 /* ---------------- exam rendering ---------------- */
 
-function renderExam() {
-  const body = $("exam-body");
-  body.innerHTML = "";
+/* Build the flat step list (one entry per question) and the
+ * jump-grid buttons. Called once when an exam is entered. */
+function buildExam() {
   const nav = $("nav-grid");
   nav.innerHTML = "";
+  state.steps = [];
 
-  for (const g of state.exam.groups) {
-    const groupEl = el("section", "item group");
-    groupEl.appendChild(el("h2", "instruction",
-      "※ " + esc(g.bp.instruction.ko) + '<span class="en">' + esc(g.bp.instruction.en) + "</span>"));
+  state.exam.groups.forEach((g) => {
+    g.items.forEach((item, ii) => {
+      const idx = state.steps.length;
+      state.steps.push({ group: g, item, firstInGroup: ii === 0 });
 
-    if (g.bp.example) groupEl.appendChild(renderExample(g.bp.example));
-    if (g.sharedBox) groupEl.appendChild(el("div", "qbox shared", fmt(g.sharedBox)));
-
-    for (const q of g.items) {
-      groupEl.appendChild(q.type === "write"
-        ? renderWriteQuestion(q, false, state.answers, state.selfScores)
-        : renderQuestion(q, false, state.answers));
-
-      const navBtn = el("button", null, String(q.number));
-      navBtn.id = "nav-" + q.number;
+      const navBtn = el("button", null, String(item.number));
+      navBtn.id = "nav-" + item.number;
       navBtn.type = "button";
-      navBtn.addEventListener("click", () => {
-        closeNavPanel();
-        const target = $("q-" + q.number);
-        if (target) target.scrollIntoView({ behavior: "smooth", block: "center" });
-      });
+      navBtn.addEventListener("click", () => { closeNavPanel(); goToStep(idx); });
       nav.appendChild(navBtn);
-    }
-    body.appendChild(groupEl);
-  }
+    });
+  });
+
+  $("step-total").textContent = String(state.steps.length);
+  if (state.current >= state.steps.length || state.current < 0) state.current = 0;
+}
+
+/* Render only the current question (with its group instruction,
+ * example and shared passage) into the stage. */
+function renderStep() {
+  const stage = $("exam-stage");
+  stage.innerHTML = "";
+  const step = state.steps[state.current];
+  if (!step) return;
+  const g = step.group;
+
+  const card = el("section", "item qcard");
+  card.appendChild(el("div", "instruction",
+    "※ " + esc(g.bp.instruction.ko) + '<span class="en">' + esc(g.bp.instruction.en) + "</span>"));
+
+  if (g.bp.example) card.appendChild(renderExample(g.bp.example));
+  if (g.sharedBox) card.appendChild(el("div", "qbox shared", fmt(g.sharedBox)));
+
+  card.appendChild(step.item.type === "write"
+    ? renderWriteQuestion(step.item, false, state.answers, state.selfScores)
+    : renderQuestion(step.item, false, state.answers));
+
+  stage.appendChild(card);
+}
+
+/* Move to a step (clamped), re-render, sync nav, save progress. */
+function goToStep(i) {
+  const n = state.steps.length;
+  if (n === 0) return;
+  state.current = Math.max(0, Math.min(n - 1, i));
+  renderStep();
+  updateStepNav();
+  saveProgress();
+  window.scrollTo(0, 0);
+}
+
+/* Update prev/next buttons, the counter, progress bar and the
+ * "current" highlight in the jump grid. */
+function updateStepNav() {
+  const n = state.steps.length;
+  const i = state.current;
+  const last = i === n - 1;
+
+  $("step-current").textContent = String(i + 1);
+  $("btn-prev").disabled = i === 0;
+
+  const next = $("btn-next");
+  next.classList.toggle("is-submit", last);
+  next.querySelector(".nav-btn-text").textContent = last ? "Submit" : "Next";
+  $("next-icon").textContent = last ? "send" : "chevron_right";
+
+  $("exam-progress-bar").style.width = n ? ((i + 1) / n * 100) + "%" : "0";
+
+  state.steps.forEach((step, idx) => {
+    const btn = $("nav-" + step.item.number);
+    if (btn) btn.classList.toggle("current", idx === state.current);
+  });
 }
 
 function renderExample(ex) {
@@ -1020,7 +1130,8 @@ function updateAnswerUI() {
       if (navBtn) navBtn.classList.toggle("answered", has);
     }
   }
-  $("answered-value").textContent = answered + "/" + total;
+  const ga = $("grid-answered");
+  if (ga) ga.innerHTML = '<span class="material-symbols-rounded">check_circle</span> ' + answered + "/" + total;
 }
 
 /* ---------------- submit & results ---------------- */

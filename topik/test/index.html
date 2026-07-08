@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOPIK Practice</title>
+  <meta name="description" content="TOPIK practice tests with a timer, scoring, level estimate and history.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../../main.css">
+  <link rel="apple-touch-icon" href="../../icon/TOPIK.webp">
+  <link rel="icon" type="image/x-icon" href="../../icon/TOPIK.webp">
+</head>
+
+<body data-app="TOPIK Test" data-back="../">
+
+  <header></header>
+
+  <!-- Question grid (opens above the dock) -->
+  <div id="nav-panel" class="nav-panel none">
+    <div class="nav-panel-head">
+      <span id="grid-answered" class="grid-answered"><span class="material-symbols-rounded">check_circle</span> 0/40</span>
+      <button id="btn-submit" class="btn-start small" type="button"><span class="material-symbols-rounded">send</span> Submit test</button>
+    </div>
+    <div id="nav-grid" class="nav-grid"></div>
+  </div>
+
+  <!-- Floating dock: one-question navigation (shown while a test is active) -->
+  <div id="exam-dock" class="dock">
+    <div class="dock-progress"><div id="exam-progress-bar"></div></div>
+    <div class="dock-row">
+      <button id="btn-pause" class="dock-btn dock-icon" type="button" title="Pause (Esc)">
+        <span class="material-symbols-rounded">pause</span>
+      </button>
+      <button id="btn-prev" class="dock-btn" type="button" title="Previous question">
+        <span class="material-symbols-rounded">chevron_left</span>
+        <span class="dock-btn-text">Prev</span>
+      </button>
+      <span id="timer" class="timer">
+        <span class="material-symbols-rounded">timer</span>
+        <span id="timer-value">60:00</span>
+      </span>
+      <button id="btn-jump" class="step-indicator" type="button" title="Question list" aria-expanded="false">
+        <span class="material-symbols-rounded">apps</span>
+        <span id="step-current">1</span><span class="step-sep">/</span><span id="step-total">40</span>
+      </button>
+      <button id="btn-next" class="dock-btn primary" type="button" title="Next question">
+        <span class="dock-btn-text nav-btn-text">Next</span>
+        <span class="material-symbols-rounded" id="next-icon">chevron_right</span>
+      </button>
+    </div>
+  </div>
+
+  <main>
+    <div class="main wrap">
+
+      <!-- ============ MAIN MENU ============ -->
+      <section id="screen-main" class="screen">
+
+        <div class="test-grid">
+          <div class="item test-card">
+            <div class="test-badge">TOPIK I</div>
+            <h2><span class="material-symbols-rounded">menu_book</span> Reading</h2>
+            <ul class="test-meta">
+              <li>40 questions (No. 1–40)</li>
+              <li>60 minutes · 100 points</li>
+            </ul>
+
+            <div id="resume-box-t1" class="resume-box none">
+              <p>You have a test in progress.</p>
+              <div class="resume-actions">
+                <button id="btn-resume-t1"><span class="material-symbols-rounded">play_arrow</span> Continue</button>
+                <button id="btn-discard-t1" class="btn-danger"><span class="material-symbols-rounded">delete</span> Discard</button>
+              </div>
+            </div>
+
+            <button id="btn-start-t1" class="btn-start"><span class="material-symbols-rounded">rocket_launch</span> Start</button>
+          </div>
+
+          <div class="item test-card">
+            <div class="test-badge t2">TOPIK II</div>
+            <h2><span class="material-symbols-rounded">edit_note</span> Writing + Reading</h2>
+            <ul class="test-meta">
+              <li>54 questions (Writing 4 · Reading 50)</li>
+              <li>120 minutes · 200 points</li>
+            </ul>
+
+            <div id="resume-box-t2" class="resume-box none">
+              <p>You have a test in progress.</p>
+              <div class="resume-actions">
+                <button id="btn-resume-t2"><span class="material-symbols-rounded">play_arrow</span> Continue</button>
+                <button id="btn-discard-t2" class="btn-danger"><span class="material-symbols-rounded">delete</span> Discard</button>
+              </div>
+            </div>
+
+            <button id="btn-start-t2" class="btn-start"><span class="material-symbols-rounded">rocket_launch</span> Start</button>
+          </div>
+        </div>
+
+        <div class="item history-card">
+          <div class="history-head">
+            <h2><span class="material-symbols-rounded">history</span> History</h2>
+            <button id="btn-clear-history" class="btn-danger small none"><span class="material-symbols-rounded">delete_sweep</span> Clear all</button>
+          </div>
+          <p id="history-empty">No attempts yet — start your first test!</p>
+          <div class="scrollable-table none" id="history-wrap">
+            <table id="history-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Test</th>
+                  <th>Score</th>
+                  <th>Level</th>
+                  <th>Time</th>
+                  <th colspan="2"></th>
+                </tr>
+              </thead>
+              <tbody id="history-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="item disclaimer-card">
+          <span class="material-symbols-rounded">info</span>
+          <span>
+            The real TOPIK I consists of Listening + Reading (200 points; Level 1 ≥ 80, Level 2 ≥ 140) and the real
+            TOPIK II consists of Listening + Writing + Reading (300 points; Level 3 ≥ 120, Level 4 ≥ 150,
+            Level 5 ≥ 190, Level 6 ≥ 230). Listening is not included here, so the level shown is an estimate:
+            TOPIK I Reading × 2, TOPIK II (Writing + Reading) × 1.5. TOPIK II writing answers are graded by
+            yourself using the provided model answers.
+          </span>
+        </div>
+
+        <div id="load-error" class="item error-box none"></div>
+      </section>
+
+      <!-- ============ EXAM ============ -->
+      <section id="screen-exam" class="screen none">
+        <div id="exam-stage"></div>
+      </section>
+
+      <!-- ============ RESULT ============ -->
+      <section id="screen-result" class="screen none">
+        <div class="item">
+          <h2 class="section-title"><span class="material-symbols-rounded">emoji_events</span> Result</h2>
+          <div id="score-panel"></div>
+          <div id="result-meta" class="result-meta"></div>
+          <div id="writing-grade" class="writing-grade none">
+            <h3 class="grade-title"><span class="material-symbols-rounded">edit_note</span> Writing — grade yourself</h3>
+            <p class="grade-hint">Open <strong>Review</strong> to compare your writing with the model answers, then enter your scores below. The total and level update automatically and are saved to history.</p>
+            <div id="writing-grade-rows" class="grade-rows"></div>
+          </div>
+          <div class="scrollable-table">
+            <table id="breakdown-table">
+              <thead>
+                <tr>
+                  <th>No.</th>
+                  <th>Type</th>
+                  <th>Correct</th>
+                  <th>Points</th>
+                </tr>
+              </thead>
+              <tbody id="breakdown-body"></tbody>
+            </table>
+          </div>
+          <div class="result-actions">
+            <button id="btn-review"><span class="material-symbols-rounded">fact_check</span> Review</button>
+            <button id="btn-new-test" class="btn-green"><span class="material-symbols-rounded">refresh</span> New test</button>
+            <button id="btn-result-home" class="btn-secondary"><span class="material-symbols-rounded">home</span> Home</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ REVIEW ============ -->
+      <section id="screen-review" class="screen none">
+        <div class="item review-head">
+          <h2 class="section-title"><span class="material-symbols-rounded">fact_check</span> Review</h2>
+          <p id="review-meta" class="review-meta"></p>
+          <div class="result-actions">
+            <button id="btn-review-back" class="btn-secondary"><span class="material-symbols-rounded">arrow_back</span> Back to result</button>
+            <button id="btn-review-home" class="btn-secondary"><span class="material-symbols-rounded">home</span> Home</button>
+          </div>
+        </div>
+        <div id="review-body"></div>
+        <div class="exam-bottom">
+          <button id="btn-review-home-bottom" class="btn-secondary"><span class="material-symbols-rounded">home</span> Home</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Pause overlay: freezes the timer and hides the questions -->
+  <div id="pause-overlay" class="pause-overlay none">
+    <div class="pause-card">
+      <span class="material-symbols-rounded pause-big">pause_circle</span>
+      <h2>Paused</h2>
+      <p class="pause-time"><span class="material-symbols-rounded">timer</span> <span id="pause-remaining">60:00</span> left</p>
+      <p class="pause-hint">The timer is stopped and your progress is saved.</p>
+      <div class="pause-actions">
+        <button id="btn-resume-exam" class="btn-start btn-green" type="button"><span class="material-symbols-rounded">play_arrow</span> Resume</button>
+        <button id="btn-quit-exam" class="btn-secondary" type="button"><span class="material-symbols-rounded">home</span> Quit to menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="notification"></div>
+
+  <script src="script.js"></script>
+    <footer></footer>
+    <script src="../../main.js"></script>
+</body>
+
+</html>

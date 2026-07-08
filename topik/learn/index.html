@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOPIK Learning Hub</title>
+  <meta name="description" content="Structured TOPIK study modules — grammar, vocabulary and question strategies from Level 1 to 6, with live practice from the question bank.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../../main.css">
+  <link rel="apple-touch-icon" href="../../icon/TOPIK.webp">
+  <link rel="icon" type="image/x-icon" href="../../icon/TOPIK.webp">
+</head>
+
+<body data-app="TOPIK Learning Hub" data-back="../">
+
+  <header></header>
+
+  <main>
+    <div class="main wrap">
+
+      <!-- ============ HUB ============ -->
+      <section id="screen-hub" class="screen">
+
+        <div class="item learn-hero">
+          <div class="learn-hero-top">
+            <h2 class="section-title"><span class="material-symbols-rounded">school</span> Learning Hub</h2>
+            <a href="../" class="btn-secondary small"><span class="material-symbols-rounded">home</span> Home</a>
+          </div>
+          <p class="learn-hero-sub">
+            Study Korean from Level 1 to 6 — grammar, vocabulary and question strategies, section by section.
+            Practice questions are drawn live from the same question bank used by the tests.
+          </p>
+        </div>
+
+        <div id="hub-coverage-note" class="coverage-note none"></div>
+        <div id="load-error" class="item error-box none"></div>
+
+        <div class="item">
+          <div class="level-group-head">
+            <span class="test-badge">TOPIK I</span>
+            <h3>Level 1–2 · Reading foundations</h3>
+          </div>
+          <div id="hub-t1-levels" class="level-grid"></div>
+        </div>
+
+        <div class="item">
+          <div class="level-group-head">
+            <span class="test-badge t2">TOPIK II</span>
+            <h3>Level 3–6 · Writing &amp; Reading</h3>
+          </div>
+          <div id="hub-t2-levels" class="level-grid"></div>
+        </div>
+
+      </section>
+
+      <!-- ============ LEVEL ============ -->
+      <section id="screen-level" class="screen none">
+        <div class="item level-hero">
+          <a href="#/" class="btn-secondary small level-hero-back"><span class="material-symbols-rounded">arrow_back</span> All levels</a>
+          <div class="level-hero-head">
+            <span id="level-test-tag" class="test-badge">TOPIK I</span>
+            <span id="level-badge" class="level-badge-pill">Level 1</span>
+          </div>
+          <h2 id="level-title" class="section-title"></h2>
+          <p id="level-subtitle" class="level-hero-sub"></p>
+        </div>
+
+        <div id="level-body" class="level-body"></div>
+      </section>
+
+      <!-- ============ LESSON ============ -->
+      <section id="screen-lesson" class="screen none">
+        <div class="item lesson-hero">
+          <div id="lesson-crumb" class="lesson-crumb"></div>
+          <h2 id="lesson-title" class="section-title"></h2>
+        </div>
+
+        <div id="lesson-body" class="lesson-body"></div>
+
+        <div id="lesson-nav" class="lesson-nav"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <div id="notification"></div>
+
+  <script src="learn.js"></script>
+    <footer></footer>
+    <script src="../../main.js"></script>
+</body>
+
+</html>

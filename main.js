@@ -27,6 +27,10 @@ function readChromeConfig() {
   return {
     title: body.dataset.app || document.title || '',
     home: body.hasAttribute('data-home'),
+    // Where the header back arrow goes. Defaults to the portfolio root;
+    // apps with their own sub-pages (e.g. topik/test/, topik/learn/) can
+    // set data-back="../" to return to the app's own landing page instead.
+    back: body.dataset.back || '/',
     login: body.hasAttribute('data-login'),
     cloud: body.hasAttribute('data-cloud'),
     lang: body.hasAttribute('data-lang')
@@ -60,7 +64,7 @@ function renderHeader() {
   // (e.g. topik's exam timer/submit) provide their own markup using the shared
   // .header.wrap / .site-back / .site-title classes and are left untouched.
   if (header.innerHTML.trim() === '') {
-    const back = cfg.home ? '' : `<a class="site-back" href="/" aria-label="Home">${IC.back}</a>`;
+    const back = cfg.home ? '' : `<a class="site-back" href="${cfg.back}" aria-label="Home">${IC.back}</a>`;
 
     const lang = cfg.lang
       ? `<div class="site-lang"><select id="site-lang"><option value="en">EN</option><option value="id">ID</option></select></div>`
