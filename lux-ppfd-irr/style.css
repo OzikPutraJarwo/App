@@ -25,7 +25,7 @@ td {
 }
 
 th {
-  background: #18abea50;
+  background: var(--accent)50;
 }
 
 .main.wrap {

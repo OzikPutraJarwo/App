@@ -23,7 +23,7 @@ textarea {
 }
 
 button {
-  background: #18abea;
+  background: var(--accent);
   color: white;
   padding: 1rem;
   border: none;
@@ -34,7 +34,7 @@ button {
 }
 
 button:hover {
-  background: #1181b1;
+  background: var(--2nd);
 }
 
 @media (max-width: 768px) {

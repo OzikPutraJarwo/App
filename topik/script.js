@@ -347,7 +347,7 @@ document.addEventListener("DOMContentLoaded", init);
 /* ---------------- init & data loading ---------------- */
 
 async function init() {
-  $("btn-home").addEventListener("click", (e) => { e.preventDefault(); goHome(); });
+  // $("btn-home").addEventListener("click", (e) => { e.preventDefault(); goHome(); });
   $("btn-submit").addEventListener("click", () => submit(false));
   $("btn-submit-bottom").addEventListener("click", () => submit(false));
   $("btn-clear-history").addEventListener("click", clearHistoryAll);
@@ -443,13 +443,13 @@ function toggleNavPanel() {
 function openNavPanel() {
   $("nav-panel").classList.remove("none");
   $("answered-count").setAttribute("aria-expanded", "true");
-  $("nav-toggle-icon").textContent = "expand_less";
+  $("nav-toggle-icon").textContent = "expand_more";
 }
 
 function closeNavPanel() {
   $("nav-panel").classList.add("none");
   $("answered-count").setAttribute("aria-expanded", "false");
-  $("nav-toggle-icon").textContent = "expand_more";
+  $("nav-toggle-icon").textContent = "expand_less";
 }
 
 function goHome() {

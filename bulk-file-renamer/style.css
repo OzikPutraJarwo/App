@@ -115,12 +115,12 @@ h3 {
 }
 
 .output-rules #bfr-rules-list>div span:nth-child(3):hover svg {
-	stroke: #18abea;
+	stroke: var(--accent);
 }
 
 .output-rules #bfr-rules-remove {
 	transition: .2s all;
-	background: #18abea;
+	background: var(--accent);
 	border: none;
 	padding: 1rem 1rem;
 	font-size: 0.8rem;
@@ -202,7 +202,7 @@ h3 {
 }
 
 .output-files #bfr-files-table td:last-child:hover svg {
-	stroke: #18abea;
+	stroke: var(--accent);
 }
 
 #bfr-files-table tr:nth-child(odd) {

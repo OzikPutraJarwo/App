@@ -1,8 +1,12 @@
+/* Landing catalog (home) — glass cards */
+
 .sub-title {
   font-size: 1.5rem;
-  font-weight: 700;
-  margin: 2rem auto;
-  max-width: 1440px;
+  font-weight: 600;
+  letter-spacing: -.015em;
+  color: var(--ink);
+  margin: 2.2rem auto 1.2rem;
+  max-width: var(--maxw);
 }
 
 .sub-title:first-child {
@@ -12,40 +16,47 @@
 .main.wrap {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 2rem;
+  gap: 1.6rem;
 }
 
 .item {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  color: var(--ink);
 }
 
 .item:hover {
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 25px 20px -20px;
-  scale: 1.05;
+  transform: translateY(-0.3333rem);
+  box-shadow: var(--shadow-lg);
 }
 
 .item-head {
   display: grid;
   grid-template-columns: 50px 1fr;
   gap: 1rem;
+  align-items: center;
 }
 
 .item-logo {
   font-size: 0;
-  border-radius: .5rem; 
+  border-radius: var(--r1);
   overflow: hidden;
+  border: 0.0667rem solid var(--border);
+  background: var(--tile);
 }
 
 .item-title {
   font-size: 1.2rem;
-  font-weight: 800;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  color: var(--ink);
   align-content: center;
 }
 
 .item-desc {
   font-size: .9rem;
+  color: var(--ink-2);
 }
 
 .item-status {
@@ -53,6 +64,7 @@
   align-items: center;
   gap: 0.5rem;
   line-height: 0;
+  margin-top: auto;
 }
 
 .item-status:before {
@@ -62,59 +74,31 @@
   border-radius: 100%;
 }
 
-.item-status.online:before {
-  background-color: limegreen;
-}
-
-.item-status.offline:before {
-  background-color: red;
-}
-
-.item-status.development:before {
-  background-color: dodgerblue;
-}
-
-.item-status.maintenance:before {
-  background-color: orange;
-}
+.item-status.online:before { background-color: mediumseagreen; }
+.item-status.offline:before { background-color: indianred; }
+.item-status.development:before { background-color: var(--accent); }
+.item-status.maintenance:before { background-color: orange; }
 
 .item-status:after {
   font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--ink-3);
 }
 
-.item-status.online:after {
-  content: "Online";
-}
-
-.item-status.offline:after {
-  content: "Offline";
-}
-
-.item-status.development:after {
-  content: "Development";
-}
-
-.item-status.maintenance:after {
-  content: "Maintenance";
-}
+.item-status.online:after { content: "Online"; }
+.item-status.offline:after { content: "Offline"; }
+.item-status.development:after { content: "Development"; }
+.item-status.maintenance:after { content: "Maintenance"; }
 
 @media (max-width: 840px) {
-  .main.wrap {
-    grid-template-columns: 1fr 1fr;
-  }
+  .main.wrap { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 600px) {
-  .main.wrap {
-    grid-template-columns: 1fr;
-  }
+  .main.wrap { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {
-  .sub-title:first-child {
-    margin-top: .5rem;
-  }
-  .main.wrap {
-    gap: 1.5rem
-  }
+  .sub-title:first-child { margin-top: .5rem; }
+  .main.wrap { gap: 1.2rem; }
 }

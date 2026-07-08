@@ -60,7 +60,7 @@ th, td {
 }
 
 th {
-    background: #18abea50;
+    background: var(--accent)50;
 }
 
 .group table {margin: .5rem 0;}
