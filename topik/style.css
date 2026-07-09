@@ -51,6 +51,8 @@ button .en {
   font-size: 1.15em;
   line-height: 1;
   vertical-align: middle;
+  align-content: center;
+  text-align: center;
 }
 
 button {
@@ -113,6 +115,10 @@ button {
 .section-title {
   font-family: var(--kr-sans);
   margin-bottom: 1rem;
+}
+
+#lesson-title {
+  margin-bottom: 0;
 }
 
 html .header.wrap.title-only {
@@ -1298,14 +1304,6 @@ span.btn-start.small {
   font-family: var(--kr-sans);
 }
 
-.learn-hero-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
 .learn-hero-sub {
   color: #767676;
   font-size: .95rem;
@@ -1442,10 +1440,6 @@ span.btn-start.small {
   font-family: var(--kr-sans);
 }
 
-.level-hero-back {
-  align-self: flex-start;
-}
-
 .level-hero-head {
   display: flex;
   align-items: center;
@@ -1569,17 +1563,7 @@ span.btn-start.small {
 
 .lesson-crumb {
   font-size: .85rem;
-}
-
-.lesson-crumb a {
   color: #767676;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-}
-
-.lesson-crumb a:hover {
-  color: var(--blue);
 }
 
 .lesson-body {
@@ -1710,6 +1694,523 @@ span.btn-start.small {
   color: #767676;
 }
 
+/* ================= DICTIONARY (Vocabulary + Grammar) ================= */
+/* Uses the shared kodejarwo design tokens from main.css. */
+
+/* ----- hub reference cards ----- */
+.ref-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: .66rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: .25rem .6rem;
+  border-radius: var(--rf);
+}
+
+.ref-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s3);
+  margin-top: var(--s4);
+}
+
+.ref-card {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s4);
+  border-radius: var(--r2);
+  background: var(--surface-2);
+  border: .0667rem solid var(--border);
+  text-decoration: none;
+  color: var(--ink);
+  transition: background .28s cubic-bezier(.22, 1, .36, 1), transform .28s cubic-bezier(.22, 1, .36, 1), box-shadow .28s;
+}
+
+.ref-card:hover {
+  background: var(--surface);
+  transform: translateY(-.1333rem);
+  box-shadow: var(--shadow);
+}
+
+.ref-ic {
+  width: 2.9333rem;
+  height: 2.9333rem;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r1);
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--2nd));
+  font-size: 1.4rem;
+  box-shadow: 0 .5333rem 1.2rem -.6rem var(--accent);
+}
+
+.ref-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ref-text strong {
+  font-size: 1rem;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.ref-text small {
+  color: var(--ink-3);
+  font-size: .8rem;
+  margin-top: .1rem;
+}
+
+.ref-go {
+  flex: none;
+  color: var(--ink-3);
+  font-size: 1.15rem;
+  transition: transform .28s cubic-bezier(.22, 1, .36, 1), color .2s;
+}
+
+.ref-card:hover .ref-go {
+  transform: translate(.15rem, -.15rem);
+  color: var(--accent);
+}
+
+/* ----- screen header ----- */
+.dict-hero {
+  display: flex;
+  align-items: center;
+  gap: var(--s4);
+}
+
+.dict-hero-ic {
+  width: 3.0667rem;
+  height: 3.0667rem;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r2);
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--2nd));
+  font-size: 1.5rem;
+  box-shadow: 0 .6667rem 1.4667rem -.6667rem var(--accent);
+}
+
+.dict-hero-text {
+  min-width: 0;
+}
+
+.dict-hero-text h2 {
+  font-size: 1.5rem;
+  color: var(--ink);
+  letter-spacing: -.02em;
+}
+
+.dict-hero-sub {
+  color: var(--ink-2);
+  font-size: .88rem;
+  margin-top: .2rem;
+}
+
+/* ----- controls ----- */
+/* compact single row: search grows, filter is icon-only.
+ * (.item.dict-controls: needs to out-specificity main.css's .item padding,
+ * which loads after this file.) */
+.item.dict-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: .6rem .7rem;
+}
+
+.dict-search {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  background: var(--tile);
+  border: .0667rem solid var(--border);
+  border-radius: var(--r1);
+  padding: .4rem .7rem;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.dict-search:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 .2rem var(--accent-soft);
+}
+
+.dict-search .material-symbols-rounded {
+  color: var(--ink-3);
+  font-size: 1.15rem;
+  flex: none;
+}
+
+.dict-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--kr-sans);
+  font-size: .88rem;
+  color: var(--ink);
+}
+
+.dict-filter-btn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 100%;
+  border: .0667rem solid var(--border);
+  border-radius: var(--r1);
+  background: var(--tile);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: background .2s, color .2s, border-color .2s;
+}
+
+.dict-filter-btn:hover {
+  border-color: var(--accent);
+  color: var(--tile);
+}
+
+.dict-filter-btn .material-symbols-rounded {
+  font-size: 1.2rem;
+}
+
+/* ----- lists ----- */
+.dict-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--s3);
+  align-items: stretch;
+}
+
+.dict-list--grammar {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.dict-cat-head {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  font-family: var(--kr-sans);
+  font-weight: 700;
+  font-size: .82rem;
+  color: var(--ink);
+  margin: var(--s4) 0 .1rem;
+  padding-left: .6rem;
+  border-left: .2rem solid var(--accent);
+  line-height: 1.2;
+}
+
+.dict-cat-head:first-child {
+  margin-top: 0;
+}
+
+.dict-cat-count {
+  font-size: .7rem;
+  font-weight: 700;
+  color: var(--ink-3);
+}
+
+/* ----- shared card bits ----- */
+.dict-card-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .5rem;
+}
+
+.dict-term {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.25;
+}
+
+.dict-meaning {
+  display: block;
+  font-size: .82rem;
+  color: var(--ink-2);
+  line-height: 1.4;
+  margin-top: .25rem;
+}
+
+.dict-lv {
+  flex: none;
+  font-family: var(--kr-sans);
+  font-size: .63rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  padding: .1rem .42rem;
+  border-radius: var(--r1);
+  background: rgba(53, 51, 83, .08);
+  color: var(--2nd);
+  white-space: nowrap;
+}
+
+.dict-lv.t2 {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* ----- vocab card (not clickable: gentle hover) ----- */
+.dict-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--tile);
+  border: .0667rem solid var(--hair);
+  border-radius: var(--r2);
+  padding: .7rem .85rem;
+  transition: box-shadow .28s, border-color .28s;
+}
+
+.dict-card:hover {
+  border-color: var(--border);
+  box-shadow: var(--shadow);
+}
+
+/* ----- grammar card (clickable: lift) ----- */
+.dict-gcard {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  background: var(--tile);
+  border: .0667rem solid var(--border);
+  border-radius: var(--r2);
+  padding: .85rem 1rem;
+  cursor: pointer;
+  font: inherit;
+  transition: transform .28s cubic-bezier(.22, 1, .36, 1), box-shadow .28s, border-color .28s;
+}
+
+.dict-gcard:hover {
+  transform: translateY(-.1333rem);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--accent);
+}
+
+.dict-gcard:focus-visible {
+  outline: .1667rem solid var(--ring);
+  outline-offset: .2rem;
+}
+
+.dict-gcard:hover * {
+  color: var(--tile);
+}
+
+.dict-gcard .dict-term {
+  font-size: 1.02rem;
+}
+
+.dict-gcard-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  margin-top: .6rem;
+  font-family: var(--kr-sans);
+  font-size: .72rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.dict-gcard-hint .material-symbols-rounded {
+  font-size: .95rem;
+  transition: transform .28s cubic-bezier(.22, 1, .36, 1);
+}
+
+.dict-gcard:hover .dict-gcard-hint .material-symbols-rounded {
+  transform: translate(.1rem, -.1rem);
+}
+
+.dict-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  padding: var(--s10) var(--s4);
+  font-family: var(--kr-sans);
+  font-size: .9rem;
+  color: var(--ink-3);
+}
+
+/* ----- grammar detail popup ----- */
+body.modal-open {
+  overflow: hidden;
+}
+
+.dict-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s5);
+}
+
+.dict-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(23, 22, 33, .55);
+  -webkit-backdrop-filter: blur(.3rem);
+  backdrop-filter: blur(.3rem);
+}
+
+.dict-modal-card {
+  position: relative;
+  z-index: 1;
+  width: min(38rem, 100%);
+  max-height: 86vh;
+  overflow-y: auto;
+  background: var(--tile);
+  -webkit-backdrop-filter: var(--blur);
+  backdrop-filter: var(--blur);
+  border: .0667rem solid var(--border);
+  border-radius: var(--r3);
+  padding: var(--s7) var(--s6) var(--s6);
+  box-shadow: var(--shadow-lg);
+  animation: dictModalIn .2s cubic-bezier(.22, 1, .36, 1);
+}
+
+@keyframes dictModalIn {
+  from { opacity: 0; transform: translateY(.8rem) scale(.98); }
+  to { opacity: 1; transform: none; }
+}
+
+.dict-modal-close {
+  position: absolute;
+  top: .9rem;
+  right: .9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1333rem;
+  height: 2.1333rem;
+  border: none;
+  border-radius: var(--rf);
+  background: var(--accent-soft);
+  color: var(--accent);
+  cursor: pointer;
+  transition: background .2s, color .2s, transform .3s cubic-bezier(.22, 1, .36, 1);
+}
+
+.dict-modal-close:hover {
+  background: var(--accent);
+  color: #fff;
+  transform: rotate(90deg);
+}
+
+.dict-modal-close .material-symbols-rounded {
+  font-size: 1.25rem;
+}
+
+.dict-modal-head {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  margin: 0 2.2rem .5rem 0;
+}
+
+.dict-modal-pattern {
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.dict-modal-meaning {
+  margin: 0 0 var(--s3);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+.dict-modal-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  font-family: var(--kr-sans);
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: .22rem .6rem;
+  border-radius: var(--rf);
+  margin-bottom: var(--s4);
+}
+
+.dict-modal-cat .material-symbols-rounded {
+  font-size: .9rem;
+}
+
+.dict-modal-exp {
+  font-size: .92rem;
+  color: var(--ink-2);
+  line-height: 1.6;
+  margin: 0 0 var(--s4);
+}
+
+.dict-modal-section {
+  margin-top: var(--s4);
+}
+
+.dict-modal-label {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  font-family: var(--kr-sans);
+  font-weight: 700;
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--ink-3);
+  margin-bottom: var(--s2);
+}
+
+.dict-modal-label .material-symbols-rounded {
+  font-size: 1rem;
+  color: var(--accent);
+}
+
+.dict-modal-form {
+  margin: 0;
+  font-size: .88rem;
+  color: var(--ink-2);
+  line-height: 1.55;
+  background: var(--surface-2);
+  border: .0667rem solid var(--hair);
+  border-radius: var(--r1);
+  padding: .7rem .85rem;
+}
+
+.dict-modal-examples {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.dict-modal .learn-tip {
+  margin: var(--s4) 0 0;
+}
+
 .learn-example {
   margin: 0;
 }
@@ -1802,6 +2303,14 @@ span.btn-start.small {
   .vocab-grid {
     grid-template-columns: 1fr 1fr;
   }
+
+  .dict-list--grammar {
+    grid-template-columns: 1fr;
+  }
+
+  .ref-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1811,5 +2320,9 @@ span.btn-start.small {
 
   .lesson-nav-btn {
     flex: 1 1 100%;
+  }
+
+  .dict-hero-text h2 {
+    font-size: 1.3rem;
   }
 }

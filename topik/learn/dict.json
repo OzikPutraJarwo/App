@@ -1,0 +1,4766 @@
+{
+  "_note": "Curated reference vocabulary & grammar for the Learning Hub dictionary. Merged with lesson-derived terms at runtime (see buildDictionary in learn.js). Each vocab group: {category, level, words:[[ko,en],...]}. Each grammar group: {category, level, patterns:[[pattern,meaning],...]}.",
+  "vocab": [
+    {
+      "category": "Greetings & Everyday Expressions",
+      "level": "Level 1",
+      "words": [
+        [
+          "안녕하세요",
+          "hello"
+        ],
+        [
+          "안녕히 가세요",
+          "goodbye (to someone leaving)"
+        ],
+        [
+          "안녕히 계세요",
+          "goodbye (to someone staying)"
+        ],
+        [
+          "감사합니다",
+          "thank you"
+        ],
+        [
+          "고맙습니다",
+          "thank you"
+        ],
+        [
+          "죄송합니다",
+          "I'm sorry (formal)"
+        ],
+        [
+          "미안합니다",
+          "sorry"
+        ],
+        [
+          "실례합니다",
+          "excuse me"
+        ],
+        [
+          "괜찮아요",
+          "it's okay / I'm fine"
+        ],
+        [
+          "여보세요",
+          "hello (on the phone)"
+        ],
+        [
+          "반갑습니다",
+          "nice to meet you"
+        ],
+        [
+          "처음 뵙겠습니다",
+          "how do you do (first meeting)"
+        ],
+        [
+          "잘 먹겠습니다",
+          "said before eating a meal"
+        ],
+        [
+          "잘 먹었습니다",
+          "said after eating a meal"
+        ],
+        [
+          "어서 오세요",
+          "welcome (come in)"
+        ],
+        [
+          "축하합니다",
+          "congratulations"
+        ],
+        [
+          "수고하셨습니다",
+          "thank you for your hard work"
+        ]
+      ]
+    },
+    {
+      "category": "Numbers & Counting",
+      "level": "Level 1",
+      "words": [
+        [
+          "하나",
+          "one (native)"
+        ],
+        [
+          "둘",
+          "two (native)"
+        ],
+        [
+          "셋",
+          "three (native)"
+        ],
+        [
+          "넷",
+          "four (native)"
+        ],
+        [
+          "다섯",
+          "five (native)"
+        ],
+        [
+          "여섯",
+          "six (native)"
+        ],
+        [
+          "일곱",
+          "seven (native)"
+        ],
+        [
+          "여덟",
+          "eight (native)"
+        ],
+        [
+          "아홉",
+          "nine (native)"
+        ],
+        [
+          "열",
+          "ten (native)"
+        ],
+        [
+          "백",
+          "hundred"
+        ],
+        [
+          "천",
+          "thousand"
+        ],
+        [
+          "만",
+          "ten thousand"
+        ],
+        [
+          "개",
+          "counter for objects"
+        ],
+        [
+          "명",
+          "counter for people"
+        ],
+        [
+          "분",
+          "counter for people (polite)"
+        ],
+        [
+          "번",
+          "counter for times / number"
+        ],
+        [
+          "살",
+          "counter for years of age"
+        ],
+        [
+          "마리",
+          "counter for animals"
+        ],
+        [
+          "권",
+          "counter for books"
+        ]
+      ]
+    },
+    {
+      "category": "Time, Days & Dates",
+      "level": "Level 1",
+      "words": [
+        [
+          "시",
+          "o'clock / hour"
+        ],
+        [
+          "분",
+          "minute"
+        ],
+        [
+          "초",
+          "second"
+        ],
+        [
+          "오늘",
+          "today"
+        ],
+        [
+          "어제",
+          "yesterday"
+        ],
+        [
+          "내일",
+          "tomorrow"
+        ],
+        [
+          "모레",
+          "the day after tomorrow"
+        ],
+        [
+          "지금",
+          "now"
+        ],
+        [
+          "아침",
+          "morning"
+        ],
+        [
+          "점심",
+          "midday / lunch"
+        ],
+        [
+          "저녁",
+          "evening"
+        ],
+        [
+          "밤",
+          "night"
+        ],
+        [
+          "오전",
+          "a.m. / morning"
+        ],
+        [
+          "오후",
+          "p.m. / afternoon"
+        ],
+        [
+          "요일",
+          "day of the week"
+        ],
+        [
+          "월요일",
+          "Monday"
+        ],
+        [
+          "화요일",
+          "Tuesday"
+        ],
+        [
+          "수요일",
+          "Wednesday"
+        ],
+        [
+          "목요일",
+          "Thursday"
+        ],
+        [
+          "금요일",
+          "Friday"
+        ],
+        [
+          "토요일",
+          "Saturday"
+        ],
+        [
+          "일요일",
+          "Sunday"
+        ],
+        [
+          "주말",
+          "weekend"
+        ],
+        [
+          "매일",
+          "every day"
+        ],
+        [
+          "시간",
+          "time / hour"
+        ],
+        [
+          "년",
+          "year"
+        ],
+        [
+          "달",
+          "month"
+        ],
+        [
+          "주",
+          "week"
+        ]
+      ]
+    },
+    {
+      "category": "Family & People",
+      "level": "Level 1",
+      "words": [
+        [
+          "가족",
+          "family"
+        ],
+        [
+          "부모님",
+          "parents"
+        ],
+        [
+          "아버지",
+          "father"
+        ],
+        [
+          "어머니",
+          "mother"
+        ],
+        [
+          "아빠",
+          "dad"
+        ],
+        [
+          "엄마",
+          "mom"
+        ],
+        [
+          "형",
+          "older brother (of a male)"
+        ],
+        [
+          "오빠",
+          "older brother (of a female)"
+        ],
+        [
+          "누나",
+          "older sister (of a male)"
+        ],
+        [
+          "언니",
+          "older sister (of a female)"
+        ],
+        [
+          "동생",
+          "younger sibling"
+        ],
+        [
+          "할아버지",
+          "grandfather"
+        ],
+        [
+          "할머니",
+          "grandmother"
+        ],
+        [
+          "아들",
+          "son"
+        ],
+        [
+          "딸",
+          "daughter"
+        ],
+        [
+          "남편",
+          "husband"
+        ],
+        [
+          "아내",
+          "wife"
+        ],
+        [
+          "친구",
+          "friend"
+        ],
+        [
+          "아이",
+          "child"
+        ],
+        [
+          "어른",
+          "adult"
+        ],
+        [
+          "남자",
+          "man"
+        ],
+        [
+          "여자",
+          "woman"
+        ],
+        [
+          "사람",
+          "person"
+        ]
+      ]
+    },
+    {
+      "category": "The Body & Health",
+      "level": "Level 1",
+      "words": [
+        [
+          "몸",
+          "body"
+        ],
+        [
+          "머리",
+          "head / hair"
+        ],
+        [
+          "얼굴",
+          "face"
+        ],
+        [
+          "눈",
+          "eye"
+        ],
+        [
+          "코",
+          "nose"
+        ],
+        [
+          "입",
+          "mouth"
+        ],
+        [
+          "귀",
+          "ear"
+        ],
+        [
+          "이",
+          "tooth"
+        ],
+        [
+          "목",
+          "neck / throat"
+        ],
+        [
+          "어깨",
+          "shoulder"
+        ],
+        [
+          "팔",
+          "arm"
+        ],
+        [
+          "손",
+          "hand"
+        ],
+        [
+          "손가락",
+          "finger"
+        ],
+        [
+          "다리",
+          "leg"
+        ],
+        [
+          "발",
+          "foot"
+        ],
+        [
+          "배",
+          "belly / stomach"
+        ],
+        [
+          "등",
+          "back (body)"
+        ],
+        [
+          "약",
+          "medicine"
+        ],
+        [
+          "감기",
+          "a cold (illness)"
+        ],
+        [
+          "열",
+          "fever"
+        ],
+        [
+          "아프다",
+          "to hurt / be sick"
+        ],
+        [
+          "건강",
+          "health"
+        ]
+      ]
+    },
+    {
+      "category": "House & Furniture",
+      "level": "Level 1",
+      "words": [
+        [
+          "집",
+          "house / home"
+        ],
+        [
+          "방",
+          "room"
+        ],
+        [
+          "거실",
+          "living room"
+        ],
+        [
+          "부엌",
+          "kitchen"
+        ],
+        [
+          "화장실",
+          "bathroom / restroom"
+        ],
+        [
+          "문",
+          "door"
+        ],
+        [
+          "창문",
+          "window"
+        ],
+        [
+          "벽",
+          "wall"
+        ],
+        [
+          "바닥",
+          "floor"
+        ],
+        [
+          "침대",
+          "bed"
+        ],
+        [
+          "책상",
+          "desk"
+        ],
+        [
+          "의자",
+          "chair"
+        ],
+        [
+          "소파",
+          "sofa"
+        ],
+        [
+          "책장",
+          "bookshelf"
+        ],
+        [
+          "옷장",
+          "wardrobe / closet"
+        ],
+        [
+          "냉장고",
+          "refrigerator"
+        ],
+        [
+          "텔레비전",
+          "television"
+        ],
+        [
+          "시계",
+          "clock / watch"
+        ],
+        [
+          "컴퓨터",
+          "computer"
+        ],
+        [
+          "열쇠",
+          "key"
+        ],
+        [
+          "거울",
+          "mirror"
+        ]
+      ]
+    },
+    {
+      "category": "Food & Drink",
+      "level": "Level 1",
+      "words": [
+        [
+          "밥",
+          "rice / a meal"
+        ],
+        [
+          "물",
+          "water"
+        ],
+        [
+          "빵",
+          "bread"
+        ],
+        [
+          "고기",
+          "meat"
+        ],
+        [
+          "생선",
+          "fish (as food)"
+        ],
+        [
+          "계란",
+          "egg"
+        ],
+        [
+          "우유",
+          "milk"
+        ],
+        [
+          "커피",
+          "coffee"
+        ],
+        [
+          "차",
+          "tea"
+        ],
+        [
+          "주스",
+          "juice"
+        ],
+        [
+          "과일",
+          "fruit"
+        ],
+        [
+          "사과",
+          "apple"
+        ],
+        [
+          "배",
+          "pear"
+        ],
+        [
+          "포도",
+          "grapes"
+        ],
+        [
+          "딸기",
+          "strawberry"
+        ],
+        [
+          "채소",
+          "vegetable"
+        ],
+        [
+          "김치",
+          "kimchi"
+        ],
+        [
+          "라면",
+          "instant noodles"
+        ],
+        [
+          "설탕",
+          "sugar"
+        ],
+        [
+          "소금",
+          "salt"
+        ],
+        [
+          "술",
+          "alcohol"
+        ],
+        [
+          "음식",
+          "food"
+        ],
+        [
+          "음료수",
+          "beverage"
+        ]
+      ]
+    },
+    {
+      "category": "Cooking & Taste",
+      "level": "Level 2",
+      "words": [
+        [
+          "요리",
+          "cooking / a dish"
+        ],
+        [
+          "맛",
+          "taste / flavor"
+        ],
+        [
+          "맛있다",
+          "to be delicious"
+        ],
+        [
+          "맛없다",
+          "to taste bad"
+        ],
+        [
+          "달다",
+          "to be sweet"
+        ],
+        [
+          "쓰다",
+          "to be bitter"
+        ],
+        [
+          "시다",
+          "to be sour"
+        ],
+        [
+          "짜다",
+          "to be salty"
+        ],
+        [
+          "맵다",
+          "to be spicy"
+        ],
+        [
+          "싱겁다",
+          "to be bland"
+        ],
+        [
+          "끓이다",
+          "to boil (cook)"
+        ],
+        [
+          "굽다",
+          "to grill / bake"
+        ],
+        [
+          "볶다",
+          "to stir-fry"
+        ],
+        [
+          "튀기다",
+          "to deep-fry"
+        ],
+        [
+          "썰다",
+          "to slice / chop"
+        ],
+        [
+          "삶다",
+          "to boil in water"
+        ],
+        [
+          "익다",
+          "to be cooked / ripe"
+        ],
+        [
+          "신선하다",
+          "to be fresh"
+        ],
+        [
+          "냄새",
+          "smell / odor"
+        ],
+        [
+          "그릇",
+          "bowl / dish"
+        ],
+        [
+          "접시",
+          "plate"
+        ],
+        [
+          "젓가락",
+          "chopsticks"
+        ],
+        [
+          "숟가락",
+          "spoon"
+        ]
+      ]
+    },
+    {
+      "category": "Clothing & Colors",
+      "level": "Level 1",
+      "words": [
+        [
+          "옷",
+          "clothes"
+        ],
+        [
+          "바지",
+          "pants"
+        ],
+        [
+          "치마",
+          "skirt"
+        ],
+        [
+          "셔츠",
+          "shirt"
+        ],
+        [
+          "티셔츠",
+          "t-shirt"
+        ],
+        [
+          "코트",
+          "coat"
+        ],
+        [
+          "양말",
+          "socks"
+        ],
+        [
+          "신발",
+          "shoes"
+        ],
+        [
+          "구두",
+          "dress shoes"
+        ],
+        [
+          "모자",
+          "hat"
+        ],
+        [
+          "안경",
+          "glasses"
+        ],
+        [
+          "가방",
+          "bag"
+        ],
+        [
+          "색깔",
+          "color"
+        ],
+        [
+          "빨간색",
+          "red"
+        ],
+        [
+          "파란색",
+          "blue"
+        ],
+        [
+          "노란색",
+          "yellow"
+        ],
+        [
+          "초록색",
+          "green"
+        ],
+        [
+          "검은색",
+          "black"
+        ],
+        [
+          "흰색",
+          "white"
+        ],
+        [
+          "입다",
+          "to wear (clothes)"
+        ],
+        [
+          "벗다",
+          "to take off"
+        ],
+        [
+          "신다",
+          "to wear (on feet)"
+        ]
+      ]
+    },
+    {
+      "category": "Weather & Seasons",
+      "level": "Level 1",
+      "words": [
+        [
+          "날씨",
+          "weather"
+        ],
+        [
+          "하늘",
+          "sky"
+        ],
+        [
+          "해",
+          "sun"
+        ],
+        [
+          "구름",
+          "cloud"
+        ],
+        [
+          "비",
+          "rain"
+        ],
+        [
+          "눈",
+          "snow"
+        ],
+        [
+          "바람",
+          "wind"
+        ],
+        [
+          "봄",
+          "spring"
+        ],
+        [
+          "여름",
+          "summer"
+        ],
+        [
+          "가을",
+          "autumn / fall"
+        ],
+        [
+          "겨울",
+          "winter"
+        ],
+        [
+          "계절",
+          "season"
+        ],
+        [
+          "덥다",
+          "to be hot (weather)"
+        ],
+        [
+          "춥다",
+          "to be cold (weather)"
+        ],
+        [
+          "따뜻하다",
+          "to be warm"
+        ],
+        [
+          "시원하다",
+          "to be cool / refreshing"
+        ],
+        [
+          "맑다",
+          "to be clear (sky)"
+        ],
+        [
+          "흐리다",
+          "to be cloudy"
+        ],
+        [
+          "온도",
+          "temperature"
+        ],
+        [
+          "우산",
+          "umbrella"
+        ]
+      ]
+    },
+    {
+      "category": "Places & Buildings",
+      "level": "Level 1",
+      "words": [
+        [
+          "학교",
+          "school"
+        ],
+        [
+          "회사",
+          "company / office"
+        ],
+        [
+          "은행",
+          "bank"
+        ],
+        [
+          "병원",
+          "hospital"
+        ],
+        [
+          "약국",
+          "pharmacy"
+        ],
+        [
+          "가게",
+          "shop / store"
+        ],
+        [
+          "시장",
+          "market"
+        ],
+        [
+          "백화점",
+          "department store"
+        ],
+        [
+          "식당",
+          "restaurant"
+        ],
+        [
+          "카페",
+          "café"
+        ],
+        [
+          "도서관",
+          "library"
+        ],
+        [
+          "공원",
+          "park"
+        ],
+        [
+          "영화관",
+          "cinema"
+        ],
+        [
+          "우체국",
+          "post office"
+        ],
+        [
+          "호텔",
+          "hotel"
+        ],
+        [
+          "공항",
+          "airport"
+        ],
+        [
+          "역",
+          "station"
+        ],
+        [
+          "정류장",
+          "bus stop"
+        ],
+        [
+          "미용실",
+          "hair salon"
+        ],
+        [
+          "주차장",
+          "parking lot"
+        ]
+      ]
+    },
+    {
+      "category": "Nature & Animals",
+      "level": "Level 2",
+      "words": [
+        [
+          "자연",
+          "nature"
+        ],
+        [
+          "산",
+          "mountain"
+        ],
+        [
+          "바다",
+          "sea"
+        ],
+        [
+          "강",
+          "river"
+        ],
+        [
+          "호수",
+          "lake"
+        ],
+        [
+          "나무",
+          "tree"
+        ],
+        [
+          "꽃",
+          "flower"
+        ],
+        [
+          "풀",
+          "grass"
+        ],
+        [
+          "돌",
+          "stone"
+        ],
+        [
+          "땅",
+          "ground / land"
+        ],
+        [
+          "별",
+          "star"
+        ],
+        [
+          "달",
+          "moon"
+        ],
+        [
+          "동물",
+          "animal"
+        ],
+        [
+          "개",
+          "dog"
+        ],
+        [
+          "고양이",
+          "cat"
+        ],
+        [
+          "새",
+          "bird"
+        ],
+        [
+          "물고기",
+          "fish (live)"
+        ],
+        [
+          "소",
+          "cow"
+        ],
+        [
+          "말",
+          "horse"
+        ],
+        [
+          "돼지",
+          "pig"
+        ],
+        [
+          "닭",
+          "chicken"
+        ],
+        [
+          "토끼",
+          "rabbit"
+        ],
+        [
+          "곤충",
+          "insect"
+        ],
+        [
+          "나비",
+          "butterfly"
+        ]
+      ]
+    },
+    {
+      "category": "Transportation & Directions",
+      "level": "Level 1",
+      "words": [
+        [
+          "차",
+          "car"
+        ],
+        [
+          "버스",
+          "bus"
+        ],
+        [
+          "지하철",
+          "subway"
+        ],
+        [
+          "기차",
+          "train"
+        ],
+        [
+          "택시",
+          "taxi"
+        ],
+        [
+          "자전거",
+          "bicycle"
+        ],
+        [
+          "비행기",
+          "airplane"
+        ],
+        [
+          "배",
+          "ship / boat"
+        ],
+        [
+          "길",
+          "road / way"
+        ],
+        [
+          "지도",
+          "map"
+        ],
+        [
+          "위",
+          "above / on top"
+        ],
+        [
+          "아래",
+          "below / under"
+        ],
+        [
+          "앞",
+          "front"
+        ],
+        [
+          "뒤",
+          "behind / back"
+        ],
+        [
+          "옆",
+          "beside / next to"
+        ],
+        [
+          "왼쪽",
+          "left side"
+        ],
+        [
+          "오른쪽",
+          "right side"
+        ],
+        [
+          "사이",
+          "between"
+        ],
+        [
+          "안",
+          "inside"
+        ],
+        [
+          "밖",
+          "outside"
+        ],
+        [
+          "근처",
+          "nearby"
+        ]
+      ]
+    },
+    {
+      "category": "School & Study",
+      "level": "Level 1",
+      "words": [
+        [
+          "공부",
+          "study"
+        ],
+        [
+          "학생",
+          "student"
+        ],
+        [
+          "선생님",
+          "teacher"
+        ],
+        [
+          "교실",
+          "classroom"
+        ],
+        [
+          "책",
+          "book"
+        ],
+        [
+          "공책",
+          "notebook"
+        ],
+        [
+          "연필",
+          "pencil"
+        ],
+        [
+          "볼펜",
+          "ballpoint pen"
+        ],
+        [
+          "지우개",
+          "eraser"
+        ],
+        [
+          "종이",
+          "paper"
+        ],
+        [
+          "숙제",
+          "homework"
+        ],
+        [
+          "시험",
+          "exam / test"
+        ],
+        [
+          "문제",
+          "question / problem"
+        ],
+        [
+          "답",
+          "answer"
+        ],
+        [
+          "수업",
+          "class / lesson"
+        ],
+        [
+          "교과서",
+          "textbook"
+        ],
+        [
+          "사전",
+          "dictionary"
+        ],
+        [
+          "칠판",
+          "blackboard"
+        ],
+        [
+          "대학교",
+          "university"
+        ],
+        [
+          "방학",
+          "school vacation"
+        ],
+        [
+          "졸업",
+          "graduation"
+        ],
+        [
+          "질문",
+          "question"
+        ]
+      ]
+    },
+    {
+      "category": "Shopping & Money",
+      "level": "Level 1",
+      "words": [
+        [
+          "돈",
+          "money"
+        ],
+        [
+          "값",
+          "price"
+        ],
+        [
+          "가격",
+          "price"
+        ],
+        [
+          "원",
+          "won (currency)"
+        ],
+        [
+          "카드",
+          "card"
+        ],
+        [
+          "현금",
+          "cash"
+        ],
+        [
+          "지갑",
+          "wallet"
+        ],
+        [
+          "사다",
+          "to buy"
+        ],
+        [
+          "팔다",
+          "to sell"
+        ],
+        [
+          "계산",
+          "payment / calculation"
+        ],
+        [
+          "영수증",
+          "receipt"
+        ],
+        [
+          "할인",
+          "discount"
+        ],
+        [
+          "손님",
+          "customer / guest"
+        ],
+        [
+          "점원",
+          "shop clerk"
+        ],
+        [
+          "비싸다",
+          "to be expensive"
+        ],
+        [
+          "싸다",
+          "to be cheap"
+        ],
+        [
+          "무료",
+          "free of charge"
+        ],
+        [
+          "거스름돈",
+          "change (money returned)"
+        ]
+      ]
+    },
+    {
+      "category": "Everyday Verbs",
+      "level": "Level 1",
+      "words": [
+        [
+          "가다",
+          "to go"
+        ],
+        [
+          "오다",
+          "to come"
+        ],
+        [
+          "먹다",
+          "to eat"
+        ],
+        [
+          "마시다",
+          "to drink"
+        ],
+        [
+          "자다",
+          "to sleep"
+        ],
+        [
+          "일어나다",
+          "to get up / stand up"
+        ],
+        [
+          "앉다",
+          "to sit"
+        ],
+        [
+          "보다",
+          "to see / watch"
+        ],
+        [
+          "듣다",
+          "to listen / hear"
+        ],
+        [
+          "말하다",
+          "to speak"
+        ],
+        [
+          "읽다",
+          "to read"
+        ],
+        [
+          "쓰다",
+          "to write / use"
+        ],
+        [
+          "만나다",
+          "to meet"
+        ],
+        [
+          "놀다",
+          "to play / hang out"
+        ],
+        [
+          "일하다",
+          "to work"
+        ],
+        [
+          "쉬다",
+          "to rest"
+        ],
+        [
+          "좋아하다",
+          "to like"
+        ],
+        [
+          "싫어하다",
+          "to dislike"
+        ],
+        [
+          "알다",
+          "to know"
+        ],
+        [
+          "모르다",
+          "to not know"
+        ],
+        [
+          "주다",
+          "to give"
+        ],
+        [
+          "받다",
+          "to receive"
+        ],
+        [
+          "살다",
+          "to live"
+        ]
+      ]
+    },
+    {
+      "category": "Motion & Action Verbs",
+      "level": "Level 2",
+      "words": [
+        [
+          "걷다",
+          "to walk"
+        ],
+        [
+          "뛰다",
+          "to run / jump"
+        ],
+        [
+          "달리다",
+          "to run"
+        ],
+        [
+          "날다",
+          "to fly"
+        ],
+        [
+          "오르다",
+          "to climb / rise"
+        ],
+        [
+          "내리다",
+          "to get off / come down"
+        ],
+        [
+          "들다",
+          "to lift / hold"
+        ],
+        [
+          "놓다",
+          "to put down / release"
+        ],
+        [
+          "밀다",
+          "to push"
+        ],
+        [
+          "당기다",
+          "to pull"
+        ],
+        [
+          "던지다",
+          "to throw"
+        ],
+        [
+          "잡다",
+          "to grab / catch"
+        ],
+        [
+          "열다",
+          "to open"
+        ],
+        [
+          "닫다",
+          "to close"
+        ],
+        [
+          "켜다",
+          "to turn on"
+        ],
+        [
+          "끄다",
+          "to turn off"
+        ],
+        [
+          "씻다",
+          "to wash"
+        ],
+        [
+          "닦다",
+          "to wipe / brush"
+        ],
+        [
+          "청소하다",
+          "to clean"
+        ],
+        [
+          "빨래하다",
+          "to do laundry"
+        ],
+        [
+          "준비하다",
+          "to prepare"
+        ]
+      ]
+    },
+    {
+      "category": "Everyday Adjectives",
+      "level": "Level 1",
+      "words": [
+        [
+          "크다",
+          "to be big"
+        ],
+        [
+          "작다",
+          "to be small"
+        ],
+        [
+          "많다",
+          "to be many / much"
+        ],
+        [
+          "적다",
+          "to be few / little"
+        ],
+        [
+          "높다",
+          "to be high / tall"
+        ],
+        [
+          "낮다",
+          "to be low"
+        ],
+        [
+          "길다",
+          "to be long"
+        ],
+        [
+          "짧다",
+          "to be short"
+        ],
+        [
+          "넓다",
+          "to be wide / spacious"
+        ],
+        [
+          "좁다",
+          "to be narrow"
+        ],
+        [
+          "좋다",
+          "to be good"
+        ],
+        [
+          "나쁘다",
+          "to be bad"
+        ],
+        [
+          "예쁘다",
+          "to be pretty"
+        ],
+        [
+          "멋있다",
+          "to be cool / stylish"
+        ],
+        [
+          "재미있다",
+          "to be fun / interesting"
+        ],
+        [
+          "재미없다",
+          "to be boring"
+        ],
+        [
+          "쉽다",
+          "to be easy"
+        ],
+        [
+          "어렵다",
+          "to be difficult"
+        ],
+        [
+          "빠르다",
+          "to be fast"
+        ],
+        [
+          "느리다",
+          "to be slow"
+        ],
+        [
+          "무겁다",
+          "to be heavy"
+        ],
+        [
+          "가볍다",
+          "to be light (weight)"
+        ]
+      ]
+    },
+    {
+      "category": "More Adjectives",
+      "level": "Level 2",
+      "words": [
+        [
+          "깨끗하다",
+          "to be clean"
+        ],
+        [
+          "더럽다",
+          "to be dirty"
+        ],
+        [
+          "밝다",
+          "to be bright"
+        ],
+        [
+          "어둡다",
+          "to be dark"
+        ],
+        [
+          "조용하다",
+          "to be quiet"
+        ],
+        [
+          "시끄럽다",
+          "to be noisy"
+        ],
+        [
+          "편하다",
+          "to be comfortable"
+        ],
+        [
+          "불편하다",
+          "to be uncomfortable"
+        ],
+        [
+          "안전하다",
+          "to be safe"
+        ],
+        [
+          "위험하다",
+          "to be dangerous"
+        ],
+        [
+          "중요하다",
+          "to be important"
+        ],
+        [
+          "필요하다",
+          "to be necessary"
+        ],
+        [
+          "유명하다",
+          "to be famous"
+        ],
+        [
+          "친절하다",
+          "to be kind"
+        ],
+        [
+          "특별하다",
+          "to be special"
+        ],
+        [
+          "비슷하다",
+          "to be similar"
+        ],
+        [
+          "다르다",
+          "to be different"
+        ],
+        [
+          "같다",
+          "to be the same"
+        ],
+        [
+          "이상하다",
+          "to be strange"
+        ],
+        [
+          "복잡하다",
+          "to be complicated / crowded"
+        ],
+        [
+          "간단하다",
+          "to be simple"
+        ]
+      ]
+    },
+    {
+      "category": "Adverbs & Frequency",
+      "level": "Level 2",
+      "words": [
+        [
+          "아주",
+          "very"
+        ],
+        [
+          "너무",
+          "too (much)"
+        ],
+        [
+          "정말",
+          "really"
+        ],
+        [
+          "매우",
+          "very (formal)"
+        ],
+        [
+          "조금",
+          "a little"
+        ],
+        [
+          "많이",
+          "a lot"
+        ],
+        [
+          "잘",
+          "well"
+        ],
+        [
+          "자주",
+          "often"
+        ],
+        [
+          "가끔",
+          "sometimes"
+        ],
+        [
+          "항상",
+          "always"
+        ],
+        [
+          "보통",
+          "usually"
+        ],
+        [
+          "별로",
+          "not really (with negative)"
+        ],
+        [
+          "전혀",
+          "not at all (with negative)"
+        ],
+        [
+          "빨리",
+          "quickly"
+        ],
+        [
+          "천천히",
+          "slowly"
+        ],
+        [
+          "먼저",
+          "first"
+        ],
+        [
+          "다시",
+          "again"
+        ],
+        [
+          "함께",
+          "together"
+        ],
+        [
+          "혼자",
+          "alone"
+        ],
+        [
+          "벌써",
+          "already"
+        ],
+        [
+          "아직",
+          "still / not yet"
+        ],
+        [
+          "곧",
+          "soon"
+        ]
+      ]
+    },
+    {
+      "category": "Hobbies & Leisure",
+      "level": "Level 2",
+      "words": [
+        [
+          "취미",
+          "hobby"
+        ],
+        [
+          "운동",
+          "exercise / sports"
+        ],
+        [
+          "축구",
+          "soccer"
+        ],
+        [
+          "야구",
+          "baseball"
+        ],
+        [
+          "농구",
+          "basketball"
+        ],
+        [
+          "수영",
+          "swimming"
+        ],
+        [
+          "등산",
+          "hiking / mountain climbing"
+        ],
+        [
+          "영화",
+          "movie"
+        ],
+        [
+          "음악",
+          "music"
+        ],
+        [
+          "노래",
+          "song"
+        ],
+        [
+          "춤",
+          "dance"
+        ],
+        [
+          "그림",
+          "drawing / painting"
+        ],
+        [
+          "사진",
+          "photo"
+        ],
+        [
+          "게임",
+          "game"
+        ],
+        [
+          "독서",
+          "reading"
+        ],
+        [
+          "낚시",
+          "fishing"
+        ],
+        [
+          "악기",
+          "musical instrument"
+        ],
+        [
+          "피아노",
+          "piano"
+        ],
+        [
+          "기타",
+          "guitar"
+        ],
+        [
+          "노래방",
+          "karaoke room"
+        ]
+      ]
+    },
+    {
+      "category": "Travel & Vacation",
+      "level": "Level 2",
+      "words": [
+        [
+          "여행",
+          "travel / trip"
+        ],
+        [
+          "관광",
+          "sightseeing"
+        ],
+        [
+          "여권",
+          "passport"
+        ],
+        [
+          "표",
+          "ticket"
+        ],
+        [
+          "예약",
+          "reservation"
+        ],
+        [
+          "숙소",
+          "accommodation"
+        ],
+        [
+          "짐",
+          "luggage"
+        ],
+        [
+          "관광객",
+          "tourist"
+        ],
+        [
+          "기념품",
+          "souvenir"
+        ],
+        [
+          "경치",
+          "scenery / view"
+        ],
+        [
+          "구경하다",
+          "to look around / sightsee"
+        ],
+        [
+          "출발",
+          "departure"
+        ],
+        [
+          "도착",
+          "arrival"
+        ],
+        [
+          "외국",
+          "foreign country"
+        ],
+        [
+          "세계",
+          "the world"
+        ],
+        [
+          "나라",
+          "country"
+        ],
+        [
+          "국내",
+          "domestic"
+        ],
+        [
+          "해외",
+          "overseas"
+        ]
+      ]
+    },
+    {
+      "category": "Jobs & Workplace",
+      "level": "Level 3",
+      "words": [
+        [
+          "직업",
+          "occupation / job"
+        ],
+        [
+          "회사원",
+          "office worker"
+        ],
+        [
+          "의사",
+          "doctor"
+        ],
+        [
+          "간호사",
+          "nurse"
+        ],
+        [
+          "경찰",
+          "police officer"
+        ],
+        [
+          "소방관",
+          "firefighter"
+        ],
+        [
+          "요리사",
+          "cook / chef"
+        ],
+        [
+          "변호사",
+          "lawyer"
+        ],
+        [
+          "기자",
+          "reporter"
+        ],
+        [
+          "교수",
+          "professor"
+        ],
+        [
+          "사장",
+          "company president / boss"
+        ],
+        [
+          "동료",
+          "colleague"
+        ],
+        [
+          "회의",
+          "meeting"
+        ],
+        [
+          "사무실",
+          "office"
+        ],
+        [
+          "월급",
+          "monthly salary"
+        ],
+        [
+          "출근",
+          "going to work"
+        ],
+        [
+          "퇴근",
+          "leaving work"
+        ],
+        [
+          "야근",
+          "working overtime"
+        ],
+        [
+          "승진",
+          "promotion"
+        ],
+        [
+          "면접",
+          "interview"
+        ],
+        [
+          "취직",
+          "getting a job"
+        ],
+        [
+          "서류",
+          "documents"
+        ]
+      ]
+    },
+    {
+      "category": "Emotions & Personality",
+      "level": "Level 3",
+      "words": [
+        [
+          "기쁘다",
+          "to be glad / happy"
+        ],
+        [
+          "슬프다",
+          "to be sad"
+        ],
+        [
+          "화나다",
+          "to get angry"
+        ],
+        [
+          "무섭다",
+          "to be scary / afraid"
+        ],
+        [
+          "놀라다",
+          "to be surprised"
+        ],
+        [
+          "걱정하다",
+          "to worry"
+        ],
+        [
+          "외롭다",
+          "to be lonely"
+        ],
+        [
+          "부끄럽다",
+          "to be embarrassed / shy"
+        ],
+        [
+          "그립다",
+          "to miss / long for"
+        ],
+        [
+          "답답하다",
+          "to feel frustrated / stuffy"
+        ],
+        [
+          "지루하다",
+          "to be bored"
+        ],
+        [
+          "긴장하다",
+          "to be nervous / tense"
+        ],
+        [
+          "만족하다",
+          "to be satisfied"
+        ],
+        [
+          "실망하다",
+          "to be disappointed"
+        ],
+        [
+          "성격",
+          "personality"
+        ],
+        [
+          "착하다",
+          "to be good-natured / kind"
+        ],
+        [
+          "부지런하다",
+          "to be diligent"
+        ],
+        [
+          "게으르다",
+          "to be lazy"
+        ],
+        [
+          "솔직하다",
+          "to be honest / frank"
+        ],
+        [
+          "활발하다",
+          "to be lively / outgoing"
+        ],
+        [
+          "급하다",
+          "to be impatient / urgent"
+        ]
+      ]
+    },
+    {
+      "category": "Communication & Media",
+      "level": "Level 3",
+      "words": [
+        [
+          "소식",
+          "news / word"
+        ],
+        [
+          "뉴스",
+          "the news"
+        ],
+        [
+          "신문",
+          "newspaper"
+        ],
+        [
+          "방송",
+          "broadcast"
+        ],
+        [
+          "광고",
+          "advertisement"
+        ],
+        [
+          "기사",
+          "article"
+        ],
+        [
+          "정보",
+          "information"
+        ],
+        [
+          "인터넷",
+          "internet"
+        ],
+        [
+          "이메일",
+          "email"
+        ],
+        [
+          "문자",
+          "text message"
+        ],
+        [
+          "편지",
+          "letter"
+        ],
+        [
+          "우표",
+          "postage stamp"
+        ],
+        [
+          "소포",
+          "parcel"
+        ],
+        [
+          "연락",
+          "contact / getting in touch"
+        ],
+        [
+          "대화",
+          "conversation"
+        ],
+        [
+          "발표",
+          "presentation / announcement"
+        ],
+        [
+          "의견",
+          "opinion"
+        ],
+        [
+          "소통",
+          "communication"
+        ],
+        [
+          "표현",
+          "expression"
+        ]
+      ]
+    },
+    {
+      "category": "Technology & Internet",
+      "level": "Level 4",
+      "words": [
+        [
+          "기술",
+          "technology / skill"
+        ],
+        [
+          "휴대폰",
+          "cell phone"
+        ],
+        [
+          "스마트폰",
+          "smartphone"
+        ],
+        [
+          "화면",
+          "screen"
+        ],
+        [
+          "프로그램",
+          "program"
+        ],
+        [
+          "파일",
+          "file"
+        ],
+        [
+          "자료",
+          "data / materials"
+        ],
+        [
+          "검색",
+          "search (online)"
+        ],
+        [
+          "누리집",
+          "website"
+        ],
+        [
+          "로봇",
+          "robot"
+        ],
+        [
+          "인공지능",
+          "artificial intelligence"
+        ],
+        [
+          "전기",
+          "electricity"
+        ],
+        [
+          "기계",
+          "machine"
+        ],
+        [
+          "발명",
+          "invention"
+        ],
+        [
+          "개발",
+          "development"
+        ],
+        [
+          "저장",
+          "saving / storage"
+        ],
+        [
+          "충전",
+          "charging"
+        ],
+        [
+          "연결",
+          "connection"
+        ]
+      ]
+    },
+    {
+      "category": "Society & Daily Life",
+      "level": "Level 4",
+      "words": [
+        [
+          "사회",
+          "society"
+        ],
+        [
+          "문화",
+          "culture"
+        ],
+        [
+          "전통",
+          "tradition"
+        ],
+        [
+          "예절",
+          "etiquette / manners"
+        ],
+        [
+          "규칙",
+          "rule"
+        ],
+        [
+          "법",
+          "law"
+        ],
+        [
+          "질서",
+          "order / discipline"
+        ],
+        [
+          "안전",
+          "safety"
+        ],
+        [
+          "사고",
+          "accident"
+        ],
+        [
+          "이웃",
+          "neighbor"
+        ],
+        [
+          "봉사",
+          "volunteering / service"
+        ],
+        [
+          "기부",
+          "donation"
+        ],
+        [
+          "행사",
+          "event"
+        ],
+        [
+          "축제",
+          "festival"
+        ],
+        [
+          "결혼",
+          "marriage"
+        ],
+        [
+          "이사",
+          "moving house"
+        ],
+        [
+          "세대",
+          "generation"
+        ],
+        [
+          "인구",
+          "population"
+        ],
+        [
+          "시민",
+          "citizen"
+        ],
+        [
+          "정부",
+          "government"
+        ],
+        [
+          "선거",
+          "election"
+        ]
+      ]
+    },
+    {
+      "category": "Economy & Money Matters",
+      "level": "Level 5",
+      "words": [
+        [
+          "경제",
+          "economy"
+        ],
+        [
+          "소비",
+          "consumption"
+        ],
+        [
+          "소비자",
+          "consumer"
+        ],
+        [
+          "생산",
+          "production"
+        ],
+        [
+          "무역",
+          "trade"
+        ],
+        [
+          "수출",
+          "export"
+        ],
+        [
+          "투자",
+          "investment"
+        ],
+        [
+          "저축",
+          "saving (money)"
+        ],
+        [
+          "이자",
+          "interest (on money)"
+        ],
+        [
+          "세금",
+          "tax"
+        ],
+        [
+          "예산",
+          "budget"
+        ],
+        [
+          "물가",
+          "cost of living / prices"
+        ],
+        [
+          "수입",
+          "income"
+        ],
+        [
+          "지출",
+          "expenditure"
+        ],
+        [
+          "부자",
+          "a rich person"
+        ],
+        [
+          "자산",
+          "assets"
+        ],
+        [
+          "이익",
+          "profit / benefit"
+        ],
+        [
+          "손해",
+          "loss / damage"
+        ]
+      ]
+    },
+    {
+      "category": "Environment & Science",
+      "level": "Level 5",
+      "words": [
+        [
+          "환경",
+          "environment"
+        ],
+        [
+          "오염",
+          "pollution"
+        ],
+        [
+          "공해",
+          "environmental pollution"
+        ],
+        [
+          "쓰레기",
+          "trash / garbage"
+        ],
+        [
+          "재활용",
+          "recycling"
+        ],
+        [
+          "에너지",
+          "energy"
+        ],
+        [
+          "자원",
+          "resources"
+        ],
+        [
+          "지구",
+          "the Earth"
+        ],
+        [
+          "기후",
+          "climate"
+        ],
+        [
+          "온난화",
+          "(global) warming"
+        ],
+        [
+          "보호",
+          "protection"
+        ],
+        [
+          "실험",
+          "experiment"
+        ],
+        [
+          "연구",
+          "research"
+        ],
+        [
+          "과학",
+          "science"
+        ],
+        [
+          "과학자",
+          "scientist"
+        ],
+        [
+          "발견",
+          "discovery"
+        ],
+        [
+          "우주",
+          "space / the universe"
+        ],
+        [
+          "생물",
+          "living organism"
+        ]
+      ]
+    },
+    {
+      "category": "Abstract & Academic Nouns",
+      "level": "Level 5",
+      "words": [
+        [
+          "생각",
+          "thought / idea"
+        ],
+        [
+          "마음",
+          "mind / heart"
+        ],
+        [
+          "사실",
+          "fact"
+        ],
+        [
+          "이유",
+          "reason"
+        ],
+        [
+          "결과",
+          "result"
+        ],
+        [
+          "원인",
+          "cause"
+        ],
+        [
+          "목적",
+          "purpose"
+        ],
+        [
+          "방법",
+          "method / way"
+        ],
+        [
+          "과정",
+          "process"
+        ],
+        [
+          "관계",
+          "relationship"
+        ],
+        [
+          "차이",
+          "difference"
+        ],
+        [
+          "변화",
+          "change"
+        ],
+        [
+          "발전",
+          "development / progress"
+        ],
+        [
+          "영향",
+          "influence / effect"
+        ],
+        [
+          "능력",
+          "ability"
+        ],
+        [
+          "태도",
+          "attitude"
+        ],
+        [
+          "경험",
+          "experience"
+        ],
+        [
+          "기회",
+          "opportunity"
+        ],
+        [
+          "습관",
+          "habit"
+        ],
+        [
+          "노력",
+          "effort"
+        ],
+        [
+          "성공",
+          "success"
+        ],
+        [
+          "실패",
+          "failure"
+        ],
+        [
+          "기억",
+          "memory"
+        ]
+      ]
+    },
+    {
+      "category": "Verbs for Thinking & Opinions",
+      "level": "Level 4",
+      "words": [
+        [
+          "생각하다",
+          "to think"
+        ],
+        [
+          "믿다",
+          "to believe"
+        ],
+        [
+          "느끼다",
+          "to feel"
+        ],
+        [
+          "이해하다",
+          "to understand"
+        ],
+        [
+          "기억하다",
+          "to remember"
+        ],
+        [
+          "잊다",
+          "to forget"
+        ],
+        [
+          "결정하다",
+          "to decide"
+        ],
+        [
+          "선택하다",
+          "to choose"
+        ],
+        [
+          "설명하다",
+          "to explain"
+        ],
+        [
+          "표현하다",
+          "to express"
+        ],
+        [
+          "주장하다",
+          "to argue / assert"
+        ],
+        [
+          "인정하다",
+          "to acknowledge / admit"
+        ],
+        [
+          "반대하다",
+          "to oppose"
+        ],
+        [
+          "찬성하다",
+          "to agree / approve"
+        ],
+        [
+          "비교하다",
+          "to compare"
+        ],
+        [
+          "판단하다",
+          "to judge"
+        ],
+        [
+          "계획하다",
+          "to plan"
+        ],
+        [
+          "상상하다",
+          "to imagine"
+        ],
+        [
+          "후회하다",
+          "to regret"
+        ],
+        [
+          "기대하다",
+          "to expect / look forward to"
+        ]
+      ]
+    },
+    {
+      "category": "Connectives & Discourse Adverbs",
+      "level": "Level 3",
+      "words": [
+        [
+          "그리고",
+          "and"
+        ],
+        [
+          "그러나",
+          "however / but"
+        ],
+        [
+          "하지만",
+          "but"
+        ],
+        [
+          "그런데",
+          "by the way / but"
+        ],
+        [
+          "그래서",
+          "so / therefore"
+        ],
+        [
+          "그러니까",
+          "so / that's why"
+        ],
+        [
+          "그러면",
+          "then / if so"
+        ],
+        [
+          "따라서",
+          "therefore"
+        ],
+        [
+          "왜냐하면",
+          "because"
+        ],
+        [
+          "그래도",
+          "even so / still"
+        ],
+        [
+          "또는",
+          "or"
+        ],
+        [
+          "또한",
+          "also / moreover"
+        ],
+        [
+          "게다가",
+          "on top of that / besides"
+        ],
+        [
+          "즉",
+          "that is / in other words"
+        ],
+        [
+          "예를 들어",
+          "for example"
+        ],
+        [
+          "반면에",
+          "on the other hand"
+        ],
+        [
+          "결국",
+          "in the end / after all"
+        ],
+        [
+          "오히려",
+          "rather / on the contrary"
+        ],
+        [
+          "물론",
+          "of course"
+        ],
+        [
+          "특히",
+          "especially"
+        ],
+        [
+          "만약",
+          "if (by any chance)"
+        ]
+      ]
+    },
+    {
+      "category": "Personal Information",
+      "level": "Level 1",
+      "words": [
+        [
+          "이름",
+          "name"
+        ],
+        [
+          "나이",
+          "age"
+        ],
+        [
+          "생일",
+          "birthday"
+        ],
+        [
+          "주소",
+          "address"
+        ],
+        [
+          "전화번호",
+          "phone number"
+        ],
+        [
+          "국적",
+          "nationality"
+        ],
+        [
+          "성별",
+          "gender"
+        ],
+        [
+          "신분증",
+          "ID card"
+        ],
+        [
+          "서명",
+          "signature"
+        ],
+        [
+          "사인",
+          "signature / autograph"
+        ]
+      ]
+    },
+    {
+      "category": "Feelings & Inner Life",
+      "level": "Level 3",
+      "words": [
+        [
+          "감정",
+          "emotion / feeling"
+        ],
+        [
+          "느낌",
+          "feeling / impression"
+        ],
+        [
+          "기분",
+          "mood"
+        ],
+        [
+          "사랑",
+          "love"
+        ],
+        [
+          "행복",
+          "happiness"
+        ],
+        [
+          "슬픔",
+          "sadness"
+        ],
+        [
+          "기쁨",
+          "joy"
+        ],
+        [
+          "추억",
+          "memory (fond)"
+        ],
+        [
+          "고민",
+          "worry / concern"
+        ],
+        [
+          "희망",
+          "hope"
+        ],
+        [
+          "꿈",
+          "dream"
+        ],
+        [
+          "스트레스",
+          "stress"
+        ],
+        [
+          "자신감",
+          "self-confidence"
+        ],
+        [
+          "용기",
+          "courage"
+        ],
+        [
+          "자유",
+          "freedom"
+        ],
+        [
+          "평화",
+          "peace"
+        ]
+      ]
+    },
+    {
+      "category": "Household Items",
+      "level": "Level 1",
+      "words": [
+        [
+          "컵",
+          "cup"
+        ],
+        [
+          "병",
+          "bottle"
+        ],
+        [
+          "수건",
+          "towel"
+        ],
+        [
+          "비누",
+          "soap"
+        ],
+        [
+          "칫솔",
+          "toothbrush"
+        ],
+        [
+          "치약",
+          "toothpaste"
+        ],
+        [
+          "휴지",
+          "tissue / toilet paper"
+        ],
+        [
+          "봉투",
+          "envelope / bag"
+        ],
+        [
+          "상자",
+          "box"
+        ],
+        [
+          "바구니",
+          "basket"
+        ],
+        [
+          "가위",
+          "scissors"
+        ],
+        [
+          "끈",
+          "string / strap"
+        ],
+        [
+          "자물쇠",
+          "padlock"
+        ],
+        [
+          "손잡이",
+          "handle / knob"
+        ],
+        [
+          "초인종",
+          "doorbell"
+        ],
+        [
+          "냄비",
+          "pot"
+        ],
+        [
+          "빗",
+          "comb"
+        ],
+        [
+          "쓰레기통",
+          "trash can"
+        ]
+      ]
+    },
+    {
+      "category": "Accessories & Belongings",
+      "level": "Level 2",
+      "words": [
+        [
+          "반지",
+          "ring"
+        ],
+        [
+          "목걸이",
+          "necklace"
+        ],
+        [
+          "귀걸이",
+          "earring"
+        ],
+        [
+          "벨트",
+          "belt"
+        ],
+        [
+          "장갑",
+          "gloves"
+        ],
+        [
+          "목도리",
+          "scarf / muffler"
+        ],
+        [
+          "손수건",
+          "handkerchief"
+        ],
+        [
+          "손목시계",
+          "wristwatch"
+        ],
+        [
+          "열쇠고리",
+          "keychain"
+        ],
+        [
+          "우산",
+          "umbrella"
+        ]
+      ]
+    },
+    {
+      "category": "The Body (More)",
+      "level": "Level 2",
+      "words": [
+        [
+          "머리카락",
+          "hair (strand)"
+        ],
+        [
+          "피부",
+          "skin"
+        ],
+        [
+          "뼈",
+          "bone"
+        ],
+        [
+          "피",
+          "blood"
+        ],
+        [
+          "심장",
+          "heart (organ)"
+        ],
+        [
+          "무릎",
+          "knee"
+        ],
+        [
+          "허리",
+          "waist / lower back"
+        ],
+        [
+          "이마",
+          "forehead"
+        ],
+        [
+          "볼",
+          "cheek"
+        ],
+        [
+          "턱",
+          "chin / jaw"
+        ],
+        [
+          "입술",
+          "lips"
+        ],
+        [
+          "혀",
+          "tongue"
+        ]
+      ]
+    },
+    {
+      "category": "City & Traffic",
+      "level": "Level 2",
+      "words": [
+        [
+          "교통",
+          "traffic / transportation"
+        ],
+        [
+          "신호등",
+          "traffic light"
+        ],
+        [
+          "횡단보도",
+          "crosswalk"
+        ],
+        [
+          "주유소",
+          "gas station"
+        ],
+        [
+          "지하",
+          "underground / basement"
+        ],
+        [
+          "건물",
+          "building"
+        ],
+        [
+          "엘리베이터",
+          "elevator"
+        ],
+        [
+          "계단",
+          "stairs"
+        ],
+        [
+          "골목",
+          "alley"
+        ],
+        [
+          "사거리",
+          "intersection"
+        ],
+        [
+          "육교",
+          "pedestrian overpass"
+        ],
+        [
+          "표지판",
+          "signboard / road sign"
+        ]
+      ]
+    },
+    {
+      "category": "Reading & Writing",
+      "level": "Level 2",
+      "words": [
+        [
+          "숫자",
+          "number / figure"
+        ],
+        [
+          "글자",
+          "letter / character"
+        ],
+        [
+          "단어",
+          "word"
+        ],
+        [
+          "낱말",
+          "word / vocabulary item"
+        ],
+        [
+          "문장",
+          "sentence"
+        ],
+        [
+          "이야기",
+          "story"
+        ],
+        [
+          "제목",
+          "title"
+        ],
+        [
+          "내용",
+          "content"
+        ],
+        [
+          "소설",
+          "novel"
+        ],
+        [
+          "시",
+          "poem"
+        ],
+        [
+          "만화",
+          "comic / cartoon"
+        ],
+        [
+          "글",
+          "writing / text"
+        ]
+      ]
+    },
+    {
+      "category": "Food (More)",
+      "level": "Level 2",
+      "words": [
+        [
+          "국",
+          "soup"
+        ],
+        [
+          "찌개",
+          "stew"
+        ],
+        [
+          "반찬",
+          "side dish"
+        ],
+        [
+          "간식",
+          "snack"
+        ],
+        [
+          "후식",
+          "dessert"
+        ],
+        [
+          "국물",
+          "broth"
+        ],
+        [
+          "양념",
+          "seasoning"
+        ],
+        [
+          "재료",
+          "ingredient"
+        ],
+        [
+          "밀가루",
+          "flour"
+        ],
+        [
+          "기름",
+          "oil"
+        ],
+        [
+          "간장",
+          "soy sauce"
+        ],
+        [
+          "고추장",
+          "red pepper paste"
+        ]
+      ]
+    },
+    {
+      "category": "Weather (More)",
+      "level": "Level 2",
+      "words": [
+        [
+          "장마",
+          "the rainy season"
+        ],
+        [
+          "태풍",
+          "typhoon"
+        ],
+        [
+          "안개",
+          "fog"
+        ],
+        [
+          "무지개",
+          "rainbow"
+        ],
+        [
+          "얼음",
+          "ice"
+        ],
+        [
+          "기온",
+          "air temperature"
+        ],
+        [
+          "소나기",
+          "sudden shower"
+        ],
+        [
+          "천둥",
+          "thunder"
+        ],
+        [
+          "번개",
+          "lightning"
+        ],
+        [
+          "황사",
+          "yellow dust"
+        ],
+        [
+          "습도",
+          "humidity"
+        ],
+        [
+          "일기예보",
+          "weather forecast"
+        ]
+      ]
+    },
+    {
+      "category": "More Time Words",
+      "level": "Level 1",
+      "words": [
+        [
+          "새벽",
+          "dawn / early morning"
+        ],
+        [
+          "정오",
+          "noon"
+        ],
+        [
+          "자정",
+          "midnight"
+        ],
+        [
+          "하루",
+          "one day"
+        ],
+        [
+          "이틀",
+          "two days"
+        ],
+        [
+          "평일",
+          "weekday"
+        ],
+        [
+          "며칠",
+          "a few days / which day"
+        ],
+        [
+          "지난주",
+          "last week"
+        ],
+        [
+          "올해",
+          "this year"
+        ],
+        [
+          "작년",
+          "last year"
+        ],
+        [
+          "내년",
+          "next year"
+        ],
+        [
+          "최근",
+          "recently / lately"
+        ]
+      ]
+    },
+    {
+      "category": "Plans & Occasions",
+      "level": "Level 2",
+      "words": [
+        [
+          "선물",
+          "gift"
+        ],
+        [
+          "약속",
+          "promise / appointment"
+        ],
+        [
+          "계획",
+          "plan"
+        ],
+        [
+          "휴가",
+          "vacation / leave"
+        ],
+        [
+          "일기",
+          "diary"
+        ],
+        [
+          "파티",
+          "party"
+        ],
+        [
+          "모임",
+          "gathering / meeting"
+        ],
+        [
+          "명절",
+          "traditional holiday"
+        ],
+        [
+          "방문",
+          "visit"
+        ],
+        [
+          "초대",
+          "invitation"
+        ],
+        [
+          "준비물",
+          "things to prepare / supplies"
+        ]
+      ]
+    },
+    {
+      "category": "Position & Quantity",
+      "level": "Level 2",
+      "words": [
+        [
+          "가운데",
+          "the middle / center"
+        ],
+        [
+          "구석",
+          "corner"
+        ],
+        [
+          "바깥",
+          "the outside"
+        ],
+        [
+          "실내",
+          "indoors"
+        ],
+        [
+          "실외",
+          "outdoors"
+        ],
+        [
+          "전체",
+          "the whole"
+        ],
+        [
+          "부분",
+          "part"
+        ],
+        [
+          "절반",
+          "half"
+        ],
+        [
+          "대부분",
+          "most / the majority"
+        ],
+        [
+          "각각",
+          "each / respectively"
+        ],
+        [
+          "여럿",
+          "several / many (people)"
+        ]
+      ]
+    },
+    {
+      "category": "Social Expressions & Actions",
+      "level": "Level 3",
+      "words": [
+        [
+          "인사",
+          "greeting"
+        ],
+        [
+          "부탁",
+          "a request / favor"
+        ],
+        [
+          "칭찬",
+          "praise / compliment"
+        ],
+        [
+          "거짓말",
+          "a lie"
+        ],
+        [
+          "비밀",
+          "secret"
+        ],
+        [
+          "소원",
+          "a wish"
+        ],
+        [
+          "농담",
+          "joke"
+        ],
+        [
+          "소문",
+          "rumor"
+        ],
+        [
+          "약점",
+          "weakness / weak point"
+        ],
+        [
+          "장점",
+          "strength / good point"
+        ],
+        [
+          "단점",
+          "shortcoming / drawback"
+        ]
+      ]
+    }
+  ],
+  "grammar": [
+    {
+      "category": "Sentence Endings & Tense",
+      "level": "Level 1",
+      "patterns": [
+        {
+          "p": "-습니다 / -ㅂ니다",
+          "m": "formal polite present statement",
+          "form": "Add -습니다 to a stem ending in a consonant, -ㅂ니다 to a stem ending in a vowel (먹다 → 먹습니다, 가다 → 갑니다).",
+          "exp": "This is the most formal, polite way to make a statement. You'll see it everywhere in TOPIK reading passages, announcements, and news. It sounds respectful and a little stiff, which is exactly why it's used in writing and formal speech.",
+          "ex": [
+            [
+              "저는 학생입니다.",
+              "I am a student."
+            ],
+            [
+              "매일 아침 운동합니다.",
+              "I exercise every morning."
+            ]
+          ]
+        },
+        {
+          "p": "-습니까? / -ㅂ니까?",
+          "m": "formal polite question",
+          "form": "The question form of -습니다: -습니까? after a consonant, -ㅂ니까? after a vowel.",
+          "exp": "Use this to ask a question politely and formally. It is simply the question version of -습니다 — the meaning is the same, only the sentence becomes a question.",
+          "ex": [
+            [
+              "어디에 갑니까?",
+              "Where are you going?"
+            ],
+            [
+              "이름이 무엇입니까?",
+              "What is your name?"
+            ]
+          ]
+        },
+        {
+          "p": "-아요 / -어요",
+          "m": "informal polite ending",
+          "form": "Add -아요 if the last stem vowel is ㅏ or ㅗ, otherwise -어요 (하다 verbs become -해요).",
+          "exp": "This is the everyday polite ending used in conversation, messages, and friendly writing. It is polite but warmer and less stiff than -습니다. The same form works for statements, questions, and suggestions — only the intonation changes.",
+          "ex": [
+            [
+              "지금 밥을 먹어요.",
+              "I'm eating now."
+            ],
+            [
+              "학교에 가요.",
+              "I go to school."
+            ]
+          ]
+        },
+        {
+          "p": "-았- / -었-",
+          "m": "past tense marker",
+          "form": "Insert -았- (after ㅏ/ㅗ) or -었- (otherwise) before the ending: 가다 → 갔어요, 먹다 → 먹었어요.",
+          "exp": "This marks that something already happened. It goes right before the polite ending. Once you can spot -았/었-, you can instantly tell a sentence is about the past.",
+          "ex": [
+            [
+              "어제 영화를 봤어요.",
+              "I watched a movie yesterday."
+            ],
+            [
+              "점심을 먹었습니다.",
+              "I ate lunch."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㄹ 거예요",
+          "m": "future / probability: 'will ~'",
+          "form": "Add -을 거예요 after a consonant, -ㄹ 거예요 after a vowel.",
+          "exp": "Use this to talk about the future or to guess about something. With 'I' it usually means a plan ('I will ~'); with other people it often means a guess ('probably ~').",
+          "ex": [
+            [
+              "내일 친구를 만날 거예요.",
+              "I will meet a friend tomorrow."
+            ],
+            [
+              "곧 비가 올 거예요.",
+              "It will probably rain soon."
+            ]
+          ]
+        },
+        {
+          "p": "-지 않다",
+          "m": "long-form negative: 'do not ~'",
+          "form": "Attach -지 않다 to the verb/adjective stem: 가다 → 가지 않아요.",
+          "exp": "This makes a sentence negative. It has the same meaning as putting 안 before the verb, but this 'long form' sounds a little more formal and is common in writing.",
+          "ex": [
+            [
+              "저는 커피를 마시지 않아요.",
+              "I don't drink coffee."
+            ],
+            [
+              "오늘은 춥지 않습니다.",
+              "It isn't cold today."
+            ]
+          ]
+        },
+        {
+          "p": "안 + 동사",
+          "m": "short-form negative",
+          "form": "Simply put 안 right before the verb or adjective: 안 가요, 안 비싸요. For 하다 verbs, split them: 공부 안 해요.",
+          "exp": "This is the quick, everyday way to make something negative. It means the same as -지 않다 but is shorter and more common in speech.",
+          "ex": [
+            [
+              "오늘은 안 바빠요.",
+              "I'm not busy today."
+            ],
+            [
+              "그 사람은 안 왔어요.",
+              "That person didn't come."
+            ]
+          ]
+        },
+        {
+          "p": "못 + 동사",
+          "m": "'cannot ~' (inability)",
+          "form": "Put 못 before the verb: 못 가요, 못 먹어요. For 하다 verbs: 운동 못 해요.",
+          "exp": "This says you are unable to do something — because of a lack of ability, permission, or circumstances. It is different from 안 (which means you simply don't/won't): 못 means you can't even if you wanted to.",
+          "ex": [
+            [
+              "너무 매워서 못 먹어요.",
+              "It's too spicy, so I can't eat it."
+            ],
+            [
+              "바빠서 못 갔어요.",
+              "I was busy, so I couldn't go."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)세요",
+          "m": "polite command or request",
+          "form": "Add -으세요 after a consonant, -세요 after a vowel: 앉다 → 앉으세요, 가다 → 가세요.",
+          "exp": "Use this to politely tell or ask someone to do something. It is friendly and respectful — the normal way to give instructions to customers, guests, or anyone you're being polite to.",
+          "ex": [
+            [
+              "여기 앉으세요.",
+              "Please sit here."
+            ],
+            [
+              "안녕히 가세요.",
+              "Goodbye (please go well)."
+            ]
+          ]
+        },
+        {
+          "p": "-고 있다",
+          "m": "present progressive: 'is ~ing'",
+          "form": "Attach -고 있다 to the verb stem: 읽다 → 읽고 있어요.",
+          "exp": "This says an action is happening right now, in progress. It matches the English '-ing'. Use it for actions you're in the middle of.",
+          "ex": [
+            [
+              "지금 책을 읽고 있어요.",
+              "I'm reading a book right now."
+            ],
+            [
+              "동생이 자고 있어요.",
+              "My younger sibling is sleeping."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Connecting Clauses",
+      "level": "Level 2",
+      "patterns": [
+        {
+          "p": "-고",
+          "m": "'and (then)' — lists actions in order",
+          "form": "Attach -고 to the first verb/adjective stem: 먹다 → 먹고.",
+          "exp": "Use -고 to join two actions or facts in one sentence. It simply lists them, often in time order ('do A and then B'). It does not carry any cause or contrast — just 'and'.",
+          "ex": [
+            [
+              "아침을 먹고 학교에 가요.",
+              "I eat breakfast and then go to school."
+            ],
+            [
+              "이 옷은 싸고 예뻐요.",
+              "These clothes are cheap and pretty."
+            ]
+          ]
+        },
+        {
+          "p": "-아서 / -어서",
+          "m": "'because / and then'",
+          "form": "Same vowel rule as -아요/어요: 아프다 → 아파서, 먹다 → 먹어서.",
+          "exp": "This links two clauses where the first is the reason or the first step leading into the second. It's one of the most common ways to say 'because' in Korean. The two clauses are closely connected in meaning.",
+          "ex": [
+            [
+              "배가 아파서 병원에 갔어요.",
+              "My stomach hurt, so I went to the hospital."
+            ],
+            [
+              "시간이 없어서 택시를 탔어요.",
+              "I had no time, so I took a taxi."
+            ]
+          ],
+          "note": "Never add a past-tense -았/었- before -아서/어서. Say 아파서, not 아팠어서."
+        },
+        {
+          "p": "-지만",
+          "m": "'but / although'",
+          "form": "Attach -지만 to the stem: 비싸다 → 비싸지만.",
+          "exp": "Use -지만 to contrast two ideas inside one sentence — the second clause goes against what you'd expect from the first. It's the basic word for 'but'.",
+          "ex": [
+            [
+              "비싸지만 아주 맛있어요.",
+              "It's expensive, but very delicious."
+            ],
+            [
+              "열심히 공부했지만 시험을 못 봤어요.",
+              "I studied hard, but I did poorly on the exam."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)면",
+          "m": "'if / when'",
+          "form": "Add -으면 after a consonant, -면 after a vowel: 있다 → 있으면, 가다 → 가면.",
+          "exp": "This sets up a condition: 'if/when the first thing happens, then the second.' It's used both for real conditions and for things that happen regularly.",
+          "ex": [
+            [
+              "시간이 있으면 같이 만나요.",
+              "If you have time, let's meet."
+            ],
+            [
+              "봄이 되면 꽃이 펴요.",
+              "When spring comes, the flowers bloom."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)러",
+          "m": "'in order to' (with 가다/오다)",
+          "form": "Add -으러 after a consonant, -러 after a vowel, then a movement verb: 먹으러 가다, 사러 오다.",
+          "exp": "Use this to say you go or come somewhere for a purpose. It only works with movement verbs like 가다 (go), 오다 (come), 다니다 (attend). The -(으)러 part states the goal.",
+          "ex": [
+            [
+              "밥을 먹으러 식당에 가요.",
+              "I'm going to a restaurant to eat."
+            ],
+            [
+              "친구를 만나러 왔어요.",
+              "I came to meet a friend."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)니까",
+          "m": "'because / since'",
+          "form": "Add -으니까 after a consonant, -니까 after a vowel: 있다 → 있으니까.",
+          "exp": "This is another way to say 'because', but it's the natural choice when the second clause is a suggestion, a request, or a command. Compare: use -아서/어서 for plain reasons, and -(으)니까 when you're telling someone to do something.",
+          "ex": [
+            [
+              "위험하니까 조심하세요.",
+              "It's dangerous, so please be careful."
+            ],
+            [
+              "비가 오니까 우산을 가져가세요.",
+              "It's raining, so take an umbrella."
+            ]
+          ]
+        },
+        {
+          "p": "-는데 / -(으)ㄴ데",
+          "m": "background / soft contrast",
+          "form": "Verbs take -는데; adjectives take -(으)ㄴ데 (좋다 → 좋은데). Past tense: -았/었는데.",
+          "exp": "This is a very common connector that sets the scene for what comes next. It can mean 'and', a gentle 'but', or just background information ('I was doing X, when Y'). The exact shade depends on context, so read the whole sentence.",
+          "ex": [
+            [
+              "밥을 먹는데 전화가 왔어요.",
+              "I was eating when the phone rang."
+            ],
+            [
+              "이 식당은 좋은데 좀 비싸요.",
+              "This restaurant is good, but a bit expensive."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)면서",
+          "m": "'while ~ing' (same subject)",
+          "form": "Add -으면서 after a consonant, -면서 after a vowel: 듣다 → 들으면서.",
+          "exp": "Use this when one person does two things at the same time. Both actions must have the same subject.",
+          "ex": [
+            [
+              "음악을 들으면서 공부해요.",
+              "I study while listening to music."
+            ],
+            [
+              "웃으면서 이야기했어요.",
+              "She talked while smiling."
+            ]
+          ]
+        },
+        {
+          "p": "-거나",
+          "m": "'or' (between actions)",
+          "form": "Attach -거나 to each verb stem: 자거나 읽거나.",
+          "exp": "Use -거나 to give a choice between two or more actions ('do A or B'). For choosing between nouns, use -(이)나 instead.",
+          "ex": [
+            [
+              "주말에는 자거나 책을 읽어요.",
+              "On weekends I sleep or read."
+            ],
+            [
+              "버스를 타거나 걸어서 가요.",
+              "I take the bus or walk."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)려고",
+          "m": "'intending to ~'",
+          "form": "Add -으려고 after a consonant, -려고 after a vowel: 사려고, 먹으려고.",
+          "exp": "This states the aim behind an action ('in order to ~'). Unlike -(으)러, it works with any verb, not just movement verbs. It's often followed by what you did to achieve that aim.",
+          "ex": [
+            [
+              "표를 사려고 줄을 섰어요.",
+              "I stood in line to buy a ticket."
+            ],
+            [
+              "살을 빼려고 매일 운동해요.",
+              "I exercise every day to lose weight."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Modifiers & Noun Forms",
+      "level": "Level 2",
+      "patterns": [
+        {
+          "p": "-(으)ㄴ + 명사",
+          "m": "past-tense adjective clause",
+          "form": "Add -은 (consonant) or -ㄴ (vowel) to a verb stem, then the noun: 산 책, 먹은 밥.",
+          "exp": "Korean puts descriptions before the noun, like a mini-sentence. This form describes a noun using a past action — 'the ~ that (someone) did'. English uses a relative clause ('the book I bought').",
+          "ex": [
+            [
+              "어제 산 책이 재미있어요.",
+              "The book I bought yesterday is interesting."
+            ],
+            [
+              "제가 만든 음식이에요.",
+              "It's the food that I made."
+            ]
+          ]
+        },
+        {
+          "p": "-는 + 명사",
+          "m": "present-tense adjective clause",
+          "form": "Add -는 to a verb stem, then the noun: 읽는 책, 먹는 사람.",
+          "exp": "This describes a noun using an action happening now or in general — 'the ~ that (someone) is doing / does'. Only action verbs use -는; descriptive verbs (adjectives) use -(으)ㄴ instead.",
+          "ex": [
+            [
+              "지금 읽는 책이 어려워요.",
+              "The book I'm reading now is difficult."
+            ],
+            [
+              "저기 오는 사람이 제 친구예요.",
+              "The person coming over there is my friend."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㄹ + 명사",
+          "m": "future / prospective adjective clause",
+          "form": "Add -을 (consonant) or -ㄹ (vowel) to a verb stem, then the noun: 만날 사람, 먹을 것.",
+          "exp": "This describes a noun using something not yet done — 'the ~ that (someone) will do / to do'. It's very common in phrases like 할 일 (things to do) and 먹을 것 (something to eat).",
+          "ex": [
+            [
+              "내일 만날 사람이 누구예요?",
+              "Who is the person you'll meet tomorrow?"
+            ],
+            [
+              "먹을 것 좀 주세요.",
+              "Please give me something to eat."
+            ]
+          ]
+        },
+        {
+          "p": "-기",
+          "m": "nominalizer (verb → noun)",
+          "form": "Add -기 to the verb/adjective stem: 수영하다 → 수영하기.",
+          "exp": "This turns an action into a noun, like adding '-ing' or 'to ~' in English. It's used with many set expressions (-기 쉽다 'easy to', -기 시작하다 'begin to') and to talk about activities.",
+          "ex": [
+            [
+              "수영하기가 생각보다 어려워요.",
+              "Swimming is harder than I thought."
+            ],
+            [
+              "저는 아침에 일찍 일어나기가 힘들어요.",
+              "Getting up early in the morning is hard for me."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㅁ",
+          "m": "nominalizer (formal / written)",
+          "form": "Add -음 after a consonant, -ㅁ after a vowel: 있다 → 있음, 크다 → 큼.",
+          "exp": "This also turns a verb or adjective into a noun, but it's the formal, written-style version. You'll see it in notices, reports, and note-taking to state a fact concisely.",
+          "ex": [
+            [
+              "회의가 취소되었음을 알려 드립니다.",
+              "We inform you that the meeting has been cancelled."
+            ],
+            [
+              "박물관은 월요일에 쉼.",
+              "The museum is closed on Mondays. (notice style)"
+            ]
+          ]
+        },
+        {
+          "p": "-는 것",
+          "m": "'the act / fact of ~ing'",
+          "form": "Add -는 것 to a verb stem; it can shorten to -는 게 (subject) or -는 걸 (object) in speech.",
+          "exp": "This turns a whole action into a noun phrase so you can talk about it — 'reading', 'the fact that ~'. It's extremely common, especially with 좋아하다/싫어하다 (like/dislike doing something).",
+          "ex": [
+            [
+              "저는 요리하는 것을 좋아해요.",
+              "I like cooking."
+            ],
+            [
+              "매일 운동하는 것이 건강에 좋아요.",
+              "Exercising every day is good for your health."
+            ]
+          ]
+        },
+        {
+          "p": "-기 전에",
+          "m": "'before ~ing'",
+          "form": "Add -기 전에 to the verb stem: 자다 → 자기 전에. With a noun, use 전에 (식사 전에).",
+          "exp": "This says one action happens before another. The verb before -기 전에 stays in dictionary form — you do not mark tense on it.",
+          "ex": [
+            [
+              "자기 전에 이를 닦아요.",
+              "I brush my teeth before sleeping."
+            ],
+            [
+              "밥을 먹기 전에 손을 씻으세요.",
+              "Wash your hands before eating."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㄴ 후에",
+          "m": "'after ~ing'",
+          "form": "Add -은 후에 (consonant) or -ㄴ 후에 (vowel): 먹은 후에. 후 can be replaced by 다음 or 뒤.",
+          "exp": "This says one action happens after another finishes. The verb takes the past-modifier form -(으)ㄴ even though the whole sentence may be present or future.",
+          "ex": [
+            [
+              "밥을 먹은 후에 산책해요.",
+              "After eating, I take a walk."
+            ],
+            [
+              "수업이 끝난 후에 만나요.",
+              "Let's meet after class ends."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㄹ 때",
+          "m": "'when / at the time of ~'",
+          "form": "Add -을 때 (consonant) or -ㄹ 때 (vowel): 먹을 때. For a past 'when', use -았/었을 때.",
+          "exp": "This marks the time when something happens ('when ~'). Use -(으)ㄹ 때 for general or present time, and -았/었을 때 for a specific past moment.",
+          "ex": [
+            [
+              "어릴 때 시골에 살았어요.",
+              "When I was young, I lived in the countryside."
+            ],
+            [
+              "집에 갈 때 전화하세요.",
+              "Call me when you go home."
+            ]
+          ]
+        },
+        {
+          "p": "-는 동안",
+          "m": "'while / during ~'",
+          "form": "Add -는 동안 to a verb stem. With a noun, use 동안 (방학 동안).",
+          "exp": "This describes a stretch of time during which something else happens. The two actions can have different subjects, unlike -(으)면서.",
+          "ex": [
+            [
+              "제가 자는 동안 비가 왔어요.",
+              "It rained while I was sleeping."
+            ],
+            [
+              "방학 동안 여행을 갔어요.",
+              "I traveled during the vacation."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Ability, Obligation & Desire",
+      "level": "Level 2",
+      "patterns": [
+        {
+          "p": "-(으)ㄹ 수 있다 / 없다",
+          "m": "'can / cannot'",
+          "form": "Add -을 수 있다/없다 (consonant) or -ㄹ 수 있다/없다 (vowel): 갈 수 있어요, 먹을 수 없어요.",
+          "exp": "This expresses ability or possibility. 있다 means you can, 없다 means you can't. It covers both 'I know how to' and 'it is possible to'.",
+          "ex": [
+            [
+              "저는 한국어를 조금 할 수 있어요.",
+              "I can speak a little Korean."
+            ],
+            [
+              "오늘은 갈 수 없어요.",
+              "I can't go today."
+            ]
+          ]
+        },
+        {
+          "p": "-아야 / -어야 하다",
+          "m": "'must / have to ~'",
+          "form": "Same vowel rule as -아요/어요, plus 하다 (or 되다): 가야 해요, 먹어야 해요.",
+          "exp": "This says something is necessary or required — you have to do it. 하다 and 되다 are interchangeable here.",
+          "ex": [
+            [
+              "지금 바로 가야 해요.",
+              "I have to go right now."
+            ],
+            [
+              "약을 매일 먹어야 돼요.",
+              "You must take the medicine every day."
+            ]
+          ]
+        },
+        {
+          "p": "-아도 / -어도 되다",
+          "m": "'may ~ / it's okay to ~'",
+          "form": "Same vowel rule plus 되다: 앉아도 돼요, 먹어도 돼요.",
+          "exp": "This grants or asks permission ('you may ~', 'is it okay to ~?'). Add a question mark and rising tone to ask for permission.",
+          "ex": [
+            [
+              "여기 앉아도 돼요?",
+              "May I sit here?"
+            ],
+            [
+              "사진을 찍어도 됩니다.",
+              "You may take photos."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)면 안 되다",
+          "m": "'must not / not allowed'",
+          "form": "Attach -(으)면 to the stem, then 안 되다: 피우면 안 돼요.",
+          "exp": "This is the opposite of -아도/어도 되다: it says something is forbidden or not allowed. Literally 'if you do ~, it won't do'.",
+          "ex": [
+            [
+              "여기에서 담배를 피우면 안 돼요.",
+              "You must not smoke here."
+            ],
+            [
+              "수업 시간에 자면 안 됩니다.",
+              "You must not sleep during class."
+            ]
+          ]
+        },
+        {
+          "p": "-고 싶다",
+          "m": "'want to ~'",
+          "form": "Attach -고 싶다 to the verb stem: 가고 싶어요.",
+          "exp": "This expresses your own desire to do something. It's one of the most useful beginner patterns.",
+          "ex": [
+            [
+              "빨리 집에 가고 싶어요.",
+              "I want to go home soon."
+            ],
+            [
+              "한국 음식을 먹고 싶어요.",
+              "I want to eat Korean food."
+            ]
+          ],
+          "note": "When talking about someone else's wish, use -고 싶어 하다: 동생이 자고 싶어 해요."
+        },
+        {
+          "p": "-(으)ㄹ 줄 알다 / 모르다",
+          "m": "'know / don't know how to ~'",
+          "form": "Add -을/ㄹ 줄 알다 (know how) or 모르다 (don't know how): 수영할 줄 알아요.",
+          "exp": "This is specifically about having (or not having) a learned skill — 'I know how to ~'. It's different from -(으)ㄹ 수 있다, which is about general possibility.",
+          "ex": [
+            [
+              "저는 수영할 줄 알아요.",
+              "I know how to swim."
+            ],
+            [
+              "운전할 줄 몰라요.",
+              "I don't know how to drive."
+            ]
+          ]
+        },
+        {
+          "p": "-기로 하다",
+          "m": "'decide to ~'",
+          "form": "Attach -기로 하다 to the verb stem; often used in the past: -기로 했어요.",
+          "exp": "This expresses a decision or agreement to do something. It's frequently used in the past tense to report a decision you've already made.",
+          "ex": [
+            [
+              "내일부터 운동하기로 했어요.",
+              "I decided to start exercising tomorrow."
+            ],
+            [
+              "친구와 저녁에 만나기로 했어요.",
+              "I arranged to meet my friend in the evening."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㄹ까요?",
+          "m": "'shall we? / I wonder'",
+          "form": "Add -을까요? (consonant) or -ㄹ까요? (vowel): 갈까요?, 먹을까요?",
+          "exp": "Use this to suggest doing something together ('shall we ~?') or to wonder aloud about something ('I wonder if ~'). With 'we', it invites the other person's opinion.",
+          "ex": [
+            [
+              "우리 같이 갈까요?",
+              "Shall we go together?"
+            ],
+            [
+              "내일 날씨가 좋을까요?",
+              "I wonder if the weather will be nice tomorrow."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㅂ시다",
+          "m": "'let's ~' (formal suggestion)",
+          "form": "Add -읍시다 (consonant) or -ㅂ시다 (vowel): 시작합시다.",
+          "exp": "This is a formal way to suggest doing something together ('let's ~'). It's common in announcements and among colleagues, but can sound too strong to elders, so be careful with who you use it on.",
+          "ex": [
+            [
+              "이제 회의를 시작합시다.",
+              "Let's start the meeting now."
+            ],
+            [
+              "다 같이 힘냅시다.",
+              "Let's all cheer up / do our best."
+            ]
+          ]
+        },
+        {
+          "p": "-아 / -어 보다",
+          "m": "'try ~ing'",
+          "form": "Same vowel rule plus 보다: 먹어 보다, 가 보다.",
+          "exp": "This means to try doing something, or to do it and see what happens. In the past tense (-아/어 봤다) it means 'I have (ever) done ~' — talking about experience.",
+          "ex": [
+            [
+              "이 음식을 한번 먹어 보세요.",
+              "Try eating this food."
+            ],
+            [
+              "제주도에 가 봤어요.",
+              "I've been to Jeju Island."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Intermediate Patterns",
+      "level": "Level 3",
+      "patterns": [
+        {
+          "p": "-느라고",
+          "m": "'because I was busy ~ing'",
+          "form": "Attach -느라고 to an action-verb stem: 하다 → 하느라고.",
+          "exp": "This explains a negative result caused by being occupied with something else — 'I was busy doing X, so I couldn't do Y'. The result is usually something that failed, was missed, or made you tired.",
+          "ex": [
+            [
+              "게임을 하느라고 숙제를 못 했어요.",
+              "I couldn't do my homework because I was busy playing games."
+            ],
+            [
+              "전화를 받느라고 못 들었어요.",
+              "I didn't hear it because I was answering the phone."
+            ]
+          ],
+          "note": "Both clauses must share the same subject, and you cannot put a past-tense marker on -느라고 itself."
+        },
+        {
+          "p": "-는 바람에",
+          "m": "'because of ~' (unexpected bad result)",
+          "form": "Attach -는 바람에 to an action-verb stem: 오다 → 오는 바람에.",
+          "exp": "This gives the cause of an unplanned, usually negative result. The first event is sudden or out of your control, and it messed something up.",
+          "ex": [
+            [
+              "갑자기 비가 오는 바람에 소풍이 취소됐어요.",
+              "The picnic was cancelled because it suddenly rained."
+            ],
+            [
+              "늦잠을 자는 바람에 지각했어요.",
+              "I was late because I overslept."
+            ]
+          ]
+        },
+        {
+          "p": "-더라도",
+          "m": "'even if / even though'",
+          "form": "Attach -더라도 to the stem: 힘들다 → 힘들더라도.",
+          "exp": "This is a strong 'even if'. It concedes an extreme or hypothetical situation and says the result still holds. It's stronger and more hypothetical than the everyday -아도/어도.",
+          "ex": [
+            [
+              "아무리 힘들더라도 포기하지 마세요.",
+              "No matter how hard it is, don't give up."
+            ],
+            [
+              "내일 눈이 오더라도 여행을 갈 거예요.",
+              "Even if it snows tomorrow, I'll still travel."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㄹ 뻔하다",
+          "m": "'almost / nearly did ~'",
+          "form": "Add -을/ㄹ 뻔하다, almost always in the past: -(으)ㄹ 뻔했다.",
+          "exp": "This describes something that very nearly happened but didn't — a close call. It's always about a narrowly avoided (usually bad) event.",
+          "ex": [
+            [
+              "길이 미끄러워서 넘어질 뻔했어요.",
+              "The road was slippery, so I almost fell."
+            ],
+            [
+              "차가 막혀서 비행기를 놓칠 뻔했어요.",
+              "There was traffic, so I almost missed the flight."
+            ]
+          ]
+        },
+        {
+          "p": "-자마자",
+          "m": "'as soon as ~'",
+          "form": "Attach -자마자 to the verb stem: 도착하다 → 도착하자마자.",
+          "exp": "This says the second action happens immediately after the first, with no gap. 'The moment I did X, Y happened.'",
+          "ex": [
+            [
+              "집에 도착하자마자 잠이 들었어요.",
+              "As soon as I got home, I fell asleep."
+            ],
+            [
+              "소식을 듣자마자 전화했어요.",
+              "I called as soon as I heard the news."
+            ]
+          ]
+        },
+        {
+          "p": "-는 대로",
+          "m": "'as soon as ~ / just as ~'",
+          "form": "With a verb: -는 대로 ('as soon as'). With a noun: 대로 ('according to').",
+          "exp": "After a verb, this means 'right after ~ happens' and is common in promises ('I'll contact you as soon as it's done'). It can also mean 'in accordance with' something.",
+          "ex": [
+            [
+              "일이 끝나는 대로 연락할게요.",
+              "I'll contact you as soon as the work is done."
+            ],
+            [
+              "말씀하신 대로 하겠습니다.",
+              "I'll do it just as you said."
+            ]
+          ]
+        },
+        {
+          "p": "-게 되다",
+          "m": "'come to ~ / end up ~ing'",
+          "form": "Attach -게 되다 to the verb stem: 살다 → 살게 되다.",
+          "exp": "This shows a change that happened because of circumstances, not entirely by your own choice — 'things turned out so that ~'. It often softens a statement, making it sound less like a personal decision.",
+          "ex": [
+            [
+              "일 때문에 한국에서 살게 되었어요.",
+              "Because of work, I ended up living in Korea."
+            ],
+            [
+              "그 사실을 나중에 알게 됐어요.",
+              "I came to know that fact later."
+            ]
+          ]
+        },
+        {
+          "p": "-아 / -어지다",
+          "m": "'become ~' (change of state)",
+          "form": "Attach to an adjective stem with the vowel rule: 따뜻하다 → 따뜻해지다.",
+          "exp": "Added to a descriptive verb (adjective), this shows a gradual change into a new state — 'to get / become ~'. It turns 'is warm' into 'becomes warm'.",
+          "ex": [
+            [
+              "봄이 되니까 날씨가 따뜻해졌어요.",
+              "Now that it's spring, the weather has become warm."
+            ],
+            [
+              "운동을 해서 건강해졌어요.",
+              "I've become healthier from exercising."
+            ]
+          ]
+        },
+        {
+          "p": "-기 위해(서)",
+          "m": "'in order to ~' (purpose)",
+          "form": "Attach -기 위해(서) to a verb stem. With a noun, use 을/를 위해(서).",
+          "exp": "This states a clear purpose or goal ('in order to ~'). It's more formal than -(으)려고 and common in writing.",
+          "ex": [
+            [
+              "건강을 지키기 위해서 매일 걸어요.",
+              "I walk every day in order to stay healthy."
+            ],
+            [
+              "시험에 합격하기 위해 열심히 공부해요.",
+              "I study hard in order to pass the exam."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㄴ / -는 편이다",
+          "m": "'tend to be rather ~'",
+          "form": "Verbs take -는 편이다; adjectives take -(으)ㄴ 편이다: 잘 먹는 편이다, 큰 편이다.",
+          "exp": "This softens a statement to 'rather / relatively ~' instead of a flat 'is'. Koreans use it a lot to avoid sounding too absolute — 'I'm on the ~ side'.",
+          "ex": [
+            [
+              "저는 매운 음식을 잘 먹는 편이에요.",
+              "I'm rather good at eating spicy food."
+            ],
+            [
+              "이 동네는 조용한 편이에요.",
+              "This neighborhood is relatively quiet."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Advanced Patterns",
+      "level": "Level 4",
+      "patterns": [
+        {
+          "p": "-더니",
+          "m": "'and then' (observed change)",
+          "form": "Attach -더니 to the stem; the subject is usually someone/something other than 'I'.",
+          "exp": "This recalls something you personally noticed, then gives a related follow-up or result. Often it contrasts a past observation with the present ('it was ~ earlier, and now ~').",
+          "ex": [
+            [
+              "아까는 춥더니 지금은 따뜻해요.",
+              "It was cold earlier, but now it's warm."
+            ],
+            [
+              "동생이 열심히 공부하더니 시험에 합격했어요.",
+              "My sibling studied hard, and then passed the exam."
+            ]
+          ]
+        },
+        {
+          "p": "-았 / -었더니",
+          "m": "'when I did ~, I found that ~'",
+          "form": "Past stem + -더니: 일어나다 → 일어났더니.",
+          "exp": "Use this when YOU did something and then discovered a result. The first clause is your own past action; the second is what you found or what happened next.",
+          "ex": [
+            [
+              "아침에 일어났더니 눈이 와 있었어요.",
+              "When I woke up in the morning, it had snowed."
+            ],
+            [
+              "약을 먹었더니 좀 나아졌어요.",
+              "After I took the medicine, I felt a bit better."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㄹ수록",
+          "m": "'the more ~, the more ~'",
+          "form": "Add -을수록 (consonant) or -ㄹ수록 (vowel). Often paired with -(으)면: 보면 볼수록.",
+          "exp": "This shows that as one thing increases, another changes along with it — 'the more X, the more Y'. Repeating the verb with -(으)면 first adds emphasis.",
+          "ex": [
+            [
+              "이 노래는 들을수록 좋아요.",
+              "The more I listen to this song, the more I like it."
+            ],
+            [
+              "값이 쌀수록 잘 팔려요.",
+              "The cheaper it is, the better it sells."
+            ]
+          ]
+        },
+        {
+          "p": "-는 셈이다",
+          "m": "'it amounts to ~ / effectively ~'",
+          "form": "Attach -는 셈이다 (verbs) or -(으)ㄴ 셈이다 (adjectives/past).",
+          "exp": "This says that although it may not be literally true, the situation is basically equivalent to something — 'it's practically ~', 'it comes down to ~'.",
+          "ex": [
+            [
+              "이 정도면 거의 다 끝난 셈이에요.",
+              "At this point, it's practically all finished."
+            ],
+            [
+              "한 달에 한 번 보니까 거의 안 보는 셈이에요.",
+              "We meet once a month, so we practically never see each other."
+            ]
+          ]
+        },
+        {
+          "p": "-기 마련이다",
+          "m": "'it's only natural that ~'",
+          "form": "Attach -기 마련이다 to the verb/adjective stem. -게 마련이다 is the same.",
+          "exp": "This states a general truth that is bound to happen — 'that's just how it is', 'naturally ~'. It's used for things everyone accepts as inevitable.",
+          "ex": [
+            [
+              "사람은 누구나 실수하기 마련이에요.",
+              "Everyone is bound to make mistakes."
+            ],
+            [
+              "오래 쓰면 고장 나기 마련이에요.",
+              "If you use it for a long time, it's bound to break."
+            ]
+          ]
+        },
+        {
+          "p": "-는 반면(에)",
+          "m": "'whereas / on the other hand'",
+          "form": "Verbs take -는 반면(에); adjectives take -(으)ㄴ 반면(에).",
+          "exp": "This contrasts two opposite qualities or facts in one sentence — one side is like this, while the other side is like that. Common in comparison and opinion writing.",
+          "ex": [
+            [
+              "형은 조용한 반면에 동생은 활발해요.",
+              "The older brother is quiet, whereas the younger one is lively."
+            ],
+            [
+              "이 일은 돈은 많이 버는 반면에 너무 힘들어요.",
+              "This job pays a lot, but on the other hand it's very hard."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㄴ / -는 데다가",
+          "m": "'on top of ~ / in addition to'",
+          "form": "Verbs take -는 데다가; adjectives take -(으)ㄴ 데다가.",
+          "exp": "This piles one thing on top of another in the same direction — the second point adds to and strengthens the first ('not only ~, and also ~').",
+          "ex": [
+            [
+              "비가 오는 데다가 바람도 세게 불어요.",
+              "On top of the rain, the wind is blowing hard too."
+            ],
+            [
+              "그 가게는 싼 데다가 친절해요.",
+              "That shop is cheap, and on top of that, friendly."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㄹ 뿐만 아니라",
+          "m": "'not only ~ but also'",
+          "form": "Add -을/ㄹ 뿐만 아니라. With a noun, use 뿐만 아니라.",
+          "exp": "This adds a second, often bigger point to the first — 'not only A, but also B'. It's a formal, common way to build up an argument.",
+          "ex": [
+            [
+              "그는 똑똑할 뿐만 아니라 성실해요.",
+              "He is not only smart but also diligent."
+            ],
+            [
+              "이 도시는 경치가 좋을 뿐만 아니라 음식도 맛있어요.",
+              "This city not only has nice scenery but also delicious food."
+            ]
+          ]
+        },
+        {
+          "p": "-곤 하다",
+          "m": "'used to / would' (habit)",
+          "form": "Attach -곤 하다 to the verb stem; often past: -곤 했다.",
+          "exp": "This describes a repeated past habit — something you often did back then. It highlights that the action happened again and again over a period.",
+          "ex": [
+            [
+              "어릴 때 이 공원에서 자주 놀곤 했어요.",
+              "When I was young, I used to play often in this park."
+            ],
+            [
+              "힘들 때면 그 노래를 듣곤 해요.",
+              "When times are hard, I tend to listen to that song."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㄴ 채(로)",
+          "m": "'while remaining in the state of ~'",
+          "form": "Add -은/ㄴ 채(로) to a verb stem: 신다 → 신은 채로.",
+          "exp": "This describes doing something while an earlier state is still in place, usually one that's a bit unusual — 'with the shoes still on', 'while the light was left on'.",
+          "ex": [
+            [
+              "신발을 신은 채로 방에 들어왔어요.",
+              "He came into the room with his shoes still on."
+            ],
+            [
+              "불을 켠 채로 잠이 들었어요.",
+              "I fell asleep with the light left on."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "category": "Formal & Nuanced Patterns",
+      "level": "Level 5",
+      "patterns": [
+        {
+          "p": "-(으)ㄴ / -는 한",
+          "m": "'as long as ~'",
+          "form": "Verbs take -는 한; some fixed forms use -(으)ㄴ 한 (아는 한, 특별한 일이 없는 한).",
+          "exp": "This sets a condition or limit under which something holds true — 'as long as / so far as ~'. It's common in the fixed phrase 내가 아는 한 ('as far as I know').",
+          "ex": [
+            [
+              "제가 아는 한 그건 사실이 아니에요.",
+              "As far as I know, that's not true."
+            ],
+            [
+              "비가 오지 않는 한 행사는 진행됩니다.",
+              "As long as it doesn't rain, the event will go ahead."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㄹ 리가 없다",
+          "m": "'there's no way that ~'",
+          "form": "Add -을/ㄹ 리가 없다 to the stem.",
+          "exp": "This strongly denies a possibility — 'it can't possibly be that ~', 'there's no way ~'. You use it when you're confident something isn't true.",
+          "ex": [
+            [
+              "그가 그런 말을 했을 리가 없어요.",
+              "There's no way he said something like that."
+            ],
+            [
+              "이렇게 열심히 했는데 실패할 리가 없어요.",
+              "I worked this hard — there's no way I'll fail."
+            ]
+          ]
+        },
+        {
+          "p": "-기는커녕",
+          "m": "'far from ~ / let alone'",
+          "form": "Add -기는커녕 to the verb stem. With a noun, use 은/는커녕.",
+          "exp": "This dismisses the first idea and says the reality is even less than that — 'far from doing X, I couldn't even do the smaller Y'. It always sets up a stronger negative that follows.",
+          "ex": [
+            [
+              "쉬기는커녕 밥 먹을 시간도 없었어요.",
+              "Far from resting, I didn't even have time to eat."
+            ],
+            [
+              "칭찬은커녕 혼만 났어요.",
+              "Far from being praised, I only got scolded."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㅁ에도 불구하고",
+          "m": "'despite / in spite of ~'",
+          "form": "Nominalize with -(으)ㅁ, then 에도 불구하고: 노력했음에도 불구하고.",
+          "exp": "This is a formal 'despite'. It concedes a fact and says the result went against what that fact would suggest. You'll mostly see it in writing and formal speech.",
+          "ex": [
+            [
+              "열심히 노력했음에도 불구하고 실패했어요.",
+              "Despite trying hard, I failed."
+            ],
+            [
+              "나이가 많음에도 불구하고 아주 건강하세요.",
+              "Despite being old, he is very healthy."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㄹ 지경이다",
+          "m": "'to the point / on the verge of ~'",
+          "form": "Add -을/ㄹ 지경이다 to the stem.",
+          "exp": "This emphasizes an extreme state you've almost reached — 'so much that I could almost ~'. It exaggerates for effect, usually about hardship.",
+          "ex": [
+            [
+              "너무 배가 고파서 쓰러질 지경이에요.",
+              "I'm so hungry I could collapse."
+            ],
+            [
+              "일이 많아서 미칠 지경이에요.",
+              "I have so much work I could go crazy."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)로 인해(서)",
+          "m": "'due to / owing to ~'",
+          "form": "Attach 으로 인해(서) after a consonant, 로 인해(서) after a vowel/ㄹ, to a noun.",
+          "exp": "This is a formal way to state a cause, used with nouns — 'due to ~'. It appears constantly in news reports and official notices.",
+          "ex": [
+            [
+              "갑작스러운 사고로 인해 길이 막혔어요.",
+              "The road was blocked due to a sudden accident."
+            ],
+            [
+              "태풍으로 인해 비행기가 취소되었습니다.",
+              "The flight was cancelled due to the typhoon."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㄴ / -는 만큼",
+          "m": "'as much as / to the extent that ~'",
+          "form": "Verbs take -는 만큼; adjectives/past take -(으)ㄴ 만큼. With a noun, use 만큼.",
+          "exp": "This shows that the second thing matches the degree of the first — 'in proportion to ~', 'to the extent that ~'. Often used to say results match effort.",
+          "ex": [
+            [
+              "노력한 만큼 좋은 결과가 나왔어요.",
+              "Good results came out in proportion to the effort."
+            ],
+            [
+              "아는 만큼 보인다고 합니다.",
+              "They say you see as much as you know."
+            ]
+          ]
+        },
+        {
+          "p": "-되",
+          "m": "'but / provided that' (formal)",
+          "form": "Attach -되 directly to the verb stem: 하다 → 하되.",
+          "exp": "This is a formal, written connector that allows something but adds a condition or contrast — 'you may do X, but ~'. It's concise and common in rules and instructions.",
+          "ex": [
+            [
+              "이 약을 드시되 하루에 세 번만 드세요.",
+              "You may take this medicine, but only three times a day."
+            ],
+            [
+              "사용은 하되 조심해서 다뤄 주세요.",
+              "You may use it, but please handle it carefully."
+            ]
+          ]
+        },
+        {
+          "p": "-고자 하다",
+          "m": "'intend to / wish to ~' (formal)",
+          "form": "Attach -고자 하다 to the verb stem.",
+          "exp": "This is a formal statement of intention or purpose — 'we intend to ~', 'I wish to ~'. You'll hear it in speeches, presentations, and official writing.",
+          "ex": [
+            [
+              "오늘은 이 문제를 함께 해결하고자 합니다.",
+              "Today we intend to solve this problem together."
+            ],
+            [
+              "새로운 회원을 모집하고자 합니다.",
+              "We wish to recruit new members."
+            ]
+          ]
+        },
+        {
+          "p": "-(으)ㄹ 따름이다",
+          "m": "'can only ~ / nothing but ~'",
+          "form": "Add -을/ㄹ 따름이다 to the stem.",
+          "exp": "This is a formal, humble way to say there's nothing more than this feeling or action — 'I can only ~', 'I am simply ~'. Common in polite thanks or apologies.",
+          "ex": [
+            [
+              "도와주셔서 그저 감사할 따름입니다.",
+              "I can only be grateful that you helped me."
+            ],
+            [
+              "기대에 못 미쳐 죄송할 따름입니다.",
+              "I am simply sorry for falling short of your expectations."
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

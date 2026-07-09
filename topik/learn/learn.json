@@ -20,19 +20,56 @@
               "title": "Sentence order & the polite ending -습니다",
               "summary": "Subject-Object-Verb order and the formal 하십시오체 style used in every passage.",
               "content": [
-                { "type": "text", "html": "Written Korean sentences follow <strong>Subject – Object – Verb (SOV)</strong> order, the opposite of English. The verb always comes last, and it carries the sentence's grammar: tense, politeness, and whether it's a statement or a question." },
-                { "type": "grammar", "pattern": "S + (O) + V", "meaning": "the verb comes last, particles mark each noun's role", "examples": [
-                  { "ko": "저는 학생입니다.", "en": "I am a student." },
-                  { "ko": "저는 사과를 먹습니다.", "en": "I eat an apple." }
-                ] },
-                { "type": "text", "html": "TOPIK I reading passages are written in the formal style <strong>-습니다/-ㅂ니다</strong> (statements) and <strong>-습니까?/-ㅂ니까?</strong> (questions), called 하십시오체. You'll also see the friendlier <strong>-아요/-어요</strong> style in dialogues, messages, and postcards." },
-                { "type": "grammar", "pattern": "verb stem + -습니다 (after a consonant) / -ㅂ니다 (after a vowel)", "meaning": "formal present tense: '...(does/is)...'", "examples": [
-                  { "ko": "먹다 → 먹습니다", "en": "to eat → eat(s)" },
-                  { "ko": "가다 → 갑니다", "en": "to go → go(es)" },
-                  { "ko": "있다 → 있습니다", "en": "to have/exist → have/there is" }
-                ] },
-                { "type": "text", "html": "Past tense adds <strong>-았/었</strong> before -습니다: 갔습니다 (went), 먹었습니다 (ate). You'll see this often in passages describing what someone did." },
-                { "type": "tip", "html": "Peel the ending off first. -습니다/-ㅂ니다, -았/었습니다 (past), and -(으)ㄹ 겁니다 (future) all attach to the same verb stem. Once you recognize the stem, the base meaning is easy to work out — this is the single most useful reading habit for TOPIK I." }
+                {
+                  "type": "text",
+                  "html": "Written Korean sentences follow <strong>Subject – Object – Verb (SOV)</strong> order, the opposite of English. The verb always comes last, and it carries the sentence's grammar: tense, politeness, and whether it's a statement or a question."
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "S + (O) + V",
+                  "meaning": "the verb comes last, particles mark each noun's role",
+                  "examples": [
+                    {
+                      "ko": "저는 학생입니다.",
+                      "en": "I am a student."
+                    },
+                    {
+                      "ko": "저는 사과를 먹습니다.",
+                      "en": "I eat an apple."
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "html": "TOPIK I reading passages are written in the formal style <strong>-습니다/-ㅂ니다</strong> (statements) and <strong>-습니까?/-ㅂ니까?</strong> (questions), called 하십시오체. You'll also see the friendlier <strong>-아요/-어요</strong> style in dialogues, messages, and postcards."
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "verb stem + -습니다 (after a consonant) / -ㅂ니다 (after a vowel)",
+                  "meaning": "formal present tense: '...(does/is)...'",
+                  "examples": [
+                    {
+                      "ko": "먹다 → 먹습니다",
+                      "en": "to eat → eat(s)"
+                    },
+                    {
+                      "ko": "가다 → 갑니다",
+                      "en": "to go → go(es)"
+                    },
+                    {
+                      "ko": "있다 → 있습니다",
+                      "en": "to have/exist → have/there is"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "html": "Past tense adds <strong>-았/었</strong> before -습니다: 갔습니다 (went), 먹었습니다 (ate). You'll see this often in passages describing what someone did."
+                },
+                {
+                  "type": "tip",
+                  "html": "Peel the ending off first. -습니다/-ㅂ니다, -았/었습니다 (past), and -(으)ㄹ 겁니다 (future) all attach to the same verb stem. Once you recognize the stem, the base meaning is easy to work out — this is the single most useful reading habit for TOPIK I."
+                }
               ]
             }
           ]
@@ -48,69 +85,217 @@
               "title": "Subject & topic: 이/가 vs 은/는",
               "summary": "The two most common — and most confused — particles in Korean.",
               "content": [
-                { "type": "text", "html": "Korean marks a noun's grammatical role with a small particle attached right after it, instead of relying on word order alone. 이/가 and 은/는 are the two most common 'subject-like' particles, and mixing them up is the number one beginner mistake." },
-                { "type": "grammar", "pattern": "noun (consonant-final) + 이 / noun (vowel-final) + 가", "meaning": "marks the grammatical subject — what performs the action, or what the sentence is newly about", "examples": [
-                  { "ko": "동생이 옵니다.", "en": "My younger sibling is coming." },
-                  { "ko": "친구가 먹습니다.", "en": "My friend eats." }
-                ] },
-                { "type": "grammar", "pattern": "noun (consonant-final) + 은 / noun (vowel-final) + 는", "meaning": "marks the topic — 'as for N' — often introducing or contrasting a topic", "examples": [
-                  { "ko": "저는 학생입니다.", "en": "As for me, I am a student." },
-                  { "ko": "오늘은 바쁩니다.", "en": "Today (unlike other days) is busy." }
-                ] },
-                { "type": "tip", "html": "Quick test: if you could mentally add 'as for...', or you're contrasting two things, 은/는 usually fits. If you're simply stating who/what does something for the first time, 이/가 usually fits. In fill-in-the-blank questions, check the words right before and after the blank — 은/는 often sits near a contrast word like 그런데/하지만." },
-                { "type": "example", "box": "저 사람( ) 제 동생입니다.", "choices": ["이", "을", "에", "는"], "answer": 4, "note": "저 사람 introduces who this new topic is, so 는 fits — 'as for that person, (they are) my sibling'." }
+                {
+                  "type": "text",
+                  "html": "Korean marks a noun's grammatical role with a small particle attached right after it, instead of relying on word order alone. 이/가 and 은/는 are the two most common 'subject-like' particles, and mixing them up is the number one beginner mistake."
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "noun (consonant-final) + 이 / noun (vowel-final) + 가",
+                  "meaning": "marks the grammatical subject — what performs the action, or what the sentence is newly about",
+                  "examples": [
+                    {
+                      "ko": "동생이 옵니다.",
+                      "en": "My younger sibling is coming."
+                    },
+                    {
+                      "ko": "친구가 먹습니다.",
+                      "en": "My friend eats."
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "noun (consonant-final) + 은 / noun (vowel-final) + 는",
+                  "meaning": "marks the topic — 'as for N' — often introducing or contrasting a topic",
+                  "examples": [
+                    {
+                      "ko": "저는 학생입니다.",
+                      "en": "As for me, I am a student."
+                    },
+                    {
+                      "ko": "오늘은 바쁩니다.",
+                      "en": "Today (unlike other days) is busy."
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "Quick test: if you could mentally add 'as for...', or you're contrasting two things, 은/는 usually fits. If you're simply stating who/what does something for the first time, 이/가 usually fits. In fill-in-the-blank questions, check the words right before and after the blank — 은/는 often sits near a contrast word like 그런데/하지만."
+                },
+                {
+                  "type": "example",
+                  "box": "저 사람( ) 제 동생입니다.",
+                  "choices": [
+                    "이",
+                    "을",
+                    "에",
+                    "는"
+                  ],
+                  "answer": 4,
+                  "note": "저 사람 introduces who this new topic is, so 는 fits — 'as for that person, (they are) my sibling'."
+                }
               ],
-              "practice": { "pools": ["blank-particle"], "count": 4 }
+              "practice": {
+                "pools": [
+                  "blank-particle"
+                ],
+                "count": 4
+              }
             },
             {
               "id": "l1-s2-b",
               "title": "Object and place: 을/를, 에, 에서",
               "summary": "Marking what you act on, and the difference between 에 and 에서.",
               "content": [
-                { "type": "text", "html": "After the subject/topic particles, the next most common are the object particle and two 'location' particles that TOPIK I loves to test against each other." },
-                { "type": "grammar", "pattern": "noun (consonant-final) + 을 / noun (vowel-final) + 를", "meaning": "marks the direct object of the verb", "examples": [
-                  { "ko": "밥을 먹습니다.", "en": "I eat rice / a meal." },
-                  { "ko": "영화를 봅니다.", "en": "I watch a movie." }
-                ] },
-                { "type": "grammar", "pattern": "noun + 에", "meaning": "marks a destination, a point in time, or a static location with 있다/없다", "examples": [
-                  { "ko": "학교에 갑니다.", "en": "I go to school." },
-                  { "ko": "세 시에 만납니다.", "en": "We meet at 3 o'clock." },
-                  { "ko": "집에 있습니다.", "en": "I am at home." }
-                ] },
-                { "type": "grammar", "pattern": "noun + 에서", "meaning": "marks the location where an action happens", "examples": [
-                  { "ko": "도서관에서 공부합니다.", "en": "I study at the library." },
-                  { "ko": "집에서 학교까지 멉니다.", "en": "It's far from home to school." }
-                ] },
-                { "type": "tip", "html": "에 vs 에서 is a classic TOPIK I trap. 에 pairs with 가다/오다/있다 (movement toward, or plain existence at). 에서 pairs with action verbs like 공부하다, 먹다, 만나다, 일하다 (something happening at that place). Ask yourself: is this verb an action happening at the place, or just movement toward / existence at it?" }
+                {
+                  "type": "text",
+                  "html": "After the subject/topic particles, the next most common are the object particle and two 'location' particles that TOPIK I loves to test against each other."
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "noun (consonant-final) + 을 / noun (vowel-final) + 를",
+                  "meaning": "marks the direct object of the verb",
+                  "examples": [
+                    {
+                      "ko": "밥을 먹습니다.",
+                      "en": "I eat rice / a meal."
+                    },
+                    {
+                      "ko": "영화를 봅니다.",
+                      "en": "I watch a movie."
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "noun + 에",
+                  "meaning": "marks a destination, a point in time, or a static location with 있다/없다",
+                  "examples": [
+                    {
+                      "ko": "학교에 갑니다.",
+                      "en": "I go to school."
+                    },
+                    {
+                      "ko": "세 시에 만납니다.",
+                      "en": "We meet at 3 o'clock."
+                    },
+                    {
+                      "ko": "집에 있습니다.",
+                      "en": "I am at home."
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "noun + 에서",
+                  "meaning": "marks the location where an action happens",
+                  "examples": [
+                    {
+                      "ko": "도서관에서 공부합니다.",
+                      "en": "I study at the library."
+                    },
+                    {
+                      "ko": "집에서 학교까지 멉니다.",
+                      "en": "It's far from home to school."
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "에 vs 에서 is a classic TOPIK I trap. 에 pairs with 가다/오다/있다 (movement toward, or plain existence at). 에서 pairs with action verbs like 공부하다, 먹다, 만나다, 일하다 (something happening at that place). Ask yourself: is this verb an action happening at the place, or just movement toward / existence at it?"
+                }
               ],
-              "practice": { "pools": ["blank-particle"], "count": 4 }
+              "practice": {
+                "pools": [
+                  "blank-particle"
+                ],
+                "count": 4
+              }
             },
             {
               "id": "l1-s2-c",
               "title": "Also, with, whose, by, from–to",
               "summary": "도, 와/과, 의, 으로/로, 부터~까지 — the rest of the particle set.",
               "content": [
-                { "type": "text", "html": "The remaining particles appear less often individually, but the fill-in-the-blank question mixes every particle together, so you need to recognize all of them at a glance." },
-                { "type": "grammar", "pattern": "noun + 도", "meaning": "'also / too' — adds a noun to a previous statement", "examples": [
-                  { "ko": "저는 커피를 마십니다. 주스도 마십니다.", "en": "I drink coffee. I also drink juice." }
-                ] },
-                { "type": "grammar", "pattern": "noun + 와/과 (또는 회화체 하고)", "meaning": "'and / with' — connects two nouns or marks a companion", "examples": [
-                  { "ko": "친구와 이야기합니다.", "en": "I talk with a friend." },
-                  { "ko": "빵과 우유", "en": "bread and milk" }
-                ] },
-                { "type": "grammar", "pattern": "noun + 의", "meaning": "possessive 'N's' — often dropped in speech but still tested in reading", "examples": [
-                  { "ko": "동생의 가방", "en": "my sibling's bag" }
-                ] },
-                { "type": "grammar", "pattern": "noun + 으로/로", "meaning": "'by means of / toward' — transportation, tools, or direction", "examples": [
-                  { "ko": "버스로 갑니다.", "en": "I go by bus." },
-                  { "ko": "오른쪽으로 가세요.", "en": "Please go to the right." }
-                ] },
-                { "type": "grammar", "pattern": "N1 부터 N2까지", "meaning": "'from N1 to N2' — usually a time range", "examples": [
-                  { "ko": "아홉 시부터 한 시까지 수업이 있습니다.", "en": "I have class from 9 to 1." }
-                ] },
-                { "type": "tip", "html": "으로/로 rule: after a vowel or ㄹ, use 로 (버스로, 지하철로); after any other consonant, use 으로 (손으로, 걸음으로)." }
+                {
+                  "type": "text",
+                  "html": "The remaining particles appear less often individually, but the fill-in-the-blank question mixes every particle together, so you need to recognize all of them at a glance."
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "noun + 도",
+                  "meaning": "'also / too' — adds a noun to a previous statement",
+                  "examples": [
+                    {
+                      "ko": "저는 커피를 마십니다. 주스도 마십니다.",
+                      "en": "I drink coffee. I also drink juice."
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "noun + 와/과 (또는 회화체 하고)",
+                  "meaning": "'and / with' — connects two nouns or marks a companion",
+                  "examples": [
+                    {
+                      "ko": "친구와 이야기합니다.",
+                      "en": "I talk with a friend."
+                    },
+                    {
+                      "ko": "빵과 우유",
+                      "en": "bread and milk"
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "noun + 의",
+                  "meaning": "possessive 'N's' — often dropped in speech but still tested in reading",
+                  "examples": [
+                    {
+                      "ko": "동생의 가방",
+                      "en": "my sibling's bag"
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "noun + 으로/로",
+                  "meaning": "'by means of / toward' — transportation, tools, or direction",
+                  "examples": [
+                    {
+                      "ko": "버스로 갑니다.",
+                      "en": "I go by bus."
+                    },
+                    {
+                      "ko": "오른쪽으로 가세요.",
+                      "en": "Please go to the right."
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "N1 부터 N2까지",
+                  "meaning": "'from N1 to N2' — usually a time range",
+                  "examples": [
+                    {
+                      "ko": "아홉 시부터 한 시까지 수업이 있습니다.",
+                      "en": "I have class from 9 to 1."
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "으로/로 rule: after a vowel or ㄹ, use 로 (버스로, 지하철로); after any other consonant, use 으로 (손으로, 걸음으로)."
+                }
               ],
-              "practice": { "pools": ["blank-particle"], "count": 4 }
+              "practice": {
+                "pools": [
+                  "blank-particle"
+                ],
+                "count": 4
+              }
             }
           ]
         },
@@ -125,22 +310,97 @@
               "title": "People, places & time words",
               "summary": "The high-frequency noun set behind question 5 and many reading passages.",
               "content": [
-                { "type": "text", "html": "Question 5 in the fill-in-the-blank set — and many reading passages — test everyday nouns: places you go, things you use, common time words. There's no shortcut except building vocabulary, but TOPIK I recycles a fairly small set of high-frequency words." },
-                { "type": "vocab", "title": "Places", "words": [
-                  { "ko": "학교", "en": "school" }, { "ko": "병원", "en": "hospital" },
-                  { "ko": "도서관", "en": "library" }, { "ko": "미용실", "en": "hair salon" },
-                  { "ko": "공항", "en": "airport" }, { "ko": "시장", "en": "market" },
-                  { "ko": "약국", "en": "pharmacy" }, { "ko": "화장실", "en": "restroom" }
-                ] },
-                { "type": "vocab", "title": "Time & everyday nouns", "words": [
-                  { "ko": "주말", "en": "weekend" }, { "ko": "방학", "en": "school vacation" },
-                  { "ko": "안경", "en": "glasses" }, { "ko": "신발", "en": "shoes" },
-                  { "ko": "우산", "en": "umbrella" }, { "ko": "약", "en": "medicine" },
-                  { "ko": "편지", "en": "letter" }, { "ko": "우표", "en": "stamp" }
-                ] },
-                { "type": "tip", "html": "These fill-in-the-blank items usually give two short sentences sharing one missing noun, e.g. '(&nbsp;&nbsp;&nbsp;&nbsp;)에 갑니다. 머리를 자릅니다.' → 미용실 (hair salon). Read <em>both</em> sentences before picking an answer — the second sentence is often the real clue." }
+                {
+                  "type": "text",
+                  "html": "Question 5 in the fill-in-the-blank set — and many reading passages — test everyday nouns: places you go, things you use, common time words. There's no shortcut except building vocabulary, but TOPIK I recycles a fairly small set of high-frequency words."
+                },
+                {
+                  "type": "vocab",
+                  "title": "Places",
+                  "words": [
+                    {
+                      "ko": "학교",
+                      "en": "school"
+                    },
+                    {
+                      "ko": "병원",
+                      "en": "hospital"
+                    },
+                    {
+                      "ko": "도서관",
+                      "en": "library"
+                    },
+                    {
+                      "ko": "미용실",
+                      "en": "hair salon"
+                    },
+                    {
+                      "ko": "공항",
+                      "en": "airport"
+                    },
+                    {
+                      "ko": "시장",
+                      "en": "market"
+                    },
+                    {
+                      "ko": "약국",
+                      "en": "pharmacy"
+                    },
+                    {
+                      "ko": "화장실",
+                      "en": "restroom"
+                    }
+                  ]
+                },
+                {
+                  "type": "vocab",
+                  "title": "Time & everyday nouns",
+                  "words": [
+                    {
+                      "ko": "주말",
+                      "en": "weekend"
+                    },
+                    {
+                      "ko": "방학",
+                      "en": "school vacation"
+                    },
+                    {
+                      "ko": "안경",
+                      "en": "glasses"
+                    },
+                    {
+                      "ko": "신발",
+                      "en": "shoes"
+                    },
+                    {
+                      "ko": "우산",
+                      "en": "umbrella"
+                    },
+                    {
+                      "ko": "약",
+                      "en": "medicine"
+                    },
+                    {
+                      "ko": "편지",
+                      "en": "letter"
+                    },
+                    {
+                      "ko": "우표",
+                      "en": "stamp"
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "These fill-in-the-blank items usually give two short sentences sharing one missing noun, e.g. '(&nbsp;&nbsp;&nbsp;&nbsp;)에 갑니다. 머리를 자릅니다.' → 미용실 (hair salon). Read <em>both</em> sentences before picking an answer — the second sentence is often the real clue."
+                }
               ],
-              "practice": { "pools": ["blank-noun"], "count": 5 }
+              "practice": {
+                "pools": [
+                  "blank-noun"
+                ],
+                "count": 5
+              }
             }
           ]
         },
@@ -155,20 +415,74 @@
               "title": "Common verbs & the present tense",
               "summary": "Verbs that pair with a specific noun, plus the ㄹ-irregular conjugation.",
               "content": [
-                { "type": "text", "html": "The same two-sentence-clue pattern from the vocabulary lesson applies to verbs. TOPIK I likes to test verbs that pair naturally with a specific noun: 사진을 찍다 (take a photo), 이를 닦다 (brush teeth), 편지를 쓰다 (write a letter)." },
-                { "type": "vocab", "title": "High-frequency verbs", "words": [
-                  { "ko": "만들다", "en": "to make" }, { "ko": "부르다", "en": "to sing / call" },
-                  { "ko": "쓰다", "en": "to write" }, { "ko": "열다", "en": "to open" },
-                  { "ko": "배우다", "en": "to learn" }, { "ko": "찍다", "en": "to take (a photo)" },
-                  { "ko": "닦다", "en": "to wipe / brush" }, { "ko": "켜다", "en": "to turn on" }
-                ] },
-                { "type": "grammar", "pattern": "verb stem + -습니다/-ㅂ니다", "meaning": "present tense (see also the Sentence Basics lesson)", "examples": [
-                  { "ko": "음식을 만듭니다.", "en": "I make food." },
-                  { "ko": "창문을 엽니다.", "en": "I open the window." }
-                ] },
-                { "type": "tip", "html": "Watch for ㄹ-irregular verbs: when a verb stem ends in ㄹ, that ㄹ drops before -습니다 becomes -ㅂ니다: 살다 → 삽니다, 만들다 → 만듭니다, 열다 → 엽니다." }
+                {
+                  "type": "text",
+                  "html": "The same two-sentence-clue pattern from the vocabulary lesson applies to verbs. TOPIK I likes to test verbs that pair naturally with a specific noun: 사진을 찍다 (take a photo), 이를 닦다 (brush teeth), 편지를 쓰다 (write a letter)."
+                },
+                {
+                  "type": "vocab",
+                  "title": "High-frequency verbs",
+                  "words": [
+                    {
+                      "ko": "만들다",
+                      "en": "to make"
+                    },
+                    {
+                      "ko": "부르다",
+                      "en": "to sing / call"
+                    },
+                    {
+                      "ko": "쓰다",
+                      "en": "to write"
+                    },
+                    {
+                      "ko": "열다",
+                      "en": "to open"
+                    },
+                    {
+                      "ko": "배우다",
+                      "en": "to learn"
+                    },
+                    {
+                      "ko": "찍다",
+                      "en": "to take (a photo)"
+                    },
+                    {
+                      "ko": "닦다",
+                      "en": "to wipe / brush"
+                    },
+                    {
+                      "ko": "켜다",
+                      "en": "to turn on"
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "verb stem + -습니다/-ㅂ니다",
+                  "meaning": "present tense (see also the Sentence Basics lesson)",
+                  "examples": [
+                    {
+                      "ko": "음식을 만듭니다.",
+                      "en": "I make food."
+                    },
+                    {
+                      "ko": "창문을 엽니다.",
+                      "en": "I open the window."
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "Watch for ㄹ-irregular verbs: when a verb stem ends in ㄹ, that ㄹ drops before -습니다 becomes -ㅂ니다: 살다 → 삽니다, 만들다 → 만듭니다, 열다 → 엽니다."
+                }
               ],
-              "practice": { "pools": ["blank-verb"], "count": 5 }
+              "practice": {
+                "pools": [
+                  "blank-verb"
+                ],
+                "count": 5
+              }
             }
           ]
         },
@@ -183,12 +497,37 @@
               "title": "Finding the topic word (Q1–3 strategy)",
               "summary": "Spot the category a short passage belongs to, without translating every word.",
               "content": [
-                { "type": "text", "html": "Questions 1–3 give a very short passage (1–2 sentences) and ask <strong>무엇에 대한 이야기입니까?</strong> — 'What is this story about?'. The four answer choices are always single topic nouns like 날씨, 직업, 가족, 취미. You are not translating the sentence — you are finding its category." },
-                { "type": "tip", "html": "Strategy: underline every content word (ignore the particles), then ask what category links them. If a passage mentions 회사원 and 의사, both are jobs → 직업. If it mentions 덥다 and 수영하다, both relate to summer → 날씨/여름." },
-                { "type": "example", "box": "저는 매일 아침 운동을 합니다. 그리고 야채와 과일을 많이 먹습니다.", "choices": ["건강", "공부", "여행", "요일"], "answer": 1, "note": "Exercising and eating vegetables/fruit are both about staying healthy → 건강 (health)." },
-                { "type": "tip", "html": "Common topic-word answer choices worth memorizing: 날씨(weather), 계절(season), 직업(job), 취미(hobby), 가족(family), 건강(health), 여행(travel), 나라(country), 요일(day of the week), 나이(age), 값/가격(price)." }
+                {
+                  "type": "text",
+                  "html": "Questions 1–3 give a very short passage (1–2 sentences) and ask <strong>무엇에 대한 이야기입니까?</strong> — 'What is this story about?'. The four answer choices are always single topic nouns like 날씨, 직업, 가족, 취미. You are not translating the sentence — you are finding its category."
+                },
+                {
+                  "type": "tip",
+                  "html": "Strategy: underline every content word (ignore the particles), then ask what category links them. If a passage mentions 회사원 and 의사, both are jobs → 직업. If it mentions 덥다 and 수영하다, both relate to summer → 날씨/여름."
+                },
+                {
+                  "type": "example",
+                  "box": "저는 매일 아침 운동을 합니다. 그리고 야채와 과일을 많이 먹습니다.",
+                  "choices": [
+                    "건강",
+                    "공부",
+                    "여행",
+                    "요일"
+                  ],
+                  "answer": 1,
+                  "note": "Exercising and eating vegetables/fruit are both about staying healthy → 건강 (health)."
+                },
+                {
+                  "type": "tip",
+                  "html": "Common topic-word answer choices worth memorizing: 날씨(weather), 계절(season), 직업(job), 취미(hobby), 가족(family), 건강(health), 여행(travel), 나라(country), 요일(day of the week), 나이(age), 값/가격(price)."
+                }
               ],
-              "practice": { "pools": ["topic"], "count": 5 }
+              "practice": {
+                "pools": [
+                  "topic"
+                ],
+                "count": 5
+              }
             }
           ]
         }
@@ -214,35 +553,138 @@
               "title": "Descriptive verbs (형용사)",
               "summary": "Korean adjectives take -습니다 directly — no separate 'to be' word.",
               "content": [
-                { "type": "text", "html": "Korean adjectives (형용사, 'descriptive verbs') conjugate exactly like action verbs — they take -습니다/-ㅂ니다 directly, with no separate 'to be' word. This trips up many learners coming from English." },
-                { "type": "vocab", "title": "Common adjectives", "words": [
-                  { "ko": "무겁다", "en": "heavy" }, { "ko": "가볍다", "en": "light (weight)" },
-                  { "ko": "춥다", "en": "cold (weather)" }, { "ko": "비싸다", "en": "expensive" },
-                  { "ko": "싸다", "en": "cheap" }, { "ko": "크다", "en": "big / tall" },
-                  { "ko": "작다", "en": "small" }, { "ko": "어렵다", "en": "difficult" },
-                  { "ko": "맵다", "en": "spicy" }, { "ko": "어둡다", "en": "dark" }
-                ] },
-                { "type": "tip", "html": "Many adjectives ending in -ㅂ다 are ㅂ-irregular in casual speech (어렵다 → 어려워요), but in the formal -습니다 style used in TOPIK I reading, the ㅂ stays: 어렵다 → 어렵습니다. You can usually attach -습니다 directly to the dictionary stem minus 다." },
-                { "type": "tip", "html": "These blanks always give two clue sentences, the second explaining a consequence of the missing adjective: '가방이 (&nbsp;&nbsp;&nbsp;&nbsp;). 혼자 들 수 없습니다.' (The bag is ___. I can't carry it alone.) → 무겁습니다 (heavy). Read the consequence sentence first — it usually narrows the answer to one obvious adjective." }
+                {
+                  "type": "text",
+                  "html": "Korean adjectives (형용사, 'descriptive verbs') conjugate exactly like action verbs — they take -습니다/-ㅂ니다 directly, with no separate 'to be' word. This trips up many learners coming from English."
+                },
+                {
+                  "type": "vocab",
+                  "title": "Common adjectives",
+                  "words": [
+                    {
+                      "ko": "무겁다",
+                      "en": "heavy"
+                    },
+                    {
+                      "ko": "가볍다",
+                      "en": "light (weight)"
+                    },
+                    {
+                      "ko": "춥다",
+                      "en": "cold (weather)"
+                    },
+                    {
+                      "ko": "비싸다",
+                      "en": "expensive"
+                    },
+                    {
+                      "ko": "싸다",
+                      "en": "cheap"
+                    },
+                    {
+                      "ko": "크다",
+                      "en": "big / tall"
+                    },
+                    {
+                      "ko": "작다",
+                      "en": "small"
+                    },
+                    {
+                      "ko": "어렵다",
+                      "en": "difficult"
+                    },
+                    {
+                      "ko": "맵다",
+                      "en": "spicy"
+                    },
+                    {
+                      "ko": "어둡다",
+                      "en": "dark"
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "Many adjectives ending in -ㅂ다 are ㅂ-irregular in casual speech (어렵다 → 어려워요), but in the formal -습니다 style used in TOPIK I reading, the ㅂ stays: 어렵다 → 어렵습니다. You can usually attach -습니다 directly to the dictionary stem minus 다."
+                },
+                {
+                  "type": "tip",
+                  "html": "These blanks always give two clue sentences, the second explaining a consequence of the missing adjective: '가방이 (&nbsp;&nbsp;&nbsp;&nbsp;). 혼자 들 수 없습니다.' (The bag is ___. I can't carry it alone.) → 무겁습니다 (heavy). Read the consequence sentence first — it usually narrows the answer to one obvious adjective."
+                }
               ],
-              "practice": { "pools": ["blank-adj"], "count": 5 }
+              "practice": {
+                "pools": [
+                  "blank-adj"
+                ],
+                "count": 5
+              }
             },
             {
               "id": "l2-s1-b",
               "title": "Adverbs: how, how much, when",
               "summary": "Degree, manner and time adverbs that sit right before the verb.",
               "content": [
-                { "type": "text", "html": "Adverbs modify the verb and usually sit right before it. TOPIK I tests adverbs of degree (much / a lot), manner (together, alone, fast) and time (early, late)." },
-                { "type": "vocab", "title": "Common adverbs", "words": [
-                  { "ko": "빨리", "en": "quickly" }, { "ko": "천천히", "en": "slowly" },
-                  { "ko": "열심히", "en": "diligently / hard" }, { "ko": "같이 / 함께", "en": "together" },
-                  { "ko": "혼자", "en": "alone" }, { "ko": "일찍", "en": "early" },
-                  { "ko": "늦게", "en": "late" }, { "ko": "자주", "en": "often" },
-                  { "ko": "많이", "en": "a lot" }, { "ko": "더", "en": "more" }
-                ] },
-                { "type": "tip", "html": "Cause-and-effect clue sentences work here too: '한국어를 (&nbsp;&nbsp;&nbsp;&nbsp;) 공부했습니다. 그래서 시험을 잘 봤습니다.' (Studied Korean ___. So did well on the exam.) → 열심히 (diligently). The 그래서 (so / therefore) tells you the blank must logically explain the good result." }
+                {
+                  "type": "text",
+                  "html": "Adverbs modify the verb and usually sit right before it. TOPIK I tests adverbs of degree (much / a lot), manner (together, alone, fast) and time (early, late)."
+                },
+                {
+                  "type": "vocab",
+                  "title": "Common adverbs",
+                  "words": [
+                    {
+                      "ko": "빨리",
+                      "en": "quickly"
+                    },
+                    {
+                      "ko": "천천히",
+                      "en": "slowly"
+                    },
+                    {
+                      "ko": "열심히",
+                      "en": "diligently / hard"
+                    },
+                    {
+                      "ko": "같이 / 함께",
+                      "en": "together"
+                    },
+                    {
+                      "ko": "혼자",
+                      "en": "alone"
+                    },
+                    {
+                      "ko": "일찍",
+                      "en": "early"
+                    },
+                    {
+                      "ko": "늦게",
+                      "en": "late"
+                    },
+                    {
+                      "ko": "자주",
+                      "en": "often"
+                    },
+                    {
+                      "ko": "많이",
+                      "en": "a lot"
+                    },
+                    {
+                      "ko": "더",
+                      "en": "more"
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "Cause-and-effect clue sentences work here too: '한국어를 (&nbsp;&nbsp;&nbsp;&nbsp;) 공부했습니다. 그래서 시험을 잘 봤습니다.' (Studied Korean ___. So did well on the exam.) → 열심히 (diligently). The 그래서 (so / therefore) tells you the blank must logically explain the good result."
+                }
               ],
-              "practice": { "pools": ["blank-adverb"], "count": 5 }
+              "practice": {
+                "pools": [
+                  "blank-adverb"
+                ],
+                "count": 5
+              }
             }
           ]
         },
@@ -257,37 +699,105 @@
               "title": "Wanting to do something: -고 싶다",
               "summary": "One of the most frequently tested single grammar patterns in TOPIK I.",
               "content": [
-                { "type": "text", "html": "-고 싶다 attaches to a verb stem to mean 'want to ~'. It's one of the most frequently tested patterns in the fill-in-the-blank section, because every item in this pool follows the exact same shape." },
-                { "type": "grammar", "pattern": "verb stem + -고 싶다 (+ -습니다 for formal style)", "meaning": "'want to (do)'", "examples": [
-                  { "ko": "고향에 가고 싶습니다.", "en": "I want to go to my hometown." },
-                  { "ko": "영화를 보고 싶습니다.", "en": "I want to watch a movie." }
-                ] },
-                { "type": "grammar", "pattern": "-고 싶어 하다 (3rd person)", "meaning": "used when the subject is someone else, not 'I'", "examples": [
-                  { "ko": "동생이 아이스크림을 먹고 싶어 합니다.", "en": "My sibling wants to eat ice cream." }
-                ] },
-                { "type": "tip", "html": "In this pool, the blank is always the verb stem itself (마시다, 자다, 만나다...), with 싶다 already printed after it. Read the first clue sentence for the situation, then pick the verb whose action fits: '배가 고픕니다. 밥을 (&nbsp;&nbsp;&nbsp;&nbsp;) 싶습니다.' (Hungry. Want to ___ rice.) → 먹고." }
+                {
+                  "type": "text",
+                  "html": "-고 싶다 attaches to a verb stem to mean 'want to ~'. It's one of the most frequently tested patterns in the fill-in-the-blank section, because every item in this pool follows the exact same shape."
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "verb stem + -고 싶다 (+ -습니다 for formal style)",
+                  "meaning": "'want to (do)'",
+                  "examples": [
+                    {
+                      "ko": "고향에 가고 싶습니다.",
+                      "en": "I want to go to my hometown."
+                    },
+                    {
+                      "ko": "영화를 보고 싶습니다.",
+                      "en": "I want to watch a movie."
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "-고 싶어 하다 (3rd person)",
+                  "meaning": "used when the subject is someone else, not 'I'",
+                  "examples": [
+                    {
+                      "ko": "동생이 아이스크림을 먹고 싶어 합니다.",
+                      "en": "My sibling wants to eat ice cream."
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "In this pool, the blank is always the verb stem itself (마시다, 자다, 만나다...), with 싶다 already printed after it. Read the first clue sentence for the situation, then pick the verb whose action fits: '배가 고픕니다. 밥을 (&nbsp;&nbsp;&nbsp;&nbsp;) 싶습니다.' (Hungry. Want to ___ rice.) → 먹고."
+                }
               ],
-              "practice": { "pools": ["blank-verb2"], "count": 5 }
+              "practice": {
+                "pools": [
+                  "blank-verb2"
+                ],
+                "count": 5
+              }
             },
             {
               "id": "l2-s2-b",
               "title": "Connecting two clauses in one sentence",
               "summary": "-고, -아서/어서, -지만, -(으)면 — the connectives behind every longer passage from here on.",
               "content": [
-                { "type": "text", "html": "From Level 2 onward, passages combine two clauses into one sentence using a connective ending attached to the first verb. Recognizing these endings is essential for the ordering and comprehension questions later in this level." },
-                { "type": "grammar", "pattern": "-고", "meaning": "'and (then)' — simply lists two actions or facts in sequence", "examples": [
-                  { "ko": "아침을 먹고 학교에 갑니다.", "en": "I eat breakfast and (then) go to school." }
-                ] },
-                { "type": "grammar", "pattern": "-아서/어서", "meaning": "'because / so that' — the first clause is the reason for the second", "examples": [
-                  { "ko": "배가 아파서 병원에 갔습니다.", "en": "My stomach hurt, so I went to the hospital." }
-                ] },
-                { "type": "grammar", "pattern": "-지만", "meaning": "'but' — contrasts the two clauses", "examples": [
-                  { "ko": "비싸지만 삽니다.", "en": "It's expensive, but I buy it." }
-                ] },
-                { "type": "grammar", "pattern": "-(으)면", "meaning": "'if' — the first clause is a condition for the second", "examples": [
-                  { "ko": "시간이 있으면 만납시다.", "en": "If you have time, let's meet." }
-                ] },
-                { "type": "tip", "html": "Between separate sentences (not inside one), the same logic is carried by connecting adverbs: 그리고 (and), 그래서 (so), 그런데/하지만 (but), 그러면 (if so). You'll meet these again in the sentence-ordering lesson." }
+                {
+                  "type": "text",
+                  "html": "From Level 2 onward, passages combine two clauses into one sentence using a connective ending attached to the first verb. Recognizing these endings is essential for the ordering and comprehension questions later in this level."
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "-고",
+                  "meaning": "'and (then)' — simply lists two actions or facts in sequence",
+                  "examples": [
+                    {
+                      "ko": "아침을 먹고 학교에 갑니다.",
+                      "en": "I eat breakfast and (then) go to school."
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "-아서/어서",
+                  "meaning": "'because / so that' — the first clause is the reason for the second",
+                  "examples": [
+                    {
+                      "ko": "배가 아파서 병원에 갔습니다.",
+                      "en": "My stomach hurt, so I went to the hospital."
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "-지만",
+                  "meaning": "'but' — contrasts the two clauses",
+                  "examples": [
+                    {
+                      "ko": "비싸지만 삽니다.",
+                      "en": "It's expensive, but I buy it."
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "-(으)면",
+                  "meaning": "'if' — the first clause is a condition for the second",
+                  "examples": [
+                    {
+                      "ko": "시간이 있으면 만납시다.",
+                      "en": "If you have time, let's meet."
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "Between separate sentences (not inside one), the same logic is carried by connecting adverbs: 그리고 (and), 그래서 (so), 그런데/하지만 (but), 그러면 (if so). You'll meet these again in the sentence-ordering lesson."
+                }
               ]
             }
           ]
@@ -303,12 +813,37 @@
               "title": "Notices, ads & the 'NOT correct' question",
               "summary": "Three choices are true, one is false — usually by a single changed detail.",
               "content": [
-                { "type": "text", "html": "Questions 10–12 show a short practical text — a for-sale post, a schedule, an invitation, a label — and ask you to find the ONE choice that does <strong>NOT</strong> match it. Three choices are true; one is false, often by a single changed detail." },
-                { "type": "tip", "html": "Strategy: read the source text once for its facts (numbers, dates, prices, condition, contact method), then check each choice against those facts one at a time. The wrong choice usually flips a number, negates a fact, or swaps who does what." },
-                { "type": "example", "box": "한국어 교실\n일시: 5월 3일 토요일 오후 2시\n장소: 3층 세미나실\n신청: 이메일(class@hanguk.com)", "choices": ["교실은 오후에 있습니다.", "토요일에 수업이 있습니다.", "교실은 3층에서 합니다.", "전화로 신청합니다."], "answer": 4, "note": "The notice says to apply by email, not by phone — that's the mismatched detail." },
-                { "type": "tip", "html": "Common text types for this question: 판매 글 (for-sale post), 안내문 (notice/announcement), 초대장 (invitation), 상품 라벨/사용 설명서 (product label / instructions). Numbers and contact methods (이메일/전화/방문) are the details most often altered." }
+                {
+                  "type": "text",
+                  "html": "Questions 10–12 show a short practical text — a for-sale post, a schedule, an invitation, a label — and ask you to find the ONE choice that does <strong>NOT</strong> match it. Three choices are true; one is false, often by a single changed detail."
+                },
+                {
+                  "type": "tip",
+                  "html": "Strategy: read the source text once for its facts (numbers, dates, prices, condition, contact method), then check each choice against those facts one at a time. The wrong choice usually flips a number, negates a fact, or swaps who does what."
+                },
+                {
+                  "type": "example",
+                  "box": "한국어 교실\n일시: 5월 3일 토요일 오후 2시\n장소: 3층 세미나실\n신청: 이메일(class@hanguk.com)",
+                  "choices": [
+                    "교실은 오후에 있습니다.",
+                    "토요일에 수업이 있습니다.",
+                    "교실은 3층에서 합니다.",
+                    "전화로 신청합니다."
+                  ],
+                  "answer": 4,
+                  "note": "The notice says to apply by email, not by phone — that's the mismatched detail."
+                },
+                {
+                  "type": "tip",
+                  "html": "Common text types for this question: 판매 글 (for-sale post), 안내문 (notice/announcement), 초대장 (invitation), 상품 라벨/사용 설명서 (product label / instructions). Numbers and contact methods (이메일/전화/방문) are the details most often altered."
+                }
               ],
-              "practice": { "pools": ["notmatch"], "count": 5 }
+              "practice": {
+                "pools": [
+                  "notmatch"
+                ],
+                "count": 5
+              }
             }
           ]
         },
@@ -323,22 +858,66 @@
               "title": "Matching content: scanning for facts",
               "summary": "The mirror image of the NOT-correct question — eliminate what contradicts the text.",
               "content": [
-                { "type": "text", "html": "Questions 13–15 are the mirror image of the NOT-correct question: now three choices are false and only ONE matches the passage. The passage is usually 2–4 plain sentences about a daily routine or simple situation." },
-                { "type": "tip", "html": "Because only one answer is true, eliminate rather than confirm: cross out any choice that contradicts a specific fact in the text (wrong day, wrong place, wrong person, opposite action). The last choice standing is your answer — verify it directly matches the text before choosing it." },
-                { "type": "example", "box": "저는 아침에 커피를 마십니다. 회사에서 점심을 먹습니다. 저녁에는 집에서 텔레비전을 봅니다.", "choices": ["아침에 밥을 먹습니다.", "점심은 집에서 먹습니다.", "저녁에 텔레비전을 봅니다.", "회사에서 커피를 마십니다."], "answer": 3, "note": "Only the third choice states a fact written directly in the passage; the others change the time, place, or action." }
+                {
+                  "type": "text",
+                  "html": "Questions 13–15 are the mirror image of the NOT-correct question: now three choices are false and only ONE matches the passage. The passage is usually 2–4 plain sentences about a daily routine or simple situation."
+                },
+                {
+                  "type": "tip",
+                  "html": "Because only one answer is true, eliminate rather than confirm: cross out any choice that contradicts a specific fact in the text (wrong day, wrong place, wrong person, opposite action). The last choice standing is your answer — verify it directly matches the text before choosing it."
+                },
+                {
+                  "type": "example",
+                  "box": "저는 아침에 커피를 마십니다. 회사에서 점심을 먹습니다. 저녁에는 집에서 텔레비전을 봅니다.",
+                  "choices": [
+                    "아침에 밥을 먹습니다.",
+                    "점심은 집에서 먹습니다.",
+                    "저녁에 텔레비전을 봅니다.",
+                    "회사에서 커피를 마십니다."
+                  ],
+                  "answer": 3,
+                  "note": "Only the third choice states a fact written directly in the passage; the others change the time, place, or action."
+                }
               ],
-              "practice": { "pools": ["match"], "count": 5 }
+              "practice": {
+                "pools": [
+                  "match"
+                ],
+                "count": 5
+              }
             },
             {
               "id": "l2-s4-b",
               "title": "Finding the main idea",
               "summary": "The writer's takeaway, usually signaled near the last sentence.",
               "content": [
-                { "type": "text", "html": "Questions 16–18 ask for the <strong>중심 생각</strong> (central idea) of a short passage — usually three sentences that build toward one opinion or conclusion, often stated in the last sentence." },
-                { "type": "tip", "html": "Look for an opinion or conclusion marker near the end: 그래서 저는 ~것이 좋다고 생각합니다 (so I think ~ is good), 제일 좋습니다 (is the best), -어야 합니다 (must/should). The main idea is rarely just a fact repeated from the first sentence — it's the writer's takeaway." },
-                { "type": "example", "box": "저는 지하철로 회사에 갑니다. 지하철은 빠르고 길이 막히지 않습니다. 그래서 저는 지하철이 제일 좋습니다.", "choices": ["지하철은 복잡합니다.", "저는 버스를 좋아합니다.", "지하철은 빠르고 편합니다.", "저는 회사에 걸어갑니다."], "answer": 3, "note": "The final opinion (지하철이 제일 좋다) is supported by 빠르고 길이 막히지 않는다 — summarized as 'fast and convenient'." }
+                {
+                  "type": "text",
+                  "html": "Questions 16–18 ask for the <strong>중심 생각</strong> (central idea) of a short passage — usually three sentences that build toward one opinion or conclusion, often stated in the last sentence."
+                },
+                {
+                  "type": "tip",
+                  "html": "Look for an opinion or conclusion marker near the end: 그래서 저는 ~것이 좋다고 생각합니다 (so I think ~ is good), 제일 좋습니다 (is the best), -어야 합니다 (must/should). The main idea is rarely just a fact repeated from the first sentence — it's the writer's takeaway."
+                },
+                {
+                  "type": "example",
+                  "box": "저는 지하철로 회사에 갑니다. 지하철은 빠르고 길이 막히지 않습니다. 그래서 저는 지하철이 제일 좋습니다.",
+                  "choices": [
+                    "지하철은 복잡합니다.",
+                    "저는 버스를 좋아합니다.",
+                    "지하철은 빠르고 편합니다.",
+                    "저는 회사에 걸어갑니다."
+                  ],
+                  "answer": 3,
+                  "note": "The final opinion (지하철이 제일 좋다) is supported by 빠르고 길이 막히지 않는다 — summarized as 'fast and convenient'."
+                }
               ],
-              "practice": { "pools": ["mainidea"], "count": 5 }
+              "practice": {
+                "pools": [
+                  "mainidea"
+                ],
+                "count": 5
+              }
             }
           ]
         },
@@ -353,12 +932,37 @@
               "title": "Ordering sentences with discourse markers",
               "summary": "Find the sentence with nothing to refer back to — it comes first.",
               "content": [
-                { "type": "text", "html": "Questions 27–28 give four labeled sentences (가/나/다/라) in scrambled order. Your job is to reconstruct the original, logical sequence — this directly tests the connecting words from the previous grammar lesson." },
-                { "type": "tip", "html": "Step 1: find the sentence that must come first — usually the one with no connective or pronoun referring back to something ('저는 지난 주말에 책을 샀습니다', a plain new statement). Step 2: chain the rest using their connectives — 그래서/그런데/그리고 signal what kind of sentence comes next, and words like 그 (그것/그 책) point back to something already mentioned." },
-                { "type": "example", "box": "(가) 저는 지난 주말에 책을 한 권 샀습니다.\n(나) 그 책은 요리에 관한 책입니다.\n(다) 그래서 요즘 집에서 요리 연습을 합니다.\n(라) 책에는 쉬운 요리법이 많이 있습니다.", "choices": ["(가)-(나)-(라)-(다)", "(가)-(다)-(나)-(라)", "(가)-(라)-(다)-(나)", "(가)-(나)-(다)-(라)"], "answer": 1, "note": "Bought a book → that book is about cooking → the book has many easy recipes → so, as a result, practicing cooking at home. (다) comes last because 그래서 announces a result, and (라) explains 책 (introduced in 나) before that result." },
-                { "type": "tip", "html": "가 always opens the first sentence in this question type — you never need to decide which sentence starts the paragraph, only how 나/다/라 fit around it." }
+                {
+                  "type": "text",
+                  "html": "Questions 27–28 give four labeled sentences (가/나/다/라) in scrambled order. Your job is to reconstruct the original, logical sequence — this directly tests the connecting words from the previous grammar lesson."
+                },
+                {
+                  "type": "tip",
+                  "html": "Step 1: find the sentence that must come first — usually the one with no connective or pronoun referring back to something ('저는 지난 주말에 책을 샀습니다', a plain new statement). Step 2: chain the rest using their connectives — 그래서/그런데/그리고 signal what kind of sentence comes next, and words like 그 (그것/그 책) point back to something already mentioned."
+                },
+                {
+                  "type": "example",
+                  "box": "(가) 저는 지난 주말에 책을 한 권 샀습니다.\n(나) 그 책은 요리에 관한 책입니다.\n(다) 그래서 요즘 집에서 요리 연습을 합니다.\n(라) 책에는 쉬운 요리법이 많이 있습니다.",
+                  "choices": [
+                    "(가)-(나)-(라)-(다)",
+                    "(가)-(다)-(나)-(라)",
+                    "(가)-(라)-(다)-(나)",
+                    "(가)-(나)-(다)-(라)"
+                  ],
+                  "answer": 1,
+                  "note": "Bought a book → that book is about cooking → the book has many easy recipes → so, as a result, practicing cooking at home. (다) comes last because 그래서 announces a result, and (라) explains 책 (introduced in 나) before that result."
+                },
+                {
+                  "type": "tip",
+                  "html": "가 always opens the first sentence in this question type — you never need to decide which sentence starts the paragraph, only how 나/다/라 fit around it."
+                }
               ],
-              "practice": { "pools": ["ordering"], "count": 4 }
+              "practice": {
+                "pools": [
+                  "ordering"
+                ],
+                "count": 4
+              }
             }
           ]
         },
@@ -373,12 +977,46 @@
               "title": "Blank (㉠) + content match — the paired strategy",
               "summary": "Read locally for the blank, then eliminate for the content question.",
               "content": [
-                { "type": "text", "html": "From question 19 onward, TOPIK I moves to paired questions: one shared passage, two questions. The first is almost always a blank marked ㉠ (sometimes ㉡) inside the passage; the second asks you to find the statement that matches the passage's content (같은 것을 고르십시오) or, occasionally, its purpose or something you can infer." },
-                { "type": "tip", "html": "For the ㉠ blank question: read only the sentence right around ㉠ — you rarely need the whole passage. For the content-matching question: reuse the elimination technique from the Matching Content lesson, now applied to a longer passage. Read once for the gist, then verify each choice sentence-by-sentence." },
-                { "type": "example", "box": "지난달에 새 휴대폰을 샀습니다. ( ㉠ ) 사진을 찍는 기능이 좋아서 이 휴대폰을 선택했습니다. 요즘 이 휴대폰으로 사진을 많이 찍습니다.", "choices": ["그런데 값이 아주 쌌습니다.", "그래서 사진을 잘 못 찍습니다.", "전에 쓰던 휴대폰이 고장 났습니다.", "친구에게 휴대폰을 선물했습니다."], "answer": 1, "note": "㉠ needs a sentence that bridges 'bought a new phone' and 'chose it for its camera' — 'it was also very cheap' fits as an added reason. Any choice introducing an unrelated new fact breaks the flow." },
-                { "type": "tip", "html": "As the pair numbers increase (19 → 39 on the real exam), passages get longer and the second question sometimes changes shape: 왜 이 글을 썼습니까? (why was this written — purpose) or 알 수 있는 것을 고르십시오 (what can be inferred). The elimination method still applies — just be ready for 'why / purpose' instead of a plain fact." }
+                {
+                  "type": "text",
+                  "html": "From question 19 onward, TOPIK I moves to paired questions: one shared passage, two questions. The first is almost always a blank marked ㉠ (sometimes ㉡) inside the passage; the second asks you to find the statement that matches the passage's content (같은 것을 고르십시오) or, occasionally, its purpose or something you can infer."
+                },
+                {
+                  "type": "tip",
+                  "html": "For the ㉠ blank question: read only the sentence right around ㉠ — you rarely need the whole passage. For the content-matching question: reuse the elimination technique from the Matching Content lesson, now applied to a longer passage. Read once for the gist, then verify each choice sentence-by-sentence."
+                },
+                {
+                  "type": "example",
+                  "box": "지난달에 새 휴대폰을 샀습니다. ( ㉠ ) 사진을 찍는 기능이 좋아서 이 휴대폰을 선택했습니다. 요즘 이 휴대폰으로 사진을 많이 찍습니다.",
+                  "choices": [
+                    "그런데 값이 아주 쌌습니다.",
+                    "그래서 사진을 잘 못 찍습니다.",
+                    "전에 쓰던 휴대폰이 고장 났습니다.",
+                    "친구에게 휴대폰을 선물했습니다."
+                  ],
+                  "answer": 1,
+                  "note": "㉠ needs a sentence that bridges 'bought a new phone' and 'chose it for its camera' — 'it was also very cheap' fits as an added reason. Any choice introducing an unrelated new fact breaks the flow."
+                },
+                {
+                  "type": "tip",
+                  "html": "As the pair numbers increase (19 → 39 on the real exam), passages get longer and the second question sometimes changes shape: 왜 이 글을 썼습니까? (why was this written — purpose) or 알 수 있는 것을 고르십시오 (what can be inferred). The elimination method still applies — just be ready for 'why / purpose' instead of a plain fact."
+                }
               ],
-              "practice": { "pools": ["pair-49-50", "pair-51-52", "pair-53-54", "pair-55-56", "pair-59-60", "pair-61-62", "pair-63-64", "pair-65-66", "pair-67-68", "pair-69-70"], "count": 6 }
+              "practice": {
+                "pools": [
+                  "pair-49-50",
+                  "pair-51-52",
+                  "pair-53-54",
+                  "pair-55-56",
+                  "pair-59-60",
+                  "pair-61-62",
+                  "pair-63-64",
+                  "pair-65-66",
+                  "pair-67-68",
+                  "pair-69-70"
+                ],
+                "count": 6
+              }
             }
           ]
         }
@@ -404,31 +1042,99 @@
               "title": "Reason, contrast & progress connectives",
               "summary": "-느라고, -는 바람에/통에, -더라도, -(으)ㄹ 때마다, -아/어 가다, -(으)ㄹ 뻔하다.",
               "content": [
-                { "type": "text", "html": "TOPIK II connects two clauses with more nuanced logic than Level 1–2's -아서/어서, -지만, -(으)면. The patterns below each add a specific shade of meaning: an unwanted side effect, a narrow miss, a gradual change." },
-                { "type": "grammar", "pattern": "verb stem + -느라고", "meaning": "'because (I was busy) doing ~' — the ongoing action caused a negative or burdensome result; same subject in both clauses, never used with a past-tense clause on -느라고 itself", "examples": [
-                  { "ko": "시험공부를 하느라고 잠을 못 잤어요.", "en": "I couldn't sleep because I was studying for the exam." },
-                  { "ko": "전화를 받느라고 못 들었어요.", "en": "I didn't hear it because I was answering the phone." }
-                ] },
-                { "type": "tip", "html": "-느라고 vs the Level 2 -아서/어서: -느라고 only works when (1) both clauses share the same subject and (2) the second clause is a negative or burdensome result (couldn't do something, was late, got tired). Plain -아서/어서 has no such restriction — it works for any reason, positive or negative, even with different subjects." },
-                { "type": "grammar", "pattern": "verb stem + -는 바람에 / -는 통에", "meaning": "'because of ~' — an unexpected, uncontrollable event caused a negative result", "examples": [
-                  { "ko": "갑자기 비가 오는 바람에 소풍이 취소되었다.", "en": "The picnic was cancelled because it suddenly started raining." },
-                  { "ko": "아이가 우는 통에 정신이 없었다.", "en": "With the child crying, everything was chaotic." }
-                ] },
-                { "type": "grammar", "pattern": "verb/adjective stem + -더라도", "meaning": "'even if / even though' — a stronger, more hypothetical concession than -아도/어도", "examples": [
-                  { "ko": "내일 눈이 오더라도 여행은 갈 거예요.", "en": "Even if it snows tomorrow, I'll still go on the trip." }
-                ] },
-                { "type": "grammar", "pattern": "verb stem + -(으)ㄹ 때마다", "meaning": "'every time / whenever ~'", "examples": [
-                  { "ko": "이 노래를 들을 때마다 고향이 생각나요.", "en": "Every time I hear this song, I think of my hometown." }
-                ] },
-                { "type": "grammar", "pattern": "verb/adjective stem + -아/어 가다", "meaning": "gradual change moving from now toward completion or a future state (pairs with -아/어 오다 for change up to now)", "examples": [
-                  { "ko": "한국 생활에 점점 익숙해져 가요.", "en": "I'm gradually getting used to life in Korea." }
-                ] },
-                { "type": "grammar", "pattern": "verb stem + -(으)ㄹ 뻔하다", "meaning": "'almost did ~ (but didn't)' — a narrowly avoided event, always past tense: -(으)ㄹ 뻔했다", "examples": [
-                  { "ko": "길이 막혀서 비행기를 놓칠 뻔했어요.", "en": "Traffic was bad, so I almost missed the flight." }
-                ] },
-                { "type": "tip", "html": "In the fill-in-the-blank question, the two surrounding clauses tell you which shade of meaning fits: a negative surprise → -는 바람에/통에; a busy cause with an inconvenient result → -느라고; a narrow miss → -(으)ㄹ 뻔하다. If more than one choice seems grammatically possible, check whether the situation is truly unexpected (바람에/통에) or simply causal (느라고, 아서)." }
+                {
+                  "type": "text",
+                  "html": "TOPIK II connects two clauses with more nuanced logic than Level 1–2's -아서/어서, -지만, -(으)면. The patterns below each add a specific shade of meaning: an unwanted side effect, a narrow miss, a gradual change."
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "verb stem + -느라고",
+                  "meaning": "'because (I was busy) doing ~' — the ongoing action caused a negative or burdensome result; same subject in both clauses, never used with a past-tense clause on -느라고 itself",
+                  "examples": [
+                    {
+                      "ko": "시험공부를 하느라고 잠을 못 잤어요.",
+                      "en": "I couldn't sleep because I was studying for the exam."
+                    },
+                    {
+                      "ko": "전화를 받느라고 못 들었어요.",
+                      "en": "I didn't hear it because I was answering the phone."
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "-느라고 vs the Level 2 -아서/어서: -느라고 only works when (1) both clauses share the same subject and (2) the second clause is a negative or burdensome result (couldn't do something, was late, got tired). Plain -아서/어서 has no such restriction — it works for any reason, positive or negative, even with different subjects."
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "verb stem + -는 바람에 / -는 통에",
+                  "meaning": "'because of ~' — an unexpected, uncontrollable event caused a negative result",
+                  "examples": [
+                    {
+                      "ko": "갑자기 비가 오는 바람에 소풍이 취소되었다.",
+                      "en": "The picnic was cancelled because it suddenly started raining."
+                    },
+                    {
+                      "ko": "아이가 우는 통에 정신이 없었다.",
+                      "en": "With the child crying, everything was chaotic."
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "verb/adjective stem + -더라도",
+                  "meaning": "'even if / even though' — a stronger, more hypothetical concession than -아도/어도",
+                  "examples": [
+                    {
+                      "ko": "내일 눈이 오더라도 여행은 갈 거예요.",
+                      "en": "Even if it snows tomorrow, I'll still go on the trip."
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "verb stem + -(으)ㄹ 때마다",
+                  "meaning": "'every time / whenever ~'",
+                  "examples": [
+                    {
+                      "ko": "이 노래를 들을 때마다 고향이 생각나요.",
+                      "en": "Every time I hear this song, I think of my hometown."
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "verb/adjective stem + -아/어 가다",
+                  "meaning": "gradual change moving from now toward completion or a future state (pairs with -아/어 오다 for change up to now)",
+                  "examples": [
+                    {
+                      "ko": "한국 생활에 점점 익숙해져 가요.",
+                      "en": "I'm gradually getting used to life in Korea."
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "verb stem + -(으)ㄹ 뻔하다",
+                  "meaning": "'almost did ~ (but didn't)' — a narrowly avoided event, always past tense: -(으)ㄹ 뻔했다",
+                  "examples": [
+                    {
+                      "ko": "길이 막혀서 비행기를 놓칠 뻔했어요.",
+                      "en": "Traffic was bad, so I almost missed the flight."
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "In the fill-in-the-blank question, the two surrounding clauses tell you which shade of meaning fits: a negative surprise → -는 바람에/통에; a busy cause with an inconvenient result → -느라고; a narrow miss → -(으)ㄹ 뻔하다. If more than one choice seems grammatically possible, check whether the situation is truly unexpected (바람에/통에) or simply causal (느라고, 아서)."
+                }
               ],
-              "practice": { "pools": ["t2r-gram"], "count": 5 }
+              "practice": {
+                "pools": [
+                  "t2r-gram"
+                ],
+                "count": 5
+              }
             }
           ]
         },
@@ -443,20 +1149,67 @@
               "title": "Choosing the closest paraphrase",
               "summary": "Two sub-types: grammar-pattern synonyms and idiom/vocabulary synonyms.",
               "content": [
-                { "type": "text", "html": "Questions 7–8 underline part of a sentence and ask you to choose the option closest in meaning. There are two flavors: a <strong>grammar pattern</strong> that has a near-synonym pattern (e.g. -자마자 ≈ -기가 무섭게), or an <strong>idiom / set expression</strong> whose plain-language equivalent you simply need to know (e.g. 씻은 듯이 = 완전히)." },
-                { "type": "tip", "html": "For grammar-pattern synonyms: reason the meaning out from the pattern itself, the same way you learned each pattern. For idioms: there's no shortcut — build a small personal list as you meet them, since the exam draws from a fairly limited, recurring set of everyday idioms." },
-                { "type": "vocab", "title": "Common idioms → plain equivalents", "words": [
-                  { "ko": "씻은 듯이 (낫다)", "en": "= 완전히 (completely)" },
-                  { "ko": "전전긍긍하다", "en": "= 안절부절못하다 (to be anxious/fidgety)" },
-                  { "ko": "볼 만하다", "en": "= 볼 가치가 충분하다 (worth watching)" },
-                  { "ko": "자다가도 벌떡 일어난다", "en": "= 매우 열정적이다 (extremely enthusiastic about it)" },
-                  { "ko": "손에 익다", "en": "= 익숙해지다 (to become skilled/familiar with)" },
-                  { "ko": "발이 넓다", "en": "= 아는 사람이 많다 (to know a lot of people)" }
-                ] },
-                { "type": "example", "box": "동생은 그 소식을 듣고 {u}깜짝 놀랐다{/u}.", "choices": ["매우 놀랐다", "전혀 놀라지 않았다", "약간 실망했다", "몹시 궁금해했다"], "answer": 1, "note": "깜짝 놀라다 is a set phrase meaning 'to be very startled/surprised' — the plain paraphrase is simply 매우 놀랐다." },
-                { "type": "tip", "html": "Eliminate choices that reverse the meaning (전혀 놀라지 않았다 = 'not surprised at all', the opposite) or introduce an unrelated feeling (실망하다 'disappointed', 궁금하다 'curious') not present in the original at all." }
+                {
+                  "type": "text",
+                  "html": "Questions 7–8 underline part of a sentence and ask you to choose the option closest in meaning. There are two flavors: a <strong>grammar pattern</strong> that has a near-synonym pattern (e.g. -자마자 ≈ -기가 무섭게), or an <strong>idiom / set expression</strong> whose plain-language equivalent you simply need to know (e.g. 씻은 듯이 = 완전히)."
+                },
+                {
+                  "type": "tip",
+                  "html": "For grammar-pattern synonyms: reason the meaning out from the pattern itself, the same way you learned each pattern. For idioms: there's no shortcut — build a small personal list as you meet them, since the exam draws from a fairly limited, recurring set of everyday idioms."
+                },
+                {
+                  "type": "vocab",
+                  "title": "Common idioms → plain equivalents",
+                  "words": [
+                    {
+                      "ko": "씻은 듯이 (낫다)",
+                      "en": "= 완전히 (completely)"
+                    },
+                    {
+                      "ko": "전전긍긍하다",
+                      "en": "= 안절부절못하다 (to be anxious/fidgety)"
+                    },
+                    {
+                      "ko": "볼 만하다",
+                      "en": "= 볼 가치가 충분하다 (worth watching)"
+                    },
+                    {
+                      "ko": "자다가도 벌떡 일어난다",
+                      "en": "= 매우 열정적이다 (extremely enthusiastic about it)"
+                    },
+                    {
+                      "ko": "손에 익다",
+                      "en": "= 익숙해지다 (to become skilled/familiar with)"
+                    },
+                    {
+                      "ko": "발이 넓다",
+                      "en": "= 아는 사람이 많다 (to know a lot of people)"
+                    }
+                  ]
+                },
+                {
+                  "type": "example",
+                  "box": "동생은 그 소식을 듣고 {u}깜짝 놀랐다{/u}.",
+                  "choices": [
+                    "매우 놀랐다",
+                    "전혀 놀라지 않았다",
+                    "약간 실망했다",
+                    "몹시 궁금해했다"
+                  ],
+                  "answer": 1,
+                  "note": "깜짝 놀라다 is a set phrase meaning 'to be very startled/surprised' — the plain paraphrase is simply 매우 놀랐다."
+                },
+                {
+                  "type": "tip",
+                  "html": "Eliminate choices that reverse the meaning (전혀 놀라지 않았다 = 'not surprised at all', the opposite) or introduce an unrelated feeling (실망하다 'disappointed', 궁금하다 'curious') not present in the original at all."
+                }
               ],
-              "practice": { "pools": ["t2r-sim"], "count": 5 }
+              "practice": {
+                "pools": [
+                  "t2r-sim"
+                ],
+                "count": 5
+              }
             }
           ]
         },
@@ -471,22 +1224,75 @@
               "title": "Decoding advertising slogans",
               "summary": "The harder sibling of the Level 1 topic-finding strategy — now in catchy, indirect ad-copy language.",
               "content": [
-                { "type": "text", "html": "Questions 9–12 show a short slogan-style text — an ad, a public campaign, or a simple notice — and ask what it's about. This is the same skill as Level 1's 'What is it about?' strategy, but the language is now indirect: wordplay, rhythm, and rhetorical questions replace plain description." },
-                { "type": "tip", "html": "Strategy: ignore the catchy phrasing and hunt for the one or two concrete nouns or verbs hiding inside it. '발끝까지 편안하게, 하루 종일 걸어도 피곤하지 않습니다' repeats 발 (foot) and 걷다 (walk) → 신발 (shoes). If no concrete noun appears, the text is likely a public-service campaign (공익 광고) — match it to its theme instead of a product." },
-                { "type": "vocab", "title": "Recurring public-campaign themes", "words": [
-                  { "ko": "물 절약", "en": "water conservation" },
-                  { "ko": "전기 절약", "en": "electricity conservation" },
-                  { "ko": "화재 예방", "en": "fire prevention" },
-                  { "ko": "환경 보호", "en": "environmental protection" },
-                  { "ko": "소음 방지", "en": "noise prevention" },
-                  { "ko": "안전 운전", "en": "safe driving" },
-                  { "ko": "질서 유지", "en": "keeping public order" },
-                  { "ko": "건강 관리", "en": "health management" }
-                ] },
-                { "type": "example", "box": "쿵쿵 뛰는 발소리, 아랫집에는 천둥소리!\n실내에서는 사뿐사뿐 걸어 주세요.", "choices": ["질서 유지", "에너지 절약", "안전 점검", "소음 방지"], "answer": 4, "note": "'쿵쿵'(loud stomping) and '천둥소리'(thunder — how it sounds to the downstairs neighbor) both point to noise → 소음 방지 (noise prevention), a classic apartment-living PSA theme." },
-                { "type": "tip", "html": "The eight campaign themes above cover the large majority of public-service items in this pool — memorizing them as a closed set is often faster than reasoning out the wordplay from scratch." }
+                {
+                  "type": "text",
+                  "html": "Questions 9–12 show a short slogan-style text — an ad, a public campaign, or a simple notice — and ask what it's about. This is the same skill as Level 1's 'What is it about?' strategy, but the language is now indirect: wordplay, rhythm, and rhetorical questions replace plain description."
+                },
+                {
+                  "type": "tip",
+                  "html": "Strategy: ignore the catchy phrasing and hunt for the one or two concrete nouns or verbs hiding inside it. '발끝까지 편안하게, 하루 종일 걸어도 피곤하지 않습니다' repeats 발 (foot) and 걷다 (walk) → 신발 (shoes). If no concrete noun appears, the text is likely a public-service campaign (공익 광고) — match it to its theme instead of a product."
+                },
+                {
+                  "type": "vocab",
+                  "title": "Recurring public-campaign themes",
+                  "words": [
+                    {
+                      "ko": "물 절약",
+                      "en": "water conservation"
+                    },
+                    {
+                      "ko": "전기 절약",
+                      "en": "electricity conservation"
+                    },
+                    {
+                      "ko": "화재 예방",
+                      "en": "fire prevention"
+                    },
+                    {
+                      "ko": "환경 보호",
+                      "en": "environmental protection"
+                    },
+                    {
+                      "ko": "소음 방지",
+                      "en": "noise prevention"
+                    },
+                    {
+                      "ko": "안전 운전",
+                      "en": "safe driving"
+                    },
+                    {
+                      "ko": "질서 유지",
+                      "en": "keeping public order"
+                    },
+                    {
+                      "ko": "건강 관리",
+                      "en": "health management"
+                    }
+                  ]
+                },
+                {
+                  "type": "example",
+                  "box": "쿵쿵 뛰는 발소리, 아랫집에는 천둥소리!\n실내에서는 사뿐사뿐 걸어 주세요.",
+                  "choices": [
+                    "질서 유지",
+                    "에너지 절약",
+                    "안전 점검",
+                    "소음 방지"
+                  ],
+                  "answer": 4,
+                  "note": "'쿵쿵'(loud stomping) and '천둥소리'(thunder — how it sounds to the downstairs neighbor) both point to noise → 소음 방지 (noise prevention), a classic apartment-living PSA theme."
+                },
+                {
+                  "type": "tip",
+                  "html": "The eight campaign themes above cover the large majority of public-service items in this pool — memorizing them as a closed set is often faster than reasoning out the wordplay from scratch."
+                }
               ],
-              "practice": { "pools": ["t2r-ad"], "count": 5 }
+              "practice": {
+                "pools": [
+                  "t2r-ad"
+                ],
+                "count": 5
+              }
             }
           ]
         },
@@ -501,13 +1307,43 @@
               "title": "Reading notices, graphs and short articles",
               "summary": "The Level 2 matching-content strategy, applied to three formats: notice, statistics, and narrative.",
               "content": [
-                { "type": "text", "html": "Questions 13–16 reuse the matching-content skill from Level 2, now across three formats in a row: 13 is a formal notice (안내문), 14 is a graph or survey data, and 15–16 are short narrative texts — a news item or a personal story." },
-                { "type": "tip", "html": "Notices (13): they're bullet-point lists, so most wrong choices misstate a date, time, place, or instruction. Read every bullet once, then check each choice against the exact bullet it corresponds to — don't rely on memory for numbers." },
-                { "type": "tip", "html": "Graphs (14): first identify what's being ranked or how it changes over time. Watch for choices that swap the ranking order (e.g. claim the 2nd-highest value is actually highest), invent a number not shown, or describe a trend (increasing/decreasing) that doesn't match the data." },
-                { "type": "example", "box": "[인주시 1인 가구 수 변화]\n\n- 2014년: 8만 가구\n- 2019년: 12만 가구\n- 2024년: 17만 가구", "choices": ["1인 가구 수가 계속 늘고 있다.", "2019년에 1인 가구가 줄어들었다.", "2024년 1인 가구는 20만이 넘는다.", "지난 10년간 1인 가구 수에 변화가 없다."], "answer": 1, "note": "The numbers rise every period (8만 → 12만 → 17만) — a steady increase, so only the first choice matches; the others invent a drop, an inflated number, and 'no change'." },
-                { "type": "tip", "html": "Short texts (15–16): these read like a mini news story or anecdote, often with a twist in the final sentence (a surprising outcome, a change of plan). The correct answer is usually the specific, secondary detail near the end — the same elimination method from Level 2 still applies, just over more sentences." }
+                {
+                  "type": "text",
+                  "html": "Questions 13–16 reuse the matching-content skill from Level 2, now across three formats in a row: 13 is a formal notice (안내문), 14 is a graph or survey data, and 15–16 are short narrative texts — a news item or a personal story."
+                },
+                {
+                  "type": "tip",
+                  "html": "Notices (13): they're bullet-point lists, so most wrong choices misstate a date, time, place, or instruction. Read every bullet once, then check each choice against the exact bullet it corresponds to — don't rely on memory for numbers."
+                },
+                {
+                  "type": "tip",
+                  "html": "Graphs (14): first identify what's being ranked or how it changes over time. Watch for choices that swap the ranking order (e.g. claim the 2nd-highest value is actually highest), invent a number not shown, or describe a trend (increasing/decreasing) that doesn't match the data."
+                },
+                {
+                  "type": "example",
+                  "box": "[인주시 1인 가구 수 변화]\n\n- 2014년: 8만 가구\n- 2019년: 12만 가구\n- 2024년: 17만 가구",
+                  "choices": [
+                    "1인 가구 수가 계속 늘고 있다.",
+                    "2019년에 1인 가구가 줄어들었다.",
+                    "2024년 1인 가구는 20만이 넘는다.",
+                    "지난 10년간 1인 가구 수에 변화가 없다."
+                  ],
+                  "answer": 1,
+                  "note": "The numbers rise every period (8만 → 12만 → 17만) — a steady increase, so only the first choice matches; the others invent a drop, an inflated number, and 'no change'."
+                },
+                {
+                  "type": "tip",
+                  "html": "Short texts (15–16): these read like a mini news story or anecdote, often with a twist in the final sentence (a surprising outcome, a change of plan). The correct answer is usually the specific, secondary detail near the end — the same elimination method from Level 2 still applies, just over more sentences."
+                }
               ],
-              "practice": { "pools": ["t2r-info-notice", "t2r-info-graph", "t2r-info-text"], "count": 6 }
+              "practice": {
+                "pools": [
+                  "t2r-info-notice",
+                  "t2r-info-graph",
+                  "t2r-info-text"
+                ],
+                "count": 6
+              }
             }
           ]
         },
@@ -522,18 +1358,60 @@
               "title": "Filling two blanks in a practical text",
               "summary": "Match the register to the text type, then write one natural sentence for ㉠ and one for ㉡.",
               "content": [
-                { "type": "text", "html": "Question 51 gives a practical text — an email, a posted notice, a club recruitment flyer — with two blanks marked ㉠ and ㉡. Write exactly one natural sentence for each (10 points each). You are not translating; you are producing the sentence a Korean writer would actually use in that situation." },
-                { "type": "tip", "html": "Identify the text type first, because it sets the register for both blanks: an email to a professor or someone senior needs full honorific style (교수님께, -습니다, -아/어 주시기 바랍니다); a public notice or club flyer stays formal but impersonal (-습니다, -아/어 주시기 바랍니다); a complaint or inquiry email is polite and direct (문의드립니다, 궁금합니다)." },
-                { "type": "grammar", "pattern": "-아/어 주시기 바랍니다 · -아/어 주시기를 부탁드립니다", "meaning": "a polite written request — very common for the second blank in notices and emails", "examples": [
-                  { "ko": "필요한 물을 미리 받아 놓으시기 바랍니다.", "en": "Please draw the water you need in advance." }
-                ] },
-                { "type": "grammar", "pattern": "-(으)려고 합니다 · -고자 합니다", "meaning": "stating an intention or purpose politely — common for opening or introducing the first blank", "examples": [
-                  { "ko": "새 회원을 모집하고자 합니다.", "en": "We would like to recruit new members." }
-                ] },
-                { "type": "tip", "html": "Read the sentence right before and after each blank — they constrain what you can write far more than the topic alone. A sentence starting with 그러므로/그래서 (therefore) right after a blank means that blank must state a fact or problem for the request to logically respond to." },
-                { "type": "writeExample", "box": "[안내문]\n\n인주 도서관을 이용해 주셔서 감사합니다.\n다음 달부터 시설 공사로 인해 3층 열람실을 (        ㉠        ).\n공사 기간에는 2층 열람실을 (        ㉡        ).\n이용에 불편을 드려서 죄송합니다.", "blanks": ["㉠", "㉡"], "model": ["이용하실 수 없습니다 / 이용할 수 없습니다", "이용해 주시기 바랍니다 / 이용해 주시기를 부탁드립니다"], "note": "㉠ states the problem the notice exists to announce, in plain formal style. ㉡ then gives the alternative instruction with the -아/어 주시기 바랍니다 pattern from above." }
+                {
+                  "type": "text",
+                  "html": "Question 51 gives a practical text — an email, a posted notice, a club recruitment flyer — with two blanks marked ㉠ and ㉡. Write exactly one natural sentence for each (10 points each). You are not translating; you are producing the sentence a Korean writer would actually use in that situation."
+                },
+                {
+                  "type": "tip",
+                  "html": "Identify the text type first, because it sets the register for both blanks: an email to a professor or someone senior needs full honorific style (교수님께, -습니다, -아/어 주시기 바랍니다); a public notice or club flyer stays formal but impersonal (-습니다, -아/어 주시기 바랍니다); a complaint or inquiry email is polite and direct (문의드립니다, 궁금합니다)."
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "-아/어 주시기 바랍니다 · -아/어 주시기를 부탁드립니다",
+                  "meaning": "a polite written request — very common for the second blank in notices and emails",
+                  "examples": [
+                    {
+                      "ko": "필요한 물을 미리 받아 놓으시기 바랍니다.",
+                      "en": "Please draw the water you need in advance."
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "-(으)려고 합니다 · -고자 합니다",
+                  "meaning": "stating an intention or purpose politely — common for opening or introducing the first blank",
+                  "examples": [
+                    {
+                      "ko": "새 회원을 모집하고자 합니다.",
+                      "en": "We would like to recruit new members."
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "Read the sentence right before and after each blank — they constrain what you can write far more than the topic alone. A sentence starting with 그러므로/그래서 (therefore) right after a blank means that blank must state a fact or problem for the request to logically respond to."
+                },
+                {
+                  "type": "writeExample",
+                  "box": "[안내문]\n\n인주 도서관을 이용해 주셔서 감사합니다.\n다음 달부터 시설 공사로 인해 3층 열람실을 (        ㉠        ).\n공사 기간에는 2층 열람실을 (        ㉡        ).\n이용에 불편을 드려서 죄송합니다.",
+                  "blanks": [
+                    "㉠",
+                    "㉡"
+                  ],
+                  "model": [
+                    "이용하실 수 없습니다 / 이용할 수 없습니다",
+                    "이용해 주시기 바랍니다 / 이용해 주시기를 부탁드립니다"
+                  ],
+                  "note": "㉠ states the problem the notice exists to announce, in plain formal style. ㉡ then gives the alternative instruction with the -아/어 주시기 바랍니다 pattern from above."
+                }
               ],
-              "practice": { "pools": ["t2w-51"], "count": 2 }
+              "practice": {
+                "pools": [
+                  "t2w-51"
+                ],
+                "count": 2
+              }
             }
           ]
         }
@@ -546,39 +1424,368 @@
       "badge": "Level 4",
       "title": "Intermediate Reading & Writing II",
       "subtitle": "Discourse flow, paired passages & describing information in writing",
-      "locked": true,
+      "locked": false,
       "sections": [
         {
           "id": "l4-s1",
           "icon": "reorder",
           "title": "Paragraph-Level Ordering",
           "about": "Arranging four sentences into a coherent paragraph, one step up from the Level 2 ordering question.",
-          "plannedPools": ["t2r-order"],
-          "lessons": []
+          "lessons": [
+            {
+              "id": "l4-s1-a",
+              "title": "Reconstructing an informational paragraph",
+              "summary": "Same four-sentence puzzle as Level 2, now on denser informational paragraphs — and the opening sentence's label is no longer fixed.",
+              "content": [
+                {
+                  "type": "text",
+                  "html": "Level 4 brings back the four-sentence ordering task from Level 2, now built from denser, informational paragraphs — science trivia, historical anecdotes, animal or nature facts — instead of simple daily-life stories. The reasoning method is the same: find the opening sentence, then chain the rest using their connectives and references."
+                },
+                {
+                  "type": "tip",
+                  "html": "Unlike Level 2, the opening sentence's label is <strong>not fixed</strong> — it can be 가, 나, 다, or 라. You can no longer assume 가 comes first. Find it by elimination: it is the only sentence with no connective (그래서/그런데/반면/이처럼) and no pronoun (이, 그, 이런) pointing back to something not yet introduced."
+                },
+                {
+                  "type": "vocab",
+                  "title": "Discourse markers that reveal position",
+                  "words": [
+                    {
+                      "ko": "그 결과",
+                      "en": "as a result — introduces an outcome, so it comes late in the sequence"
+                    },
+                    {
+                      "ko": "이는 ~것을 보여 준다",
+                      "en": "this shows that ~ — an interpretive closer, almost always the last sentence"
+                    },
+                    {
+                      "ko": "반면",
+                      "en": "on the other hand — needs the first, contrasting case stated right before it"
+                    },
+                    {
+                      "ko": "이처럼 / 이렇게",
+                      "en": "like this — a summarizing sentence, sits at or near the end"
+                    }
+                  ]
+                },
+                {
+                  "type": "example",
+                  "box": "(가) 특히 사이렌 소리는 사람이 본능적으로 위험을 느끼는 주파수에 맞춰져 있다.\n(나) 구급차 사이렌은 위급한 상황임을 알리기 위해 일부러 크고 날카로운 소리로 만들어졌다.\n(다) 그래서 사람들은 급하게 걷다가도 사이렌 소리가 들리면 자연스럽게 길을 비켜 준다.\n(라) 이는 사이렌이 단순한 경고음을 넘어 사람들의 행동까지 바꾸는 소리라는 것을 보여 준다.",
+                  "choices": [
+                    "(나)-(가)-(다)-(라)",
+                    "(가)-(나)-(다)-(라)",
+                    "(나)-(다)-(가)-(라)",
+                    "(가)-(다)-(나)-(라)"
+                  ],
+                  "answer": 1,
+                  "note": "나 (what a siren is and why it's loud/sharp) opens with no back-reference. 가 adds a supporting detail about frequency. 다 states the resulting behavior (그래서 = so). 라 closes with the interpretive takeaway (이는 ~것을 보여 준다)."
+                }
+              ],
+              "practice": {
+                "pools": [
+                  "t2r-order"
+                ],
+                "count": 4
+              }
+            }
+          ]
         },
         {
           "id": "l4-s2",
           "icon": "extension",
           "title": "Longer Fill-in-the-Blank Passages",
           "about": "Choosing the correct expression within a full paragraph of context.",
-          "plannedPools": ["t2r-blank1"],
-          "lessons": []
+          "lessons": [
+            {
+              "id": "l4-s2-a",
+              "title": "Tracking logic across a full paragraph",
+              "summary": "One blank, but the logic now spans the whole paragraph — read the ending before the choices.",
+              "content": [
+                {
+                  "type": "text",
+                  "html": "From here on, fill-in-the-blank questions no longer give you a same-sentence or next-sentence clue — the blank depends on logic spread across three to five sentences. Read the whole paragraph once before looking at the choices."
+                },
+                {
+                  "type": "tip",
+                  "html": "Read the <strong>last sentence first</strong>. It often states the conclusion or consequence that the blank must lead into, which narrows the four choices before you've even reread the earlier sentences."
+                },
+                {
+                  "type": "tip",
+                  "html": "Contrast markers (그러나/반면/그런데) right after the blank mean the blank must be the <strong>opposite</strong> of whatever comes next. Cause markers (그래서/때문에/이유는) mean the blank is the reason or mechanism being explained — look for a choice that names a concrete cause, not just a vague feeling."
+                },
+                {
+                  "type": "example",
+                  "box": "사람들은 낯선 사람보다 낯익은 얼굴에 더 쉽게 지갑을 연다고 한다. 한 카페는 이 점을 이용해 계산대 옆에 직원들의 어릴 적 사진을 걸어 두었다. 손님들이 사진 속 아이의 얼굴에서 (                ) 느끼면서 직원에게도 친근감을 갖게 된 것이다. 그 결과 이 카페는 재방문 손님이 크게 늘었다고 한다.",
+                  "choices": [
+                    "낯섦을",
+                    "거리감을",
+                    "친밀함을",
+                    "불편함을"
+                  ],
+                  "answer": 3,
+                  "note": "The blank must explain WHY customers came to feel closer to the staff (직원에게도 친근감을 갖게 되었다) — a childhood photo makes people feel 친밀함 (closeness), not distance or discomfort."
+                }
+              ],
+              "practice": {
+                "pools": [
+                  "t2r-blank1"
+                ],
+                "count": 5
+              }
+            }
+          ]
         },
         {
           "id": "l4-s3",
           "icon": "auto_stories",
           "title": "Paired Passages A–C",
-          "about": "Three paired-question passage styles: idiom/expression blanks, feeling & content, and blank & theme.",
-          "plannedPools": ["t2r-pair-a", "t2r-pair-b", "t2r-pair-c"],
-          "lessons": []
+          "about": "Three paired-question passage styles: a connector-word blank with a theme question, a body-part idiom blank with a content question, and a short narrative with a feeling question.",
+          "lessons": [
+            {
+              "id": "l4-s3-a",
+              "title": "Blank + theme: the connector-word pair (Type A)",
+              "summary": "Fill a connector adverb, then find the passage's theme.",
+              "content": [
+                {
+                  "type": "text",
+                  "html": "From Level 4 on, the paired-passage format (one passage, two questions) returns with three distinct flavors. This first type fills a blank with a connector adverb, then asks for the passage's overall theme — a direct extension of the Level 2 mainidea skill to a slightly longer passage."
+                },
+                {
+                  "type": "vocab",
+                  "title": "Connector adverbs to know",
+                  "words": [
+                    {
+                      "ko": "또한",
+                      "en": "also / moreover — adds a further point in the same direction"
+                    },
+                    {
+                      "ko": "반면",
+                      "en": "on the other hand — introduces a contrasting fact or case"
+                    },
+                    {
+                      "ko": "오히려",
+                      "en": "rather / instead — the actual result is the opposite of what you'd expect"
+                    },
+                    {
+                      "ko": "결국",
+                      "en": "in the end / ultimately — introduces the final outcome"
+                    },
+                    {
+                      "ko": "즉",
+                      "en": "that is / in other words — restates the previous point more plainly"
+                    },
+                    {
+                      "ko": "결코",
+                      "en": "never (ever) — pairs with a negative verb for strong denial"
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "Read the sentence right before AND after the blank as a single unit before checking the choices — the correct connector is the one whose logical relationship (add, contrast, restate, conclude) matches how those two sentences relate. For the theme question, the correct choice restates the passage's overall point in general terms; wrong choices usually restate just one supporting detail."
+                },
+                {
+                  "type": "example",
+                  "box": "새로 산 물건보다 오래 써 온 물건에 더 애정이 가는 경우가 많다. 물건 자체의 성능 때문이 아니다. ( ㉠ ) 그 물건과 함께한 시간과 기억 때문이다. 낡고 흠집이 난 가방일수록 그 안에 담긴 추억은 오히려 더 진하다.",
+                  "choices": [
+                    "또한",
+                    "반면",
+                    "즉",
+                    "그런데"
+                  ],
+                  "answer": 3,
+                  "note": "㉠ restates '성능 때문이 아니다' in plain terms as '시간과 기억 때문이다' — that's a restatement relationship, so 즉 (that is) fits best."
+                }
+              ],
+              "practice": {
+                "pools": [
+                  "t2r-pair-a"
+                ],
+                "count": 3
+              }
+            },
+            {
+              "id": "l4-s3-b",
+              "title": "Idiom blank + content matching (Type B)",
+              "summary": "Fill a body-part idiom, then match its content.",
+              "content": [
+                {
+                  "type": "text",
+                  "html": "The second paired type replaces the connector blank with a body-part idiom (관용 표현) — a fixed expression whose meaning has nothing to do with the literal body part. The second question is a plain content-match, reusing the elimination method from Level 2–3."
+                },
+                {
+                  "type": "vocab",
+                  "title": "Body-part idioms seen in this pool",
+                  "words": [
+                    {
+                      "ko": "머리를 맞대다",
+                      "en": "to put heads together — to discuss something together"
+                    },
+                    {
+                      "ko": "머리를 짜내다",
+                      "en": "to rack one's brain — to struggle to think of an idea"
+                    },
+                    {
+                      "ko": "팔을 걷어붙이다",
+                      "en": "to roll up one's sleeves — to tackle something actively"
+                    },
+                    {
+                      "ko": "가슴을 졸이다",
+                      "en": "to be anxious, on edge"
+                    },
+                    {
+                      "ko": "가슴을 앓다",
+                      "en": "to suffer inwardly — to worry deeply without showing it"
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "There's no shortcut for idioms — build a running list as you meet them. Body-part idioms cluster by meaning: 머리 (head) idioms are usually about thinking/deciding, 가슴 (chest) idioms are about inner feeling, and 손/발 (hand/foot) idioms are usually about taking action. That pattern alone can eliminate one or two choices even when you don't know the exact phrase."
+                },
+                {
+                  "type": "example",
+                  "box": "혼자 카페를 운영하던 이 씨는 재료비가 오르자 (                ) 메뉴를 다시 짜야 했다. 원가를 하나하나 계산해 인기 없는 메뉴를 정리하고 대신 저렴한 재료로 만들 수 있는 메뉴를 늘렸다. 몇 달 뒤 가게의 이익은 오히려 전보다 늘어났다.",
+                  "choices": [
+                    "귀를 기울이며",
+                    "머리를 짜내며",
+                    "눈을 감으며",
+                    "발을 빼며"
+                  ],
+                  "answer": 2,
+                  "note": "'머리를 짜내다' (rack one's brain) fits a small business owner forced to rework the whole menu under pressure — the same idiom from the vocab list above."
+                }
+              ],
+              "practice": {
+                "pools": [
+                  "t2r-pair-b"
+                ],
+                "count": 3
+              }
+            },
+            {
+              "id": "l4-s3-c",
+              "title": "A character's feeling + content matching (Type C)",
+              "summary": "Read a narrator's underlined feeling, then match the passage's content.",
+              "content": [
+                {
+                  "type": "text",
+                  "html": "The third paired type is a short personal narrative with one sentence underlined, asking what the narrator felt in that moment — then a plain content-match question. This is the first time the Learning Hub asks you to read emotion rather than fact, a skill that returns in a harder form at Level 6."
+                },
+                {
+                  "type": "vocab",
+                  "title": "Feeling words (심정) for this level",
+                  "words": [
+                    {
+                      "ko": "허전하다",
+                      "en": "empty, a sense of loss — something/someone is suddenly missing"
+                    },
+                    {
+                      "ko": "뭉클하다",
+                      "en": "deeply moved — a lump in one's throat"
+                    },
+                    {
+                      "ko": "감격스럽다",
+                      "en": "overwhelmed with emotion — usually a proud or joyful peak moment"
+                    },
+                    {
+                      "ko": "긴장되다",
+                      "en": "nervous, tense — before something important"
+                    },
+                    {
+                      "ko": "서운하다",
+                      "en": "hurt / a little disappointed — usually by someone close"
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "The underlined sentence almost always describes a <strong>physical reaction</strong> — a racing heart, held breath, tears, a long silence, staring at an object — not the feeling word itself. Match the physical cue to its feeling: trembling hands/racing heart before an event = 긴장되다; unexpected tears while remembering someone = 뭉클하다; a lump in the throat mid-achievement = 감격스럽다. Then check what the narrator does right after — it usually confirms which feeling fits."
+                },
+                {
+                  "type": "example",
+                  "box": "회사에 다니는 동안 늘 함께였던 낡은 자전거를 마침내 새것으로 바꾸기로 한 날이었다. 중고 거래로 자전거를 건네주고 돌아오는 길, {u}나는 몇 번이나 뒤를 돌아보았다{/u}. 집에 와서도 오랫동안 세워 두었던 자리가 자꾸 눈에 들어왔다.",
+                  "choices": [
+                    "허전하다",
+                    "짜증스럽다",
+                    "당황스럽다",
+                    "만족스럽다"
+                  ],
+                  "answer": 1,
+                  "note": "Looking back repeatedly and noticing the now-empty spot both point to a sense of loss over something long familiar — 허전하다."
+                }
+              ],
+              "practice": {
+                "pools": [
+                  "t2r-pair-c"
+                ],
+                "count": 3
+              }
+            }
+          ]
         },
         {
           "id": "l4-s4",
           "icon": "edit_note",
           "title": "Writing — Sentence Completion (문제 52)",
           "about": "A second sentence-blank writing task, often explaining a general fact or comparison.",
-          "plannedPools": ["t2w-52"],
-          "lessons": []
+          "lessons": [
+            {
+              "id": "l4-s4-a",
+              "title": "Writing task 52: explaining a general fact",
+              "summary": "A second two-blank writing task — now in plain written style, not polite -습니다.",
+              "content": [
+                {
+                  "type": "text",
+                  "html": "Question 52 looks like question 51 — a two-blank text with 10 points each — but the text type is completely different. Instead of a practical, addressed-to-someone text (email, notice), 52 gives a general explanatory paragraph: a fact, a comparison, a piece of advice, written the way an article or textbook would state it."
+                },
+                {
+                  "type": "tip",
+                  "html": "<strong>Register shift:</strong> 51 uses the polite written style -습니다 (and sometimes honorifics, since it's addressed to a real reader). 52 switches to the plain written style -다/-는다 — the same impersonal style you'll use for the rest of the writing section (53, 54). Writing '-습니다' in question 52 is a common point-losing mistake."
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "-는 것으로 나타났다",
+                  "meaning": "'was found to be ~' — reports a research or survey result in written style",
+                  "examples": [
+                    {
+                      "ko": "이 방법이 더 효과적인 것으로 나타났다.",
+                      "en": "This method was found to be more effective."
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "-는 경우가 많다 / -기 마련이다",
+                  "meaning": "'it's often the case that ~' / 'it's only natural that ~' — states a general tendency, common in the opening or blank sentence of these texts",
+                  "examples": [
+                    {
+                      "ko": "사람은 익숙한 것에 편안함을 느끼기 마련이다.",
+                      "en": "People naturally feel comfortable with what's familiar."
+                    }
+                  ]
+                },
+                {
+                  "type": "writeExample",
+                  "box": "사람은 무언가에 집중할 때 눈을 깜박이는 횟수가 줄어든다. 그래서 책을 읽거나 화면을 오래 보고 나면 눈이 (        ㉠        ). 이를 막으려면 중간중간 의식적으로 (        ㉡        ). 짧은 휴식만으로도 눈의 피로는 크게 줄어든다.",
+                  "blanks": [
+                    "㉠",
+                    "㉡"
+                  ],
+                  "model": [
+                    "건조해지고 뻑뻑해진다 / 건조해진다",
+                    "눈을 깜박여 주는 것이 좋다 / 눈을 쉬게 해 주어야 한다"
+                  ],
+                  "note": "㉠ states the resulting problem (dry, strained eyes) in plain written style. ㉡ then gives the practical fix, following '이를 막으려면' (to prevent this) with a recommendation ending."
+                }
+              ],
+              "practice": {
+                "pools": [
+                  "t2w-52"
+                ],
+                "count": 2
+              }
+            }
+          ]
         }
       ]
     },
@@ -589,47 +1796,273 @@
       "badge": "Level 5",
       "title": "Advanced Reading & Writing I",
       "subtitle": "News headlines, long passages & describing survey data",
-      "locked": true,
+      "locked": false,
       "sections": [
         {
           "id": "l5-s1",
           "icon": "newspaper",
           "title": "News Headlines",
           "about": "Decoding the compressed, idiomatic language of Korean newspaper headlines.",
-          "plannedPools": ["t2r-head"],
-          "lessons": []
+          "lessons": [
+            {
+              "id": "l5-s1-a",
+              "title": "Decoding news headlines",
+              "summary": "Decode a compressed newspaper headline into a full sentence.",
+              "content": [
+                {
+                  "type": "text",
+                  "html": "Questions 25–27 show a real newspaper headline — compressed, punchy, and often missing particles or verbs entirely — and ask which full sentence best explains it. You're not translating word-for-word; you're decoding tone and topic from a handful of loaded words."
+                },
+                {
+                  "type": "vocab",
+                  "title": "Common headline idioms",
+                  "words": [
+                    {
+                      "ko": "고공 행진",
+                      "en": "sky-high march — a price or figure staying persistently high"
+                    },
+                    {
+                      "ko": "한숨",
+                      "en": "a sigh — signals hardship or burden, not literal breathing"
+                    },
+                    {
+                      "ko": "대박",
+                      "en": "a huge hit — something succeeding far beyond expectations"
+                    },
+                    {
+                      "ko": "단비",
+                      "en": "welcome rain — relief arriving after a long hardship"
+                    },
+                    {
+                      "ko": "발길이 이어지다",
+                      "en": "footsteps keep coming — a steady stream of visitors/customers"
+                    },
+                    {
+                      "ko": "눈앞",
+                      "en": "right before one's eyes — something is imminent, about to happen"
+                    },
+                    {
+                      "ko": "숨통이 트이다",
+                      "en": "one's airway opens up — to finally get relief from a difficult situation"
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "Split the headline at its comma or gap into two halves: a subject/situation and a reaction/result. Decide the overall tone first — is this good news, bad news, or a before-and-after contrast? — then match that tone to a full-sentence choice before checking details. A headline with 대박/단비/눈앞 (success, relief, imminent) is positive; one with 한숨/지옥/몸살 (sigh, hell, aching) is negative."
+                },
+                {
+                  "type": "example",
+                  "box": "폭염에 냉방 용품 '불티', 선풍기·에어컨 매출 쑥쑥",
+                  "choices": [
+                    "폭염으로 냉방 용품 판매가 크게 늘고 있다.",
+                    "폭염이 끝나 냉방 용품 수요가 줄었다.",
+                    "냉방 용품 가격이 너무 비싸 팔리지 않는다.",
+                    "선풍기와 에어컨 생산이 중단되었다."
+                  ],
+                  "answer": 1,
+                  "note": "'불티나다' (sell like hotcakes) and '쑥쑥' (rapidly) both signal strong, rising sales driven by the heatwave."
+                }
+              ],
+              "practice": {
+                "pools": [
+                  "t2r-head"
+                ],
+                "count": 5
+              }
+            }
+          ]
         },
         {
           "id": "l5-s2",
           "icon": "menu_book",
           "title": "Long-Passage Blanks",
           "about": "Fill-in-the-blank questions embedded in denser, more abstract passages.",
-          "plannedPools": ["t2r-blank2"],
-          "lessons": []
+          "lessons": [
+            {
+              "id": "l5-s2-a",
+              "title": "Long-passage blanks: filling in the mechanism",
+              "summary": "A single blank that hinges on a surprising cause-and-effect mechanism.",
+              "content": [
+                {
+                  "type": "text",
+                  "html": "This pool looks like Level 4's single-blank passages, but the topic shifts to psychology, marketing and science trivia — usually revealing a surprising cause behind an everyday behavior. The blank is often the mechanism itself: the reason something happens, not just a matching keyword."
+                },
+                {
+                  "type": "tip",
+                  "html": "Locate the sentence containing 이유는/때문에/전략이다/현상이다 (the reason is / because / it's a strategy / it's a phenomenon) — the blank is frequently inside or right next to that sentence. Since the whole paragraph exists to explain ONE surprising mechanism, once you understand what's being explained, only one choice actually names it."
+                },
+                {
+                  "type": "example",
+                  "box": "슈퍼마켓에서는 우유나 계란처럼 자주 사는 물건을 매장 가장 안쪽에 둔다. 손님들이 그 물건을 사러 가는 동안 (                ) 하기 위해서다. 매장을 가로지르며 다른 진열대를 지나다 보면 원래 계획에 없던 물건도 눈에 들어와 장바구니에 담기게 된다.",
+                  "choices": [
+                    "빨리 계산을 마치게",
+                    "매장 전체를 지나가게",
+                    "같은 통로로 돌아가게",
+                    "직원과 마주치지 않게"
+                  ],
+                  "answer": 2,
+                  "note": "The next sentence explains that walking across the whole store exposes shoppers to more shelves — so the blank must be the reason for that layout: making customers pass through the entire store."
+                }
+              ],
+              "practice": {
+                "pools": [
+                  "t2r-blank2"
+                ],
+                "count": 5
+              }
+            }
+          ]
         },
         {
           "id": "l5-s3",
           "icon": "fact_check",
           "title": "Content Matching (Advanced)",
           "about": "Applying the matching-content strategy to longer, more nuanced passages.",
-          "plannedPools": ["t2r-match"],
-          "lessons": []
+          "lessons": [
+            {
+              "id": "l5-s3-a",
+              "title": "Content matching in dense, factual passages",
+              "summary": "The same elimination method, now on dense scientific and historical trivia.",
+              "content": [
+                {
+                  "type": "text",
+                  "html": "The same elimination skill from Level 2–3 matching-content questions, now applied to short, fact-dense paragraphs about science, history or everyday research findings rather than narrative."
+                },
+                {
+                  "type": "tip",
+                  "html": "In these information-dense paragraphs, the most common false choices are: a flipped negation (있다 becomes 없다, or vice versa), a swapped ranking or number, and <strong>reversed causality</strong> — the passage says A causes B, but the wrong choice claims B causes A. Check the direction of every 'because' claim carefully, not just whether the fact itself sounds familiar."
+                },
+                {
+                  "type": "example",
+                  "box": "오래된 나침반은 정확히 북쪽을 가리키지 않는 경우가 있다. 지구의 자기장이 지역에 따라 조금씩 다르고 시간이 지나면서 서서히 변하기 때문이다. 그래서 지도 제작자들은 지역과 제작 연도에 맞춰 나침반의 오차를 따로 표시해 둔다.",
+                  "choices": [
+                    "나침반의 오차는 어느 지역에서나 항상 같다.",
+                    "지구의 자기장은 시간이 지나도 변하지 않는다.",
+                    "나침반이 가리키는 방향은 지역에 따라 다를 수 있다.",
+                    "지도 제작자들은 나침반의 오차를 표시하지 않는다."
+                  ],
+                  "answer": 3,
+                  "note": "The passage states the magnetic field — and so a compass's accuracy — varies by region and changes over time; the other choices each reverse or deny a stated fact."
+                }
+              ],
+              "practice": {
+                "pools": [
+                  "t2r-match"
+                ],
+                "count": 5
+              }
+            }
+          ]
         },
         {
           "id": "l5-s4",
           "icon": "lightbulb",
           "title": "Passage Themes",
           "about": "Identifying the central theme of an argumentative or explanatory passage.",
-          "plannedPools": ["t2r-theme"],
-          "lessons": []
+          "lessons": [
+            {
+              "id": "l5-s4-a",
+              "title": "Finding the theme of an argument",
+              "summary": "Find the core claim of a short opinion passage.",
+              "content": [
+                {
+                  "type": "text",
+                  "html": "Level 2's mainidea question returns in a harder form: a short opinion piece (a few sentences long) about consumer psychology, parenting, or workplace behavior, building toward a claim rather than a simple daily observation."
+                },
+                {
+                  "type": "tip",
+                  "html": "The core claim is usually signaled by 따라서/그러므로 (therefore), -어야 한다 (should/must), or -는 것이 중요하다 (it's important that), and often sits at the very end — but check the opening sentence too, since some passages state the claim up front and spend the rest of the paragraph supporting it. The correct choice paraphrases this claim in general terms; wrong choices restate a specific example or statistic used only to support it."
+                },
+                {
+                  "type": "example",
+                  "box": "아이에게 실수를 지적할 때는 '왜 그랬어?'보다 '다음엔 어떻게 하면 좋을까?'라고 묻는 것이 좋다. 전자는 아이를 방어적으로 만들지만 후자는 스스로 해결책을 생각하게 한다. 질문의 방식 하나가 아이의 태도를 크게 바꾸는 것이다.",
+                  "choices": [
+                    "아이의 실수는 그냥 넘어가는 것이 좋다.",
+                    "질문의 방식이 아이의 태도에 큰 영향을 준다.",
+                    "아이에게는 확실하게 이유를 물어야 한다.",
+                    "아이의 문제는 부모가 대신 해결해 줘야 한다."
+                  ],
+                  "answer": 2,
+                  "note": "The final sentence states the claim directly: how you phrase a question changes a child's attitude — a general statement, not the specific example phrasing."
+                }
+              ],
+              "practice": {
+                "pools": [
+                  "t2r-theme"
+                ],
+                "count": 5
+              }
+            }
+          ]
         },
         {
           "id": "l5-s5",
           "icon": "bar_chart",
           "title": "Writing — Describing Survey Data (문제 53)",
           "about": "Turning a chart or survey results into a structured 200–300 character report.",
-          "plannedPools": ["t2w-53"],
-          "lessons": []
+          "lessons": [
+            {
+              "id": "l5-s5-a",
+              "title": "Writing task 53: describing survey or graph data",
+              "summary": "Turn a chart or survey into a structured 200–300 character report.",
+              "content": [
+                {
+                  "type": "text",
+                  "html": "Question 53 gives a chart, graph or survey result and asks for a 200–300 character written report. Unlike 52, there's no blank to fill — you write the whole passage yourself, in the same plain written style (-다), describing only what the data shows."
+                },
+                {
+                  "type": "tip",
+                  "html": "Never add your own opinion in task 53 — it's scored as an objective report. No '저는 ~라고 생각한다'. Structure: (1) introduce the survey — who/what was asked, (2) state the headline figures using a contrast expression, (3) list any ranked reasons/categories in order, (4) close with one sentence on what the numbers show overall."
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "~을/를 대상으로 조사한 결과",
+                  "meaning": "'as a result of surveying ~' — the standard opening for describing survey data",
+                  "examples": [
+                    {
+                      "ko": "성인 300명을 대상으로 조사한 결과",
+                      "en": "as a result of surveying 300 adults"
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "~에 그친 반면 ~에 달했다",
+                  "meaning": "'stood at only ~, while reaching ~' — a set contrast pattern for comparing two figures",
+                  "examples": [
+                    {
+                      "ko": "20%에 그친 반면 80%에 달했다.",
+                      "en": "It stood at only 20%, while reaching 80%."
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "1위는 ~, 그 뒤를 이어 ~",
+                  "meaning": "'ranked first was ~, followed by ~' — the standard way to list survey results in order",
+                  "examples": [
+                    {
+                      "ko": "1위는 '시간 부족'으로 나타났으며, 그 뒤를 이어 '비용 부담'이 2위를 차지했다.",
+                      "en": "Ranked first was \"lack of time,\" followed by \"cost burden\" in second place."
+                    }
+                  ]
+                },
+                {
+                  "type": "writeExample",
+                  "box": "다음은 '성인 400명의 하루 평균 독서 시간'에 대한 설문 조사 자료이다.\n\n[하루 평균 독서 시간]\n- 30분 미만: 45%\n- 30분~1시간: 35%\n- 1시간 이상: 20%\n\n[책을 적게 읽는 이유 (1위~2위)]\n- 1위: 시간이 없어서 (60%)\n- 2위: 다른 매체를 더 선호해서 (25%)",
+                  "model": "성인 400명을 대상으로 하루 평균 독서 시간을 조사한 결과, '30분 미만'이라는 응답이 45%로 가장 많았고 '30분에서 1시간'이 35%로 뒤를 이었다. '1시간 이상' 독서를 한다는 응답은 20%에 그쳤다. 책을 적게 읽는 이유로는 '시간이 없어서'가 60%로 1위를 차지했으며, '다른 매체를 더 선호해서'라는 응답이 25%로 그 뒤를 이었다. 이를 통해 성인 대부분의 독서 시간이 짧으며, 그 가장 큰 원인은 시간 부족임을 알 수 있다.",
+                  "note": "Notice the four-part structure in the model: introduce the survey, state the headline figures, list the ranked reasons, then close with a one-sentence takeaway — the same shape works for almost any 53 prompt."
+                }
+              ],
+              "practice": {
+                "pools": [
+                  "t2w-53"
+                ],
+                "count": 2
+              }
+            }
+          ]
         }
       ]
     },
@@ -640,39 +2073,347 @@
       "badge": "Level 6",
       "title": "Advanced Reading & Writing II",
       "subtitle": "Sentence insertion, literary & academic passages, and the final essay",
-      "locked": true,
+      "locked": false,
       "sections": [
         {
           "id": "l6-s1",
           "icon": "call_split",
           "title": "Sentence Insertion",
           "about": "Finding where a missing sentence best fits back into a passage.",
-          "plannedPools": ["t2r-insert"],
-          "lessons": []
+          "lessons": [
+            {
+              "id": "l6-s1-a",
+              "title": "Finding where a sentence belongs",
+              "summary": "Find which numbered gap a removed sentence originally came from.",
+              "content": [
+                {
+                  "type": "text",
+                  "html": "Questions 39–41 give a passage with four numbered gaps (㉠㉡㉢㉣) and one sentence removed from it, shown separately above. Your job is to find which gap that sentence came from."
+                },
+                {
+                  "type": "tip",
+                  "html": "The removed sentence almost always opens with a connector (그러나/그래서/이처럼/이런 이유로) or a reference word (이, 그, 이런 + noun) that points back to something specific. Test each gap by reading only the sentence immediately <strong>before</strong> it — does the removed sentence's opening word logically continue that exact idea? Then check that the sentence originally <strong>after</strong> the gap still flows naturally once the removed sentence is inserted before it."
+                },
+                {
+                  "type": "example",
+                  "box": "그런데 이 방법은 그을음이 많이 나서 실내 공기를 탁하게 만든다는 단점이 있었다.",
+                  "box2": "옛날 사람들은 밤에 불을 밝히기 위해 초를 사용했다. ( ㉠ ) 초 하나의 불빛은 밝기도 약해서 여러 개를 동시에 켜야 했다. ( ㉡ ) 그래서 사람들은 그을음 없이 오래 밝게 탈 수 있는 새로운 조명 방법을 찾기 시작했다. ( ㉢ ) 이러한 노력 끝에 등장한 것이 바로 가스등이었다. ( ㉣ )",
+                  "choices": [
+                    "㉠",
+                    "㉡",
+                    "㉢",
+                    "㉣"
+                  ],
+                  "answer": 1,
+                  "note": "The passage's ㉢-sentence mentions '그을음 없이' (without soot) — a detail that only makes sense once the soot drawback (the sentence to insert) has already been mentioned. That points to ㉠, right after candles are introduced and before the next drawback (weak light, marked by '도' = also)."
+                }
+              ],
+              "practice": {
+                "pools": [
+                  "t2r-insert"
+                ],
+                "count": 4
+              }
+            }
+          ]
         },
         {
           "id": "l6-s2",
           "icon": "theater_comedy",
-          "title": "Literary Passages",
-          "about": "Reading fiction excerpts for a character's feelings, attitude and inference.",
-          "plannedPools": ["t2r-pair-d", "t2r-pair-f"],
-          "lessons": []
+          "title": "Feeling & Attitude in Longer Passages",
+          "about": "Reading a character's feelings in personal narrative, and a writer's own attitude in opinion pieces — two flavors of the same skill: reading emotion between the lines.",
+          "lessons": [
+            {
+              "id": "l6-s2-a",
+              "title": "A character's feelings in personal narrative",
+              "summary": "A harder version of the Level 4 feeling question, inside a fuller personal story.",
+              "content": [
+                {
+                  "type": "text",
+                  "html": "This is the Level 4 심정 (feeling) skill again, now inside longer, more literary personal narratives — often about a milestone moment (a graduation, a reunion, a hard-won finish line). The method is identical: find the physical/behavioral cue in the underlined sentence and match it to the feeling."
+                },
+                {
+                  "type": "vocab",
+                  "title": "More nuanced feeling words",
+                  "words": [
+                    {
+                      "ko": "초조하다",
+                      "en": "anxious, jittery — restless while waiting for an uncertain outcome"
+                    },
+                    {
+                      "ko": "애틋하다",
+                      "en": "tender, wistfully fond — a gentle longing for someone or something from the past"
+                    },
+                    {
+                      "ko": "후련하다",
+                      "en": "relieved, a weight lifted — after finally doing or finishing something difficult"
+                    },
+                    {
+                      "ko": "못마땅하다",
+                      "en": "displeased, not sitting right — a quiet disapproval"
+                    },
+                    {
+                      "ko": "벅차다",
+                      "en": "overwhelmed (in a good way) — almost too much emotion to hold"
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "At this level, passages sometimes give TWO emotional beats — an early worry followed by a late relief or joy — and the underlined sentence can sit at either point. Always check where the underline falls relative to the story's turning point (a phone call, a door opening, a result announced): before it usually means 초조하다/긴장되다, after it usually means 후련하다/벅차다/뭉클하다."
+                },
+                {
+                  "type": "example",
+                  "box": "유학을 마치고 5년 만에 고향으로 돌아오는 날이었다. 공항 출구를 나서자 저 멀리 낯익은 실루엣이 보였다. 부모님이었다. {u}나는 캐리어를 그대로 둔 채 뛰어가 두 분을 껴안았다{/u}. 오랜만에 맡는 고향의 냄새와 부모님의 품이 참 낯설고도 반가웠다.",
+                  "choices": [
+                    "부끄럽다",
+                    "벅차다",
+                    "지루하다",
+                    "불만스럽다"
+                  ],
+                  "answer": 2,
+                  "note": "Dropping everything to run and embrace her parents after five years apart shows an emotion almost too big to contain — 벅차다."
+                }
+              ],
+              "practice": {
+                "pools": [
+                  "t2r-pair-d"
+                ],
+                "count": 3
+              }
+            },
+            {
+              "id": "l6-s2-b",
+              "title": "A writer's attitude in opinion pieces",
+              "summary": "Identify the writer's own stance toward a real-world issue.",
+              "content": [
+                {
+                  "type": "text",
+                  "html": "The second half of this section shifts from a character's feeling inside a story to the writer's own attitude toward a real-world issue — technology, policy, the environment. The passage is a short op-ed, and one question asks how the writer feels about the topic; the other is a plain content-match."
+                },
+                {
+                  "type": "vocab",
+                  "title": "Attitude words (필자의 태도)",
+                  "words": [
+                    {
+                      "ko": "우려하다",
+                      "en": "to be concerned, worried about a possible bad outcome"
+                    },
+                    {
+                      "ko": "신중한 접근을 요구하다",
+                      "en": "to call for a cautious approach"
+                    },
+                    {
+                      "ko": "비판하다",
+                      "en": "to criticize"
+                    },
+                    {
+                      "ko": "경계하다",
+                      "en": "to be wary of, on guard against"
+                    },
+                    {
+                      "ko": "회의적이다",
+                      "en": "to be skeptical"
+                    },
+                    {
+                      "ko": "지지하다",
+                      "en": "to support, be in favor of"
+                    }
+                  ]
+                },
+                {
+                  "type": "tip",
+                  "html": "태도 (attitude) differs from 심정 (feeling, the previous lesson) and 주제 (theme, Level 5): 심정 is what a character feels inside a story; 주제 is what the passage is about; 태도 is how the WRITER personally feels about that topic. Read the last one or two sentences closely — they usually contain a recommendation, a warning, or a call for discussion (~해야 한다, 논의가 필요하다, 우려된다), the clearest evidence of attitude. A topic introduced neutrally or even positively at the start can still end in a critical or cautious attitude once 그러나/하지만 appears."
+                },
+                {
+                  "type": "example",
+                  "box": "최근 여러 기업이 직원 채용 과정에 인공지능 면접을 도입하고 있다. 시간과 비용을 크게 줄일 수 있다는 것이 가장 큰 장점으로 꼽힌다. 그러나 인공지능이 지원자의 표정이나 말투만으로 성향을 판단하는 방식에는 여전히 논란이 많다. 기술의 편리함에 앞서 그 판단 기준이 공정한지부터 충분히 검증해야 할 것이다.",
+                  "choices": [
+                    "인공지능 면접의 효율성을 높이 평가하고 있다.",
+                    "인공지능 면접 기준의 공정성 검증을 요구하고 있다.",
+                    "인공지능 면접의 전면 도입을 지지하고 있다.",
+                    "인공지능 기술의 발전 속도에 감탄하고 있다."
+                  ],
+                  "answer": 2,
+                  "note": "The passage opens with a neutral advantage, but 그러나 pivots to concern — the final sentence directly calls for verifying fairness first, matching '공정성 검증을 요구하고 있다'."
+                }
+              ],
+              "practice": {
+                "pools": [
+                  "t2r-pair-f"
+                ],
+                "count": 3
+              }
+            }
+          ]
         },
         {
           "id": "l6-s3",
           "icon": "school",
-          "title": "Academic & Argumentative Passages",
-          "about": "Denser passages testing purpose, blanks and content together.",
-          "plannedPools": ["t2r-pair-e", "t2r-pair-g"],
-          "lessons": []
+          "title": "Dense Expository & Argumentative Passages",
+          "about": "Blank and theme questions applied to longer cultural essays, plus the exam's hardest three-question format: purpose, blank and content together in one long op-ed.",
+          "lessons": [
+            {
+              "id": "l6-s3-a",
+              "title": "Blank + theme in cultural or lifestyle essays",
+              "summary": "A longer blank-and-theme passage on culture and lifestyle topics.",
+              "content": [
+                {
+                  "type": "text",
+                  "html": "The same blank-plus-theme shape from Level 4's Type A pair, now over longer, more abstract passages about culture, media or lifestyle trends. The blank is usually a full descriptive phrase rather than a single connector word, so it demands more of the surrounding context."
+                },
+                {
+                  "type": "tip",
+                  "html": "Read the sentence before AND after the blank together as one unit — at this length, the blank's phrase has to fit the logic of both, not just one neighboring clause. For the theme question, be wary of choices that only restate the passage's opening example; the real theme is usually the interpretive point made in the final sentence, generalized beyond that one example."
+                },
+                {
+                  "type": "example",
+                  "box": "요즘 도시에서는 건물 옥상을 정원으로 꾸미는 곳이 늘고 있다. 화려한 정원을 만드는 것이 목적이 아니다. 좁은 도시에서 사람들이 자연을 (                ) 공간을 만들어 주는 것이 핵심이다. 잠깐이라도 초록빛 아래에 앉아 있으면 마음이 한결 차분해진다고 이용객들은 말한다.",
+                  "choices": [
+                    "멀리하고 잊을 수 있는",
+                    "가까이에서 느낄 수 있는",
+                    "빨리 지나칠 수 있는",
+                    "돈을 주고 사야 하는"
+                  ],
+                  "answer": 2,
+                  "note": "The point isn't a fancy garden — it's giving city dwellers a way to feel close to nature, which the closing sentence about sitting under greenery confirms."
+                }
+              ],
+              "practice": {
+                "pools": [
+                  "t2r-pair-e"
+                ],
+                "count": 3
+              }
+            },
+            {
+              "id": "l6-s3-b",
+              "title": "Purpose + blank + content in long op-eds",
+              "summary": "Three questions, one passage: purpose, blank, and content — the hardest reading format on the exam.",
+              "content": [
+                {
+                  "type": "text",
+                  "html": "The longest, hardest paired format: a full op-ed with THREE questions — the writer's purpose (목적) in writing it, a blank, and a content-match. This closes the reading section at the same difficulty as the essay you're about to write in question 54."
+                },
+                {
+                  "type": "tip",
+                  "html": "Keep 목적 (purpose), 주제 (theme) and 태도 (attitude) separate: 목적 is the writer's ACT in writing — what they're trying to DO (propose, warn, inform) — while 주제 is what it's about and 태도 is how they feel. 목적 choices are almost always phrased as '~하기 위해서' (in order to ~); scan for that ending first, since it instantly separates real candidates from choices that just describe the topic."
+                },
+                {
+                  "type": "vocab",
+                  "title": "목적 (purpose) verbs",
+                  "words": [
+                    {
+                      "ko": "제시하다",
+                      "en": "to propose, put forward (a solution or condition)"
+                    },
+                    {
+                      "ko": "지적하다",
+                      "en": "to point out (a problem)"
+                    },
+                    {
+                      "ko": "주장하다",
+                      "en": "to argue, assert (a position)"
+                    },
+                    {
+                      "ko": "경고하다",
+                      "en": "to warn"
+                    },
+                    {
+                      "ko": "분석하다",
+                      "en": "to analyze"
+                    }
+                  ]
+                },
+                {
+                  "type": "example",
+                  "box": "최근 몇몇 지방 도시가 청년 인구를 늘리기 위해 파격적인 지원금을 내걸고 있다. 그러나 지원금만으로는 청년들을 붙잡아 두기 어렵다는 지적이 나온다. 청년들이 도시를 떠나는 진짜 이유는 일자리와 문화 시설의 부족이기 때문이다. 지원금 지급에 앞서 (                ) 정책이 먼저 마련되어야 한다. 단기적인 현금 지원은 결국 예산 낭비로 끝날 위험이 크다.",
+                  "choices": [
+                    "지원금을 더 늘리는",
+                    "일자리와 문화 기반을 마련하는",
+                    "다른 도시와 경쟁하는",
+                    "지원 대상을 줄이는"
+                  ],
+                  "answer": 2,
+                  "note": "The passage already names the real causes of youth outmigration — lack of jobs and cultural facilities — so the blank must address exactly those two. (A companion purpose question on the same passage would answer '지방 도시의 청년 정책 방향을 제시하기 위해서' — to propose a direction for local youth policy.)"
+                }
+              ],
+              "practice": {
+                "pools": [
+                  "t2r-pair-g"
+                ],
+                "count": 3
+              }
+            }
+          ]
         },
         {
           "id": "l6-s4",
           "icon": "history_edu",
           "title": "Writing — The Essay (문제 54)",
           "about": "Structuring a 600–700 character opinion essay: introduction, body and conclusion.",
-          "plannedPools": ["t2w-54"],
-          "lessons": []
+          "lessons": [
+            {
+              "id": "l6-s4-a",
+              "title": "Structuring the final essay (문제 54)",
+              "summary": "Structure a 600–700 character essay that answers all three bullet points.",
+              "content": [
+                {
+                  "type": "text",
+                  "html": "Question 54 is the capstone: a 600–700 character opinion essay (50 points, the most of any single question) responding to three guiding sub-questions given as bullet points under a broad theme — technology, education, values, modern life."
+                },
+                {
+                  "type": "tip",
+                  "html": "The single biggest scoring mistake is skipping a bullet. Graders check explicitly for complete coverage of all three sub-questions — a beautifully written essay that only answers two of them loses major points. Structure: one clear paragraph per bullet (or combine the first two if they're closely related), in the order given, then a short closing sentence that ties them together."
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "먼저 ~을/를 살펴보면",
+                  "meaning": "'first, looking at ~' — a common way to open the first body paragraph",
+                  "examples": [
+                    {
+                      "ko": "먼저 칭찬이 아이에게 미치는 영향을 살펴보면",
+                      "en": "First, looking at how praise affects children"
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "이러한 이유로 / 이처럼",
+                  "meaning": "'for this reason' / 'as we've seen' — transitions from an example or reason into the next point",
+                  "examples": [
+                    {
+                      "ko": "이러한 이유로 많은 전문가들이 이 문제에 주목하고 있다.",
+                      "en": "For this reason, many experts are paying attention to this issue."
+                    }
+                  ]
+                },
+                {
+                  "type": "grammar",
+                  "pattern": "-다고 할 수 있다",
+                  "meaning": "'it can be said that ~' — a hedge/conclusion ending common in the essay's final sentence",
+                  "examples": [
+                    {
+                      "ko": "결국 꾸준한 노력이 실력을 만든다고 할 수 있다.",
+                      "en": "Ultimately, it can be said that steady effort is what builds real skill."
+                    }
+                  ]
+                },
+                {
+                  "type": "writeExample",
+                  "box": "다음을 주제로 하여 글을 쓰십시오.\n\n'좋은 리더'에 대해 아래의 내용을 중심으로 자신의 생각을 쓰십시오.\n- 좋은 리더는 어떤 능력을 갖춰야 합니까?\n- 리더의 태도가 조직에 어떤 영향을 미칩니까?\n- 좋은 리더가 되기 위해 어떤 노력이 필요합니까?",
+                  "model": "서론에서는 좋은 리더에게 필요한 능력을 제시한다. 본론에서는 리더의 태도가 조직의 분위기와 성과에 미치는 영향을 구체적인 예와 함께 설명한다. 결론에서는 좋은 리더가 되기 위한 노력을 제시하며 글을 마무리한다.",
+                  "note": "This is a structural outline, not a full 600–700 character essay — it still addresses all three bullets in order, which is the one non-negotiable requirement no matter the topic."
+                }
+              ],
+              "practice": {
+                "pools": [
+                  "t2w-54"
+                ],
+                "count": 1
+              }
+            }
+          ]
         }
       ]
     }

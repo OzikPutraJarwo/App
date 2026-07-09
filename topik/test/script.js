@@ -350,7 +350,6 @@ document.addEventListener("DOMContentLoaded", init);
 /* ---------------- init & data loading ---------------- */
 
 async function init() {
-  // $("btn-home").addEventListener("click", (e) => { e.preventDefault(); goHome(); });
   $("btn-submit").addEventListener("click", () => submit(false));
   $("btn-prev").addEventListener("click", () => goToStep(state.current - 1));
   $("btn-next").addEventListener("click", () => {
@@ -363,16 +362,13 @@ async function init() {
   $("btn-quit-exam").addEventListener("click", quitExam);
   document.addEventListener("keydown", onExamKey);
   $("btn-clear-history").addEventListener("click", clearHistoryAll);
-  $("btn-review").addEventListener("click", () => openReviewFromResult());
+  $("btn-review").addEventListener("click", () => { location.hash = "#/review/" + state.lastResult.entry.id; });
   $("btn-new-test").addEventListener("click", () => startExam(state.testId));
-  $("btn-result-home").addEventListener("click", goHome);
-  $("btn-review-back").addEventListener("click", () => showScreen("result"));
-  $("btn-review-home").addEventListener("click", goHome);
-  $("btn-review-home-bottom").addEventListener("click", goHome);
+  window.addEventListener("hashchange", route);
 
   for (const t of Object.keys(TESTS)) {
     $("btn-start-" + t).addEventListener("click", () => startExam(t));
-    $("btn-resume-" + t).addEventListener("click", () => resumeSaved(t));
+    $("btn-resume-" + t).addEventListener("click", () => { location.hash = "#/exam/" + t; });
     $("btn-discard-" + t).addEventListener("click", () => {
       clearProgress(t);
       renderHome();
@@ -398,8 +394,7 @@ async function init() {
     showLoadError(err);
   }
 
-  renderHome();
-  showScreen("main");
+  route();
 }
 
 function checkBank(blueprint) {
@@ -433,7 +428,49 @@ function showLoadError(err) {
   state.pools = null;
 }
 
-/* ---------------- navigation ---------------- */
+/* ---------------- routing ---------------- */
+
+/* Screens are addressed by hash: #/ (home), #/exam/{testId},
+ * #/result/{id}, #/review/{id} — id is always a history entry id,
+ * since submit() adds the entry before navigating. */
+function route() {
+  const hash = location.hash.replace(/^#\/?/, "");
+  const parts = hash.split("/").filter(Boolean);
+
+  // Leaving an in-progress exam by any navigation (site-back, quitExam,
+  // a direct link) auto-saves and stops the timer; the home screen's
+  // "Continue" box lets the user resume later.
+  if (state.mode === "exam" && !state.finished && parts[0] !== "exam") {
+    saveProgress();
+    stopTimer();
+    state.mode = null;
+    state.paused = false;
+  }
+
+  if (parts[0] === "exam" && parts[1]) {
+    routeExam(parts[1]);
+  } else if (parts[0] === "result" && parts[1]) {
+    routeResult(parts[1]);
+  } else if (parts[0] === "review" && parts[1]) {
+    routeReview(parts[1]);
+  } else {
+    renderHome();
+    showScreen("main");
+  }
+}
+
+/* Header back-arrow hook (main.js): one deterministic step up this
+ * app's own hierarchy — exam/result/review are all one level below
+ * the bare test/ home, so any of them goes straight there. Returns
+ * false once already home, so the arrow falls through to data-back
+ * ("../", i.e. up to /topik/). */
+window.siteBackUp = function () {
+  const hash = location.hash.replace(/^#\/?/, "");
+  const parts = hash.split("/").filter(Boolean);
+  if (parts.length === 0) return false;
+  location.hash = "#/";
+  return true;
+};
 
 function showScreen(name) {
   for (const s of SCREENS) $("screen-" + s).classList.toggle("none", s !== name);
@@ -462,20 +499,6 @@ function closeNavPanel() {
   $("btn-jump").setAttribute("aria-expanded", "false");
 }
 
-function goHome() {
-  if (state.mode === "exam" && !state.finished) {
-    const ok = window.confirm(
-      "Go to the main menu? Your progress will be saved so you can resume later."
-    );
-    if (!ok) return;
-    saveProgress();
-    stopTimer();
-    state.mode = null;
-  }
-  renderHome();
-  showScreen("main");
-}
-
 /* ---------------- home screen ---------------- */
 
 function renderHome() {
@@ -487,13 +510,17 @@ function renderHome() {
   renderHistory();
 }
 
-function resumeSaved(testId) {
+/* #/exam/{testId}: resume (or recover on reload) a saved exam from
+ * localStorage. startExam() already writes this before navigating
+ * here, so a freshly-started exam round-trips through the same path. */
+function routeExam(testId) {
+  if (!state.pools || !TESTS[testId]) { location.hash = "#/"; return; }
   const saved = loadProgress(testId);
   const exam = saved ? rebuildExam(saved, TESTS[testId].blueprint) : null;
   if (!exam) {
     notify("Could not load the saved test.", "error");
     clearProgress(testId);
-    renderHome();
+    location.hash = "#/";
     return;
   }
   state.testId = testId;
@@ -695,7 +722,7 @@ function renderHistory() {
     const tdView = el("td", "actions-cell");
     const viewBtn = el("button", "btn-secondary small", icon("visibility") + " View");
     viewBtn.type = "button";
-    viewBtn.addEventListener("click", () => openHistoryReview(entry));
+    viewBtn.addEventListener("click", () => { location.hash = "#/review/" + entry.id; });
     tdView.appendChild(viewBtn);
     tr.appendChild(tdView);
 
@@ -747,7 +774,7 @@ function startExam(testId) {
   state.finished = false;
   state.mode = "exam";
   saveProgress();
-  enterExamScreen();
+  location.hash = "#/exam/" + testId;
 }
 
 function enterExamScreen() {
@@ -815,15 +842,12 @@ function unpauseExam() {
   startTimer();
 }
 
-/* Save and leave to the main menu (resumable later). */
+/* Save and leave to the main menu (resumable later). route() performs
+ * the actual save/stop-timer cleanup once it sees the hash leaving #/exam. */
 function quitExam() {
   state.paused = false;
   $("pause-overlay").classList.add("none");
-  saveProgress();
-  stopTimer();
-  state.mode = null;
-  renderHome();
-  showScreen("main");
+  location.hash = "#/";
 }
 
 function renderTimer() {
@@ -1175,8 +1199,7 @@ function submit(auto) {
   addHistory(entry);
 
   state.lastResult = { res, lvl, entry, auto };
-  renderResult();
-  showScreen("result");
+  location.hash = "#/result/" + entry.id;
 }
 
 function computeResults() {
@@ -1306,33 +1329,53 @@ function onSelfScore(number, value) {
   renderBreakdown();
 }
 
-/* ---------------- review ---------------- */
+/* ---------------- result & review routes ---------------- */
 
-function openReviewFromResult() {
-  if (!state.lastResult) return;
-  const { res, entry } = state.lastResult;
-  renderReviewBody(state.exam, state.answers, state.selfScores);
-  $("review-meta").textContent =
-    fmtDate(entry.ts) + " · " + entry.test + " · " + res.score + "/" + res.maxScore + " pts · Estimated " + entry.level;
-  $("btn-review-back").classList.remove("none");
-  showScreen("review");
+/* #/result/{id}: id is a history entry id. submit() already leaves
+ * state.lastResult matching it, so this only rehydrates on a reload
+ * or a direct link (recomputing from the persisted history entry). */
+function routeResult(id) {
+  if (!state.pools) { location.hash = "#/"; return; }
+  if (!(state.lastResult && state.lastResult.entry.id === id)) {
+    if (!hydrateResult(id)) { location.hash = "#/"; return; }
+  }
+  renderResult();
+  showScreen("result");
 }
 
-function openHistoryReview(entry) {
-  if (!state.pools) {
-    notify("Question bank not loaded.", "error");
-    return;
-  }
+function hydrateResult(id) {
+  const entry = loadHistory().find((e) => e.id === id);
+  if (!entry) return false;
+  const testId = entry.testId || "t1";
+  const exam = rebuildExam({ chosen: entry.chosen }, TESTS[testId].blueprint);
+  if (!exam) return false;
+  state.testId = testId;
+  state.exam = exam;
+  state.answers = entry.answers || {};
+  state.selfScores = entry.selfScores || {};
+  const res = computeResults();
+  const lvl = curTest().level(res.score);
+  state.lastResult = { res, lvl, entry, auto: false };
+  return true;
+}
+
+/* #/review/{id}: same history-entry id, works uniformly for a just-
+ * finished attempt (already in history by the time submit() navigates
+ * here) and for any past attempt opened from the history table. */
+function routeReview(id) {
+  if (!state.pools) { location.hash = "#/"; return; }
+  const entry = loadHistory().find((e) => e.id === id);
+  if (!entry) { location.hash = "#/"; return; }
   const testId = entry.testId || "t1";
   const exam = rebuildExam({ chosen: entry.chosen }, TESTS[testId].blueprint);
   if (!exam) {
     notify("The question bank has changed — this attempt can no longer be reviewed.", "error");
+    location.hash = "#/";
     return;
   }
   renderReviewBody(exam, entry.answers || {}, entry.selfScores || {});
   $("review-meta").textContent =
     fmtDate(entry.ts) + " · " + entry.test + " · " + entry.score + "/" + entry.max + " pts · Estimated " + entry.level;
-  $("btn-review-back").classList.add("none");
   showScreen("review");
 }
 

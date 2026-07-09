@@ -37,6 +37,27 @@ function readChromeConfig() {
   };
 }
 
+// An app with its own internal hash-routing (e.g. topik/test/#/exam/t1,
+// topik/learn/#/lesson/xxx) can define window.siteBackUp(): a function
+// that moves exactly one level up its own hierarchy and returns true, or
+// returns false when already at the app's root. The back arrow calls it
+// first; only when it's absent or returns false does the arrow fall back
+// to its static href (data-back, or the portfolio root). This is a
+// deterministic "go up one directory" step, not a browser-history replay
+// — replaying real history was tried and proved unpredictable, since it
+// unwinds whatever the user actually clicked (exam -> result -> review
+// -> ...) rather than a clean parent/child structure.
+function wireSiteBack() {
+  const back = document.querySelector('.site-back');
+  if (!back || back.dataset.wired) return;
+  back.dataset.wired = '1';
+  back.addEventListener('click', (e) => {
+    if (typeof window.siteBackUp === 'function' && window.siteBackUp()) {
+      e.preventDefault();
+    }
+  });
+}
+
 // Header/background/toast are injected SYNCHRONOUSLY (main.js sits at the end
 // of <body>, so the <header></header> mount is already parsed) — this lets each
 // app's own script query injected controls (e.g. .cloud-success) right after.
@@ -92,6 +113,8 @@ function renderHeader() {
         <div class="site-actions">${lang}${cloud}${login}</div>
       </div>`;
   }
+
+  wireSiteBack();
 
   // toast host
   if (!document.getElementById('notification')) {

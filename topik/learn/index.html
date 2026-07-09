@@ -27,10 +27,7 @@
       <section id="screen-hub" class="screen">
 
         <div class="item learn-hero">
-          <div class="learn-hero-top">
-            <h2 class="section-title"><span class="material-symbols-rounded">school</span> Learning Hub</h2>
-            <a href="../" class="btn-secondary small"><span class="material-symbols-rounded">home</span> Home</a>
-          </div>
+          <h2 class="section-title"><span class="material-symbols-rounded">school</span> Learning Hub</h2>
           <p class="learn-hero-sub">
             Study Korean from Level 1 to 6 — grammar, vocabulary and question strategies, section by section.
             Practice questions are drawn live from the same question bank used by the tests.
@@ -39,6 +36,31 @@
 
         <div id="hub-coverage-note" class="coverage-note none"></div>
         <div id="load-error" class="item error-box none"></div>
+
+        <div class="item ref-block">
+          <div class="level-group-head">
+            <span class="ref-badge">Reference</span>
+            <h3>Look things up</h3>
+          </div>
+          <div class="ref-grid">
+            <a href="#/vocab" class="ref-card">
+              <span class="ref-ic material-symbols-rounded">translate</span>
+              <span class="ref-text">
+                <strong>Vocabulary</strong>
+                <small>Words by theme &amp; level, with search</small>
+              </span>
+              <span class="material-symbols-rounded ref-go">arrow_forward</span>
+            </a>
+            <a href="#/grammar" class="ref-card">
+              <span class="ref-ic material-symbols-rounded">menu_book</span>
+              <span class="ref-text">
+                <strong>Grammar</strong>
+                <small>Patterns with explanations &amp; examples</small>
+              </span>
+              <span class="material-symbols-rounded ref-go">arrow_forward</span>
+            </a>
+          </div>
+        </div>
 
         <div class="item">
           <div class="level-group-head">
@@ -61,7 +83,6 @@
       <!-- ============ LEVEL ============ -->
       <section id="screen-level" class="screen none">
         <div class="item level-hero">
-          <a href="#/" class="btn-secondary small level-hero-back"><span class="material-symbols-rounded">arrow_back</span> All levels</a>
           <div class="level-hero-head">
             <span id="level-test-tag" class="test-badge">TOPIK I</span>
             <span id="level-badge" class="level-badge-pill">Level 1</span>
@@ -85,8 +106,40 @@
         <div id="lesson-nav" class="lesson-nav"></div>
       </section>
 
+      <!-- ============ VOCAB / GRAMMAR (shared) ============ -->
+      <section id="screen-dict" class="screen none">
+        <div class="item dict-hero">
+          <span id="dict-icon" class="dict-hero-ic material-symbols-rounded">translate</span>
+          <div class="dict-hero-text">
+            <h2 id="dict-title">Vocabulary</h2>
+            <p id="dict-sub" class="dict-hero-sub"></p>
+          </div>
+        </div>
+
+        <div id="dict-controls" class="item dict-controls">
+          <div class="dict-search">
+            <span class="material-symbols-rounded">search</span>
+            <input id="dict-search-input" type="search" placeholder="Search in Korean or English…" autocomplete="off" spellcheck="false">
+          </div>
+          <button id="dict-filter-btn" class="dict-filter-btn" type="button"></button>
+        </div>
+
+        <div id="dict-list" class="dict-list"></div>
+      </section>
+
     </div>
   </main>
+
+  <!-- grammar detail popup -->
+  <div id="dict-modal" class="dict-modal none" role="dialog" aria-modal="true" aria-label="Grammar detail">
+    <div class="dict-modal-backdrop"></div>
+    <div class="dict-modal-card">
+      <button id="dict-modal-close" class="dict-modal-close" type="button" aria-label="Close">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+      <div id="dict-modal-body"></div>
+    </div>
+  </div>
 
   <div id="notification"></div>
 
