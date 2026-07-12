@@ -1,9 +1,0 @@
-https://www.processsensing.com/en-us/humidity-calculator/rotronic/
-
-Next:
-- Custom text/shape/image inside chart
-- Fix point and zone not moved following the changing of atm pressure
-- Customizable parameters
-
-Proposal:
-- Decision Support System

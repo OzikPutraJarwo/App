@@ -4,29 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PsychroMol</title>
-  <link rel="icon" type="image/x-icon" href="https://app.kodejarwo.com/icon/psychrometric-chart.webp">
+  <link rel="icon" type="image/x-icon" href="../icon/psychrometric-chart.webp">
   <link rel="stylesheet" href="./style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
 </head>
 <body>
 
   <!-- ═══════════════════════════════════════════════════════ TOPBAR -->
   <header id="app-header">
     <div id="app-brand">
-      <img id="app-logo" src="https://app.kodejarwo.com/icon/psychrometric-chart.webp" alt="Psychrometric chart logo">
+      <img id="app-logo" src="../icon/psychrometric-chart.webp" alt="Psychrometric chart logo">
       <span id="app-title">PsychroMol</span>
     </div>
 
     <div id="app-charttype" class="chart-type">
       <button class="modebar-btn charttype-btn psychrometric active" id="btn-chart-psychrometric" value="psychrometric" onclick="changeChartType(this.value)" title="Psychrometric Chart">
-        <img class="charttype-icon" src="https://app.kodejarwo.com/icon/type-psychrometric.png" alt="">
+        <img class="charttype-icon" src="../icon/type-psychrometric.png" alt="">
         Psychrometric
       </button>
       <button class="modebar-btn charttype-btn mollier" id="btn-chart-mollier" value="mollier" onclick="changeChartType(this.value)" title="Mollier Chart">
-        <img class="charttype-icon" src="https://app.kodejarwo.com/icon/type-mollier.png" alt="">
+        <img class="charttype-icon" src="../icon/type-mollier.png" alt="">
         Mollier
       </button>
     </div>
@@ -58,6 +54,12 @@
         <span class="material-symbols-rounded">import_export</span>Data
         <span class="material-symbols-rounded dd-arrow">arrow_drop_down</span>
       </button>
+      <button class="topbar-btn" id="btn-playback" onclick="openPlaybackWindow()" title="Real-data playback">
+        <span class="material-symbols-rounded">play_circle</span>Playback
+      </button>
+      <button class="topbar-btn" id="btn-dss" onclick="openDssWindow()" title="DSS advisor">
+        <span class="material-symbols-rounded">tips_and_updates</span>Advisor
+      </button>
       <button class="topbar-btn mobile-only" id="btn-sidebar-toggle" onclick="toggleMobileSidebar()" title="Menu">
         <span class="material-symbols-rounded">menu</span>
       </button>
@@ -67,11 +69,8 @@
   <!-- Topbar dropdowns -->
   <div id="dd-data" class="topbar-dropdown" style="display:none">
     <div class="dd-item" onclick="closeTopbarDropdowns(); openImportDialog()">
-      <span class="material-symbols-rounded">upload_file</span>Import CSV or Excel
+      <span class="material-symbols-rounded">upload_file</span>Import CSV
     </div>
-    <a class="dd-item" href="./converter/">
-      <span class="material-symbols-rounded">conversion_path</span>Real-Data Converter
-    </a>
     <div class="dd-divider"></div>
     <div class="dd-item" onclick="closeTopbarDropdowns(); downloadSvgAsPng('#chart-container svg','chart.png',3)">
       <span class="material-symbols-rounded">image</span>PNG Image
@@ -83,9 +82,6 @@
     <div class="dd-item" onclick="closeTopbarDropdowns(); exportToCSV()">
       <span class="material-symbols-rounded">table_chart</span>CSV Data
     </div>
-    <div class="dd-item" onclick="closeTopbarDropdowns(); exportToExcel()">
-      <span class="material-symbols-rounded">description</span>Excel Data
-    </div>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════ APP BODY -->
@@ -96,52 +92,8 @@
 
       <!-- Mode controls -->
       <div id="explore-controls" class="mode-panel">
-        <div class="seg-control" id="explore-submode-indicator">
-          <button class="seg-btn active" id="seg-explore-hover" onclick="setExploreSubMode('hover')" title="Hover"><span class="material-symbols-rounded">explore</span>Hover</button>
-          <button class="seg-btn" id="seg-explore-compare" onclick="setExploreSubMode('compare')" title="Compare A/B"><span class="material-symbols-rounded">compare_arrows</span>A/B</button>
-        </div>
-
         <div id="explore-hover-ui">
           <p class="panel-desc">Move cursor over chart to inspect all psychrometric properties.</p>
-        </div>
-
-
-        <div id="explore-compare-ui" style="display:none">
-          <p class="panel-desc">Select target A or B, then click the chart to place or replace that probe.</p>
-          <div class="compare-ab-status">
-            <button type="button" id="probe-ab-a" class="probe-ab-badge probe-ab-a active" onclick="setCompareTarget('A')">
-              <span class="probe-ab-title">A</span>
-              <div>
-                <div class="tdb">
-                  <span class="title">Tdb (°C)</span>
-                  <span class="value"></span>
-                </div>
-                <div class="ah">
-                  <span class="title">AH (g/m³)</span>
-                  <span class="value"></span>
-                </div>
-              </div>
-            </button>
-            <button type="button" id="probe-ab-b" class="probe-ab-badge probe-ab-b" onclick="setCompareTarget('B')">
-              <span class="probe-ab-title">B</span>
-              <div>
-                <div class="tdb">
-                  <span class="title">Tdb (°C)</span>
-                  <span class="value"></span>
-                </div>
-                <div class="ah">
-                  <span class="title">AH (g/m³)</span>
-                  <span class="value"></span>
-                </div>
-              </div>
-            </button>
-          </div>
-          <div class="sb-btn-row">
-            <button class="sb-btn" onclick="clearProbeA()">Reset A</button>
-            <button class="sb-btn" onclick="clearProbeB()">Reset B</button>
-            <button class="sb-btn danger" onclick="clearProbeAll()">Clear All</button>
-          </div>
-          <div id="compare-delta-panel"></div>
         </div>
       </div>
 
@@ -151,7 +103,6 @@
           <button class="seg-btn" id="seg-zone-input" onclick="setZoneSubMode('input')" title="Input params"><span class="material-symbols-rounded">edit_note</span>Input</button>
           <button class="seg-btn" id="seg-zone-auto" onclick="setZoneSubMode('auto')" title="Auto zone"><span class="material-symbols-rounded">auto_awesome</span>Auto</button>
           <button class="seg-btn" id="seg-zone-plants" onclick="setZoneSubMode('plants')" title="Plant zones"><span class="material-symbols-rounded">local_florist</span>Plants</button>
-          <button class="seg-btn" id="seg-zone-boolean" onclick="setZoneSubMode('boolean')" title="Boolean op"><span class="material-symbols-rounded">join</span>Bool</button>
         </div>
 
         <div id="zone-manual-ui">
@@ -196,17 +147,7 @@
         </div>
 
         <div id="zone-auto-ui" style="display:none">
-          <p class="panel-desc">Auto zone can use a single parameter band or a two-parameter boundary.</p>
-          <div class="param-grid single auto-zone-method-grid">
-            <div>
-              <label>Method</label>
-              <select id="auto-zone-method" onchange="syncAutoZoneMethod()">
-                <option value="single">Single Parameter</option>
-                <option value="double">Two Parameters</option>
-              </select>
-            </div>
-          </div>
-          <div id="auto-zone-single-ui">
+          <p class="panel-desc">Auto zone from a single parameter band (e.g. RH or VPD).</p>
           <div class="param-grid single">
             <div>
               <label>Parameter</label>
@@ -230,51 +171,6 @@
           </div>
           <div class="sb-btn-row">
             <button class="sb-btn primary" onclick="submitAutoZone()">Create</button>
-          </div>
-          </div>
-          <div id="auto-zone-double-ui" style="display:none">
-            <div class="range-block">
-              <div class="range-label-row">
-                <span>Dry Bulb Temp</span>
-                <input type="text" value="°C" disabled style="width:32px;text-align:center">
-              </div>
-              <div class="range-row">
-                <label>Min</label>
-                <input type="range" class="range-slider" id="sliderTmin" min="-10" max="60" value="20" oninput="syncRange('Tmin')">
-                <input type="number" class="range-val" id="rangeTmin" min="-10" max="60" value="20" oninput="updateRangeZone()">
-              </div>
-              <div class="range-row">
-                <label>Max</label>
-                <input type="range" class="range-slider" id="sliderTmax" min="-10" max="60" value="30" oninput="syncRange('Tmax')">
-                <input type="number" class="range-val" id="rangeTmax" min="-10" max="60" value="30" oninput="updateRangeZone()">
-              </div>
-            </div>
-            <div class="range-block">
-              <div class="range-label-row">
-                <span>2nd Parameter</span>
-                <select id="rangeParamType" onchange="setupRangeDefaults()">
-                  <option value="RH">Rel. Humidity (%)</option>
-                  <option value="Twb">Wet Bulb (°C)</option>
-                  <option value="Tdp">Dew Point (°C)</option>
-                  <option value="W">Humidity Ratio (kg/kg')</option>
-                  <option value="h">Enthalpy (kJ/kg)</option>
-                  <option value="v">Spec. Volume (m³/kg)</option>
-                </select>
-              </div>
-              <div class="range-row">
-                <label>Min</label>
-                <input type="range" class="range-slider" id="sliderP2min" oninput="syncRange('P2min')">
-                <input type="number" class="range-val" id="rangeP2min" step="0.1" oninput="updateRangeZone()">
-              </div>
-              <div class="range-row">
-                <label>Max</label>
-                <input type="range" class="range-slider" id="sliderP2max" oninput="syncRange('P2max')">
-                <input type="number" class="range-val" id="rangeP2max" step="0.1" oninput="updateRangeZone()">
-              </div>
-            </div>
-            <div class="sb-btn-row">
-              <button class="sb-btn primary" onclick="submitAutoZone()">Create</button>
-            </div>
           </div>
         </div>
 
@@ -344,28 +240,6 @@
           </div>
         </div>
 
-        <div id="zone-boolean-ui" style="display:none">
-          <p class="panel-desc">Boolean operation between two existing zones.</p>
-          <div class="param-grid single">
-            <div>
-              <label>Zone A</label>
-              <select id="boolean-zone-a"></select>
-            </div>
-            <div>
-              <label>Zone B</label>
-              <select id="boolean-zone-b"></select>
-            </div>
-            <div>
-              <label>Operation</label>
-              <select id="boolean-op">
-                <option value="intersect">Intersect (A ∩ B)</option>
-                <option value="union">Union (A ∪ B)</option>
-                <option value="difference">Difference (A − B)</option>
-              </select>
-            </div>
-          </div>
-          <button class="sb-btn primary w-full" onclick="applyZoneBoolean()">Apply</button>
-        </div>
       </div>
 
       <div id="point-controls" class="mode-panel" style="display:none">
@@ -373,7 +247,7 @@
           <button class="seg-btn active" id="seg-point-manual" onclick="setPointSubMode('manual')" title="Click to place"><span class="material-symbols-rounded">ads_click</span>Click</button>
           <button class="seg-btn" id="seg-point-input" onclick="setPointSubMode('input')" title="Input params"><span class="material-symbols-rounded">edit_note</span>Input</button>
           <button class="seg-btn" id="seg-point-batch" onclick="setPointSubMode('batch')" title="Batch CSV"><span class="material-symbols-rounded">data_table</span>Batch</button>
-          <button class="seg-btn" id="seg-point-sensor" onclick="setPointSubMode('sensor')" title="Live sensor" disabled><span class="material-symbols-rounded">sensors</span>Sensor</button>
+          <button class="seg-btn" id="seg-point-sensor" onclick="setPointSubMode('sensor')" title="Live sensor"><span class="material-symbols-rounded">sensors</span>Sensor</button>
         </div>
 
         <div id="point-manual-ui">
@@ -550,7 +424,7 @@
           <div class="settings-group">
             <div class="settings-group-title">Atmospheric Pressure</div>
             <div class="pressure-input-row">
-              <input type="number" id="pressure" value="101325" oninput="drawChart()" step="100">
+              <input type="number" id="pressure" value="101325" oninput="onPressureInputChange()" step="100">
               <select id="pressure-unit" onchange="updatePressureUnit()">
                 <option value="Pa">Pa</option>
                 <option value="kPa">kPa</option>
@@ -563,11 +437,11 @@
             <div class="settings-row2">
               <div>
                 <label>Minimum</label>
-                <input type="number" id="minTemp" value="-10" oninput="drawChart()">
+                <input type="number" id="minTemp" value="-10" oninput="scheduleChartRedraw()">
               </div>
               <div>
                 <label>Maximum</label>
-                <input type="number" id="maxTemp" value="50" oninput="drawChart()">
+                <input type="number" id="maxTemp" value="50" oninput="scheduleChartRedraw()">
               </div>
             </div>
           </div>
@@ -759,55 +633,139 @@
     <div class="floating-window-content" id="detailModalContent"></div>
   </div>
 
-  <div id="floating-range-window" class="floating-window">
+  <!-- ═══════════════════════════════════════════════════ REAL-DATA PLAYBACK (Fase 3) -->
+  <div id="floating-playback-window" class="floating-window floating-playback-window" data-window-display="flex">
     <div class="floating-window-header">
-      <span class="floating-window-title">Range Parameters</span>
-      <span class="floating-window-close" onclick="closeFloatingWindow('floating-range-window')">×</span>
+      <span class="floating-window-title"><span class="material-symbols-rounded">play_circle</span> Real-Data Playback</span>
+      <span class="floating-window-close" onclick="closeFloatingWindow('floating-playback-window')">×</span>
     </div>
-    <div class="floating-window-content">
+    <div class="floating-window-content playback-window-content">
+
       <div class="field-section">
-        <label>Tdb Min (°C):</label>
-        <input type="range" id="floating-sliderTmin" min="-10" max="60" step="0.5" oninput="syncFloatingRange('Tmin')">
-        <input type="number" id="floating-rangeTmin" min="-10" max="60" step="any" oninput="applyFloatingRange();">
-      </div>
-      <div class="field-section">
-        <label>Tdb Max (°C):</label>
-        <input type="range" id="floating-sliderTmax" min="-10" max="60" step="0.5" oninput="syncFloatingRange('Tmax')">
-        <input type="number" id="floating-rangeTmax" min="-10" max="60" step="any" oninput="applyFloatingRange();">
-      </div>
-      <div class="field-section">
-        <label>2nd Parameter:</label>
-        <select id="floating-rangeParamType" onchange="applyFloatingRange();">
-          <option value="RH">Rel. Humidity (%)</option>
-          <option value="Twb">Wet Bulb (°C)</option>
-          <option value="Tdp">Dew Point (°C)</option>
-          <option value="W">Humidity Ratio (kg/kg')</option>
-          <option value="h">Enthalpy (kJ/kg)</option>
-          <option value="v">Spec. Volume (m³/kg)</option>
+        <label>Dataset:</label>
+        <select id="playback-dataset-select" onchange="selectPlaybackDataset(this.value)">
+          <option value="">Select a real-data set…</option>
         </select>
       </div>
-      <div class="field-section">
-        <label>Min Value:</label>
-        <input type="range" id="floating-sliderP2min" step="1" oninput="syncFloatingRange('P2min')">
-        <input type="number" id="floating-rangeP2min" step="0.1" oninput="applyFloatingRange();">
+
+      <div class="field-section playback-transport">
+        <button type="button" id="playback-play-btn" class="floating-btn btn-primary playback-play-btn" onclick="togglePlaybackPlay()" disabled>
+          <span class="material-symbols-rounded">play_arrow</span>
+        </button>
+        <input type="range" id="playback-seek" min="0" max="0" value="0" step="1" disabled oninput="seekPlayback(this.value)">
+        <select id="playback-speed-select" onchange="setPlaybackSpeed(this.value)">
+          <option value="0.5">0.5×</option>
+          <option value="1" selected>1×</option>
+          <option value="2">2×</option>
+          <option value="4">4×</option>
+          <option value="8">8×</option>
+        </select>
       </div>
+      <div class="playback-frame-info" id="playback-frame-info">No dataset selected.</div>
+
       <div class="field-section">
-        <label>Max Value:</label>
-        <input type="range" id="floating-sliderP2max" step="1" oninput="syncFloatingRange('P2max')">
-        <input type="number" id="floating-rangeP2max" step="0.1" oninput="applyFloatingRange();">
+        <label>Compare against zone:</label>
+        <select id="playback-zone-select" onchange="setPlaybackZone(this.value)">
+          <option value="">None</option>
+        </select>
       </div>
-      <div class="field-section">
-        <div class="floating-btn-group cols-2">
-          <button class="floating-btn btn-success" onclick="finishZone(); closeFloatingWindow('floating-range-window');">Finish Zone</button>
-          <button class="floating-btn btn-danger" onclick="cancelZone(); closeFloatingWindow('floating-range-window');">Cancel</button>
+
+      <div class="settings-row2">
+        <div>
+          <label>Healthy VPD Min (kPa)</label>
+          <input type="number" id="playback-vpd-min" step="0.05" value="0.4" oninput="updatePlaybackThresholds()">
         </div>
+        <div>
+          <label>Healthy VPD Max (kPa)</label>
+          <input type="number" id="playback-vpd-max" step="0.05" value="1.2" oninput="updatePlaybackThresholds()">
+        </div>
+      </div>
+      <div class="field-section">
+        <label>Condensation warning: Tdb − Tdp below (°C)</label>
+        <input type="number" id="playback-condensation-delta" step="0.5" value="2" oninput="updatePlaybackThresholds()">
+      </div>
+
+      <div id="playback-analytics-panel" class="playback-analytics-panel">
+        <p class="panel-desc">Select a dataset to see time-in-zone and risk analytics.</p>
       </div>
     </div>
   </div>
 
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="./xlsx.min.js"></script>
-  <script src="./script.js"></script>
+  <!-- ═══════════════════════════════════════════════════ DSS ADVISOR (Fase 4) -->
+  <div id="floating-dss-window" class="floating-window floating-dss-window" data-window-display="flex">
+    <div class="floating-window-header">
+      <span class="floating-window-title"><span class="material-symbols-rounded">tips_and_updates</span> DSS Advisor</span>
+      <span class="floating-window-close" onclick="closeFloatingWindow('floating-dss-window')">×</span>
+    </div>
+    <div class="floating-window-content">
+
+      <div class="field-section">
+        <label>Target zone:</label>
+        <select id="dss-zone-select" onchange="setDssZone(this.value)">
+          <option value="">None</option>
+        </select>
+      </div>
+
+      <div class="field-section">
+        <label>Data source:</label>
+        <div class="seg-control">
+          <button type="button" class="seg-btn active" id="seg-dss-hover" onclick="setDssSourceMode('hover')">Hover</button>
+          <button type="button" class="seg-btn" id="seg-dss-sensor" onclick="setDssSourceMode('sensor')">Sensor</button>
+          <button type="button" class="seg-btn" id="seg-dss-playback" onclick="setDssSourceMode('playback')">Playback</button>
+        </div>
+      </div>
+
+      <div class="field-section" id="dss-sensor-row" style="display:none">
+        <label>Sensor:</label>
+        <select id="dss-sensor-select" onchange="setDssSensor(this.value)">
+          <option value="" disabled>No sensors added.</option>
+        </select>
+      </div>
+
+      <div class="settings-row2">
+        <div>
+          <label>Warning &Delta;Tdb (°C)</label>
+          <input type="number" id="dss-warning-deltat" step="0.5" value="2" oninput="updateDssThresholds()">
+        </div>
+        <div>
+          <label>Critical &Delta;Tdb (°C)</label>
+          <input type="number" id="dss-critical-deltat" step="0.5" value="5" oninput="updateDssThresholds()">
+        </div>
+      </div>
+      <div class="settings-row2">
+        <div>
+          <label>Warning &Delta;W (g/kg)</label>
+          <input type="number" id="dss-warning-deltaw" step="0.1" value="1.5" oninput="updateDssThresholds()">
+        </div>
+        <div>
+          <label>Critical &Delta;W (g/kg)</label>
+          <input type="number" id="dss-critical-deltaw" step="0.1" value="4" oninput="updateDssThresholds()">
+        </div>
+      </div>
+
+      <div id="dss-recommendation-panel" class="dss-recommendation-panel">
+        <p class="panel-desc">Select a target zone to get recommendations.</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="./d3.v7.min.js"></script>
+  <!-- Split from a single script.js into load-ordered modules (Fase 2 modularization).
+       Classic (non-module) scripts sharing one global scope — order matters. -->
+  <script src="./js/state.js"></script>
+  <script src="./js/i18n.js"></script>
+  <script src="./js/psychro.js"></script>
+  <script src="./js/ui-controls.js"></script>
+  <script src="./js/real-data.js"></script>
+  <script src="./js/ui-panels.js"></script>
+  <script src="./js/import-export.js"></script>
+  <script src="./js/render.js"></script>
+  <script src="./js/features.js"></script>
+  <script src="./js/playback.js"></script>
+  <script src="./js/dss.js"></script>
+  <script src="./js/iot.js"></script>
+  <script src="./js/interaction.js"></script>
+  <script src="./js/persist.js"></script>
   <script>
     // ── Topbar dropdown helpers ─────────────────────────────────
     function toggleTopbarDropdown(id, btn) {
