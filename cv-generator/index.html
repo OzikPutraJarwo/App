@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV Generator</title>
+    <link rel="icon" type="image/x-icon" href="../icon/cv.webp">
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="../main.css">
+  </head>
+
+  <body data-app="CV Generator">
+
+    <header>
+      <div class="header wrap">
+        <a class="site-back" href="/" aria-label="Home"><span class="material-symbols-rounded">arrow_back</span></a>
+        <div class="site-title">CV Generator</div>
+        <div class="site-actions">
+
+          <div class="mode-switch" role="group" aria-label="Editor mode">
+            <button type="button" class="mode-btn" data-mode="form" title="Form editor">
+              <span class="material-symbols-rounded">edit_note</span><span class="hdr-btn-text">Form</span>
+            </button>
+            <button type="button" class="mode-btn" data-mode="paper" title="Edit directly on the paper">
+              <span class="material-symbols-rounded">edit_document</span><span class="hdr-btn-text">Paper</span>
+            </button>
+          </div>
+
+          <div class="dd" id="dd-settings">
+            <button type="button" class="hdr-btn dd-trigger" aria-haspopup="true" aria-label="Page settings">
+              <span class="material-symbols-rounded">tune</span>
+              <span class="hdr-btn-text">Page</span>
+              <span class="material-symbols-rounded dd-caret">expand_more</span>
+            </button>
+            <div class="dd-menu">
+              <div class="tb-group">
+                <label>CV Language</label>
+                <select id="set-lang">
+                  <option value="en" selected>English</option>
+                  <option value="id">Indonesia</option>
+                </select>
+              </div>
+              <div class="tb-group">
+                <label>Font</label>
+                <select id="set-font">
+                  <option value="Arial">Arial</option>
+                  <option value="Calibri">Calibri</option>
+                  <option value="Georgia">Georgia</option>
+                  <option value="Helvetica">Helvetica</option>
+                  <option value="Times New Roman">Times New Roman</option>
+                </select>
+              </div>
+              <div class="tb-group">
+                <label>Size</label>
+                <select id="set-size">
+                  <option value="10">10 pt</option>
+                  <option value="10.5">10.5 pt</option>
+                  <option value="11" selected>11 pt</option>
+                  <option value="12">12 pt</option>
+                </select>
+              </div>
+              <div class="tb-group">
+                <label>Margins</label>
+                <select id="set-margin">
+                  <option value="normal">Normal (1 in)</option>
+                  <option value="medium">Medium (0.75 in)</option>
+                  <option value="narrow" selected>Narrow (0.5 in)</option>
+                </select>
+              </div>
+              <div class="dd-sep"></div>
+              <button type="button" class="dd-item danger" id="btn-clear">
+                <span class="material-symbols-rounded">restart_alt</span> Reset CV
+              </button>
+            </div>
+          </div>
+
+          <div class="dd" id="dd-download">
+            <button type="button" class="hdr-btn primary dd-trigger" aria-haspopup="true" aria-label="Download">
+              <span class="material-symbols-rounded">download</span>
+              <span class="hdr-btn-text">Download</span>
+              <span class="material-symbols-rounded dd-caret">expand_more</span>
+            </button>
+            <div class="dd-menu">
+              <button type="button" class="dd-item dd-item-lg" id="btn-pdf">
+                <span class="material-symbols-rounded">picture_as_pdf</span>
+                <span class="dd-item-txt"><b>PDF</b><small>Via the print dialog</small></span>
+              </button>
+              <button type="button" class="dd-item dd-item-lg" id="btn-word">
+                <span class="material-symbols-rounded">description</span>
+                <span class="dd-item-txt"><b>Word</b><small>Microsoft Word (.docx)</small></span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </header>
+
+    <main>
+
+      <div class="main wrap" id="cv-main">
+
+        <div class="cv-layout" data-view="edit">
+
+          <div class="preview-col">
+            <div id="pages"></div>
+            <div class="pv-bar">
+              <button type="button" class="pv-bar-btn" id="pg-prev" aria-label="Previous page">
+                <span class="material-symbols-rounded">keyboard_arrow_up</span>
+              </button>
+              <span class="pv-num" id="page-ind">1 / 1</span>
+              <button type="button" class="pv-bar-btn" id="pg-next" aria-label="Next page">
+                <span class="material-symbols-rounded">keyboard_arrow_down</span>
+              </button>
+              <span class="pv-bar-sep"></span>
+              <button type="button" class="pv-bar-btn" id="zoom-out" aria-label="Zoom out">
+                <span class="material-symbols-rounded">remove</span>
+              </button>
+              <button type="button" class="pv-bar-btn pv-pct" id="zoom-pct" title="Reset zoom">100%</button>
+              <button type="button" class="pv-bar-btn" id="zoom-in" aria-label="Zoom in">
+                <span class="material-symbols-rounded">add</span>
+              </button>
+            </div>
+            <button type="button" id="paper-add-btn">
+              <span class="material-symbols-rounded">add</span> Add Section
+            </button>
+          </div>
+
+          <div class="editor-col" id="editor-col">
+
+            <div class="item section-card" id="personal-card">
+              <div class="sec-head">
+                <span class="sec-icon material-symbols-rounded">person</span>
+                <div class="sec-title-fixed">Personal Details</div>
+                <div class="sec-actions">
+                  <button type="button" class="icon-btn" data-act="collapse" aria-label="Collapse">
+                    <span class="material-symbols-rounded">expand_less</span>
+                  </button>
+                </div>
+              </div>
+              <div class="sec-body">
+                <div class="grid-2">
+                  <div class="f"><label>Full Name</label><input data-p="name" placeholder="Andi Pratama"></div>
+                  <div class="f"><label>Job Title (optional)</label><input data-p="title" placeholder="Software Engineer"></div>
+                  <div class="f"><label>Email</label><input data-p="email" type="email" placeholder="andi@email.com"></div>
+                  <div class="f"><label>Phone</label><input data-p="phone" placeholder="+62 812-3456-7890"></div>
+                  <div class="f"><label>City</label><input data-p="city" placeholder="Jakarta"></div>
+                  <div class="f"><label>Country</label><input data-p="country" placeholder="Indonesia"></div>
+                  <div class="f"><label>LinkedIn (optional)</label><input data-p="linkedin" placeholder="linkedin.com/in/andipratama"></div>
+                  <div class="f"><label>Website (optional)</label><input data-p="website" placeholder="github.com/andipratama"></div>
+                </div>
+              </div>
+            </div>
+
+            <div id="sections"></div>
+
+            <button type="button" class="add-section" id="add-section-btn">
+              <span class="material-symbols-rounded">add</span> Add Section
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+    <div id="view-bar">
+      <div class="view-seg">
+        <button type="button" class="view-btn active" data-view="edit">
+          <span class="material-symbols-rounded">edit_note</span>Edit
+        </button>
+        <button type="button" class="view-btn" data-view="preview">
+          <span class="material-symbols-rounded">visibility</span>Preview
+        </button>
+      </div>
+    </div>
+
+    <div id="popup">
+      <div class="popup">
+        <div class="popup-wrap">
+          <div class="popup-title">Add Section</div>
+          <div class="popup-content">
+            <div class="add-grid" id="add-grid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="./script.js"></script>
+
+    <div id="notification"></div>
+
+    <script src="../main.js"></script>
+
+      <footer></footer>
+  </body>
+
+</html>
