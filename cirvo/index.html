@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cirvo</title>
+    <meta name="description" content="Design microcontroller circuits in the browser — place boards, breadboards and sensors, wire them pin to pin, and export the schematic as a PNG.">
+    <link rel="icon" type="image/png" href="../icon/cirvo.png">
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="../main.css">
+    <script>
+      // set before first paint so the page never flashes light
+      try {
+        var t = localStorage.getItem('cirvo-theme')
+          || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.dataset.theme = t;
+      } catch (e) { document.documentElement.dataset.theme = 'light'; }
+    </script>
+  </head>
+
+  <body class="cv-body" data-app="Cirvo">
+
+    <header>
+      <div class="header wrap">
+        <a class="site-back" href="/" aria-label="Home"><span class="material-symbols-rounded">arrow_back</span></a>
+        <div class="site-title">Cirvo</div>
+        <div class="site-actions">
+
+          <div class="mode-switch" role="group" aria-label="Tool">
+            <button type="button" class="mode-btn active" data-tool="explore">
+              <span class="material-symbols-rounded">pan_tool</span><span class="hdr-btn-text">Explore</span>
+            </button>
+            <button type="button" class="mode-btn" data-tool="move">
+              <span class="material-symbols-rounded">open_with</span><span class="hdr-btn-text">Move</span>
+            </button>
+            <button type="button" class="mode-btn" data-tool="wire">
+              <span class="material-symbols-rounded">cable</span><span class="hdr-btn-text">Wire</span>
+            </button>
+          </div>
+
+          <button type="button" class="hdr-btn" id="btn-undo" aria-label="Undo">
+            <span class="material-symbols-rounded">undo</span>
+          </button>
+          <button type="button" class="hdr-btn" id="btn-redo" aria-label="Redo">
+            <span class="material-symbols-rounded">redo</span>
+          </button>
+
+          <div class="dd" id="dd-settings">
+            <button type="button" class="hdr-btn dd-trigger" aria-haspopup="true" aria-label="Settings">
+              <span class="material-symbols-rounded">tune</span>
+              <span class="material-symbols-rounded dd-caret">expand_more</span>
+            </button>
+            <div class="dd-menu">
+              <div class="tb-group">
+                <label>View</label>
+                <div class="zoom-row">
+                  <button type="button" class="mini-btn" id="d-zout"><span class="material-symbols-rounded">remove</span></button>
+                  <button type="button" class="mini-btn" id="d-zoom">100%</button>
+                  <button type="button" class="mini-btn" id="d-zin"><span class="material-symbols-rounded">add</span></button>
+                  <button type="button" class="mini-btn" id="d-fit"><span class="material-symbols-rounded">fit_screen</span></button>
+                </div>
+              </div>
+              <div class="dd-sep"></div>
+              <button type="button" class="dd-item" id="d-grid">
+                <span class="material-symbols-rounded">grid_4x4</span> Grid
+                <span class="dd-check material-symbols-rounded">check</span>
+              </button>
+              <button type="button" class="dd-item" id="d-pins">
+                <span class="material-symbols-rounded">stroke_partial</span> Pin dots
+                <span class="dd-check material-symbols-rounded">check</span>
+              </button>
+              <button type="button" class="dd-item" id="d-snap">
+                <span class="material-symbols-rounded">point_scan</span> Snap pins together
+                <span class="dd-check material-symbols-rounded">check</span>
+              </button>
+              <div class="dd-sep"></div>
+              <button type="button" class="dd-item" id="btn-theme">
+                <span class="material-symbols-rounded">dark_mode</span> Dark mode
+                <span class="dd-check material-symbols-rounded">check</span>
+              </button>
+            </div>
+          </div>
+
+          <button type="button" class="hdr-btn" id="btn-code">
+            <span class="material-symbols-rounded">terminal</span>
+            <span class="hdr-btn-text">Code</span>
+          </button>
+
+          <div class="dd" id="dd-project">
+            <button type="button" class="hdr-btn primary dd-trigger" aria-haspopup="true" aria-label="Project">
+              <span class="material-symbols-rounded">folder_open</span>
+              <span class="hdr-btn-text">Project</span>
+              <span class="material-symbols-rounded dd-caret">expand_more</span>
+            </button>
+            <div class="dd-menu">
+              <button type="button" class="dd-item dd-item-lg" id="btn-png">
+                <span class="material-symbols-rounded">image</span>
+                <span class="dd-item-txt"><b>Download PNG</b><small>The wired design, ready to share</small></span>
+              </button>
+              <button type="button" class="dd-item dd-item-lg" id="btn-json">
+                <span class="material-symbols-rounded">data_object</span>
+                <span class="dd-item-txt"><b>Download project</b><small>Re-openable .cirvo.json</small></span>
+              </button>
+              <div class="dd-sep"></div>
+              <button type="button" class="dd-item" id="btn-open">
+                <span class="material-symbols-rounded">upload_file</span> Open project…
+              </button>
+              <button type="button" class="dd-item" id="btn-save">
+                <span class="material-symbols-rounded">save</span> Save project file
+              </button>
+              <div class="dd-sep"></div>
+              <a class="dd-item" href="./admin.html">
+                <span class="material-symbols-rounded">tune</span> Component builder
+              </a>
+              <div class="dd-sep"></div>
+              <button type="button" class="dd-item danger" id="btn-new">
+                <span class="material-symbols-rounded">restart_alt</span> New / clear canvas
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="cv-shell">
+
+        <aside class="panel side left" id="panel-parts">
+          <div class="panel-head">
+            <h3>Library</h3>
+            <a class="icon-btn" href="./admin.html"><span class="material-symbols-rounded">add_circle</span></a>
+            <button type="button" class="icon-btn panel-collapse" id="panel-parts-toggle">
+              <span class="material-symbols-rounded">left_panel_close</span></button>
+            <button type="button" class="icon-btn panel-close"><span class="material-symbols-rounded">close</span></button>
+          </div>
+          <div class="cv-search">
+            <span class="material-symbols-rounded">search</span>
+            <input type="search" id="part-search" placeholder="Search" autocomplete="off">
+          </div>
+          <div class="cv-pick"><div class="csel" id="cat-select"></div></div>
+          <div class="panel-body">
+            <div class="cv-list" id="part-list"></div>
+          </div>
+        </aside>
+
+        <section class="panel cv-stage">
+          <div class="cv-viewport show-pins" id="viewport">
+            <div class="cv-world" id="world">
+              <div id="items"></div>
+              <svg class="cv-wires" id="wires" xmlns="http://www.w3.org/2000/svg"></svg>
+            </div>
+
+            <div class="cv-blank" id="blank">
+              <span class="material-symbols-rounded">developer_board</span>
+              <b>Start your circuit</b>
+              <span class="t">Pick a board or sensor on the left — click it, or drag it onto the canvas. Then switch to the Wire tool and click pin to pin.</span>
+            </div>
+
+            <div class="cv-tip" id="tip"></div>
+          </div>
+
+          <section class="cv-code" id="code-panel" data-dock="bottom" hidden>
+            <div class="code-grip" id="code-grip"></div>
+            <div class="code-head">
+              <div class="code-tabs">
+                <button type="button" class="code-tab active" data-pane="editor">
+                  <span class="material-symbols-rounded">code</span>Python</button>
+                <button type="button" class="code-tab" data-pane="console">
+                  <span class="material-symbols-rounded">terminal</span>Console</button>
+                <button type="button" class="code-tab" data-pane="world">
+                  <span class="material-symbols-rounded">public</span>World</button>
+              </div>
+              <div class="dock-switch" id="dock-switch" role="group" aria-label="Panel position">
+                <button type="button" class="dock-opt" data-dock="left">
+                  <span class="material-symbols-rounded">dock_to_left</span></button>
+                <button type="button" class="dock-opt" data-dock="top">
+                  <span class="material-symbols-rounded" style="transform:rotate(180deg)">dock_to_bottom</span></button>
+                <button type="button" class="dock-opt active" data-dock="bottom">
+                  <span class="material-symbols-rounded">dock_to_bottom</span></button>
+                <button type="button" class="dock-opt" data-dock="right">
+                  <span class="material-symbols-rounded">dock_to_right</span></button>
+              </div>
+              <div class="code-actions">
+                <div class="csel" id="example-select"></div>
+                <button type="button" class="hdr-btn primary" id="btn-run">
+                  <span class="material-symbols-rounded">play_arrow</span>
+                  <span class="hdr-btn-text">Run</span>
+                </button>
+                <button type="button" class="icon-btn" id="btn-clear-log">
+                  <span class="material-symbols-rounded">backspace</span></button>
+                <button type="button" class="icon-btn" id="code-close">
+                  <span class="material-symbols-rounded">close</span></button>
+              </div>
+            </div>
+            <div class="code-body">
+              <div class="code-pane" data-pane="editor">
+                <div id="code-editor" class="code-editor-mount"></div>
+              </div>
+              <div class="code-pane none" data-pane="console"><div id="console-out"></div></div>
+              <div class="code-pane none" data-pane="world"><div id="world-grid"></div></div>
+            </div>
+            <div class="code-status" id="code-status"></div>
+          </section>
+
+          <div class="cv-mobile-tabs">
+            <button type="button" class="dock-btn" data-panel="panel-parts"><span class="material-symbols-rounded">widgets</span></button>
+            <button type="button" class="dock-btn" data-panel="panel-insp"><span class="material-symbols-rounded">tune</span></button>
+          </div>
+        </section>
+
+        <aside class="panel side right" id="panel-insp">
+          <div class="panel-head">
+            <h3 id="insp-head">Properties</h3>
+            <button type="button" class="icon-btn panel-collapse" id="panel-insp-toggle">
+              <span class="material-symbols-rounded">right_panel_close</span></button>
+            <button type="button" class="icon-btn panel-close" id="insp-close"><span class="material-symbols-rounded">close</span></button>
+          </div>
+          <div class="panel-body" id="insp-body"></div>
+        </aside>
+
+      </div>
+    </main>
+
+    <div id="popup">
+      <div class="popup sm">
+        <div class="popup-wrap" id="popup-wrap"></div>
+      </div>
+    </div>
+
+    <input type="file" id="file-open" accept=".json,application/json" class="none">
+
+    <script src="./js/lib.js"></script>
+    <script src="./js/sim.js"></script>
+    <script src="./js/examples.js"></script>
+    <script src="./js/designer.js"></script>
+
+    <div id="notification"></div>
+
+    <script src="../main.js"></script>
+
+    <footer></footer>
+  </body>
+
+</html>
