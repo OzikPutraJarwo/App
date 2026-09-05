@@ -18,18 +18,18 @@
   const PREFS = 'cirvo-prefs';
 
   // Explore = look only · Move = components · Wire = pin to pin *and* reshaping
-  const TOOLS = ['explore', 'move', 'wire'];
 
   // ------------------------------------------------------------- state
   const S = {
     lib: null,
     doc: { name: 'Untitled circuit', items: [], wires: [] },
     view: { x: 0, y: 0, z: 1 },
-    tool: 'explore',
     objTab: 'items',
     sel: { items: [], wires: [] },
     wiring: null,
     drag: null,
+    pinch: null,
+    touchId: null,
     hoverSeg: null,
     opts: { grid: true, pins: true, snap: true },
     history: [],
@@ -141,199 +141,60 @@
     return d + ` L${r2(last.x)} ${r2(last.y)}`;
   }
 
-  /** The runs of a polyline, as {axis, c, lo, hi} — c is the constant coordinate. */
-  function runsOf(pts) {
-    const out = [];
-    for (let i = 0; i < pts.length - 1; i++) {
-      const a = pts[i], b = pts[i + 1];
-      if (Math.abs(a.y - b.y) <= 0.6) {
-        if (Math.abs(a.x - b.x) > 1) out.push({ axis: 'h', c: a.y, lo: Math.min(a.x, b.x), hi: Math.max(a.x, b.x) });
-      } else if (Math.abs(a.x - b.x) <= 0.6) {
-        if (Math.abs(a.y - b.y) > 1) out.push({ axis: 'v', c: a.x, lo: Math.min(a.y, b.y), hi: Math.max(a.y, b.y) });
-      }
-    }
+  /**
+   * Wires run wherever they are drawn.
+   *
+   * They used to be forced onto the 0.1 in lattice, auto-routed into
+   * axis-aligned dog-legs and squared back up after every move. That is right
+   * for a schematic and wrong for this: on a board a jumper goes where it goes,
+   * and the tidying that matters is the tidying you do yourself. So a new wire
+   * is a straight line between two pins, and shape comes from bends you add —
+   * click anywhere on a run to fold a corner in there and drag it.
+   *
+   * `alignToNeighbours` is what keeps that from looking sloppy: a bend dragged
+   * within a few px of level with the point before or after it snaps flat, so
+   * runs come out square when you want them square without ever being forced
+   * to be. Alt places one exactly where the cursor is.
+   */
+  const ALIGN_TOL = 5;
+
+  function alignToNeighbours(p, prev, next) {
+    const out = { x: p.x, y: p.y };
+    let sx = null, sy = null;
+    [prev, next].forEach(q => {
+      if (!q) return;
+      if (sy === null && Math.abs(q.y - p.y) <= ALIGN_TOL) sy = q.y;
+      if (sx === null && Math.abs(q.x - p.x) <= ALIGN_TOL) sx = q.x;
+    });
+    if (sx !== null) out.x = sx;
+    if (sy !== null) out.y = sy;
     return out;
   }
 
-  /**
-   * How much of a candidate route would lie *on top of* wires already drawn.
-   * Only collinear overlap counts — two wires crossing at right angles is fine
-   * and unavoidable, but running one along another hides it completely.
-   */
-  function overlapCost(runs, skip) {
-    let cost = 0;
-    for (const w of S.doc.wires) {
-      if (w.uid === skip) continue;
-      const other = runsOf(wirePoints(w));
-      for (const a of runs) {
-        for (const b of other) {
-          if (a.axis !== b.axis || Math.abs(a.c - b.c) > 1.4) continue;
-          const shared = Math.min(a.hi, b.hi) - Math.max(a.lo, b.lo);
-          if (shared > 0) cost += shared;
-        }
-      }
-    }
-    return cost;
-  }
+  const lastWiringPoint = () => {
+    if (!S.wiring) return null;
+    const pts = S.wiring.points;
+    return pts.length ? pts[pts.length - 1] : pinRefWorld(S.wiring.from);
+  };
 
-  /**
-   * Auto-route between two pins: a single dog-leg on the lattice. Candidates are
-   * generated on both axes and at half-step offsets either side of the middle,
-   * then scored — the cheapest route that does not lie along another wire wins,
-   * with the straightest one breaking ties.
-   */
-  function routeWire(a, b, skip) {
-    if (!a || !b) return [];
-    const dx = b.x - a.x, dy = b.y - a.y;
-    if (Math.abs(dx) < 0.8 || Math.abs(dy) < 0.8) return [];
+  /** A new wire is simply a straight run: no waypoints until you add one. */
+  function routeWire() { return []; }
 
-    const cands = [];
-    const midY = snapHalf((a.y + b.y) / 2), midX = snapHalf((a.x + b.x) / 2);
-    for (let k = 0; k < 18; k++) {
-      const off = (k % 2 ? 1 : -1) * Math.ceil(k / 2) * HALF;
-      cands.push({ pts: [{ x: a.x, y: midY + off }, { x: b.x, y: midY + off }], k });
-      cands.push({ pts: [{ x: midX + off, y: a.y }, { x: midX + off, y: b.y }], k });
-    }
+  const reroute = (w) => { w.points = []; };
 
-    let best = null;
-    for (const c of cands) {
-      const cost = overlapCost(runsOf([a, ...c.pts, b]), skip);
-      // prefer the natural axis, then the least detour from the midpoint
-      const bias = c.k * 0.35 + (Math.abs(dy) >= Math.abs(dx) === (c.pts[0].x === a.x) ? 0 : 6);
-      const score = cost * 10 + bias;
-      if (!best || score < best.score) best = { score, cost, pts: c.pts };
-      if (cost === 0 && c.k === 0) break;
-    }
-    return best ? best.pts : [];
-  }
-
-  const reroute = (w) => { w.points = routeWire(pinRefWorld(w.a), pinRefWorld(w.b), w.uid); };
-
-  /** The drawn segments of a wire, with the index the editor uses to grab one. */
+  /** The drawn runs of a wire, with the index a new bend would be spliced at. */
   function segments(w) {
     const pts = wirePoints(w);
     const out = [];
     for (let i = 0; i < pts.length - 1; i++) {
       const a = pts[i], b = pts[i + 1];
       if (dist(a, b) < 1.2) continue;
-      out.push({ i, a, b, axis: Math.abs(a.y - b.y) <= Math.abs(a.x - b.x) ? 'h' : 'v' });
+      out.push({ i, a, b });
     }
     return out;
   }
 
-  /**
-   * Get a wire ready to be reshaped by one grab, and hand back the indices the
-   * drag will move. Done once on pointer-down, never per mouse-move: growing
-   * waypoints on every move is what makes a route explode into duplicates.
-   *
-   *   role 'mid'  — slide the whole run sideways
-   *   role 'a'/'b' — fold a corner in at the run's midpoint and move that half
-   *
-   * A run that ends on a pin cannot move the pin, so a waypoint is grown at that
-   * end first and the pin keeps a short stub of its own.
-   */
-  function prepareSegmentDrag(w, i, role) {
-    const P = wirePoints(w);
-    const a = P[i], b = P[i + 1];
-    if (!a || !b) return null;
-    const axis = Math.abs(a.y - b.y) <= Math.abs(a.x - b.x) ? 'h' : 'v';
-    const pts = (w.points || []).map(p => ({ x: p.x, y: p.y }));
-
-    if (role === 'mid') {
-      let j = i - 1;
-      if (i === 0) { pts.unshift({ x: a.x, y: a.y }); j = 0; }
-      if (j + 1 > pts.length - 1) pts.push({ x: b.x, y: b.y });
-      w.points = pts;
-      return { idx: [j, j + 1], axis };
-    }
-
-    // fold: three new points turn one run into run · jog · run, hinged at the
-    // midpoint. Which three depends on the side grabbed, so that the two the
-    // drag moves always stay axis-aligned with the two that stay put.
-    const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-    let ins;
-    if (axis === 'h') {
-      ins = role === 'a'
-        ? [{ x: a.x, y: a.y }, { x: mid.x, y: a.y }, { x: mid.x, y: b.y }]
-        : [{ x: mid.x, y: a.y }, { x: mid.x, y: b.y }, { x: b.x, y: b.y }];
-    } else {
-      ins = role === 'a'
-        ? [{ x: a.x, y: a.y }, { x: a.x, y: mid.y }, { x: b.x, y: mid.y }]
-        : [{ x: a.x, y: mid.y }, { x: b.x, y: mid.y }, { x: b.x, y: b.y }];
-    }
-    pts.splice(i, 0, ...ins);
-    w.points = pts;
-    return { idx: role === 'a' ? [i, i + 1] : [i + 1, i + 2], axis };
-  }
-
-  function moveSegment(w, idx, axis, value) {
-    idx.forEach(k => {
-      const p = w.points[k];
-      if (!p) return;
-      if (axis === 'h') p.y = value; else p.x = value;
-    });
-  }
-
-  /**
-   * Force every run of a wire back onto an axis.
-   *
-   * A wire is two *pin references* plus waypoints, so moving a part moves one
-   * end and leaves the waypoints where they were — and the run between them
-   * goes diagonal. Nothing else notices: the wire still connects the same two
-   * pins, it just stops looking like a wire. So after anything moves, the two
-   * end runs are squared up again.
-   *
-   * Which axis an end run takes is decided by its neighbour, not by taste: if
-   * the next run along is horizontal this one has to leave the pin vertically,
-   * or the corner between them is itself a diagonal. With a single waypoint
-   * there is no neighbour to ask, so the elbow goes to whichever of the two
-   * candidate corners is closest to where it already sat — the wire keeps the
-   * shape the user drew instead of flipping to the other side of the board.
-   */
-  function straighten(w) {
-    const a = pinRefWorld(w.a), b = pinRefWorld(w.b);
-    if (!a || !b) return;
-    const skew = (p, q) => Math.abs(p.x - q.x) > 0.4 && Math.abs(p.y - q.y) > 0.4;
-    const pts = (w.points || []).map(p => ({ x: p.x, y: p.y }));
-
-    if (!pts.length) {
-      if (skew(a, b)) reroute(w);
-      return;
-    }
-    if (skew(a, pts[0])) {
-      if (pts.length === 1) {
-        const c1 = { x: a.x, y: b.y }, c2 = { x: b.x, y: a.y };
-        pts[0] = dist(pts[0], c1) <= dist(pts[0], c2) ? c1 : c2;
-      } else if (Math.abs(pts[0].y - pts[1].y) <= Math.abs(pts[0].x - pts[1].x)) {
-        pts[0].x = a.x;                       // next run is horizontal
-      } else {
-        pts[0].y = a.y;
-      }
-    }
-    const n = pts.length - 1;
-    if (skew(b, pts[n])) {
-      if (pts.length === 1) {
-        // the head fixed one axis of the lone elbow; the other one meets b
-        if (Math.abs(pts[0].x - a.x) < 0.4) pts[0].y = b.y; else pts[0].x = b.x;
-      } else if (Math.abs(pts[n].y - pts[n - 1].y) <= Math.abs(pts[n].x - pts[n - 1].x)) {
-        pts[n].x = b.x;
-      } else {
-        pts[n].y = b.y;
-      }
-    }
-    w.points = pts;
-    simplifyWire(w);
-  }
-
-  /** Every wire with an end on one of these items, squared up again. */
-  function straightenAround(uids) {
-    const set = uids instanceof Set ? uids : new Set(uids);
-    S.doc.wires.forEach(w => {
-      if (set.has(w.a.item) || set.has(w.b.item)) straighten(w);
-    });
-  }
-
-  /** Drop waypoints that sit on a straight run or on top of their neighbour. */
+  /** Drop bends that sit on a neighbour, or on the straight line through them. */
   function simplifyWire(w) {
     const P = wirePoints(w);
     if (P.length < 3) return;
@@ -341,9 +202,11 @@
     for (let i = 1; i < P.length - 1; i++) {
       const prev = keep.length ? keep[keep.length - 1] : P[0];
       const cur = P[i], next = P[i + 1];
-      const flatH = Math.abs(prev.y - cur.y) < 0.4 && Math.abs(cur.y - next.y) < 0.4;
-      const flatV = Math.abs(prev.x - cur.x) < 0.4 && Math.abs(cur.x - next.x) < 0.4;
-      if (!flatH && !flatV && dist(prev, cur) > 0.4) keep.push(cur);
+      if (dist(prev, cur) < 1.2) continue;
+      const cross = Math.abs((cur.x - prev.x) * (next.y - prev.y) - (cur.y - prev.y) * (next.x - prev.x));
+      const span = dist(prev, next) || 1;
+      if (cross / span < 0.6) continue;       // collinear: the corner does nothing
+      keep.push(cur);
     }
     w.points = keep;
   }
@@ -621,27 +484,24 @@
         g.appendChild(c);
       });
 
-      // one grabbable strip per run, plus the three handles on the hovered one
-      const hov = S.hoverSeg && S.hoverSeg.uid === w.uid ? S.hoverSeg.i : -1;
+      // one grabbable strip per run — clicking it folds a bend in there
       segments(w).forEach(seg => {
-        const hit = mkPath(`M${r2(seg.a.x)} ${r2(seg.a.y)} L${r2(seg.b.x)} ${r2(seg.b.y)}`,
-          'wire-hit seg-' + seg.axis);
+        const hit = mkPath(`M${r2(seg.a.x)} ${r2(seg.a.y)} L${r2(seg.b.x)} ${r2(seg.b.y)}`, 'wire-hit');
         hit.dataset.uid = w.uid;
         hit.dataset.seg = String(seg.i);
-        hit.dataset.axis = seg.axis;
         g.appendChild(hit);
-        if (seg.i !== hov) return;
-        [['a', 0.25], ['mid', 0.5], ['b', 0.75]].forEach(([role, t]) => {
-          const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-          c.setAttribute('cx', r2(seg.a.x + (seg.b.x - seg.a.x) * t));
-          c.setAttribute('cy', r2(seg.a.y + (seg.b.y - seg.a.y) * t));
-          c.setAttribute('r', role === 'mid' ? 3.6 : 3);
-          c.setAttribute('class', 'seg-handle ' + (role === 'mid' ? 'mid ' : '') + seg.axis);
-          c.dataset.uid = w.uid;
-          c.dataset.seg = String(seg.i);
-          c.dataset.role = role;
-          g.appendChild(c);
-        });
+      });
+
+      // the bends themselves, grabbable whenever the wire is hovered or selected
+      const showBends = (S.hoverSeg && S.hoverSeg.uid === w.uid) || S.sel.wires.includes(w.uid);
+      (w.points || []).forEach((p, i) => {
+        const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        c.setAttribute('cx', r2(p.x)); c.setAttribute('cy', r2(p.y));
+        c.setAttribute('r', 3.2);
+        c.setAttribute('class', 'seg-handle' + (showBends ? ' on' : ''));
+        c.dataset.uid = w.uid;
+        c.dataset.idx = String(i);
+        g.appendChild(c);
       });
       g0.appendChild(g);
     });
@@ -650,9 +510,7 @@
       const from = pinRefWorld(S.wiring.from);
       if (from) {
         const target = S.wiring.cursor || from;
-        const pts = S.wiring.points.length
-          ? [from, ...S.wiring.points, target]
-          : [from, ...routeWire(from, target), target];
+        const pts = [from, ...S.wiring.points, target];
         const p = mkPath(pathD(pts), 'wire');
         p.setAttribute('stroke', S.wiring.color);
         p.setAttribute('stroke-width', 2);
@@ -950,9 +808,8 @@
       points: S.wiring && S.wiring.points.length ? S.wiring.points.slice() : null,
     };
     // no hand-placed bends: lay it out on the lattice, on a lane nothing else uses
-    if (!w.points) w.points = routeWire(pinRefWorld(w.a), pinRefWorld(w.b), w.uid);
+    if (!w.points) w.points = [];
     S.doc.wires.push(w);
-    straighten(w);          // hand-placed bends can still leave a skewed stub
     S.nets = null;
     return true;
   }
@@ -967,6 +824,53 @@
     renderWires();
     renderInspector();
     updateDock();
+  }
+
+  /**
+   * Turn parts, taking whatever is plugged into them along for the ride.
+   *
+   * `pinWorld()` swings a pin around its item's own centre by `it.rot`, so
+   * rotating a breadboard moves every hole it has — while a plugged-in LED,
+   * whose own x/y never changed, is left behind at the old position and stops
+   * touching. `attachedSet()` already solves exactly this for dragging; the
+   * only reason rotation broke was that no rotate path ever called it.
+   *
+   * Every rotate goes through here for that reason: the keyboard, the
+   * inspector's rotate buttons and its rotation field all used to turn parts
+   * their own separate way, and fixing one left the others detaching parts.
+   *
+   * Each directly-selected item still turns in place about its own centre —
+   * its own attachedSet seeds with zero offset from its own pivot, so it
+   * never moves — while anything riding on it revolves around that same
+   * centre. Per-leader pivots, not one shared centroid: selecting two
+   * unrelated parts and rotating still spins each where it stands.
+   */
+  function rotateItems(uids, deg) {
+    const rad = deg * Math.PI / 180;
+    const cos = Math.cos(rad), sin = Math.sin(rad);
+    const processed = new Set();
+    const touched = new Set();
+
+    uids.forEach(uid => {
+      const leader = item(uid);
+      if (!leader || leader.locked || processed.has(uid)) return;
+      const { w: lw, h: lh } = size(leader);
+      const px = leader.x + lw / 2, py = leader.y + lh / 2;
+
+      [...attachedSet([uid])].map(item).filter(Boolean).forEach(it => {
+        if (it.locked || processed.has(it.uid)) return;
+        processed.add(it.uid);
+        touched.add(it.uid);
+        const { w, h } = size(it);
+        const dx = (it.x + w / 2) - px, dy = (it.y + h / 2) - py;
+        it.x = px + dx * cos - dy * sin - w / 2;
+        it.y = py + dx * sin + dy * cos - h / 2;
+        it.rot = (it.rot || 0) + deg;
+      });
+    });
+    if (!touched.size) return;
+    S.nets = null;
+    renderItems(); renderWires(); renderInspector(); commit();
   }
 
   function setItem(uids, patch) {
@@ -1137,7 +1041,7 @@
     $$('.obj-row', list).forEach(row => {
       row.addEventListener('click', () => {
         if (row.dataset.kind === 'items') select([row.dataset.uid], []);
-        else { setTool('wire'); select([], [row.dataset.uid]); }
+        else select([], [row.dataset.uid]);
       });
       row.addEventListener('dragstart', e => {
         dragUid = row.dataset.uid;
@@ -1332,12 +1236,18 @@
     $('#i-label', b).addEventListener('change', commit);
     num('i-x', 'x'); num('i-y', 'y');
     num('i-scale', 'scale', v => Math.max(0.1, Math.min(4, v / 100)));
-    num('i-rot', 'rot');
+    // typing an angle is still a rotation, so it goes through rotateItems()
+    // as a delta — setting `rot` directly would leave anything plugged in
+    // behind, which is the whole bug this function exists to stop
+    $('#i-rot', b).addEventListener('change', e => {
+      const v = parseFloat(e.target.value);
+      if (!isNaN(v)) rotateItems([it.uid], v - (it.rot || 0));
+    });
 
     $$('[data-act]', b).forEach(btn => btn.addEventListener('click', () => {
       const a = btn.dataset.act;
-      if (a === 'rot-l') setItem([it.uid], { rot: (it.rot || 0) - 90 });
-      if (a === 'rot-r') setItem([it.uid], { rot: (it.rot || 0) + 90 });
+      if (a === 'rot-l') rotateItems([it.uid], -90);
+      if (a === 'rot-r') rotateItems([it.uid], 90);
       if (a === 'flip-x') setItem([it.uid], { flipX: !it.flipX });
       if (a === 'flip-y') setItem([it.uid], { flipY: !it.flipY });
       if (a === 'lock') setItem([it.uid], { locked: !it.locked });
@@ -1481,13 +1391,49 @@
 
   const pinAt = (e) => hitAt(e).pin;
 
+  /**
+   * One pointer, no modes.
+   *
+   * There used to be an Explore / Move / Wire switch, and every gesture was
+   * gated on which one was active — which meant the answer to "why can't I
+   * drag this" was always "you are in the wrong mode". What the pointer is
+   * over already says what it should do, so that is what decides:
+   *
+   *   right-drag (or middle)      pan, from anywhere, over anything
+   *   left on a pin              start / finish a wire
+   *   left on a wire             bend it at that point, and drag the bend
+   *   left on a part's body      move it (with anything plugged into it)
+   *   left on empty canvas       marquee-select parts and wires
+   *
+   * Pins beat wires in the hit test (see hitAt) so a run lying across a row
+   * of holes never blocks the hole underneath, and a part's body is only
+   * whatever is left after those two — which is why the pin and wire hit
+   * areas are kept tight rather than generous.
+   */
   function onPointerDown(e) {
-    if (e.button === 2) return;
-    // The dock and the hint bar sit inside the viewport; capturing the pointer
-    // for them would retarget their own click away and, worse, clear the
-    // selection right before "delete selection" runs.
     if (e.target.closest('.cv-mobile-tabs')) return;
     closePanels();
+
+    // right or middle button pans, whatever is underneath
+    if (e.button === 1 || e.button === 2) {
+      e.preventDefault();
+      els.viewport.setPointerCapture(e.pointerId);
+      S.drag = { mode: 'pan', x0: e.clientX, y0: e.clientY, vx: S.view.x, vy: S.view.y };
+      els.viewport.classList.add('panning');
+      return;
+    }
+    if (e.button !== 0) return;
+
+    // A second finger is the start of a pinch, never a gesture of its own.
+    // Chrome fires its pointerdown *before* touchstart, so without this the
+    // second finger landed on empty canvas and started a marquee — throwing
+    // away the move drag the first finger was in the middle of, along with
+    // the original positions needed to put the part back.
+    if (e.pointerType === 'touch') {
+      if (S.touchId !== null) return;
+      S.touchId = e.pointerId;
+    }
+    if (S.pinch) return;
 
     // --- something on a part you can actually press or turn
     const ctrl = e.target.closest('.sim-ctrl');
@@ -1508,33 +1454,52 @@
       return;
     }
 
-    const tool = S.tool;
-    const hit = tool === 'wire' ? hitAt(e) : { pin: null, seg: null, handle: null };
+    const hit = hitAt(e);
 
-    // --- a run handle: middle slides the run, the outer two fold a corner in
-    const grab = hit.handle || (!hit.pin && hit.seg);
-    if (grab && !S.wiring) {
-      const w = wire(grab.dataset.uid);
+    // --- a wire being drawn: a pin ends it, empty canvas drops a corner
+    if (S.wiring) {
+      els.viewport.setPointerCapture(e.pointerId);
+      if (hit.pin) { endWire(hit.pin); return; }
+      const p = toWorld(e.clientX, e.clientY);
+      S.wiring.points.push(alignToNeighbours(p, lastWiringPoint(), null));
+      renderWires();
+      return;
+    }
+
+    // --- an existing bend: drag it
+    if (hit.handle) {
+      const w = wire(hit.handle.dataset.uid);
       if (w) {
-        const role = grab.dataset.role || 'mid';
-        const prep = prepareSegmentDrag(w, +grab.dataset.seg, role);
-        if (prep) {
-          select([], [w.uid]);
-          els.viewport.setPointerCapture(e.pointerId);
-          S.drag = { mode: 'seg', wire: w, idx: prep.idx, axis: prep.axis, moved: false };
-          renderWires();
-          return;
-        }
+        select([], [w.uid]);
+        els.viewport.setPointerCapture(e.pointerId);
+        S.drag = { mode: 'bend', wire: w, idx: +hit.handle.dataset.idx, moved: false };
+        renderWires();
+        return;
+      }
+    }
+
+    // --- the body of a wire: fold a new bend in right where it was clicked
+    if (hit.seg && !hit.pin) {
+      const w = wire(hit.seg.dataset.uid);
+      if (w) {
+        const i = +hit.seg.dataset.seg;
+        const p = toWorld(e.clientX, e.clientY);
+        const pts = (w.points || []).map(q => ({ x: q.x, y: q.y }));
+        pts.splice(i, 0, { x: p.x, y: p.y });
+        w.points = pts;
+        select([], [w.uid]);
+        els.viewport.setPointerCapture(e.pointerId);
+        S.drag = { mode: 'bend', wire: w, idx: i, moved: false, fresh: true };
+        renderWires();
+        return;
       }
     }
 
     // --- a pin: starts a wire
-    const ref = hit.pin;
-    if (ref) {
+    if (hit.pin) {
       e.preventDefault();
       els.viewport.setPointerCapture(e.pointerId);
-      if (S.wiring) { endWire(ref); return; }
-      startWire(ref, false);
+      startWire(hit.pin, false);
       S.drag = { mode: 'wire', x0: e.clientX, y0: e.clientY, moved: false };
       return;
     }
@@ -1542,38 +1507,30 @@
     const node = e.target.closest && e.target.closest('.cv-item');
     els.viewport.setPointerCapture(e.pointerId);
 
-    // --- a part
-    if (node && !S.wiring) {
+    // --- a part's body: move it, and the whole selection if it is part of one
+    if (node) {
       const it = item(node.dataset.uid);
       if (it) {
         const add = e.shiftKey || e.ctrlKey || e.metaKey;
         let sel = S.sel.items.slice();
         if (add) sel = sel.includes(it.uid) ? sel.filter(u => u !== it.uid) : sel.concat(it.uid);
+        // Already in the selection: keep the whole thing. Clicking one part of
+        // a marquee'd group moves the group — picking a single member out of it
+        // means clearing the selection first, which is what clicking away does.
         else if (!sel.includes(it.uid)) sel = [it.uid];
-        select(sel, add ? S.sel.wires : []);
-        if (tool === 'move' && !it.locked) { startMove(e); return; }
+        select(sel, add ? S.sel.wires : (sel.includes(it.uid) && S.sel.items.includes(it.uid) ? S.sel.wires : []));
+        if (!it.locked) { startMove(e); return; }
       }
-      // every other tool looks but does not touch — the drag pans instead
     }
 
-    // --- empty canvas
-    if (S.wiring) {
-      const p = toWorld(e.clientX, e.clientY);
-      if (S.wiring.clickMode) {
-        S.wiring.points.push({ x: snapHalf(p.x), y: snapHalf(p.y) });
-        renderWires();
-      }
-      return;
-    }
+    // --- empty canvas: drag a box over whatever you want
     if (!node) {
-      if (tool === 'move' && e.shiftKey) {
-        S.drag = { mode: 'marquee', x0: e.clientX, y0: e.clientY, box: mkMarquee() };
-        return;
-      }
-      select([], []);
+      S.drag = {
+        mode: 'marquee', x0: e.clientX, y0: e.clientY, moved: false,
+        box: mkMarquee(), add: e.shiftKey || e.ctrlKey || e.metaKey,
+        base: { items: S.sel.items.slice(), wires: S.sel.wires.slice() },
+      };
     }
-    S.drag = { mode: 'pan', x0: e.clientX, y0: e.clientY, vx: S.view.x, vy: S.view.y };
-    els.viewport.classList.add('panning');
   }
 
   /**
@@ -1654,6 +1611,37 @@
     return out;
   }
 
+  /**
+   * Everything the box touches — parts by their bounds, wires by any of their
+   * points or the midpoint of any run, so a long wire crossing the box counts
+   * even when both of its ends are outside it.
+   */
+  function applyMarquee(d, e) {
+    const a = toWorld(Math.min(d.x0, e.clientX), Math.min(d.y0, e.clientY));
+    const b = toWorld(Math.max(d.x0, e.clientX), Math.max(d.y0, e.clientY));
+    const inBox = (p) => p && p.x >= a.x && p.x <= b.x && p.y >= a.y && p.y <= b.y;
+
+    const items = S.doc.items.filter(it => {
+      const bb = itemBounds(it);
+      return bb.x < b.x && bb.x + bb.w > a.x && bb.y < b.y && bb.y + bb.h > a.y;
+    }).map(it => it.uid);
+
+    const wires = S.doc.wires.filter(w => {
+      const pts = wirePoints(w);
+      if (pts.some(inBox)) return true;
+      for (let i = 0; i < pts.length - 1; i++) {
+        if (inBox({ x: (pts[i].x + pts[i + 1].x) / 2, y: (pts[i].y + pts[i + 1].y) / 2 })) return true;
+      }
+      return false;
+    }).map(w => w.uid);
+
+    if (d.add) {
+      select([...new Set([...d.base.items, ...items])], [...new Set([...d.base.wires, ...wires])]);
+    } else {
+      select(items, wires);
+    }
+  }
+
   function mkMarquee() {
     const b = document.createElement('div');
     b.className = 'cv-marquee';
@@ -1666,7 +1654,9 @@
 
     if (S.wiring) {
       const p = toWorld(e.clientX, e.clientY);
-      S.wiring.cursor = { x: snapHalf(p.x), y: snapHalf(p.y) };
+      // free to follow the cursor, but level with the last corner when close,
+      // and snapped hard onto a pin when there is one under the pointer
+      S.wiring.cursor = e.altKey ? p : alignToNeighbours(p, lastWiringPoint(), null);
       const ref = pinAt(e);
       if (ref) {
         const w = pinRefWorld(ref);
@@ -1676,12 +1666,12 @@
     }
 
     if (!d) {
-      const hit = S.tool === 'wire' ? hitAt(e) : { pin: pinAt(e), seg: null };
+      const hit = hitAt(e);
       if (hit.pin) showTip(e, hit.pin); else hideTip();
-      // three handles appear on whichever run the pointer is over
-      const seg = !hit.pin && hit.seg
-        ? { uid: hit.seg.dataset.uid, i: +hit.seg.dataset.seg } : null;
-      const same = (a, b) => (!a && !b) || (a && b && a.uid === b.uid && a.i === b.i);
+      // the wire under the pointer shows its bends, and where a new one would go
+      const seg = !hit.pin && (hit.seg || hit.handle)
+        ? { uid: (hit.handle || hit.seg).dataset.uid } : null;
+      const same = (a, b) => (!a && !b) || (a && b && a.uid === b.uid);
       if (!same(seg, S.hoverSeg)) { S.hoverSeg = seg; renderWires(); }
       return;
     }
@@ -1704,6 +1694,8 @@
       d.box.style.top = (y - r.top) + 'px';
       d.box.style.width = Math.abs(e.clientX - d.x0) + 'px';
       d.box.style.height = Math.abs(e.clientY - d.y0) + 'px';
+      if (Math.abs(e.clientX - d.x0) + Math.abs(e.clientY - d.y0) > 3) d.moved = true;
+      applyMarquee(d, e);                      // highlight as it is dragged
       return;
     }
 
@@ -1720,11 +1712,11 @@
 
     if (d.mode === 'ctrl') return;
 
-    if (d.mode === 'seg') {
+    if (d.mode === 'bend') {
       const p = toWorld(e.clientX, e.clientY);
-      const v = e.altKey ? (d.axis === 'h' ? p.y : p.x)
-        : snapHalf(d.axis === 'h' ? p.y : p.x);
-      moveSegment(d.wire, d.idx, d.axis, v);
+      const pts = wirePoints(d.wire);          // [pinA, ...bends, pinB]
+      const prev = pts[d.idx], next = pts[d.idx + 2];
+      d.wire.points[d.idx] = e.altKey ? p : alignToNeighbours(p, prev, next);
       d.moved = true;
       renderWires();
       return;
@@ -1752,26 +1744,21 @@
         w.points = pts.map(p => ({ x: p.x + dx, y: p.y + dy }));
       });
       d.origins.forEach(o => placeItem(o.it));
-      // a wire with only one end on the moving group has just gone diagonal
-      straightenAround(d.movingIds);
       renderWires();
       }
   }
 
   function onPointerUp(e) {
+    if (e.pointerType === 'touch' && S.touchId === e.pointerId) S.touchId = null;
     const d = S.drag;
     S.drag = null;
     els.viewport.classList.remove('panning');
 
     if (d && d.mode === 'marquee') {
-      const a = toWorld(Math.min(d.x0, e.clientX), Math.min(d.y0, e.clientY));
-      const b = toWorld(Math.max(d.x0, e.clientX), Math.max(d.y0, e.clientY));
       d.box.remove();
-      const hit = S.doc.items.filter(it => {
-        const bb = itemBounds(it);
-        return bb.x < b.x && bb.x + bb.w > a.x && bb.y < b.y && bb.y + bb.h > a.y;
-      }).map(it => it.uid);
-      select(hit, []);
+      // a click on empty canvas, rather than a box: let go of everything
+      if (!d.moved) { select([], []); return; }
+      applyMarquee(d, e);
       return;
     }
 
@@ -1789,15 +1776,15 @@
     if (d && d.mode === 'ctrl') { CirvoSim.press(d.uid, d.cid, false); return; }
     if (d && d.mode === 'knob') return;
 
-    if (d && d.mode === 'seg') {
-      simplifyWire(d.wire);       // also cleans up a fold that was never dragged
-      S.hoverSeg = null;
+    if (d && d.mode === 'bend') {
+      // a bend folded in but never dragged is just a click on the wire —
+      // simplifyWire drops it again rather than leaving a dead point behind
+      simplifyWire(d.wire);
       renderWires();
       renderInspector();
-      if (d.moved) commit();
+      if (d.moved || d.fresh) commit();
     }
     if (d && d.mode === 'move' && d.moved) {
-      straightenAround(d.movingIds);
       renderWires();
       S.nets = null;
       commit();
@@ -1822,6 +1809,52 @@
       els.tip.style.display = 'none';
       if (!S.wiring) paintPinStates();
     }
+  }
+
+  /* ---------------------------------------------------------- touch
+     Two fingers pinch to zoom and drag to pan — the only way to get around
+     the canvas on a phone, where there is no wheel and no right button.
+     Tracked here rather than through pointer events because a pinch has to
+     cancel whatever the first finger had already started: without that, the
+     canvas moves a part and zooms at the same time. */
+  function touchMid(t) {
+    return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 };
+  }
+  const touchGap = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+
+  function onTouchStart(e) {
+    if (e.touches.length !== 2) return;
+    const t = [e.touches[0], e.touches[1]];
+    // whatever one finger had begun is abandoned, and anything it changed
+    // along the way is put back, so a pinch never leaves a part displaced
+    const d = S.drag;
+    if (d && d.mode === 'move') d.origins.forEach(o => { o.it.x = o.x; o.it.y = o.y; placeItem(o.it); });
+    if (d && d.mode === 'marquee') d.box.remove();
+    S.drag = null;
+    if (S.wiring) { cancelWire(); renderWires(); }
+    const r = els.viewport.getBoundingClientRect();
+    const m = touchMid(t);
+    S.pinch = { gap: touchGap(t), z: S.view.z, cx: m.x - r.left, cy: m.y - r.top, mx: m.x, my: m.y };
+    els.viewport.classList.add('panning');
+  }
+
+  function onTouchMove(e) {
+    if (!S.pinch || e.touches.length !== 2) return;
+    e.preventDefault();
+    const t = [e.touches[0], e.touches[1]];
+    const m = touchMid(t);
+    // pan by however far the midpoint travelled, then zoom about it
+    S.view.x += m.x - S.pinch.mx;
+    S.view.y += m.y - S.pinch.my;
+    S.pinch.mx = m.x; S.pinch.my = m.y;
+    const r = els.viewport.getBoundingClientRect();
+    zoomAt(m.x - r.left, m.y - r.top, S.pinch.z * (touchGap(t) / (S.pinch.gap || 1)));
+  }
+
+  function onTouchEnd(e) {
+    if (e.touches.length >= 2) return;
+    if (S.pinch) els.viewport.classList.remove('panning');
+    S.pinch = null;
   }
 
   function onWheel(e) {
@@ -2123,10 +2156,6 @@
     if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); removeSelection(); return; }
 
     const k = e.key.toLowerCase();
-    if (k >= '1' && k <= '3') setTool(TOOLS[+k - 1]);
-    if (k === 'e') setTool('explore');
-    if (k === 'm') setTool('move');
-    if (k === 'w') setTool('wire');
     if (k === 'f') fit();
     if (k === 'd' && !mod) CirvoLib.setTheme(CirvoLib.theme() === 'dark' ? 'light' : 'dark');
     if (e.key === '[') panels.toggle('left');
@@ -2134,42 +2163,7 @@
     if (k === 'g') toggleOpt('grid');
     if (k === 'p') toggleOpt('pins');
     if (k === 's') toggleOpt('snap');
-    if (k === 'r' && S.sel.items.length && S.tool === 'move') {
-      // A part plugged into what is being rotated has to swing with it, the
-      // same way attachedSet() already keeps it plugged in through a drag —
-      // otherwise its pins are left behind at their old world position the
-      // instant the host's pins swing to a new one, and contacts() sees them
-      // as no longer touching. Each directly-selected item still turns in
-      // place around its own centre exactly as before (its own attachedSet
-      // seeds with dx=dy=0, so it never moves); anything smaller riding along
-      // with it revolves around that same centre instead of being left behind.
-      const deg = e.shiftKey ? -90 : 90;
-      const rad = deg * Math.PI / 180;
-      const cos = Math.cos(rad), sin = Math.sin(rad);
-      const processed = new Set();
-      const touched = new Set();
-
-      S.sel.items.forEach(uid => {
-        const leader = item(uid);
-        if (!leader || leader.locked || processed.has(uid)) return;
-        const { w: lw, h: lh } = size(leader);
-        const px = leader.x + lw / 2, py = leader.y + lh / 2;
-
-        [...attachedSet([uid])].map(item).filter(Boolean).forEach(it => {
-          if (it.locked || processed.has(it.uid)) return;
-          processed.add(it.uid);
-          touched.add(it.uid);
-          const { w, h } = size(it);
-          const dx = (it.x + w / 2) - px, dy = (it.y + h / 2) - py;
-          it.x = px + dx * cos - dy * sin - w / 2;
-          it.y = py + dx * sin + dy * cos - h / 2;
-          it.rot = (it.rot || 0) + deg;
-        });
-      });
-      S.nets = null;
-      straightenAround(touched);
-      renderItems(); renderWires(); renderInspector(); commit();
-    }
+    if (k === 'r' && S.sel.items.length) rotateItems(S.sel.items, e.shiftKey ? -90 : 90);
     if (e.key === '+' || e.key === '=') zoomBy(1.15);
     if (e.key === '-' || e.key === '_') zoomBy(1 / 1.15);
     if (e.key.startsWith('Arrow') && S.sel.items.length) {
@@ -2178,7 +2172,6 @@
       const dx = (e.key === 'ArrowRight' ? step : e.key === 'ArrowLeft' ? -step : 0);
       const dy = (e.key === 'ArrowDown' ? step : e.key === 'ArrowUp' ? -step : 0);
       S.sel.items.forEach(u => { const it = item(u); it.x += dx; it.y += dy; placeItem(it); });
-      straightenAround(S.sel.items);
       renderWires();
       clearTimeout(onKey._t);
       onKey._t = setTimeout(commit, 350);
@@ -2195,18 +2188,6 @@
     S.opts[key] = !S.opts[key];
     savePrefs();
     updateDock();
-  }
-
-  function setTool(tool) {
-    if (!TOOLS.includes(tool)) return;
-    if (S.wiring && tool !== 'wire') cancelWire();
-    S.tool = tool;
-    S.hoverSeg = null;
-    $$('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.tool === tool));
-    els.viewport.dataset.tool = tool;
-    if (tool !== 'wire' && S.sel.wires.length) select(S.sel.items, []);
-    renderWires();
-    try { localStorage.setItem('cirvo-tool', tool); } catch (e) { /* private mode */ }
   }
 
   const closeMenus = () => $$('.dd.open').forEach(d => d.classList.remove('open'));
@@ -2236,10 +2217,7 @@
       // CodeMirror is fetched from a CDN the first time the panel is actually
       // opened, same as Skulpt only loads on first Run — no cost for someone
       // who never touches the code side of the app.
-      ensureEditor().then(() => {
-        els.cm.refresh();     // it measured itself in pixels while hidden
-        if (!els.cm.getValue()) loadExample(CirvoExamples[0].id);
-      });
+      ensureEditor().then(() => els.cm.refresh());   // it measured itself while hidden
     }
   }
 
@@ -2303,23 +2281,6 @@
     const txt = run.querySelector('.hdr-btn-text');
     if (txt) txt.textContent = running ? 'Stop' : 'Run';
     run.classList.toggle('primary', !running);
-  }
-
-  function loadExample(id) {
-    ensureEditor().then(() => {
-      const ex = CirvoExamples.find(e => e.id === id) || CirvoExamples[0];
-      els.cm.setValue(ex.code);
-      els.cm.clearHistory();
-      saveCode();
-      const missing = ex.needs.filter(n => !S.doc.items.some(i => i.partId === n));
-      if (missing.length) {
-        const names = missing.map(m => {
-          const d = S.lib.byId.get(m);
-          return d ? d.name : m;
-        });
-        logLine('This example wants: ' + names.join(', ') + ' — drop them on the canvas and wire them up.', 'sys');
-      }
-    });
   }
 
   let codeTimer;
@@ -2405,7 +2366,7 @@
   async function mountEditor() {
     await loadCodeMirror();
     const mount = $('#code-editor');
-    let initial = CirvoExamples[0].code;
+    let initial = '';
     try {
       const saved = localStorage.getItem(CODE_KEY);
       if (saved) initial = saved;
@@ -2497,15 +2458,6 @@
 
     els.console.innerHTML = '<span class="empty">Output from print() and any errors land here.</span>';
 
-    mountSelect($('#example-select'), CirvoExamples.map(e => ({
-      value: e.id, label: e.name, icon: e.icon,
-    })), null, v => { loadExample(v); setPane('editor'); });
-    // the picker is an action list, not a state — keep its own label
-    const lbl = $('#example-select .lbl');
-    if (lbl) lbl.textContent = 'Examples';
-    const ic = $('#example-select .csel-btn .material-symbols-rounded');
-    if (ic) ic.textContent = 'auto_stories';
-
     $$('.code-tab').forEach(b => b.addEventListener('click', () => setPane(b.dataset.pane)));
     $('#code-close').addEventListener('click', () => toggleCode(false));
     $('#btn-code').addEventListener('click', () => toggleCode());
@@ -2565,9 +2517,6 @@
 
     renderAll();
     commit();
-    let savedTool = 'explore';
-    try { savedTool = localStorage.getItem('cirvo-tool') || 'explore'; } catch (e) { /* private mode */ }
-    setTool(TOOLS.includes(savedTool) ? savedTool : 'explore');
     applyView();
     updateDock();
     if (S.doc.items.length) fit();
@@ -2606,9 +2555,18 @@
     els.viewport.addEventListener('pointerdown', onPointerDown);
     els.viewport.addEventListener('pointermove', onPointerMove);
     els.viewport.addEventListener('pointerup', onPointerUp);
-    els.viewport.addEventListener('pointercancel', () => { S.drag = null; });
+    els.viewport.addEventListener('pointercancel', e => {
+      if (e.pointerType === 'touch' && S.touchId === e.pointerId) S.touchId = null;
+      S.drag = null;
+    });
     els.viewport.addEventListener('pointerleave', hideTip);
     els.viewport.addEventListener('wheel', onWheel, { passive: false });
+    els.viewport.addEventListener('touchstart', onTouchStart, { passive: true });
+    els.viewport.addEventListener('touchmove', onTouchMove, { passive: false });
+    els.viewport.addEventListener('touchend', onTouchEnd);
+    els.viewport.addEventListener('touchcancel', onTouchEnd);
+    // right-drag pans, so the browser menu would fight it
+    els.viewport.addEventListener('contextmenu', e => e.preventDefault());
     els.viewport.addEventListener('contextmenu', e => {
       if (S.wiring) {
         e.preventDefault();
@@ -2647,7 +2605,6 @@
     $('#d-snap').addEventListener('click', () => toggleOpt('snap'));
 
     // --- header
-    $$('.mode-btn').forEach(b => b.addEventListener('click', () => setTool(b.dataset.tool)));
     $$('.dd-trigger').forEach(btn => btn.addEventListener('click', () => {
       const dd = btn.closest('.dd');
       const open = dd.classList.contains('open');
@@ -2680,7 +2637,7 @@
     // handy from the console (and for the headless checks in tools/): the live
     // document, plus the few verbs a script would want to drive
     window.Cirvo = { state: S, addItem, fit, exportPNG, select, connect, renderAll, commit,
-      setTool, pinRefWorld, wirePoints, segments, reroute, toggleCode, loadExample,
+      pinRefWorld, wirePoints, segments, reroute, toggleCode, rotateItems,
       sim: CirvoSim };
 
     CirvoLib.initTheme();

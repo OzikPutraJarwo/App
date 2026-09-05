@@ -245,8 +245,13 @@
 
 /* ------------------------------------------------- app shell */
 body.cv-body {
+  /* 100vh on iOS is the height the window has with the address bar *hidden*,
+     so the bottom of a fixed-height app is permanently underneath it. dvh
+     tracks the bar as it comes and goes; vh stays as the fallback. */
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
 /* the workbench uses the whole window: no centred band in the header, and no
@@ -584,8 +589,6 @@ body.cv-body main {
 
 .cv-viewport.grid-off { background-image: none; }
 .cv-viewport.panning { cursor: grabbing !important; }
-.cv-viewport[data-tool="explore"] { cursor: grab; }
-.cv-viewport[data-tool="wire"] { cursor: crosshair; }
 
 .cv-world {
   position: absolute;
@@ -609,20 +612,32 @@ body.cv-body main {
   z-index: 4000;
 }
 
-.cv-wires .wire-hit { stroke: transparent; stroke-width: 9; fill: none; pointer-events: none; }
-/* only the wire tool may grab a wire, and even then pins win the hit test so a
-   run lying across a row of holes never blocks the hole underneath */
-.cv-viewport[data-tool="wire"] .cv-wires .wire-hit { pointer-events: stroke; }
-.cv-wires .wire-hit.seg-h { cursor: ns-resize; }
-.cv-wires .wire-hit.seg-v { cursor: ew-resize; }
+/* Kept deliberately tight. It used to be 9 px of always-on grab area, which
+   on a 10.16 px hole pitch covered the holes either side of whatever the wire
+   crossed; pins win the hit test anyway, so the only thing the extra width
+   bought was wires stealing each other's clicks. */
+.cv-wires .wire-hit {
+  stroke: transparent;
+  stroke-width: 5;
+  fill: none;
+  pointer-events: stroke;
+  cursor: cell;
+}
 
-/* the three handles that appear on the hovered run: middle slides it, the two
-   outer ones fold a new corner in at the midpoint */
-.cv-wires .seg-handle { fill: var(--card); stroke: var(--accent); stroke-width: 1.6; pointer-events: all; }
-.cv-wires .seg-handle.mid { fill: var(--accent); stroke: var(--card); }
-.cv-wires .seg-handle:hover { stroke-width: 2.4; }
-.cv-wires .seg-handle.h { cursor: ns-resize; }
-.cv-wires .seg-handle.v { cursor: ew-resize; }
+/* a bend you have already folded in: invisible until the wire is hovered or
+   selected, but always grabbable so it never slips out from under the cursor */
+.cv-wires .seg-handle {
+  fill: var(--card);
+  stroke: var(--accent);
+  stroke-width: 1.6;
+  pointer-events: all;
+  cursor: move;
+  opacity: 0;
+  transition: opacity .12s;
+}
+
+.cv-wires .seg-handle.on { opacity: 1; }
+.cv-wires .seg-handle:hover { opacity: 1; stroke-width: 2.4; }
 .cv-wires .wire { fill: none; stroke-linecap: round; stroke-linejoin: round; }
 .cv-wires g.sel .wire { stroke-dasharray: 7 4; }
 .cv-wires g.sel .wire-halo,
@@ -671,9 +686,7 @@ body.cv-body main {
   pointer-events: none;
 }
 
-.cv-item .pins { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
-.cv-viewport[data-tool="wire"] .cv-item .pins,
-.cv-viewport[data-tool="explore"] .cv-item .pins { pointer-events: auto; }
+.cv-item .pins { position: absolute; inset: 0; overflow: visible; pointer-events: auto; }
 .cv-item .pins circle { cursor: crosshair; pointer-events: all; }
 .cv-item .pins .pin-dot { stroke: rgba(255, 255, 255, .85); stroke-width: .8; opacity: .0; transition: opacity .12s; }
 .cv-viewport.show-pins .pins .pin-dot,
@@ -1136,6 +1149,45 @@ body.cv-body main {
 @media (max-width: 560px) {
   footer { display: none; }
   .cv-dock { bottom: .5rem; }
+
+  /* The header is a fixed row of buttons that used to simply overflow the
+     screen: .site-actions is flex:none, so past a certain width the last
+     buttons went off the right edge with no way to reach them. The title is
+     the one thing here that can give up its space. */
+  body.cv-body .site-title { display: none; }
+
+  body.cv-body .site-actions {
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: flex-end;
+    gap: .3rem;
+  }
+
+  body.cv-body .hdr-btn { padding: 0 .5rem; height: 2rem; }
+  body.cv-body .hdr-btn .material-symbols-rounded { font-size: 1.1rem; }
+  body.cv-body header { padding-left: .6rem; padding-right: .6rem; }
+  body.cv-body .header.wrap { gap: .4rem; }
+
+  /* a dropdown as wide as the screen rather than one hanging off it */
+  body.cv-body .dd-menu { width: min(17rem, calc(100vw - 1.2rem)); padding: .7rem; }
+
+  .cv-shell, .ad-shell { padding: .35rem; gap: .35rem; }
+
+  /* a side rail this narrow is the whole screen — let it be */
+  .cv-shell > .panel.side, .ad-shell > .panel.side {
+    width: calc(100% - .7rem);
+    top: .35rem;
+    bottom: .35rem;
+    left: .35rem;
+    right: .35rem;
+  }
+
+  /* the code panel needs most of the screen to be usable at all */
+  .cv-code[data-dock="bottom"], .cv-code[data-dock="top"] { height: 62%; }
+  .code-head { padding: .1rem .5rem .35rem; gap: .35rem; }
+  .code-actions { gap: .3rem; }
+  .code-actions .hdr-btn { height: 1.85rem; padding: 0 .5rem; }
+  .code-tab { padding: .3rem .5rem; font-size: .74rem; }
 }
 
 /* ============================================================
@@ -1234,10 +1286,8 @@ body.cv-body main {
   transition: box-shadow .15s, background .15s;
 }
 
-.cv-viewport[data-tool="explore"] .sim-ctrl,
-.cv-viewport.sim-running .sim-ctrl { pointer-events: all; }
-.cv-viewport[data-tool="explore"] .sim-ctrl:hover,
-.cv-viewport.sim-running .sim-ctrl:hover { box-shadow: 0 0 0 2px rgba(117, 112, 188, .85); }
+.sim-ctrl { pointer-events: all; }
+.sim-ctrl:hover { box-shadow: 0 0 0 2px rgba(117, 112, 188, .85); }
 .sim-ctrl.down { background: rgba(117, 112, 188, .35); }
 .sim-ctrl.on:hover { box-shadow: 0 0 0 2px rgba(34, 160, 107, .9) !important; }
 .sim-ctrl[data-kind="knob"] { cursor: ns-resize; }
@@ -1409,7 +1459,7 @@ body.cv-body main {
 .code-actions .hdr-btn { height: 1.95rem; }
 
 .code-body { flex: 1 1 auto; min-height: 0; position: relative; }
-.code-pane { position: absolute; inset: 0; overflow: auto; }
+.code-pane { position: absolute; inset: 0; overflow: auto; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y; }
 
 #code-text {
   width: 100%;
@@ -1616,6 +1666,10 @@ body.cv-body main {
 
 .code-editor-mount .CodeMirror {
   height: 100%;
+  /* without this the browser claims the gesture for page scrolling and the
+     editor cannot be scrolled by touch at all */
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
   background: transparent;
   color: var(--ink);
   font-family: ui-monospace, "SF Mono", Menlo, monospace;

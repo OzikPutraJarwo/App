@@ -150,18 +150,30 @@ const CirvoLib = (() => {
     const byId = new Map();
     stock.parts.forEach(p => byId.set(p.id, normalise(p, false)));
     custom.forEach(p => {
-      // a tombstone: this browser asked to stop seeing a part it never made
-      // an override of — nothing to normalise, just leave it out of the
-      // library. It is never written to parts.json, so it costs nothing
-      // anywhere but this browser and comes back the moment the tombstone
-      // is deleted (CirvoLib.delCustom or File → Restore hidden parts).
-      if (p.hidden) { byId.delete(p.id); return; }
+      // a tombstone: archived, with nothing of its own to show. Never written
+      // to parts.json, so it costs nothing anywhere but this browser, and the
+      // part is back the moment the record is deleted.
+      if (p.archived) { byId.delete(p.id); return; }
       byId.set(p.id, normalise(p, true));
+    });
+
+    // An entry can also be archived in the file itself, which is how a part
+    // whose artwork lives in parts/ is put away without deleting the asset:
+    // the entry and its PNG stay exactly where they are, the designer simply
+    // stops offering it. Applied after the custom pass so un-archiving a part
+    // in this browser still wins over the flag on disk.
+    stock.parts.forEach(p => {
+      if (p.archived && !custom.some(c => c.id === p.id && !c.archived)) byId.delete(p.id);
     });
     cache = {
       manifest: stock,
       parts: [...byId.values()].sort((a, b) => a.name.localeCompare(b.name)),
       byId,
+      // what the designer is not being shown, so the builder can list it
+      archived: [
+        ...stock.parts.filter(p => p.archived).map(p => normalise(p, false)),
+        ...custom.filter(p => p.archived).map(p => ({ id: p.id, name: p.id, archived: true, tombstone: true })),
+      ].filter((p, i, all) => all.findIndex(q => q.id === p.id) === i),
     };
     return cache;
   }
