@@ -1,36 +1,14 @@
-/* ============================================================
-   Cirvo — shared part library
-   Loaded by both index.html (designer) and admin.html (builder).
 
-   A "part" is artwork + pins:
-     { id, name, category, image,
-       width, height,                    <- canvas size at 100 % zoom
-       pins: [{ id, name, x, y, color, type }],   x/y are 0..1 of the box
-       groups: [[pinId, ...], ...]       <- pins wired together inside the part
-                                            (breadboard rows, shared GNDs) }
-
-   Stock parts come from parts/parts.json, which tools/generate_parts.py
-   writes alongside the PNGs. Parts made in the admin page live in
-   IndexedDB (their image is an inlined data URL) until they are exported
-   into parts/ and committed — see admin.html › Save to app assets.
-   ============================================================ */
 
 const CirvoLib = (() => {
   const DB_NAME = 'cirvo';
   const META_DB = 'cirvo-meta';
   const META_STORE = 'meta';
-  // Was briefly 2 mid-development (a since-reverted second store), and that
-  // version already reached some browsers. Opening at 1 now throws
-  // VersionError outright — "requested version is less than existing" — not
-  // just onblocked, since a downgrade isn't a request IndexedDB will queue.
-  // Matching the version that leaked is the only way back in for those
-  // browsers; a fresh one opening at 2 for the first time is unaffected.
+
   const DB_VERSION = 2;
   const STORE = 'parts';
   const MANIFEST = 'parts/parts.json';
 
-  // Pin roles. The colour doubles as the default colour of a wire started
-  // from that pin, which is why they read like a wiring convention.
   const PIN_TYPES = [
     { id: 'io', name: 'Digital I/O', color: '#22a06b' },
     { id: 'analog', name: 'Analog', color: '#3d7fe5' },
@@ -51,7 +29,6 @@ const CirvoLib = (() => {
 
   const typeColor = (t) => (PIN_TYPES.find(p => p.id === t) || PIN_TYPES[11]).color;
 
-  // ---------------------------------------------------------- IndexedDB
   let dbp = null;
 
   function db() {
@@ -64,8 +41,7 @@ const CirvoLib = (() => {
       };
       req.onsuccess = () => resolve(req.result);
       req.onerror = () => reject(req.error);
-      // another tab still holds an older version open. Rejecting turns this
-      // into an empty custom library rather than a page that never loads.
+
       req.onblocked = () => reject(new Error('another tab is holding the library open'));
     });
     return dbp;
@@ -81,18 +57,6 @@ const CirvoLib = (() => {
     }));
   }
 
-  /*
-   * Small odds and ends that are not parts — currently the folder handle for
-   * writing app assets, which localStorage cannot hold because it is an object,
-   * not a string.
-   *
-   * Deliberately its own database rather than a second store in `cirvo`.
-   * Adding a store means bumping the version, and a version upgrade blocks
-   * until every other tab on that origin closes its connection — so shipping
-   * one would have hung Cirvo, with no error and no message, for anyone who
-   * happened to have it open twice. A new database at version 1 upgrades
-   * nothing and cannot block anything.
-   */
   let metap = null;
 
   function metaDb() {
@@ -128,7 +92,6 @@ const CirvoLib = (() => {
   const putCustom = (part) => tx('readwrite', s => s.put(part));
   const delCustom = (id) => tx('readwrite', s => s.delete(id));
 
-  // ------------------------------------------------------------ loading
   let cache = null;
 
   async function loadStock() {
@@ -137,7 +100,65 @@ const CirvoLib = (() => {
     return res.json();
   }
 
-  /** Stock + custom parts, custom winning on an id clash (an override). */
+  function partImages(p) {
+    if (p && Array.isArray(p.images) && p.images.length) {
+      return p.images.map(im => ({
+        src: im.src,
+        x: im.x === undefined ? 0.5 : im.x,
+        y: im.y === undefined ? 0.5 : im.y,
+        w: im.w === undefined ? 1 : im.w,
+        h: im.h === undefined ? 1 : im.h,
+        rot: im.rot || 0,
+      }));
+    }
+    return p && p.image ? [{ src: p.image, x: 0.5, y: 0.5, w: 1, h: 1, rot: 0 }] : [];
+  }
+
+  const IGNORED_FIELDS = ['image', 'src', 'custom'];
+
+  function stableKey(v) {
+    if (Array.isArray(v)) return '[' + v.map(stableKey).join(',') + ']';
+    if (v && typeof v === 'object') {
+      return '{' + Object.keys(v).filter(k => k[0] !== '_').sort()
+        .map(k => JSON.stringify(k) + ':' + stableKey(v[k])).join(',') + '}';
+    }
+    return JSON.stringify(v === undefined ? null : v);
+  }
+
+  function comparable(p) {
+    const q = Object.assign({}, p);
+    IGNORED_FIELDS.forEach(k => { delete q[k]; });
+    if (Array.isArray(q.images)) {
+      q.images = q.images.map(im => {
+        const r = Object.assign({}, im);
+        delete r.src;
+        return r;
+      });
+    }
+    return stableKey(q);
+  }
+
+  async function pruneStale(stock, custom) {
+    if (!stock.parts || !stock.parts.length) return custom;
+    const disk = new Map(stock.parts.map(p => [p.id, p]));
+    const kept = [];
+    const dropped = [];
+    for (const rec of custom) {
+      const entry = disk.get(rec.id);
+      if (!entry) { kept.push(rec); continue; }
+      const stale = rec.pins
+        ? comparable(rec) !== comparable(entry)
+        : !!rec.archived !== !!entry.archived;
+      if (!stale) { kept.push(rec); continue; }
+      try { await delCustom(rec.id); dropped.push(rec.id); } catch (err) { kept.push(rec); }
+    }
+    if (dropped.length) {
+      console.info('Cirvo: dropped ' + dropped.length
+        + ' browser copy/copies that no longer match parts.json —', dropped.join(', '));
+    }
+    return kept;
+  }
+
   async function load(force) {
     if (cache && !force) return cache;
     let stock = { parts: [] };
@@ -146,34 +167,38 @@ const CirvoLib = (() => {
     } catch (err) {
       console.warn('Cirvo: stock library unavailable —', err.message);
     }
-    const custom = await getCustom();
+    const custom = await pruneStale(stock, await getCustom());
+    const customById = new Map(custom.map(p => [p.id, p]));
+
     const byId = new Map();
     stock.parts.forEach(p => byId.set(p.id, normalise(p, false)));
     custom.forEach(p => {
-      // a tombstone: archived, with nothing of its own to show. Never written
-      // to parts.json, so it costs nothing anywhere but this browser, and the
-      // part is back the moment the record is deleted.
-      if (p.archived) { byId.delete(p.id); return; }
+      if (!p.pins) return;
       byId.set(p.id, normalise(p, true));
     });
 
-    // An entry can also be archived in the file itself, which is how a part
-    // whose artwork lives in parts/ is put away without deleting the asset:
-    // the entry and its PNG stay exactly where they are, the designer simply
-    // stops offering it. Applied after the custom pass so un-archiving a part
-    // in this browser still wins over the flag on disk.
-    stock.parts.forEach(p => {
-      if (p.archived && !custom.some(c => c.id === p.id && !c.archived)) byId.delete(p.id);
+    const archivedIds = new Set();
+    stock.parts.forEach(p => { if (p.archived) archivedIds.add(p.id); });
+    custom.forEach(p => {
+      if (p.archived) archivedIds.add(p.id);
+      else if ('archived' in p || p.pins) archivedIds.delete(p.id);
     });
+
+    const archived = [...archivedIds].map(id => {
+      const best = byId.get(id)
+        || (customById.get(id) && customById.get(id).pins && normalise(customById.get(id), true))
+        || (stock.parts.find(p => p.id === id) && normalise(stock.parts.find(p => p.id === id), false));
+
+      return best ? Object.assign({}, best, { archived: true }) : { id, name: id, archived: true, pins: [], groups: [] };
+    }).sort((a, b) => a.name.localeCompare(b.name));
+
+    archivedIds.forEach(id => byId.delete(id));
+
     cache = {
       manifest: stock,
       parts: [...byId.values()].sort((a, b) => a.name.localeCompare(b.name)),
       byId,
-      // what the designer is not being shown, so the builder can list it
-      archived: [
-        ...stock.parts.filter(p => p.archived).map(p => normalise(p, false)),
-        ...custom.filter(p => p.archived).map(p => ({ id: p.id, name: p.id, archived: true, tombstone: true })),
-      ].filter((p, i, all) => all.findIndex(q => q.id === p.id) === i),
+      archived,
     };
     return cache;
   }
@@ -193,21 +218,6 @@ const CirvoLib = (() => {
     return [...set].sort();
   }
 
-  /**
-   * Search the name, and only the name — that is what people type.
-   *
-   * Four passes, cheapest first: the whole query as a prefix, as a substring,
-   * every word of it as a substring, and finally the longest run of the
-   * query's letters that appears *in order* in the name. That last pass is
-   * what makes "raspi", "ras" and even "rapsrr" all find a Raspberry Pi.
-   *
-   * It has to be the longest common subsequence, not a greedy scan: a greedy
-   * scan commits to the first 'p' it sees and then cannot find the 's' that
-   * came before it, so "rapsrr" — two letters transposed — misses entirely.
-   * The LCS is free to skip the transposed letter and still match five of six.
-   * Seventy per cent of the query has to land, which is loose enough for a
-   * fumbled word and tight enough that "zzqqxx" matches nothing at all.
-   */
   function lcsLen(a, b) {
     const n = a.length, m = b.length;
     let prev = new Uint16Array(m + 1), cur = new Uint16Array(m + 1);
@@ -234,14 +244,10 @@ const CirvoLib = (() => {
       else if (name.includes(s)) score = 70;
       else if (terms.every(t => name.includes(t))) score = 50;
       else if (tight.length >= 3) {
-        // fuzzy is the last resort, and never for one or two letters — those
-        // would match half the library and drown the exact hits
         const flat = name.replace(/[^a-z0-9]/g, '');
         const ratio = lcsLen(tight, flat) / tight.length;
         if (ratio < 0.7) return;
-        // a long name has more letters to match by accident, so also ask how
-        // much of the *name* the query accounts for — otherwise "rapsrr" ranks
-        // a Capacitive Soil Moisture Sensor above a Raspberry Pi
+
         score = ratio * 30 + (tight.length / Math.max(tight.length, flat.length)) * 12;
       } else return;
       scored.push({ p, score });
@@ -251,7 +257,6 @@ const CirvoLib = (() => {
       .map(x => x.p);
   }
 
-  // ------------------------------------------------------------ helpers
   const uid = (p) => (p || 'x') + Math.random().toString(36).slice(2, 9);
 
   const esc = (s) => String(s == null ? '' : s)
@@ -288,7 +293,6 @@ const CirvoLib = (() => {
     im.src = src;
   });
 
-  // ---------------------------------------------------------- theme
   const THEME_KEY = 'cirvo-theme';
 
   function theme() {
@@ -297,12 +301,11 @@ const CirvoLib = (() => {
 
   function setTheme(t) {
     document.documentElement.dataset.theme = t;
-    try { localStorage.setItem(THEME_KEY, t); } catch (e) { /* private mode */ }
+    try { localStorage.setItem(THEME_KEY, t); } catch (e) {  }
     const icon = document.querySelector('#btn-theme .material-symbols-rounded');
     if (icon) icon.textContent = t === 'dark' ? 'light_mode' : 'dark_mode';
   }
 
-  /** Wire the header button; the attribute itself is set inline in <head>. */
   function initTheme() {
     setTheme(theme());
     const btn = document.getElementById('btn-theme');
@@ -314,7 +317,6 @@ const CirvoLib = (() => {
     else console.log('[' + (kind || 'info') + ']', msg);
   };
 
-  /** Where a pin sits on the canvas, once the part is scaled, flipped, turned. */
   function pinWorld(it, pin, d) {
     const w = d.width * (it.scale || 1), h = d.height * (it.scale || 1);
     let lx = pin.x * w, ly = pin.y * h;
@@ -329,11 +331,6 @@ const CirvoLib = (() => {
     };
   }
 
-  /**
-   * Pins of *different* parts sitting on the same spot are touching, exactly as
-   * a leg pushed into a breadboard hole is. Those pairs are as good as a wire,
-   * which is why a plugged-in LED lights without anyone drawing one.
-   */
   function contacts(items, byId, tol) {
     tol = tol || 1.2;
     const cell = tol * 2;
@@ -351,7 +348,7 @@ const CirvoLib = (() => {
             const bucket = grid.get((gx + i) + ',' + (gy + j));
             if (!bucket) continue;
             for (const q of bucket) {
-              if (q.uid === it.uid) continue;      // a part never shorts itself
+              if (q.uid === it.uid) continue;
               if (Math.abs(q.x - w.x) <= tol && Math.abs(q.y - w.y) <= tol) out.push([q.key, key]);
             }
           }
@@ -364,7 +361,6 @@ const CirvoLib = (() => {
     return out;
   }
 
-  /** Union-find over pins: internal part groups + touching legs + user wires. */
   function buildNets(items, wires, byId) {
     const parent = new Map();
     const find = (k) => {
@@ -396,7 +392,7 @@ const CirvoLib = (() => {
 
   return {
     PIN_TYPES, WIRE_COLORS, MANIFEST, typeColor,
-    load, categories, search, normalise,
+    load, categories, search, normalise, partImages,
     getCustom, putCustom, delCustom,
     getMeta, setMeta, delMeta,
     uid, esc, slug, download, readFile, loadImage, toast, buildNets, pinWorld, contacts,

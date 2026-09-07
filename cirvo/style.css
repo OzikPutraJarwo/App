@@ -1,7 +1,4 @@
-/* main.css styles `code` as a block-ish callout — padding, a border, its own
-   background. In an app that is a UI, not an article, an inline <code> is a pin
-   name in a sentence, so it reads as one: monospace, a hint of tint, nothing
-   else. Scoped to .cv-body so the shared rule still applies on the portfolio. */
+
 .cv-body code {
   padding: 0 .15rem;
   border: none;
@@ -11,9 +8,6 @@
   overflow-x: visible;
 }
 
-/* The canvas is a tool, and a drag across it should never sweep up a paragraph
-   of blue text. Chrome is opt-out, not opt-in: everything the user genuinely
-   types into or wants to copy hands selection back below. */
 .cv-body { user-select: none; -webkit-user-select: none; }
 
 .cv-body input,
@@ -27,19 +21,8 @@
   -webkit-user-select: text;
 }
 
-/* --card: the colour a raised surface sits at. Everything that used to be a
-   hard-coded #fff reads this instead, which is what makes dark mode a token
-   swap rather than a rewrite. */
 :root { --card: #ffffff; }
 
-/* ============================================================
-   Cirvo — circuit designer
-   The header chrome (.hdr-btn / .dd / .mode-switch) is the shared
-   Kode Jarwo pattern lifted from CV Generator so every app's top
-   bar behaves the same. Everything below <header> is Cirvo's own.
-   ============================================================ */
-
-/* ---------------------------------------------- header chrome */
 .hdr-btn {
   display: inline-flex;
   align-items: center;
@@ -144,6 +127,8 @@
 }
 
 .dd-item:hover { background: var(--accent-soft); color: var(--accent); transform: none; box-shadow: none; }
+
+.dd-item[hidden] { display: none; }
 .dd-item.danger { color: indianred; }
 .dd-item.danger:hover { background: rgba(205, 92, 92, .12); border-color: rgba(205, 92, 92, .3); color: indianred; }
 .dd-item .material-symbols-rounded { font-size: 1.2rem; flex: none; }
@@ -151,9 +136,6 @@
 .dd-item-txt { display: flex; flex-direction: column; gap: .05rem; line-height: 1.3; }
 .dd-item-txt small { font-weight: 500; font-size: .72rem; color: var(--ink-3); }
 
-/* Whether Save to library also reaches the files on disk is otherwise
-   invisible — the same toast fires either way — so this sits permanently in
-   the File menu rather than only surfacing the one time linking happens. */
 .dd-status {
   display: flex;
   align-items: flex-start;
@@ -172,9 +154,6 @@
 .tb-group > label { font-size: .72rem; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
 .tb-group select, .tb-group input { padding: .5rem .7rem; font-size: .82rem; }
 
-/* The canvas toolbar: the designer no longer has one, but the component
-   builder still docks its zoom / grid / snap controls at the bottom of its
-   stage, so these stay. */
 .cv-dock {
   position: absolute;
   left: 50%;
@@ -228,11 +207,9 @@
 
 .dock-zoom:hover { background: var(--accent-soft); color: var(--accent); transform: none; box-shadow: none; }
 
-/* zoom row inside the settings menu */
 .zoom-row { display: flex; gap: .3rem; }
 .zoom-row .mini-btn { padding: .4rem .3rem; }
 
-/* a dd-item that behaves like a checkbox: the tick only shows when it is on */
 .dd-item .dd-check {
   margin-left: auto;
   font-size: 1.1rem;
@@ -243,27 +220,20 @@
 .dd-item.on .dd-check { opacity: 1; }
 .dd-item.on { color: var(--accent); border-color: var(--ring); }
 
-/* ------------------------------------------------- app shell */
 body.cv-body {
-  /* 100vh on iOS is the height the window has with the address bar *hidden*,
-     so the bottom of a fixed-height app is permanently underneath it. dvh
-     tracks the bar as it comes and goes; vh stays as the fallback. */
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
   overscroll-behavior: none;
 }
 
-/* the workbench uses the whole window: no centred band in the header, and no
-   footer eating a strip of canvas */
 body.cv-body header .header.wrap { max-width: none; }
 body.cv-body footer { display: none; }
 
 body.cv-body main {
   padding: 0;
   display: flex;
-  /* main.css sets flex:1 0 auto, which lets a tall parts list push the whole
-     shell past the viewport — this app scrolls inside its panels instead. */
+
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -272,11 +242,9 @@ body.cv-body main {
   flex: 1 1 auto;
   min-height: 0;
   display: grid;
-  /* --lw/--rw are set from JS only while a side panel is collapsed — leaving
-     them unset here means every responsive breakpoint below keeps working
-     exactly as before */
+
   grid-template-columns: var(--lw, 17rem) 1fr var(--rw, 19rem);
-  grid-template-rows: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
   gap: .7rem;
   padding: .7rem;
   transition: grid-template-columns .18s ease;
@@ -292,9 +260,7 @@ body.cv-body main {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  /* visible, not hidden: the category menu has to be able to hang past the
-     panel edge. Everything that actually needs clipping (the scrolling body,
-     the canvas) clips itself. */
+
   overflow: visible;
 }
 
@@ -306,7 +272,7 @@ body.cv-body main {
   flex: none;
 }
 
-.panel-head h3 {
+.panel-head h3, .code-head h3 {
   font-size: .78rem;
   font-weight: 700;
   letter-spacing: .06em;
@@ -338,12 +304,10 @@ body.cv-body main {
 .icon-btn .material-symbols-rounded { font-size: 1.15rem; }
 .icon-btn.danger:hover { background: rgba(205,92,92,.12); color: indianred; }
 
-/* only useful once the side panels turn into slide-overs */
 .panel-close { display: none; }
 
-/* -------------------------------------------- collapsible side panels */
 .panel.side {
-  min-width: 0;               /* let the grid track actually shrink to --lw/--rw */
+  min-width: 0;
   transition: opacity .15s ease;
 }
 
@@ -372,7 +336,6 @@ body.cv-body main {
   white-space: nowrap;
 }
 
-/* ------------------------------------------ parts palette */
 .cv-search {
   position: relative;
   padding: 0 .9rem .6rem;
@@ -391,8 +354,6 @@ body.cv-body main {
   pointer-events: none;
 }
 
-/* the category picker sits outside .cv-search on purpose — that block
-   absolutely-positions any icon inside it, which would land on the label */
 .cv-pick {
   padding: 0 .9rem .6rem;
   flex: none;
@@ -458,8 +419,6 @@ body.cv-body main {
 .part-meta { min-width: 0; flex: 1 1 auto; }
 .part-name { font-size: .8rem; font-weight: 600; line-height: 1.3; }
 
-/* the designer's palette card is just a name; the builder's library row still
-   wants the pin count under it */
 .lib-item .part-sub {
   display: block;
   font-size: .68rem;
@@ -472,7 +431,6 @@ body.cv-body main {
 
 .cv-empty { padding: 1.5rem .5rem; text-align: center; font-size: .8rem; color: var(--ink-3); }
 
-/* custom select — a native <select> cannot carry an icon per option */
 .csel { position: relative; }
 
 .csel-btn {
@@ -538,7 +496,6 @@ body.cv-body main {
 .csel-opt .material-symbols-rounded { font-size: 1.1rem; flex: none; }
 .csel-opt .n { margin-left: auto; font-size: .68rem; opacity: .7; font-weight: 600; }
 
-/* draggable object list in the inspector */
 .obj-list { display: flex; flex-direction: column; gap: .2rem; }
 
 .obj-row {
@@ -564,7 +521,6 @@ body.cv-body main {
 .obj-row .swatch-dot { width: .7rem; height: .7rem; border-radius: 100%; flex: none; box-shadow: 0 0 0 1px rgba(0,0,0,.15); }
 .obj-row .thumb { width: 1.5rem; height: 1.2rem; flex: none; object-fit: contain; }
 
-/* -------------------------------------------------- stage */
 .cv-stage {
   position: relative;
   overflow: hidden;
@@ -581,8 +537,7 @@ body.cv-body main {
   cursor: grab;
   touch-action: none;
   background-color: #f7f7fb;
-  /* the dot pattern's size/offset are set from the view transform in JS so the
-     grid is the *real* 0.1 in lattice at every zoom level */
+
   background-image:
     radial-gradient(circle at center, rgba(53, 51, 83, .22) 1px, transparent 1.6px);
 }
@@ -607,15 +562,23 @@ body.cv-body main {
   height: 100000px;
   overflow: visible;
   pointer-events: none;
-  /* every .cv-item carries an explicit z-index for its stacking order, so the
-     wire layer needs one too or the parts paint over the wires */
+
   z-index: 4000;
 }
 
-/* Kept deliberately tight. It used to be 9 px of always-on grab area, which
-   on a 10.16 px hole pitch covered the holes either side of whatever the wire
-   crossed; pins win the hit test anyway, so the only thing the extra width
-   bought was wires stealing each other's clicks. */
+.cv-align {
+  position: absolute;
+  left: -50000px;
+  top: -50000px;
+  width: 100000px;
+  height: 100000px;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 4500;
+}
+
+.cv-align line { stroke: var(--accent); stroke-dasharray: 4 4; }
+
 .cv-wires .wire-hit {
   stroke: transparent;
   stroke-width: 5;
@@ -624,8 +587,6 @@ body.cv-body main {
   cursor: cell;
 }
 
-/* a bend you have already folded in: invisible until the wire is hovered or
-   selected, but always grabbable so it never slips out from under the cursor */
 .cv-wires .seg-handle {
   fill: var(--card);
   stroke: var(--accent);
@@ -721,18 +682,6 @@ body.cv-body main {
 
 .cv-tip small { display: block; font-weight: 500; opacity: .7; font-size: .62rem; }
 
-/* stage overlays */
-
-
-
-
-
-
-
-
-
-
-
 .cv-blank {
   position: absolute;
   inset: 0;
@@ -751,7 +700,6 @@ body.cv-body main {
 .cv-blank span.t { font-size: .82rem; max-width: 22rem; }
 .cv-blank.hide { display: none; }
 
-/* --------------------------------------------- inspector */
 .insp-sec { border-top: 0.0667rem solid var(--hair); padding: .75rem 0; }
 .insp-sec:first-child { border-top: none; padding-top: .2rem; }
 
@@ -874,7 +822,6 @@ body.cv-body main {
 .stat b { display: block; font-size: 1rem; color: var(--ink); line-height: 1.2; }
 .stat span { font-size: .62rem; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
 
-/* --------------------------------------------------- admin */
 .ad-shell { grid-template-columns: var(--lw, 15rem) 1fr var(--rw, 21rem); }
 
 .ad-stage { position: relative; overflow: hidden; background: #fbfbfe; border-radius: var(--r3); }
@@ -896,8 +843,6 @@ body.cv-body main {
 .ad-world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 .ad-world.empty .ad-paper { display: none; }
 .ad-world img {
-  /* .ad-paper is absolutely positioned, so a statically-placed image would
-     paint underneath it — both layers have to be out of flow */
   position: absolute;
   inset: 0;
   display: block;
@@ -914,9 +859,21 @@ body.cv-body main {
   border: 1px solid var(--border);
 }
 
+.ad-images { position: absolute; inset: 0; }
+
+.ad-images .ad-image {
+  position: absolute;
+  inset: auto;
+  display: block;
+  object-fit: fill;
+  -webkit-user-drag: none;
+}
+
 .ad-grid-ov { position: absolute; inset: 0; pointer-events: none; opacity: .5; }
 .ad-pins { position: absolute; inset: 0; overflow: visible; }
 .ad-pins .alay { cursor: move; }
+.ad-pins .aimage { pointer-events: none; }
+.ad-pins .aimage.sel { pointer-events: auto; }
 .ad-pins .apin circle { stroke: #fff; }
 .ad-pins .apin.sel circle { stroke: var(--accent); }
 .ad-pins .apin text { font: 700 9px Rubik, sans-serif; fill: var(--ink); paint-order: stroke; stroke: rgba(255,255,255,.85); stroke-width: 3px; }
@@ -925,7 +882,7 @@ body.cv-body main {
 .ad-pins .control.sel circle,
 .ad-pins .screen.sel rect { stroke: var(--accent); stroke-dasharray: none; }
 .ad-pins .amarquee { fill: rgba(117, 112, 188, .10); stroke: var(--accent); }
-/* the handles resize the *gaps*: a diagonal one spreads both ways at once */
+
 .ad-pins .ahandle { cursor: nwse-resize; }
 .ad-pins .ahandle[data-handle="n"],
 .ad-pins .ahandle[data-handle="s"] { cursor: ns-resize; }
@@ -934,7 +891,6 @@ body.cv-body main {
 .ad-pins .ahandle[data-handle="ne"],
 .ad-pins .ahandle[data-handle="sw"] { cursor: nesw-resize; }
 
-/* ---------------------------------------------------------- layer stack */
 .lay-add { flex-wrap: wrap; margin-bottom: .5rem; }
 .lay-add .mini-btn { flex: 1 1 auto; }
 
@@ -957,7 +913,7 @@ body.cv-body main {
 
 .lay-row {
   display: grid;
-  grid-template-columns: 1.2rem 1fr auto auto;
+  grid-template-columns: 1.1rem 1.2rem 1fr auto auto;
   align-items: center;
   gap: .45rem;
   width: 100%;
@@ -973,15 +929,18 @@ body.cv-body main {
 }
 
 .lay-row:hover { background: var(--accent-soft); }
+.lay-row.drag { opacity: .45; }
+.lay-row.over { box-shadow: inset 0 .12rem 0 var(--accent); }
 .lay-row.sel { background: var(--accent); color: var(--bg-color); }
 .lay-row.open { box-shadow: inset 0 0 0 0.0667rem var(--accent); }
+.lay-row .lay-grip { font-size: 1.05rem; color: var(--ink-3); opacity: .55; cursor: grab; }
+.lay-row.sel .lay-grip { color: var(--bg-color); opacity: .7; }
 .lay-row .lay-ico { font-size: 1.05rem; color: var(--ink-3); }
 .lay-row.sel .lay-ico { color: var(--bg-color); }
 .lay-row .lay-name { font-size: .78rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lay-row .lay-kind { font-size: .62rem; color: var(--surface); text-transform: uppercase; letter-spacing: .04em; }
+.lay-row .lay-kind { font-size: .62rem; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
 .lay-row .lay-dot { width: .7rem; height: .7rem; border-radius: 50%; box-shadow: inset 0 0 0 0.0667rem rgba(0,0,0,.25); }
 
-/* ------------------------------------------------- layer settings popup */
 .layer-pop {
   position: fixed;
   z-index: 9000;
@@ -1064,8 +1023,11 @@ body.cv-body main {
 
 .tag.custom { color: var(--accent); background: var(--accent-soft); }
 .tag.stock { color: var(--ink-3); background: rgba(53,51,83,.07); }
+.tag.archived { color: #b0741f; background: rgba(214, 143, 46, .14); }
 
-/* popup extras */
+.lib-item.archived .part-thumb,
+.lib-item.archived .part-name { opacity: .55; }
+
 .popup.sm { max-width: 30rem; }
 .popup-note {
   font-size: .78rem;
@@ -1091,7 +1053,6 @@ body.cv-body main {
 
 .check input { width: auto; margin: 0; accent-color: var(--accent); }
 
-/* ------------------------------------------------ responsive */
 .cv-mobile-tabs { display: none; }
 
 @media (max-width: 1100px) {
@@ -1107,42 +1068,33 @@ body.cv-body main {
   }
 
   .cv-shell > .panel.side, .ad-shell > .panel.side {
-    position: absolute;
-    z-index: 30;
-    top: .5rem;
-    bottom: .5rem;
-    width: min(20rem, calc(100% - 1rem));
-    display: none;
-  }
-
-  .cv-shell > .panel.side.left, .ad-shell > .panel.side.left { left: .5rem; }
-  .cv-shell > .panel.side.right, .ad-shell > .panel.side.right { right: .5rem; }
-  .cv-shell > .panel.side.open, .ad-shell > .panel.side.open { display: flex; }
-
-  .cv-mobile-tabs {
+    position: fixed;
+    z-index: 40;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    width: auto;
+    max-height: 70vh;
+    border-radius: var(--r3) var(--r3) 0 0;
     display: flex;
-    position: absolute;
-    z-index: 25;
-    top: 1rem;
-    right: 1.1rem;
-    flex-direction: column;
-    gap: .35rem;
+    transform: translateY(105%);
+    transition: transform .26s cubic-bezier(.32, .72, 0, 1);
+    pointer-events: none;
   }
 
-  .cv-mobile-tabs .dock-btn {
-    background: var(--surface);
-    -webkit-backdrop-filter: var(--blur);
-    backdrop-filter: var(--blur);
-    border: 0.0667rem solid var(--border);
-    box-shadow: var(--shadow);
+  .cv-shell > .panel.side.open, .ad-shell > .panel.side.open {
+    transform: translateY(0);
+    pointer-events: auto;
   }
+
+  .cv-mobile-tabs { display: inline-flex; }
 
   .panel-close { display: inline-grid; }
 
   .hdr-btn-text { display: none; }
   .hdr-btn { padding: 0 .55rem; }
-  /* mobile has its own show/hide via the tabs + panel-close X; the desktop
-     collapse-to-a-rail affordance would only fight it */
+
   .panel-collapse { display: none; }
 }
 
@@ -1150,10 +1102,6 @@ body.cv-body main {
   footer { display: none; }
   .cv-dock { bottom: .5rem; }
 
-  /* The header is a fixed row of buttons that used to simply overflow the
-     screen: .site-actions is flex:none, so past a certain width the last
-     buttons went off the right edge with no way to reach them. The title is
-     the one thing here that can give up its space. */
   body.cv-body .site-title { display: none; }
 
   body.cv-body .site-actions {
@@ -1168,31 +1116,23 @@ body.cv-body main {
   body.cv-body header { padding-left: .6rem; padding-right: .6rem; }
   body.cv-body .header.wrap { gap: .4rem; }
 
-  /* a dropdown as wide as the screen rather than one hanging off it */
   body.cv-body .dd-menu { width: min(17rem, calc(100vw - 1.2rem)); padding: .7rem; }
 
   .cv-shell, .ad-shell { padding: .35rem; gap: .35rem; }
 
-  /* a side rail this narrow is the whole screen — let it be */
   .cv-shell > .panel.side, .ad-shell > .panel.side {
-    width: calc(100% - .7rem);
-    top: .35rem;
-    bottom: .35rem;
-    left: .35rem;
-    right: .35rem;
+    width: auto;
+    left: 0;
+    right: 0;
   }
 
-  /* the code panel needs most of the screen to be usable at all */
-  .cv-code[data-dock="bottom"], .cv-code[data-dock="top"] { height: 62%; }
+  .cv-code { --code-h: 62vh; }
   .code-head { padding: .1rem .5rem .35rem; gap: .35rem; }
   .code-actions { gap: .3rem; }
   .code-actions .hdr-btn { height: 1.85rem; padding: 0 .5rem; }
-  .code-tab { padding: .3rem .5rem; font-size: .74rem; }
+  .code-tabs .mode-btn { padding: .3rem .5rem; font-size: .74rem; }
 }
 
-/* ============================================================
-   Simulation — live overlays on the parts
-   ============================================================ */
 .cv-item .sim,
 .cv-item .ctrls {
   position: absolute;
@@ -1242,7 +1182,10 @@ body.cv-body main {
   animation: cv-spin 1s linear infinite;
 }
 
-@keyframes cv-spin { to { transform: rotate(360deg); } }
+@keyframes cv-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
 
 .sim-horn {
   position: absolute;
@@ -1255,9 +1198,9 @@ body.cv-body main {
   content: "";
   position: absolute;
   left: 50%;
-  top: 8%;
+  top: -45%;
   width: 14%;
-  height: 46%;
+  height: 100%;
   border-radius: 99px;
   background: #e5484d;
   transform: translateX(-50%);
@@ -1273,8 +1216,8 @@ body.cv-body main {
 }
 
 @keyframes cv-wave {
-  from { transform: scale(.3); opacity: .9; }
-  to { transform: scale(1.5); opacity: 0; }
+  from { transform: translate(-50%, -50%) scale(.3); opacity: .9; }
+  to { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
 }
 
 .sim-ctrl {
@@ -1292,126 +1235,41 @@ body.cv-body main {
 .sim-ctrl.on:hover { box-shadow: 0 0 0 2px rgba(34, 160, 107, .9) !important; }
 .sim-ctrl[data-kind="knob"] { cursor: ns-resize; }
 
-/* ============================================================
-   Code + simulation panel
-   ============================================================ */
-/* a class rule beats the UA's [hidden] { display: none }, so say it here */
-.cv-code[hidden] { display: none; }
-
-/* The panel can dock to any of the four edges of the canvas. `data-dock`
-   picks the edge; JS only ever writes a size to the one CSS property that
-   edge actually uses (height for top/bottom, width for left/right) so the
-   other axis is free to fall back to its default. */
 .cv-code {
-  position: absolute;
-  z-index: 30;
+  grid-column: 1 / -1;
   display: flex;
-  background: rgba(252, 252, 255, .93);
-  -webkit-backdrop-filter: var(--blur);
-  backdrop-filter: var(--blur);
-  box-shadow: var(--shadow-lg);
-}
-
-.cv-code[data-dock="bottom"],
-.cv-code[data-dock="top"] {
-  left: 0;
-  right: 0;
-  height: 44%;
-  min-height: 8rem;
-  max-height: 88%;
   flex-direction: column;
+  height: var(--code-h, 44vh);
+  min-height: 0;
+  overflow: hidden;
+  transition: height .24s cubic-bezier(.4, 0, .2, 1);
 }
 
-.cv-code[data-dock="bottom"] { bottom: 0; border-top: 0.0667rem solid var(--border); border-radius: 0 0 var(--r3) var(--r3); }
-.cv-code[data-dock="top"] { top: 0; border-bottom: 0.0667rem solid var(--border); border-radius: var(--r3) var(--r3) 0 0; }
-
-.cv-code[data-dock="left"],
-.cv-code[data-dock="right"] {
-  top: 0;
-  bottom: 0;
-  width: 30%;
-  min-width: 16rem;
-  max-width: 70%;
-  flex-direction: column;
-}
-
-.cv-code[data-dock="left"] { left: 0; border-right: 0.0667rem solid var(--border); border-radius: 0 var(--r3) var(--r3) 0; }
-.cv-code[data-dock="right"] { right: 0; border-left: 0.0667rem solid var(--border); border-radius: var(--r3) 0 0 var(--r3); }
+.cv-code.resizing { transition: none; }
+.cv-code.collapsed { height: 3.1rem; }
+.cv-code.collapsed .code-grip {display:none}
+.cv-code.collapsed .code-tabs, .cv-code.collapsed #btn-clear-log {display: none;}
+.cv-code.collapsed .code-head { padding: .5rem 0.7rem }
+.cv-code.collapsed #code-toggle .material-symbols-rounded { transform: rotate(180deg); }
 
 .code-grip {
   flex: none;
   touch-action: none;
-}
-
-.cv-code[data-dock="bottom"] .code-grip,
-.cv-code[data-dock="top"] .code-grip {
   height: .5rem;
-  width: 100%;
   cursor: ns-resize;
+  display: flex;
+  order: -1;
+  margin-top: -.15rem;
 }
-
-.cv-code[data-dock="bottom"] .code-grip { margin-top: -.25rem; order: -1; }
-.cv-code[data-dock="top"] .code-grip { margin-bottom: -.25rem; order: 10; }
-
-.cv-code[data-dock="left"] .code-grip,
-.cv-code[data-dock="right"] .code-grip {
-  width: .5rem;
-  height: 100%;
-  cursor: ew-resize;
-  position: absolute;
-  top: 0;
-}
-
-.cv-code[data-dock="left"] .code-grip { right: -.25rem; }
-.cv-code[data-dock="right"] .code-grip { left: -.25rem; }
 
 .code-grip::after {
-  content: "";
-  display: block;
-  border-radius: 99px;
+  content: '';
   background: var(--border);
-}
-
-.cv-code[data-dock="bottom"] .code-grip::after,
-.cv-code[data-dock="top"] .code-grip::after {
-  width: 2.6rem;
+  border-radius: 999px;
+  width: 2.2rem;
   height: .22rem;
   margin: .14rem auto 0;
 }
-
-.cv-code[data-dock="left"] .code-grip::after,
-.cv-code[data-dock="right"] .code-grip::after {
-  width: .22rem;
-  height: 2.6rem;
-  margin: auto auto auto .14rem;
-}
-
-.dock-switch {
-  display: inline-flex;
-  align-items: center;
-  gap: .1rem;
-  background: var(--surface-2);
-  border: 0.0667rem solid var(--border);
-  border-radius: var(--rf);
-  padding: .15rem;
-  flex: none;
-}
-
-.dock-opt {
-  display: inline-grid;
-  place-items: center;
-  width: 1.7rem;
-  height: 1.7rem;
-  padding: 0;
-  border-radius: var(--rf);
-  background: transparent;
-  color: var(--ink-3);
-  box-shadow: none;
-}
-
-.dock-opt:hover { background: var(--accent-soft); color: var(--accent); transform: none; box-shadow: none; }
-.dock-opt.active { background: var(--accent); color: #fff; }
-.dock-opt .material-symbols-rounded { font-size: 1.05rem; }
 
 .code-head {
   display: flex;
@@ -1422,41 +1280,28 @@ body.cv-body main {
   flex: none;
 }
 
-/* left/right docks are narrow — the actions row gets its own line */
-.cv-code[data-dock="left"] .code-actions,
-.cv-code[data-dock="right"] .code-actions {
-  flex: 1 1 100%;
-  justify-content: flex-end;
-}
-
-.cv-code[data-dock="left"] .code-actions .csel,
-.cv-code[data-dock="right"] .code-actions .csel { width: 8rem; }
-
-.code-tabs { display: flex; gap: .2rem; flex: 1 1 auto; min-width: 0; }
-
-.code-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: .3rem;
-  padding: .3rem .65rem;
-  border-radius: var(--rf);
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  color: var(--ink-2);
-  font-size: .78rem;
-  font-weight: 600;
-}
-
-.code-tab:hover { background: var(--accent-soft); color: var(--accent); transform: none; box-shadow: none; }
-.code-tab.active { background: var(--accent); color: #fff; }
-.code-tab .material-symbols-rounded { font-size: 1.05rem; }
-.code-tab .dot { width: .4rem; height: .4rem; border-radius: 100%; background: indianred; }
-
 .code-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem; flex: none; }
 .code-actions .csel { width: 12rem; }
 .code-actions .csel-btn { padding: .32rem .55rem; font-size: .76rem; }
 .code-actions .hdr-btn { height: 1.95rem; }
+#code-close { display: none; }
+
+.cm-load-error {
+  padding: 1.2rem;
+  font-size: .82rem;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.cm-load-error button {
+  color: var(--accent);
+  font-weight: 700;
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  text-decoration: underline;
+}
 
 .code-body { flex: 1 1 auto; min-height: 0; position: relative; }
 .code-pane { position: absolute; inset: 0; overflow: auto; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y; }
@@ -1531,43 +1376,36 @@ body.cv-body main {
 .code-status .pill .material-symbols-rounded { font-size: .95rem; }
 
 @media (max-width: 900px) {
-  /* a phone-width canvas has no room for a side-docked panel — force it back
-     to the bottom sheet regardless of what was picked on a wider screen */
-  .cv-code,
-  .cv-code[data-dock="top"],
-  .cv-code[data-dock="left"],
-  .cv-code[data-dock="right"] {
-    left: 0; right: 0; top: auto; bottom: 0; width: auto;
-    height: 55%; min-width: 0; max-width: none; border-radius: 0;
-    border-left: none; border-right: none; border-top: 0.0667rem solid var(--border);
+  .cv-code {
+    grid-column: auto;
+    position: fixed;
+    z-index: 40;
+    left: 0; right: 0; bottom: 0; top: var(--header-h, 3.8rem);
+    height: auto;
+    max-height: none;
+    border-radius: 0;
+    display: flex;
+    transform: translateY(105%);
+    transition: transform .26s cubic-bezier(.32, .72, 0, 1);
+    pointer-events: none;
   }
-  .cv-code .code-grip,
-  .cv-code[data-dock="top"] .code-grip,
-  .cv-code[data-dock="left"] .code-grip,
-  .cv-code[data-dock="right"] .code-grip {
-    position: static; height: .5rem; width: 100%; cursor: ns-resize; order: -1; margin: -.25rem 0 0;
+  .cv-code.collapsed { height: auto; }
+  .cv-code:not(.collapsed) {
+    transform: translateY(0);
+    pointer-events: auto;
   }
-  .cv-code[data-dock="left"] .code-grip::after,
-  .cv-code[data-dock="right"] .code-grip::after { width: 2.6rem; height: .22rem; margin: .14rem auto 0; }
-  .dock-switch { display: none; }
+  .cv-code .code-grip { display: none; }
+  .code-head { flex-wrap: wrap; }
+  #code-close { display: inline-grid; }
   .code-actions .csel { width: 7.5rem; }
 }
 
-/* an LED is one part in a dozen colours — the chosen one is painted over the
-   artwork's dome so the canvas and the export both show it */
 .body-tint {
   position: absolute;
   border-radius: 100%;
   pointer-events: none;
 }
 
-
-/* ============================================================
-   Dark mode
-   The shared design system in main.css is a set of tokens on :root, so the
-   dark theme is mostly a second set of the same names. Only the few places
-   Cirvo paints its own surfaces need naming again.
-   ============================================================ */
 :root[data-theme="dark"] {
   --1st: #e9e8f4;
   --2nd: #a8a4dc;
@@ -1600,7 +1438,6 @@ body.cv-body main {
   color-scheme: dark;
 }
 
-/* opaque cards need a solid colour, not the translucent --card */
 :root[data-theme="dark"] .dd-menu,
 :root[data-theme="dark"] .csel-menu,
 :root[data-theme="dark"] .part-thumb { background: #262433; }
@@ -1635,7 +1472,6 @@ body.cv-body main {
     linear-gradient(45deg, rgba(255, 255, 255, .04) 25%, transparent 25%, transparent 75%, rgba(255, 255, 255, .04) 75%);
 }
 
-/* the builder's paper stays light — the artwork on it is dark on transparent */
 :root[data-theme="dark"] .ad-paper { background: #edecf2; }
 :root[data-theme="dark"] .ad-drop { background: rgba(24, 23, 33, .6); }
 
@@ -1658,16 +1494,11 @@ body.cv-body main {
 :root[data-theme="dark"] .cv-blank .material-symbols-rounded { opacity: .22; }
 :root[data-theme="dark"] #console-out .l-err { color: #ff8b8b; }
 
-/* ============================================================
-   Code editor (CodeMirror 5) — themed to match Cirvo's own tokens instead
-   of pulling in a separate theme stylesheet
-   ============================================================ */
 .code-editor-mount { height: 100%; }
 
 .code-editor-mount .CodeMirror {
   height: 100%;
-  /* without this the browser claims the gesture for page scrolling and the
-     editor cannot be scrolled by touch at all */
+
   touch-action: pan-x pan-y;
   -webkit-overflow-scrolling: touch;
   background: transparent;
@@ -1685,8 +1516,6 @@ body.cv-body main {
 .code-editor-mount .CodeMirror-matchingbracket { color: var(--accent) !important; font-weight: 700; text-decoration: none; }
 .code-editor-mount .CodeMirror-scrollbar-filler { background: transparent; }
 
-/* Python token colours — one palette per theme, chosen for contrast against
-   --card rather than borrowed from a stock CodeMirror theme */
 .code-editor-mount .cm-keyword { color: #a55dc2; font-weight: 600; }
 .code-editor-mount .cm-def { color: #3d7fe5; }
 .code-editor-mount .cm-variable { color: var(--ink); }

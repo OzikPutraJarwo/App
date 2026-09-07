@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="../main.css">
     <script>
-      // set before first paint so the page never flashes light
+
       try {
         var t = localStorage.getItem('cirvo-theme')
           || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -26,6 +26,12 @@
         <a class="site-back" href="/" aria-label="Home"><span class="material-symbols-rounded">arrow_back</span></a>
         <div class="site-title">Cirvo</div>
         <div class="site-actions">
+
+          <div class="mode-switch cv-mobile-tabs" role="group" aria-label="Panel">
+            <button type="button" class="mode-btn" data-panel="panel-parts"><span class="material-symbols-rounded">widgets</span></button>
+            <button type="button" class="mode-btn" data-panel="panel-insp"><span class="material-symbols-rounded">tune</span></button>
+            <button type="button" class="mode-btn" id="code-mobile-tab"><span class="material-symbols-rounded">terminal</span></button>
+          </div>
 
           <button type="button" class="hdr-btn" id="btn-undo" aria-label="Undo">
             <span class="material-symbols-rounded">undo</span>
@@ -59,7 +65,7 @@
                 <span class="dd-check material-symbols-rounded">check</span>
               </button>
               <button type="button" class="dd-item" id="d-snap">
-                <span class="material-symbols-rounded">point_scan</span> Snap pins together
+                <span class="material-symbols-rounded">point_scan</span> Snap pins &amp; guides
                 <span class="dd-check material-symbols-rounded">check</span>
               </button>
               <div class="dd-sep"></div>
@@ -70,11 +76,6 @@
             </div>
           </div>
 
-          <button type="button" class="hdr-btn" id="btn-code">
-            <span class="material-symbols-rounded">terminal</span>
-            <span class="hdr-btn-text">Code</span>
-          </button>
-
           <div class="dd" id="dd-project">
             <button type="button" class="hdr-btn primary dd-trigger" aria-haspopup="true" aria-label="Project">
               <span class="material-symbols-rounded">folder_open</span>
@@ -84,18 +85,15 @@
             <div class="dd-menu">
               <button type="button" class="dd-item dd-item-lg" id="btn-png">
                 <span class="material-symbols-rounded">image</span>
-                <span class="dd-item-txt"><b>Download PNG</b><small>The wired design, ready to share</small></span>
+                <span class="dd-item-txt"><b>Download PNG</b></span>
               </button>
               <button type="button" class="dd-item dd-item-lg" id="btn-json">
                 <span class="material-symbols-rounded">data_object</span>
-                <span class="dd-item-txt"><b>Download project</b><small>Re-openable .cirvo.json</small></span>
+                <span class="dd-item-txt"><b>Download project</b></span>
               </button>
               <div class="dd-sep"></div>
               <button type="button" class="dd-item" id="btn-open">
                 <span class="material-symbols-rounded">upload_file</span> Open project…
-              </button>
-              <button type="button" class="dd-item" id="btn-save">
-                <span class="material-symbols-rounded">save</span> Save project file
               </button>
               <div class="dd-sep"></div>
               <button type="button" class="dd-item danger" id="btn-new">
@@ -133,62 +131,15 @@
             <div class="cv-world" id="world">
               <div id="items"></div>
               <svg class="cv-wires" id="wires" xmlns="http://www.w3.org/2000/svg"></svg>
+              <svg class="cv-align" id="align" xmlns="http://www.w3.org/2000/svg"></svg>
             </div>
 
             <div class="cv-blank" id="blank">
               <span class="material-symbols-rounded">developer_board</span>
               <b>Start your circuit</b>
-              <span class="t">Pick a board or sensor on the left — click it, or drag it onto the canvas. Then draw wires by dragging pin to pin.</span>
             </div>
 
             <div class="cv-tip" id="tip"></div>
-          </div>
-
-          <section class="cv-code" id="code-panel" data-dock="bottom" hidden>
-            <div class="code-grip" id="code-grip"></div>
-            <div class="code-head">
-              <div class="code-tabs">
-                <button type="button" class="code-tab active" data-pane="editor">
-                  <span class="material-symbols-rounded">code</span>Python</button>
-                <button type="button" class="code-tab" data-pane="console">
-                  <span class="material-symbols-rounded">terminal</span>Console</button>
-                <button type="button" class="code-tab" data-pane="world">
-                  <span class="material-symbols-rounded">public</span>World</button>
-              </div>
-              <div class="dock-switch" id="dock-switch" role="group" aria-label="Panel position">
-                <button type="button" class="dock-opt" data-dock="left">
-                  <span class="material-symbols-rounded">dock_to_left</span></button>
-                <button type="button" class="dock-opt" data-dock="top">
-                  <span class="material-symbols-rounded" style="transform:rotate(180deg)">dock_to_bottom</span></button>
-                <button type="button" class="dock-opt active" data-dock="bottom">
-                  <span class="material-symbols-rounded">dock_to_bottom</span></button>
-                <button type="button" class="dock-opt" data-dock="right">
-                  <span class="material-symbols-rounded">dock_to_right</span></button>
-              </div>
-              <div class="code-actions">
-                <button type="button" class="hdr-btn primary" id="btn-run">
-                  <span class="material-symbols-rounded">play_arrow</span>
-                  <span class="hdr-btn-text">Run</span>
-                </button>
-                <button type="button" class="icon-btn" id="btn-clear-log">
-                  <span class="material-symbols-rounded">backspace</span></button>
-                <button type="button" class="icon-btn" id="code-close">
-                  <span class="material-symbols-rounded">close</span></button>
-              </div>
-            </div>
-            <div class="code-body">
-              <div class="code-pane" data-pane="editor">
-                <div id="code-editor" class="code-editor-mount"></div>
-              </div>
-              <div class="code-pane none" data-pane="console"><div id="console-out"></div></div>
-              <div class="code-pane none" data-pane="world"><div id="world-grid"></div></div>
-            </div>
-            <div class="code-status" id="code-status"></div>
-          </section>
-
-          <div class="cv-mobile-tabs">
-            <button type="button" class="dock-btn" data-panel="panel-parts"><span class="material-symbols-rounded">widgets</span></button>
-            <button type="button" class="dock-btn" data-panel="panel-insp"><span class="material-symbols-rounded">tune</span></button>
           </div>
         </section>
 
@@ -201,6 +152,41 @@
           </div>
           <div class="panel-body" id="insp-body"></div>
         </aside>
+
+        <section class="panel cv-code collapsed" id="code-panel">
+          <div class="code-grip" id="code-grip"></div>
+          <div class="code-head">
+            <h3>Code</h3>
+            <div class="mode-switch code-tabs" role="group" aria-label="Code panel view">
+              <button type="button" class="mode-btn active" data-pane="editor">
+                <span class="material-symbols-rounded">code</span></button>
+              <button type="button" class="mode-btn" data-pane="console">
+                <span class="material-symbols-rounded">terminal</span></button>
+              <button type="button" class="mode-btn" data-pane="world">
+                <span class="material-symbols-rounded">public</span></button>
+            </div>
+            <div class="code-actions">
+              <button type="button" class="hdr-btn primary" id="btn-run">
+                <span class="material-symbols-rounded">play_arrow</span>
+                <span class="hdr-btn-text">Run</span>
+              </button>
+              <button type="button" class="icon-btn" id="btn-clear-log" hidden>
+                <span class="material-symbols-rounded">backspace</span></button>
+              <button type="button" class="icon-btn panel-collapse" id="code-toggle">
+                <span class="material-symbols-rounded">expand_more</span></button>
+              <button type="button" class="icon-btn" id="code-close">
+                <span class="material-symbols-rounded">close</span></button>
+            </div>
+          </div>
+          <div class="code-body">
+            <div class="code-pane" data-pane="editor">
+              <div id="code-editor" class="code-editor-mount"></div>
+            </div>
+            <div class="code-pane none" data-pane="console"><div id="console-out"></div></div>
+            <div class="code-pane none" data-pane="world"><div id="world-grid"></div></div>
+          </div>
+          <div class="code-status" id="code-status"></div>
+        </section>
 
       </div>
     </main>

@@ -1,25 +1,18 @@
-/* ============================================================
-   Cirvo — designer
-   Canvas of parts (PNG artwork + pins) joined by wires, exported
-   as a PNG. Geometry lives in "world" units: 1 unit = 1 px of the
-   part at 100 % zoom; the viewport only translates/scales.
-   ============================================================ */
+
 
 (() => {
   const $ = (s, r) => (r || document).querySelector(s);
   const $$ = (s, r) => [...(r || document).querySelectorAll(s)];
-  const { esc, uid, toast } = CirvoLib;
+  const { esc, uid, toast, partImages } = CirvoLib;
 
-  const SNAP_PX = 9;          // pin-to-pin snapping radius, world units
-  const GRID = 10.16;         // 0.1 in — the pitch every stock part is drawn on
-  const HALF = GRID / 2;      // wires may bend on the half-step, between hole rows
-  const ATTACH_TOL = 1.2;     // pins this close count as plugged together
+  const SNAP_PX = 9;
+  const GRID = 10.16;
+  const HALF = GRID / 2;
+  const ATTACH_TOL = 1.2;
+  const ALIGN_PX = 6;
   const AUTOSAVE = 'cirvo-project';
   const PREFS = 'cirvo-prefs';
 
-  // Explore = look only · Move = components · Wire = pin to pin *and* reshaping
-
-  // ------------------------------------------------------------- state
   const S = {
     lib: null,
     doc: { name: 'Untitled circuit', items: [], wires: [] },
@@ -41,12 +34,11 @@
   };
 
   const els = {};
-  let panels = null;   // set once in boot(); onKey needs it too
+  let panels = null;
   const def = (partId) => S.lib && S.lib.byId.get(partId);
   const item = (u) => S.doc.items.find(i => i.uid === u);
   const wire = (u) => S.doc.wires.find(w => w.uid === u);
 
-  // ------------------------------------------------------- geometry
   function size(it) {
     const d = def(it.partId);
     if (!d) return { w: 60, h: 40 };
@@ -72,7 +64,6 @@
     return pin ? pinWorld(it, pin) : null;
   }
 
-  /** Axis-aligned bounds of a placed part, rotation included. */
   function itemBounds(it) {
     const { w, h } = size(it);
     const a = (it.rot || 0) * Math.PI / 180;
@@ -103,7 +94,6 @@
     return { x: (cx - r.left - S.view.x) / S.view.z, y: (cy - r.top - S.view.y) / S.view.z };
   };
 
-  // ------------------------------------------------------ wire paths
   function wirePoints(w) {
     const a = pinRefWorld(w.a), b = pinRefWorld(w.b);
     if (!a || !b) return [];
@@ -126,7 +116,6 @@
     return out.length > 1 ? out : pts;
   }
 
-  /** Axis-aligned polyline with softened corners. */
   function pathD(pts) {
     if (!pts || pts.length < 2) return '';
     const p = dedupe(pts);
@@ -141,21 +130,6 @@
     return d + ` L${r2(last.x)} ${r2(last.y)}`;
   }
 
-  /**
-   * Wires run wherever they are drawn.
-   *
-   * They used to be forced onto the 0.1 in lattice, auto-routed into
-   * axis-aligned dog-legs and squared back up after every move. That is right
-   * for a schematic and wrong for this: on a board a jumper goes where it goes,
-   * and the tidying that matters is the tidying you do yourself. So a new wire
-   * is a straight line between two pins, and shape comes from bends you add —
-   * click anywhere on a run to fold a corner in there and drag it.
-   *
-   * `alignToNeighbours` is what keeps that from looking sloppy: a bend dragged
-   * within a few px of level with the point before or after it snaps flat, so
-   * runs come out square when you want them square without ever being forced
-   * to be. Alt places one exactly where the cursor is.
-   */
   const ALIGN_TOL = 5;
 
   function alignToNeighbours(p, prev, next) {
@@ -177,12 +151,10 @@
     return pts.length ? pts[pts.length - 1] : pinRefWorld(S.wiring.from);
   };
 
-  /** A new wire is simply a straight run: no waypoints until you add one. */
   function routeWire() { return []; }
 
   const reroute = (w) => { w.points = []; };
 
-  /** The drawn runs of a wire, with the index a new bend would be spliced at. */
   function segments(w) {
     const pts = wirePoints(w);
     const out = [];
@@ -194,7 +166,6 @@
     return out;
   }
 
-  /** Drop bends that sit on a neighbour, or on the straight line through them. */
   function simplifyWire(w) {
     const P = wirePoints(w);
     if (P.length < 3) return;
@@ -205,7 +176,7 @@
       if (dist(prev, cur) < 1.2) continue;
       const cross = Math.abs((cur.x - prev.x) * (next.y - prev.y) - (cur.y - prev.y) * (next.x - prev.x));
       const span = dist(prev, next) || 1;
-      if (cross / span < 0.6) continue;       // collinear: the corner does nothing
+      if (cross / span < 0.6) continue;
       keep.push(cur);
     }
     w.points = keep;
@@ -213,7 +184,6 @@
 
   const r2 = (n) => Math.round(n * 100) / 100;
 
-  // ---------------------------------------------------------- history
   const snapshot = () => JSON.stringify({ name: S.doc.name, items: S.doc.items, wires: S.doc.wires });
 
   function commit() {
@@ -248,15 +218,14 @@
   function autosave() {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
-      try { localStorage.setItem(AUTOSAVE, snapshot()); } catch (e) { /* quota — fine */ }
+      try { localStorage.setItem(AUTOSAVE, snapshot()); } catch (e) {  }
     }, 400);
   }
 
   const savePrefs = () => {
-    try { localStorage.setItem(PREFS, JSON.stringify(S.opts)); } catch (e) { /* private mode */ }
+    try { localStorage.setItem(PREFS, JSON.stringify(S.opts)); } catch (e) {  }
   };
 
-  // ------------------------------------------------------------ nets
   function nets() {
     if (!S.nets) S.nets = CirvoLib.buildNets(S.doc.items, S.doc.wires, S.lib.byId);
     return S.nets;
@@ -264,13 +233,6 @@
 
   const netKey = (itemUid, pinId) => nets().key(itemUid, pinId);
 
-  function netCount() {
-    const used = new Set();
-    S.doc.wires.forEach(w => { used.add(netKey(w.a.item, w.a.pin)); });
-    return used.size;
-  }
-
-  // ------------------------------------------------------- rendering
   function renderAll() {
     S._pinPaintDone = false;
     renderItems();
@@ -312,11 +274,21 @@
         font-size:11px;font-weight:700">missing part<br>${esc(it.partId)}</div><div class="item-frame"></div>`;
       return node;
     }
-    const img = document.createElement('img');
-    img.src = d.image;
-    img.alt = d.name;
-    img.draggable = false;
-    node.appendChild(img);
+    partImages(d).forEach(im => {
+      const img = document.createElement('img');
+      img.src = im.src;
+      img.alt = d.name;
+      img.draggable = false;
+      Object.assign(img.style, {
+        position: 'absolute',
+        left: (im.x - im.w / 2) * 100 + '%',
+        top: (im.y - im.h / 2) * 100 + '%',
+        width: im.w * 100 + '%',
+        height: im.h * 100 + '%',
+        transform: im.rot ? 'rotate(' + im.rot + 'deg)' : '',
+      });
+      node.appendChild(img);
+    });
 
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('class', 'pins');
@@ -369,7 +341,6 @@
     return node;
   }
 
-  /** The value of a per-instance setting, falling back to the part's default. */
   function propValue(d, it, id) {
     const spec = (d.props || []).find(p => p.id === id);
     if (!spec) return null;
@@ -377,7 +348,6 @@
     return v === undefined || v === null ? spec.default : v;
   }
 
-  /** The hex a select-with-swatches option carries, e.g. an LED's colour. */
   function propHex(d, it, id) {
     const spec = (d.props || []).find(p => p.id === id);
     if (!spec || !spec.options) return null;
@@ -386,11 +356,6 @@
     return hit && hit[2];
   }
 
-  /**
-   * Overlay geometry. Everything a part declares (controls, glows, screens) is
-   * normalised to its box, and the box is sized in world px — so percentages
-   * here follow the part through scaling and the canvas zoom for free.
-   */
   function circleBox(c, d) {
     const wpc = c.r * 2 * 100;
     return {
@@ -425,12 +390,11 @@
     if (tag) {
       tag.textContent = it.label || '';
       tag.style.display = it.label ? '' : 'none';
-      // keep the label upright no matter how the part is turned
+
       tag.style.transform = `translateX(-50%) rotate(${-(it.rot || 0)}deg) scale(${it.flipX ? -1 : 1}, ${it.flipY ? -1 : 1})`;
     }
   }
 
-  /** Mark pins that carry a wire, plus the net currently hovered. */
   function paintPinStates(hotNet, force) {
     if (!force && S._hotNet === (hotNet || null) && S._pinPaintDone) return;
     S._hotNet = hotNet || null;
@@ -454,7 +418,7 @@
   function renderWires() {
     const svg = els.wires;
     svg.innerHTML = '';
-    const off = 50000;                       // the svg is shifted so negatives work
+    const off = 50000;
     const g0 = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     g0.setAttribute('transform', `translate(${off} ${off})`);
     svg.appendChild(g0);
@@ -484,7 +448,6 @@
         g.appendChild(c);
       });
 
-      // one grabbable strip per run — clicking it folds a bend in there
       segments(w).forEach(seg => {
         const hit = mkPath(`M${r2(seg.a.x)} ${r2(seg.a.y)} L${r2(seg.b.x)} ${r2(seg.b.y)}`, 'wire-hit');
         hit.dataset.uid = w.uid;
@@ -492,7 +455,6 @@
         g.appendChild(hit);
       });
 
-      // the bends themselves, grabbable whenever the wire is hovered or selected
       const showBends = (S.hoverSeg && S.hoverSeg.uid === w.uid) || S.sel.wires.includes(w.uid);
       (w.points || []).forEach((p, i) => {
         const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -531,8 +493,7 @@
   function applyView() {
     els.world.style.transform = `translate(${S.view.x}px, ${S.view.y}px) scale(${S.view.z})`;
     els.dZoom.textContent = Math.round(S.view.z * 100) + '%';
-    // the background dots are the real 0.1 in lattice, so they have to track the
-    // zoom; double the step whenever they would crowd closer than 9 screen px
+
     let step = GRID;
     while (step * S.view.z < 9) step *= 2;
     const px = step * S.view.z;
@@ -551,7 +512,6 @@
     els.viewport.classList.toggle('show-pins', !!S.opts.pins);
   }
 
-  // ==================================================== live simulation
   const SIM_ROWS = { oled: 6, character: 2, graphic: 6, tft: 12 };
   const SIM_COLS = { oled: 21, character: 16, graphic: 14, tft: 40 };
 
@@ -565,7 +525,6 @@
       const state = st.items[it.uid] || {};
       const board = st.boards[it.uid];
 
-      // controls show their own position back to the user
       $$('.sim-ctrl', node).forEach(el => {
         const c = (d.controls || []).find(x => x.id === el.dataset.cid);
         if (!c) return;
@@ -594,8 +553,6 @@
       return el;
     };
 
-    // the little light that says a board has power. Its colour, size and
-    // position all come from the part's own anchor, so the builder can move it.
     if (board && board.on && viz.power_led) {
       const a = viz.power_led;
       const col = a.colour || '#54e08a';
@@ -605,8 +562,7 @@
 
     if (state.glow && viz.glow) {
       const g = state.glow;
-      // the running device wins (an RGB LED, a user-picked LED colour); the
-      // anchor's own colour is the fallback for a light with a fixed lens
+
       const col = g.rgb ? `rgb(${g.rgb.join(',')})`
         : (propHex(d, it, 'colour') || COLOUR[g.colour] || g.colour || viz.glow.colour || '#ff4d4d');
       add('sim-glow', circleBox({ x: viz.glow.x, y: viz.glow.y, r: viz.glow.r * 2.4 }, d),
@@ -616,9 +572,9 @@
         });
     }
 
-    if (state.leds && viz.leds) {
+    if (state.leds && d.sim && d.sim.ledKeys) {
       state.leds.forEach((c, i) => {
-        const a = viz.leds[i];
+        const a = viz[d.sim.ledKeys[i]];
         if (!a || (c[0] + c[1] + c[2]) < 6) return;
         add('sim-glow', circleBox({ x: a.x, y: a.y, r: a.r * 2.6 }, d), {
           background: `radial-gradient(circle, rgb(${c.join(',')}) 0%, rgb(${c.join(',')}) 26%, transparent 70%)`,
@@ -712,11 +668,11 @@
     const rows = s0.rows || SIM_ROWS[s0.kind] || 4;
     const cols = s0.cols || SIM_COLS[s0.kind] || 20;
     const wpx = s0.w * d.width * it.scale;
-    // fit both ways: a 16x2 LCD is limited by its columns, a tall OLED by rows
+
     const size = Math.min(hpx / rows * 0.8, wpx / (cols * 0.62));
     Object.assign(el.style, box, {
       color: s0.ink || '#7fd6ff',
-      // opaque: the artwork has its own placeholder text printed underneath
+
       background: s0.paper || '#0d0f13',
       fontSize: size.toFixed(2) + 'px',
       padding: (hpx * 0.05).toFixed(2) + 'px',
@@ -731,7 +687,6 @@
     sim.appendChild(el);
   }
 
-  // ------------------------------------------------------ mutations
   function addItem(partId, wx, wy, silent) {
     const d = def(partId);
     if (!d) return null;
@@ -773,7 +728,7 @@
       S.doc.items.push(c);
       return c.uid;
     });
-    // wires whose two ends were both copied come along
+
     S.doc.wires.slice().forEach(w => {
       if (map.has(w.a.item) && map.has(w.b.item)) {
         S.doc.wires.push({
@@ -807,7 +762,7 @@
       width: 2,
       points: S.wiring && S.wiring.points.length ? S.wiring.points.slice() : null,
     };
-    // no hand-placed bends: lay it out on the lattice, on a lane nothing else uses
+
     if (!w.points) w.points = [];
     S.doc.wires.push(w);
     S.nets = null;
@@ -826,25 +781,6 @@
     updateDock();
   }
 
-  /**
-   * Turn parts, taking whatever is plugged into them along for the ride.
-   *
-   * `pinWorld()` swings a pin around its item's own centre by `it.rot`, so
-   * rotating a breadboard moves every hole it has — while a plugged-in LED,
-   * whose own x/y never changed, is left behind at the old position and stops
-   * touching. `attachedSet()` already solves exactly this for dragging; the
-   * only reason rotation broke was that no rotate path ever called it.
-   *
-   * Every rotate goes through here for that reason: the keyboard, the
-   * inspector's rotate buttons and its rotation field all used to turn parts
-   * their own separate way, and fixing one left the others detaching parts.
-   *
-   * Each directly-selected item still turns in place about its own centre —
-   * its own attachedSet seeds with zero offset from its own pivot, so it
-   * never moves — while anything riding on it revolves around that same
-   * centre. Per-leader pivots, not one shared centroid: selecting two
-   * unrelated parts and rotating still spins each where it stands.
-   */
   function rotateItems(uids, deg) {
     const rad = deg * Math.PI / 180;
     const cos = Math.cos(rad), sin = Math.sin(rad);
@@ -884,7 +820,6 @@
     commit();
   }
 
-  // -------------------------------------------------------- wiring
   function startWire(ref, clickMode) {
     const it = item(ref.item);
     const d = def(it.partId);
@@ -913,7 +848,6 @@
     paintPinStates();
   }
 
-  // -------------------------------------------------- pin snapping
   function snapIndex(exclude) {
     const cell = SNAP_PX * 2;
     const grid = new Map();
@@ -931,7 +865,6 @@
     return { grid, cell };
   }
 
-  /** Best (dx,dy) that lands one of the moving pins on a stationary one. */
   function snapOffset(movingPins, idx) {
     let best = null;
     movingPins.forEach(p => {
@@ -951,9 +884,66 @@
     return best;
   }
 
-  // ------------------------------------------------- palette (left)
-  // A native <select> cannot carry an icon per option, so the category picker
-  // and the inspector's list switcher share this small custom control.
+  function movingGroupBounds(origins) {
+    let b = null;
+    origins.forEach(({ it }) => {
+      const r = itemBounds(it);
+      if (!b) b = { x1: r.x, y1: r.y, x2: r.x + r.w, y2: r.y + r.h };
+      else {
+        b.x1 = Math.min(b.x1, r.x); b.y1 = Math.min(b.y1, r.y);
+        b.x2 = Math.max(b.x2, r.x + r.w); b.y2 = Math.max(b.y2, r.y + r.h);
+      }
+    });
+    return b ? { x: b.x1, y: b.y1, w: b.x2 - b.x1, h: b.y2 - b.y1 } : null;
+  }
+
+  function alignSnap(box, excludeIds) {
+    const thresh = ALIGN_PX / S.view.z;
+    const mx = [box.x, box.x + box.w / 2, box.x + box.w];
+    const my = [box.y, box.y + box.h / 2, box.y + box.h];
+    let bestX = null, bestY = null;
+
+    S.doc.items.forEach(it => {
+      if (excludeIds.has(it.uid)) return;
+      const r = itemBounds(it);
+      const rx = [r.x, r.x + r.w / 2, r.x + r.w];
+      const ry = [r.y, r.y + r.h / 2, r.y + r.h];
+      mx.forEach(v => rx.forEach(rv => {
+        const diff = rv - v;
+        if (Math.abs(diff) <= thresh && (!bestX || Math.abs(diff) < Math.abs(bestX.diff))) bestX = { diff, value: rv, r };
+      }));
+      my.forEach(v => ry.forEach(rv => {
+        const diff = rv - v;
+        if (Math.abs(diff) <= thresh && (!bestY || Math.abs(diff) < Math.abs(bestY.diff))) bestY = { diff, value: rv, r };
+      }));
+    });
+
+    const guides = [];
+    if (bestX) {
+      guides.push({
+        axis: 'v', at: bestX.value,
+        from: Math.min(box.y, bestX.r.y), to: Math.max(box.y + box.h, bestX.r.y + bestX.r.h),
+      });
+    }
+    if (bestY) {
+      guides.push({
+        axis: 'h', at: bestY.value,
+        from: Math.min(box.x, bestY.r.x), to: Math.max(box.x + box.w, bestY.r.x + bestY.r.w),
+      });
+    }
+    return { dx: bestX ? bestX.diff : 0, dy: bestY ? bestY.diff : 0, guides };
+  }
+
+  function renderAlignGuides(guides) {
+    const svg = els.align;
+    if (!guides || !guides.length) { svg.innerHTML = ''; return; }
+    const off = 50000;
+    const sw = 1 / S.view.z;
+    svg.innerHTML = `<g transform="translate(${off} ${off})">${guides.map(g => g.axis === 'v'
+      ? `<line x1="${g.at}" y1="${g.from}" x2="${g.at}" y2="${g.to}" stroke-width="${sw}"/>`
+      : `<line x1="${g.from}" y1="${g.at}" x2="${g.to}" y2="${g.at}" stroke-width="${sw}"/>`).join('')}</g>`;
+  }
+
   const CAT_ICON = {
     'All': 'apps',
     'Single-board computer': 'developer_board',
@@ -1020,7 +1010,7 @@
 
   function renderPalette() {
     const q = els.search.value.trim();
-    // the category is the scope: searching looks inside whatever is selected
+
     let list = S.cat === 'All' ? S.lib.parts
       : S.lib.parts.filter(p => (p.category || 'Other') === S.cat);
     if (q) list = CirvoLib.search(list, q);
@@ -1071,7 +1061,6 @@
     });
   }
 
-  // ---------------------------------------------- inspector (right)
   function renderInspector() {
     const body = els.inspBody;
     const nI = S.sel.items.length, nW = S.sel.wires.length;
@@ -1082,8 +1071,7 @@
     if (nI + nW > 1) return renderMultiInspector();
 
     const tab = S.objTab;
-    // top of the list is the front of the canvas, so it reads the way the
-    // stacking looks rather than the way the array happens to be ordered
+
     const rows = tab === 'items' ? S.doc.items.map((it, i) => {
       const d = def(it.partId);
       return `<div class="obj-row${S.sel.items.includes(it.uid) ? ' sel' : ''}"
@@ -1117,7 +1105,6 @@
         <div class="stat-row">
           <div class="stat"><b>${S.doc.items.length}</b><span>Parts</span></div>
           <div class="stat"><b>${S.doc.wires.length}</b><span>Wires</span></div>
-          <div class="stat"><b>${netCount()}</b><span>Nets</span></div>
         </div>
       </div>
       <div class="insp-sec">
@@ -1125,7 +1112,6 @@
         <div class="obj-list" id="obj-list" style="margin-top:.5rem">
           ${rows.slice().reverse().join('') || '<div class="f-hint">Nothing here yet.</div>'}
         </div>
-        <div class="f-hint" style="margin-top:.5rem">Top of the list is the front of the canvas.</div>
       </div>`;
 
     mountSelect($('#obj-select', body), [
@@ -1171,10 +1157,8 @@
           <div class="f-row"><label>X</label><input type="number" id="i-x" value="${Math.round(it.x)}"></div>
           <div class="f-row"><label>Y</label><input type="number" id="i-y" value="${Math.round(it.y)}"></div>
         </div>
-        <div class="f-grid">
-          <div class="f-row"><label>Size %</label><input type="number" id="i-scale" min="10" max="400" step="5" value="${Math.round(it.scale * 100)}"></div>
-          <div class="f-row"><label>Rotation °</label><input type="number" id="i-rot" step="15" value="${Math.round(it.rot || 0)}"></div>
-        </div>
+        <div class="f-row"><label>Rotation °</label>
+          <input type="number" id="i-rot" step="15" value="${Math.round(it.rot || 0)}"></div>
         <div class="btn-row">
           <button type="button" class="mini-btn" data-act="rot-l"><span class="material-symbols-rounded">rotate_left</span></button>
           <button type="button" class="mini-btn" data-act="rot-r"><span class="material-symbols-rounded">rotate_right</span></button>
@@ -1191,7 +1175,7 @@
         </div>
         <div class="btn-row" style="margin-top:.4rem">
           <button type="button" class="mini-btn" data-act="lock"><span class="material-symbols-rounded">${it.locked ? 'lock' : 'lock_open'}</span>${it.locked ? 'Locked' : 'Lock'}</button>
-          <button type="button" class="mini-btn" data-act="dup"><span class="material-symbols-rounded">content_copy</span>Copy</button>
+          <button type="button" class="mini-btn" data-act="dup"><span class="material-symbols-rounded">content_copy</span>Duplicate</button>
           <button type="button" class="mini-btn danger" data-act="del"><span class="material-symbols-rounded">delete</span></button>
         </div>
       </div>
@@ -1199,8 +1183,7 @@
       <div class="insp-sec">
         <div class="insp-title">Pins (${d.pins.length})</div>
         ${d.pins.length > 120
-        ? `<div class="f-hint">${d.pins.length} tie points — too many to list. Hover a hole on the
-             canvas to see its name and the net it belongs to.</div>`
+        ? `<div class="f-hint">${d.pins.length} tie points</div>`
         : d.pins.map(p => `
           <div class="pin-line${wired.has(p.id) ? ' wired' : ''}" data-pin="${esc(p.id)}">
             <span class="dot" style="background:${esc(p.color)}"></span>
@@ -1235,10 +1218,7 @@
     });
     $('#i-label', b).addEventListener('change', commit);
     num('i-x', 'x'); num('i-y', 'y');
-    num('i-scale', 'scale', v => Math.max(0.1, Math.min(4, v / 100)));
-    // typing an angle is still a rotation, so it goes through rotateItems()
-    // as a delta — setting `rot` directly would leave anything plugged in
-    // behind, which is the whole bug this function exists to stop
+
     $('#i-rot', b).addEventListener('change', e => {
       const v = parseFloat(e.target.value);
       if (!isNaN(v)) rotateItems([it.uid], v - (it.rot || 0));
@@ -1364,7 +1344,6 @@
     $('#m-del', b).addEventListener('click', removeSelection);
   }
 
-  // ------------------------------------------------- pointer input
   function pinRefFrom(target) {
     const c = target && target.closest && target.closest('.pin-dot');
     if (!c) return null;
@@ -1372,11 +1351,6 @@
     return node ? { item: node.dataset.uid, pin: c.dataset.pin } : null;
   }
 
-  /* The viewport captures the pointer while dragging, which retargets every
-     later event to the viewport itself — so anything that needs to know what
-     is *under* the cursor has to hit-test by coordinate, not by e.target.
-     elementsFromPoint (plural) also lets pins win over the wire layer painted
-     above them: a run lying across a row of holes must never block a hole. */
   function hitAt(e) {
     const stack = document.elementsFromPoint(e.clientX, e.clientY);
     let pin = null, seg = null, handle = null;
@@ -1391,30 +1365,13 @@
 
   const pinAt = (e) => hitAt(e).pin;
 
-  /**
-   * One pointer, no modes.
-   *
-   * There used to be an Explore / Move / Wire switch, and every gesture was
-   * gated on which one was active — which meant the answer to "why can't I
-   * drag this" was always "you are in the wrong mode". What the pointer is
-   * over already says what it should do, so that is what decides:
-   *
-   *   right-drag (or middle)      pan, from anywhere, over anything
-   *   left on a pin              start / finish a wire
-   *   left on a wire             bend it at that point, and drag the bend
-   *   left on a part's body      move it (with anything plugged into it)
-   *   left on empty canvas       marquee-select parts and wires
-   *
-   * Pins beat wires in the hit test (see hitAt) so a run lying across a row
-   * of holes never blocks the hole underneath, and a part's body is only
-   * whatever is left after those two — which is why the pin and wire hit
-   * areas are kept tight rather than generous.
-   */
   function onPointerDown(e) {
     if (e.target.closest('.cv-mobile-tabs')) return;
     closePanels();
+    if (window.matchMedia('(max-width: 900px)').matches
+      && els.code && !els.code.classList.contains('collapsed')) toggleCode(false);
+    syncMobileTabs();
 
-    // right or middle button pans, whatever is underneath
     if (e.button === 1 || e.button === 2) {
       e.preventDefault();
       els.viewport.setPointerCapture(e.pointerId);
@@ -1424,18 +1381,12 @@
     }
     if (e.button !== 0) return;
 
-    // A second finger is the start of a pinch, never a gesture of its own.
-    // Chrome fires its pointerdown *before* touchstart, so without this the
-    // second finger landed on empty canvas and started a marquee — throwing
-    // away the move drag the first finger was in the middle of, along with
-    // the original positions needed to put the part back.
     if (e.pointerType === 'touch') {
       if (S.touchId !== null) return;
       S.touchId = e.pointerId;
     }
     if (S.pinch) return;
 
-    // --- something on a part you can actually press or turn
     const ctrl = e.target.closest('.sim-ctrl');
     if (ctrl) {
       const node = ctrl.closest('.cv-item');
@@ -1456,7 +1407,6 @@
 
     const hit = hitAt(e);
 
-    // --- a wire being drawn: a pin ends it, empty canvas drops a corner
     if (S.wiring) {
       els.viewport.setPointerCapture(e.pointerId);
       if (hit.pin) { endWire(hit.pin); return; }
@@ -1466,7 +1416,6 @@
       return;
     }
 
-    // --- an existing bend: drag it
     if (hit.handle) {
       const w = wire(hit.handle.dataset.uid);
       if (w) {
@@ -1478,7 +1427,6 @@
       }
     }
 
-    // --- the body of a wire: fold a new bend in right where it was clicked
     if (hit.seg && !hit.pin) {
       const w = wire(hit.seg.dataset.uid);
       if (w) {
@@ -1495,7 +1443,6 @@
       }
     }
 
-    // --- a pin: starts a wire
     if (hit.pin) {
       e.preventDefault();
       els.viewport.setPointerCapture(e.pointerId);
@@ -1507,23 +1454,19 @@
     const node = e.target.closest && e.target.closest('.cv-item');
     els.viewport.setPointerCapture(e.pointerId);
 
-    // --- a part's body: move it, and the whole selection if it is part of one
     if (node) {
       const it = item(node.dataset.uid);
       if (it) {
         const add = e.shiftKey || e.ctrlKey || e.metaKey;
         let sel = S.sel.items.slice();
         if (add) sel = sel.includes(it.uid) ? sel.filter(u => u !== it.uid) : sel.concat(it.uid);
-        // Already in the selection: keep the whole thing. Clicking one part of
-        // a marquee'd group moves the group — picking a single member out of it
-        // means clearing the selection first, which is what clicking away does.
+
         else if (!sel.includes(it.uid)) sel = [it.uid];
         select(sel, add ? S.sel.wires : (sel.includes(it.uid) && S.sel.items.includes(it.uid) ? S.sel.wires : []));
         if (!it.locked) { startMove(e); return; }
       }
     }
 
-    // --- empty canvas: drag a box over whatever you want
     if (!node) {
       S.drag = {
         mode: 'marquee', x0: e.clientX, y0: e.clientY, moved: false,
@@ -1533,12 +1476,6 @@
     }
   }
 
-  /**
-   * Anything plugged into what is being dragged rides along: a part counts as
-   * plugged in when its pins land on the pins of a bigger part (an MCP3008 in a
-   * breadboard, not the other way round). Dragging the small part on its own
-   * still pulls it out, because nothing bigger ever follows it.
-   */
   function attachedSet(seed) {
     const set = new Set(seed);
     let grew = true;
@@ -1592,7 +1529,7 @@
       start: toWorld(e.clientX, e.clientY),
       moved: false,
       origins: moving.map(i => ({ it: i, x: i.x, y: i.y })),
-      // a wire with both ends on the moving group keeps its shape
+
       wires: S.doc.wires
         .filter(w => movingIds.has(w.a.item) && movingIds.has(w.b.item))
         .map(w => ({ w, pts: (w.points || []).map(p => ({ x: p.x, y: p.y })) })),
@@ -1611,11 +1548,6 @@
     return out;
   }
 
-  /**
-   * Everything the box touches — parts by their bounds, wires by any of their
-   * points or the midpoint of any run, so a long wire crossing the box counts
-   * even when both of its ends are outside it.
-   */
   function applyMarquee(d, e) {
     const a = toWorld(Math.min(d.x0, e.clientX), Math.min(d.y0, e.clientY));
     const b = toWorld(Math.max(d.x0, e.clientX), Math.max(d.y0, e.clientY));
@@ -1654,8 +1586,7 @@
 
     if (S.wiring) {
       const p = toWorld(e.clientX, e.clientY);
-      // free to follow the cursor, but level with the last corner when close,
-      // and snapped hard onto a pin when there is one under the pointer
+
       S.wiring.cursor = e.altKey ? p : alignToNeighbours(p, lastWiringPoint(), null);
       const ref = pinAt(e);
       if (ref) {
@@ -1668,7 +1599,7 @@
     if (!d) {
       const hit = hitAt(e);
       if (hit.pin) showTip(e, hit.pin); else hideTip();
-      // the wire under the pointer shows its bends, and where a new one would go
+
       const seg = !hit.pin && (hit.seg || hit.handle)
         ? { uid: (hit.handle || hit.seg).dataset.uid } : null;
       const same = (a, b) => (!a && !b) || (a && b && a.uid === b.uid);
@@ -1695,7 +1626,7 @@
       d.box.style.width = Math.abs(e.clientX - d.x0) + 'px';
       d.box.style.height = Math.abs(e.clientY - d.y0) + 'px';
       if (Math.abs(e.clientX - d.x0) + Math.abs(e.clientY - d.y0) > 3) d.moved = true;
-      applyMarquee(d, e);                      // highlight as it is dragged
+      applyMarquee(d, e);
       return;
     }
 
@@ -1714,7 +1645,7 @@
 
     if (d.mode === 'bend') {
       const p = toWorld(e.clientX, e.clientY);
-      const pts = wirePoints(d.wire);          // [pinA, ...bends, pinB]
+      const pts = wirePoints(d.wire);
       const prev = pts[d.idx], next = pts[d.idx + 2];
       d.wire.points[d.idx] = e.altKey ? p : alignToNeighbours(p, prev, next);
       d.moved = true;
@@ -1729,17 +1660,24 @@
       if (e.shiftKey) { if (Math.abs(dx) > Math.abs(dy)) dy = 0; else dx = 0; }
       d.origins.forEach(o => { o.it.x = o.x + dx; o.it.y = o.y + dy; });
 
+      let guides = [];
       if (d.snapIdx && !e.altKey) {
         const off = snapOffset(d.pins.map(({ it, p }) => pinWorld(it, p)), d.snapIdx);
-        if (off) { dx += off.dx; dy += off.dy; }
-        else if (S.opts.grid && d.origins.length) {
-          // nothing to plug into: fall back to the 0.1 in grid so rows stay tidy
+        if (off) {
+          dx += off.dx; dy += off.dy;
+        } else if (S.opts.snap && d.origins.length) {
+          const box = movingGroupBounds(d.origins);
+          const align = box ? alignSnap(box, d.movingIds) : { dx: 0, dy: 0, guides: [] };
+          guides = align.guides;
           const first = d.origins[0];
-          dx += Math.round(first.it.x / GRID) * GRID - first.it.x;
-          dy += Math.round(first.it.y / GRID) * GRID - first.it.y;
+          if (align.dx) dx += align.dx;
+          else if (S.opts.grid) dx += snapHalf(first.it.x) - first.it.x;
+          if (align.dy) dy += align.dy;
+          else if (S.opts.grid) dy += snapHalf(first.it.y) - first.it.y;
         }
         d.origins.forEach(o => { o.it.x = o.x + dx; o.it.y = o.y + dy; });
       }
+      renderAlignGuides(guides);
       d.wires.forEach(({ w, pts }) => {
         w.points = pts.map(p => ({ x: p.x + dx, y: p.y + dy }));
       });
@@ -1753,10 +1691,11 @@
     const d = S.drag;
     S.drag = null;
     els.viewport.classList.remove('panning');
+    els.align.innerHTML = '';
 
     if (d && d.mode === 'marquee') {
       d.box.remove();
-      // a click on empty canvas, rather than a box: let go of everything
+
       if (!d.moved) { select([], []); return; }
       applyMarquee(d, e);
       return;
@@ -1768,7 +1707,7 @@
         if (ref) endWire(ref);
         else { cancelWire(); renderWires(); }
       } else if (S.wiring) {
-        S.wiring.clickMode = true;          // a plain click: keep wiring on clicks
+        S.wiring.clickMode = true;
       }
       return;
     }
@@ -1777,8 +1716,6 @@
     if (d && d.mode === 'knob') return;
 
     if (d && d.mode === 'bend') {
-      // a bend folded in but never dragged is just a click on the wire —
-      // simplifyWire drops it again rather than leaving a dead point behind
       simplifyWire(d.wire);
       renderWires();
       renderInspector();
@@ -1811,12 +1748,6 @@
     }
   }
 
-  /* ---------------------------------------------------------- touch
-     Two fingers pinch to zoom and drag to pan — the only way to get around
-     the canvas on a phone, where there is no wheel and no right button.
-     Tracked here rather than through pointer events because a pinch has to
-     cancel whatever the first finger had already started: without that, the
-     canvas moves a part and zooms at the same time. */
   function touchMid(t) {
     return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 };
   }
@@ -1825,12 +1756,12 @@
   function onTouchStart(e) {
     if (e.touches.length !== 2) return;
     const t = [e.touches[0], e.touches[1]];
-    // whatever one finger had begun is abandoned, and anything it changed
-    // along the way is put back, so a pinch never leaves a part displaced
+
     const d = S.drag;
     if (d && d.mode === 'move') d.origins.forEach(o => { o.it.x = o.x; o.it.y = o.y; placeItem(o.it); });
     if (d && d.mode === 'marquee') d.box.remove();
     S.drag = null;
+    els.align.innerHTML = '';
     if (S.wiring) { cancelWire(); renderWires(); }
     const r = els.viewport.getBoundingClientRect();
     const m = touchMid(t);
@@ -1843,7 +1774,7 @@
     e.preventDefault();
     const t = [e.touches[0], e.touches[1]];
     const m = touchMid(t);
-    // pan by however far the midpoint travelled, then zoom about it
+
     S.view.x += m.x - S.pinch.mx;
     S.view.y += m.y - S.pinch.my;
     S.pinch.mx = m.x; S.pinch.my = m.y;
@@ -1866,7 +1797,7 @@
   }
 
   function zoomAt(cx, cy, z) {
-    z = Math.max(0.12, Math.min(6, z));
+    z = Math.max(0.12, Math.min(24, z));
     const wx = (cx - S.view.x) / S.view.z, wy = (cy - S.view.y) / S.view.z;
     S.view.z = z;
     S.view.x = cx - wx * z;
@@ -1889,12 +1820,20 @@
     applyView();
   }
 
-  // -------------------------------------------------------- export
   async function imageFor(d) {
     if (S.images.has(d.id)) return S.images.get(d.id);
     const im = await CirvoLib.loadImage(d.image);
     S.images.set(d.id, im);
     return im;
+  }
+
+  async function layerImagesFor(d) {
+    return Promise.all(partImages(d).map(async (spec) => {
+      const key = d.id + '|' + spec.src.slice(0, 64) + spec.src.length;
+      let im = S.images.get(key);
+      if (!im) { im = await CirvoLib.loadImage(spec.src); S.images.set(key, im); }
+      return { spec, im };
+    }));
   }
 
   async function exportPNG(opts) {
@@ -1913,13 +1852,21 @@
     for (const it of S.doc.items) {
       const d = def(it.partId);
       if (!d) continue;
-      const im = await imageFor(d);
+      const layers = await layerImagesFor(d);
       const { w, h } = size(it);
       ctx.save();
       ctx.translate(it.x + w / 2, it.y + h / 2);
       ctx.rotate((it.rot || 0) * Math.PI / 180);
       ctx.scale(it.flipX ? -1 : 1, it.flipY ? -1 : 1);
-      ctx.drawImage(im, -w / 2, -h / 2, w, h);
+      layers.forEach(({ spec, im }) => {
+        const lw = spec.w * w, lh = spec.h * h;
+        const cx = (spec.x - 0.5) * w, cy = (spec.y - 0.5) * h;
+        ctx.save();
+        ctx.translate(cx, cy);
+        if (spec.rot) ctx.rotate(spec.rot * Math.PI / 180);
+        ctx.drawImage(im, -lw / 2, -lh / 2, lw, lh);
+        ctx.restore();
+      });
       const hex = propHex(d, it, 'colour');
       if (hex && d.viz && d.viz.body) {
         const b = d.viz.body;
@@ -2015,7 +1962,6 @@
     ctx.closePath();
   }
 
-  // ------------------------------------------------------- dialogs
   function dialog(title, html, actions) {
     els.popupWrap.innerHTML = `
       <div class="popup-title">${title}</div>
@@ -2075,14 +2021,13 @@
           }
         }
       }]);
-    // the dialog is rebuilt each time, so read the values inside run()
+
     setTimeout(() => {
       const sel = $('#x-scale');
       if (sel) sel.focus();
     }, 50);
   }
 
-  // ------------------------------------------------ project file I/O
   function saveProject() {
     const data = JSON.stringify({
       app: 'cirvo', version: 1, name: S.doc.name,
@@ -2133,7 +2078,6 @@
       }]);
   }
 
-  // ------------------------------------------------------ shortcuts
   function onKey(e) {
     const t = e.target;
     if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) {
@@ -2192,7 +2136,6 @@
 
   const closeMenus = () => $$('.dd.open').forEach(d => d.classList.remove('open'));
 
-  // ================================================== code panel + run
   const CODE_KEY = 'cirvo-code';
   const WORLD_LABELS = {
     temperature: ['Temperature', '\u00b0C', -10, 60, 0.5],
@@ -2210,20 +2153,19 @@
 
   function toggleCode(show) {
     const panel = els.code;
-    const open = show === undefined ? panel.hidden : show;
-    panel.hidden = !open;
-    $('#btn-code').classList.toggle('primary', open);
+    const open = show === undefined ? panel.classList.contains('collapsed') : show;
+    panel.classList.toggle('collapsed', !open);
+    try { localStorage.setItem(DOCK_KEY, open ? 'open' : 'collapsed'); } catch (e) { }
     if (open) {
-      // CodeMirror is fetched from a CDN the first time the panel is actually
-      // opened, same as Skulpt only loads on first Run — no cost for someone
-      // who never touches the code side of the app.
-      ensureEditor().then(() => els.cm.refresh());   // it measured itself while hidden
+      ensureEditor().then(() => els.cm.refresh())
+        .catch(err => toast('Could not load the code editor: ' + err.message, 'error'));
     }
   }
 
   function setPane(name) {
-    $$('.code-tab').forEach(b => b.classList.toggle('active', b.dataset.pane === name));
+    $$('.code-tabs .mode-btn').forEach(b => b.classList.toggle('active', b.dataset.pane === name));
     $$('.code-pane').forEach(p => p.classList.toggle('none', p.dataset.pane !== name));
+    $('#btn-clear-log').hidden = name !== 'console';
     if (name === 'world') renderWorld();
   }
 
@@ -2237,8 +2179,8 @@
     out.appendChild(el);
     out.parentElement.scrollTop = out.parentElement.scrollHeight;
     while (out.childNodes.length > 500) out.removeChild(out.firstChild);
-    if (kind === 'err' && $('.code-tab[data-pane="console"]')) {
-      $('.code-tab[data-pane="console"]').classList.add('has-err');
+    if (kind === 'err' && $('.code-tabs .mode-btn[data-pane="console"]')) {
+      $('.code-tabs .mode-btn[data-pane="console"]').classList.add('has-err');
     }
   }
 
@@ -2274,8 +2216,8 @@
         ? boards.map(b => `<span class="pill ${b.on ? 'on' : ''}"
             ><span class="material-symbols-rounded">${b.on ? 'power' : 'power_off'}</span>${esc(b.name)}</span>`).join('')
         : '<span>No board on the canvas — drop a Raspberry Pi or an ESP32 first.</span>'}
-      ${on.length ? '<span>Everything is live already — click a board\u2019s power button to cut it.</span>'
-        : boards.length ? '<span>Every board is switched off.</span>' : ''}`;
+      ${on.length ? '<span class="none">Everything is live already — click a board\u2019s power button to cut it.</span>' : boards.length ? '<span class="none">Every board is switched off.</span>' : ''}`
+      ;
     const run = $('#btn-run');
     run.querySelector('.material-symbols-rounded').textContent = running ? 'stop' : 'play_arrow';
     const txt = run.querySelector('.hdr-btn-text');
@@ -2287,11 +2229,10 @@
   function saveCode() {
     clearTimeout(codeTimer);
     codeTimer = setTimeout(() => {
-      try { localStorage.setItem(CODE_KEY, els.cm.getValue()); } catch (e) { /* private mode */ }
+      try { localStorage.setItem(CODE_KEY, els.cm.getValue()); } catch (e) {  }
     }, 400);
   }
 
-  // -------------------------------------------------- collapsible panels
   const PANEL_KEY = 'cirvo-panels';
 
   function initPanels() {
@@ -2303,7 +2244,7 @@
         cssVar: '--rw', openIcon: 'right_panel_close', closedIcon: 'right_panel_open' },
     ];
     let saved = {};
-    try { saved = JSON.parse(localStorage.getItem(PANEL_KEY) || '{}'); } catch (e) { /* private mode */ }
+    try { saved = JSON.parse(localStorage.getItem(PANEL_KEY) || '{}'); } catch (e) {  }
 
     const apply = (spec, collapsed) => {
       spec.aside.classList.toggle('collapsed', collapsed);
@@ -2318,14 +2259,13 @@
         const collapsed = !spec.aside.classList.contains('collapsed');
         apply(spec, collapsed);
         saved[spec.side] = collapsed;
-        try { localStorage.setItem(PANEL_KEY, JSON.stringify(saved)); } catch (e) { /* private mode */ }
+        try { localStorage.setItem(PANEL_KEY, JSON.stringify(saved)); } catch (e) {  }
       });
     });
 
     return { toggle(side) { const b = specs.find(x => x.side === side); if (b) b.btn.click(); } };
   }
 
-  // ---------------------------------------------------- CodeMirror
   const CM_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/';
   let cmReady = null;
 
@@ -2356,21 +2296,32 @@
         loadScript(CM_BASE + 'addon/edit/matchbrackets.min.js'),
         loadScript(CM_BASE + 'addon/selection/active-line.min.js'),
         loadScript(CM_BASE + 'addon/comment/comment.min.js'),
-      ]));
+      ]))
+      .catch(err => { cmReady = null; throw err; });
     return cmReady;
   }
 
   let cmMounted = null;
-  const ensureEditor = () => (cmMounted || (cmMounted = mountEditor()));
+  const ensureEditor = () => (cmMounted || (cmMounted = mountEditor().catch(err => {
+    cmMounted = null;
+    throw err;
+  })));
 
   async function mountEditor() {
-    await loadCodeMirror();
     const mount = $('#code-editor');
+    try {
+      await loadCodeMirror();
+    } catch (err) {
+      mount.innerHTML = '<div class="cm-load-error">Could not load the editor — check your connection, then <button type="button" id="cm-retry">retry</button>.</div>';
+      const retry = $('#cm-retry', mount);
+      if (retry) retry.addEventListener('click', () => { cmMounted = null; ensureEditor(); });
+      throw err;
+    }
     let initial = '';
     try {
       const saved = localStorage.getItem(CODE_KEY);
       if (saved) initial = saved;
-    } catch (e) { /* private mode */ }
+    } catch (e) {  }
 
     els.cm = CodeMirror(mount, {
       value: initial,
@@ -2396,54 +2347,29 @@
     els.cm.on('change', saveCode);
   }
 
-  // -------------------------------------------------------- dock + resize
   const DOCK_KEY = 'cirvo-code-dock';
   const SIZE_KEY = 'cirvo-code-size';
 
-  function initDock() {
-    let dock = 'bottom';
-    let sizes = { bottom: 44, top: 44, left: 30, right: 30 };
-    try { dock = localStorage.getItem(DOCK_KEY) || dock; } catch (e) { /* private mode */ }
-    try { Object.assign(sizes, JSON.parse(localStorage.getItem(SIZE_KEY) || '{}')); } catch (e) { /* */ }
-
-    const applySize = () => {
-      const horiz = dock === 'left' || dock === 'right';
-      els.code.style.height = horiz ? '' : sizes[dock] + '%';
-      els.code.style.width = horiz ? sizes[dock] + '%' : '';
-    };
-
-    const setDock = (d) => {
-      dock = d;
-      els.code.dataset.dock = d;
-      applySize();
-      $$('.dock-opt').forEach(b => b.classList.toggle('active', b.dataset.dock === d));
-      try { localStorage.setItem(DOCK_KEY, d); } catch (e) { /* private mode */ }
-      if (els.cm) setTimeout(() => els.cm.refresh(), 0);
-    };
-
-    setDock(dock);
-    $$('.dock-opt').forEach(b => b.addEventListener('click', () => setDock(b.dataset.dock)));
+  function initCodeSize() {
+    let size = 44;
+    try { size = +(localStorage.getItem(SIZE_KEY) || size) || size; } catch (e) { }
+    const applySize = () => { els.code.style.setProperty('--code-h', size + 'vh'); };
+    applySize();
 
     $('#code-grip').addEventListener('pointerdown', e => {
       const grip = e.currentTarget;
       grip.setPointerCapture(e.pointerId);
-      const stage = els.code.parentElement.getBoundingClientRect();
-      const horiz = dock === 'left' || dock === 'right';
+      els.code.classList.add('resizing');
       const move = ev => {
-        let pct;
-        if (dock === 'bottom') pct = (stage.bottom - ev.clientY) / stage.height * 100;
-        else if (dock === 'top') pct = (ev.clientY - stage.top) / stage.height * 100;
-        else if (dock === 'left') pct = (ev.clientX - stage.left) / stage.width * 100;
-        else pct = (stage.right - ev.clientX) / stage.width * 100;
-        pct = Math.max(15, Math.min(85, pct));
-        sizes[dock] = pct;
+        size = Math.max(15, Math.min(85, (window.innerHeight - ev.clientY) / window.innerHeight * 100));
         applySize();
         if (els.cm) els.cm.refresh();
       };
       const up = () => {
         grip.removeEventListener('pointermove', move);
         grip.removeEventListener('pointerup', up);
-        try { localStorage.setItem(SIZE_KEY, JSON.stringify(sizes)); } catch (e) { /* private mode */ }
+        els.code.classList.remove('resizing');
+        try { localStorage.setItem(SIZE_KEY, String(size)); } catch (e) { }
       };
       grip.addEventListener('pointermove', move);
       grip.addEventListener('pointerup', up);
@@ -2456,25 +2382,27 @@
     els.worldPane = $('#world-grid');
     els.status = $('#code-status');
 
-    els.console.innerHTML = '<span class="empty">Output from print() and any errors land here.</span>';
+    els.console.innerHTML = '';
 
-    $$('.code-tab').forEach(b => b.addEventListener('click', () => setPane(b.dataset.pane)));
-    $('#code-close').addEventListener('click', () => toggleCode(false));
-    $('#btn-code').addEventListener('click', () => toggleCode());
+    $$('.code-tabs .mode-btn').forEach(b => b.addEventListener('click', () => setPane(b.dataset.pane)));
+    $('#code-toggle').addEventListener('click', () => toggleCode());
+    $('#code-close').addEventListener('click', () => { toggleCode(false); syncMobileTabs(); });
     $('#btn-clear-log').addEventListener('click', () => {
-      els.console.innerHTML = '<span class="empty">Cleared.</span>';
+      els.console.innerHTML = '';
     });
     $('#btn-run').addEventListener('click', () => {
       if (CirvoSim.isRunning()) { CirvoSim.stop(); return; }
-      if (!els.cm) return;    // still fetching CodeMirror — nothing to run yet
-      setPane('console');
-      CirvoSim.run(els.cm.getValue());
+      ensureEditor().then(() => {
+        setPane('console');
+        CirvoSim.run(els.cm.getValue());
+      }).catch(err => toast('Could not load the code editor: ' + err.message, 'error'));
     });
 
-    initDock();
+    initCodeSize();
+    let saved = 'collapsed';
+    try { saved = localStorage.getItem(DOCK_KEY) || saved; } catch (e) { }
+    if (saved === 'open') toggleCode(true);
 
-    // getters, not values: the document object is replaced wholesale when a
-    // project is opened or cleared
     CirvoSim.attach({
       getDoc: () => S.doc, getLib: () => S.lib,
       onState: applySim,
@@ -2485,10 +2413,10 @@
     renderWorld();
   }
 
-  // ------------------------------------------------------------ boot
   async function boot() {
     Object.assign(els, {
       viewport: $('#viewport'), world: $('#world'), items: $('#items'), wires: $('#wires'),
+      align: $('#align'),
       blank: $('#blank'), tip: $('#tip'), list: $('#part-list'),
       search: $('#part-search'), inspBody: $('#insp-body'),
       inspHead: $('#insp-head'), popupWrap: $('#popup-wrap'), fileOpen: $('#file-open'),
@@ -2498,7 +2426,7 @@
 
     try {
       Object.assign(S.opts, JSON.parse(localStorage.getItem(PREFS) || '{}'));
-    } catch (e) { /* defaults are fine */ }
+    } catch (e) {  }
 
     S.lib = await CirvoLib.load();
     if (!S.lib.parts.length) {
@@ -2512,7 +2440,7 @@
       try {
         const d = JSON.parse(saved);
         if (d.items && d.items.length) S.doc = { name: d.name || 'Untitled circuit', items: d.items, wires: d.wires || [] };
-      } catch (e) { /* ignore a corrupt autosave */ }
+      } catch (e) {  }
     }
 
     renderAll();
@@ -2521,7 +2449,6 @@
     updateDock();
     if (S.doc.items.length) fit();
 
-    // --- palette
     els.search.addEventListener('input', renderPalette);
     els.list.addEventListener('click', e => {
       const card = e.target.closest('.part-card');
@@ -2551,13 +2478,13 @@
       addItem(id, p.x, p.y);
     });
 
-    // --- canvas
     els.viewport.addEventListener('pointerdown', onPointerDown);
     els.viewport.addEventListener('pointermove', onPointerMove);
     els.viewport.addEventListener('pointerup', onPointerUp);
     els.viewport.addEventListener('pointercancel', e => {
       if (e.pointerType === 'touch' && S.touchId === e.pointerId) S.touchId = null;
       S.drag = null;
+      els.align.innerHTML = '';
     });
     els.viewport.addEventListener('pointerleave', hideTip);
     els.viewport.addEventListener('wheel', onWheel, { passive: false });
@@ -2565,7 +2492,7 @@
     els.viewport.addEventListener('touchmove', onTouchMove, { passive: false });
     els.viewport.addEventListener('touchend', onTouchEnd);
     els.viewport.addEventListener('touchcancel', onTouchEnd);
-    // right-drag pans, so the browser menu would fight it
+
     els.viewport.addEventListener('contextmenu', e => e.preventDefault());
     els.viewport.addEventListener('contextmenu', e => {
       if (S.wiring) {
@@ -2590,7 +2517,6 @@
       }
     });
 
-    // --- dock
     $('#btn-undo').addEventListener('click', undo);
     $('#btn-redo').addEventListener('click', redo);
     $('#d-zin').addEventListener('click', () => zoomBy(1.2));
@@ -2604,7 +2530,6 @@
     $('#d-pins').addEventListener('click', () => toggleOpt('pins'));
     $('#d-snap').addEventListener('click', () => toggleOpt('snap'));
 
-    // --- header
     $$('.dd-trigger').forEach(btn => btn.addEventListener('click', () => {
       const dd = btn.closest('.dd');
       const open = dd.classList.contains('open');
@@ -2617,7 +2542,6 @@
     });
     $('#btn-png').addEventListener('click', exportDialog);
     $('#btn-json').addEventListener('click', saveProject);
-    $('#btn-save').addEventListener('click', saveProject);
     $('#btn-new').addEventListener('click', newProject);
     $('#btn-open').addEventListener('click', () => els.fileOpen.click());
     els.fileOpen.addEventListener('change', e => {
@@ -2625,17 +2549,22 @@
       e.target.value = '';
     });
 
-    // --- mobile panels
-    $$('.cv-mobile-tabs .dock-btn').forEach(b => b.addEventListener('click', () => {
+    $$('.cv-mobile-tabs .mode-btn[data-panel]').forEach(b => b.addEventListener('click', () => {
       const p = $('#' + b.dataset.panel);
       const wasOpen = p.classList.contains('open');
       closePanels();
+      toggleCode(false);
       if (!wasOpen) p.classList.add('open');
+      syncMobileTabs();
     }));
-    $$('.panel-close').forEach(b => b.addEventListener('click', closePanels));
+    $('#code-mobile-tab').addEventListener('click', () => {
+      const wasOpen = !els.code.classList.contains('collapsed');
+      closePanels();
+      toggleCode(!wasOpen);
+      syncMobileTabs();
+    });
+    $$('.panel-close').forEach(b => b.addEventListener('click', () => { closePanels(); syncMobileTabs(); }));
 
-    // handy from the console (and for the headless checks in tools/): the live
-    // document, plus the few verbs a script would want to drive
     window.Cirvo = { state: S, addItem, fit, exportPNG, select, connect, renderAll, commit,
       pinRefWorld, wirePoints, segments, reroute, toggleCode, rotateItems,
       sim: CirvoSim };
@@ -2648,7 +2577,6 @@
     document.addEventListener('keydown', onKey);
     window.addEventListener('resize', () => { if (!S.doc.items.length) applyView(); });
 
-    // parts added in the builder show up without a reload
     window.addEventListener('focus', async () => {
       const before = S.lib.parts.length;
       S.lib = await CirvoLib.load(true);
@@ -2658,6 +2586,15 @@
 
   function closePanels() {
     $$('.panel.side.open').forEach(p => p.classList.remove('open'));
+  }
+
+  function syncMobileTabs() {
+    $$('.cv-mobile-tabs .mode-btn').forEach(b => {
+      const active = b.id === 'code-mobile-tab'
+        ? (els.code && !els.code.classList.contains('collapsed'))
+        : $('#' + b.dataset.panel).classList.contains('open');
+      b.classList.toggle('active', !!active);
+    });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

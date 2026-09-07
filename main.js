@@ -289,6 +289,13 @@ function initPopup() {
 function popupShow(e) {
   const p = document.querySelector(e);
   if (!p) return;
+  // A close scheduled just before this show would otherwise still land: its
+  // 200ms `display:none` fires *after* this dialog is already open, hiding
+  // it with nothing on screen to explain why. Showing a second dialog from
+  // inside the first one's own confirm action — closing dialog A, then
+  // opening dialog B a few ms later while A's hide timer is still pending —
+  // is exactly this case, and used to make dialog B vanish silently.
+  clearTimeout(p._hideTimer);
   if (p.style.opacity !== "1") {
     p.classList.add('show');
     p.style.display = "grid";
@@ -302,7 +309,8 @@ function popupClose(e) {
   if (!p) return;
   p.classList.remove('show');
   p.style.opacity = "0";
-  setTimeout(() => { p.style.display = "none"; }, 200);
+  clearTimeout(p._hideTimer);
+  p._hideTimer = setTimeout(() => { p.style.display = "none"; }, 200);
 }
 
 // ============================================================

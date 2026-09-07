@@ -1,15 +1,4 @@
-/* ============================================================
-   Cirvo — simulator
-   Turns the drawing into something that behaves: nets carry
-   volts, a board can be switched on at its own power button,
-   outputs light and spin, sensors read the world, and user
-   Python drives the whole thing through familiar libraries.
 
-   Nothing here solves a circuit properly — there is no nodal
-   analysis. Parts are modelled by behaviour (`sim.model` in
-   parts.json), which is what makes an LED across a GPIO and a
-   resistor light up the way a beginner expects.
-   ============================================================ */
 
 const CirvoSim = (() => {
   'use strict';
@@ -19,15 +8,14 @@ const CirvoSim = (() => {
     'https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js',
   ];
 
-  // drive strengths — a hard rail beats a GPIO beats a sensor beats a pull
   const STR = { rail: 4, gpio: 3, analog: 2, tie: 1.5, pull: 0.5 };
-  const ON_THRESHOLD = 1.6;        // volts across an LED before it lights
+  const ON_THRESHOLD = 1.6;
 
   const S = {
     getDoc: () => null, getLib: () => null,
     onState: null, onLog: null, onStatus: null,
-    boards: new Map(),             // uid -> {on, logic, platform, gpio:Map}
-    controls: new Map(),           // 'uid:cid' -> value
+    boards: new Map(),
+    controls: new Map(),
     devices: [],
     nets: null,
     V: new Map(),
@@ -45,7 +33,6 @@ const CirvoSim = (() => {
   const items = () => { const d = S.getDoc(); return d ? d.items : []; };
   const partOf = (it) => def(it.partId);
 
-  // ------------------------------------------------------- geometry
   function pinWorld(it, pin) {
     const d = partOf(it);
     const w = d.width * it.scale, h = d.height * it.scale;
@@ -60,7 +47,6 @@ const CirvoSim = (() => {
     };
   }
 
-  // --------------------------------------------------------- netlist
   function nets() {
     if (!S.nets) S.nets = CirvoLib.buildNets(items(), S.getDoc().wires, S.getLib().byId);
     return S.nets;
@@ -81,13 +67,12 @@ const CirvoSim = (() => {
     return d.pins.find(p => (p.signal || '').toLowerCase() === want)
       || d.pins.find(p => p.name.toLowerCase() === want)
       || d.pins.find(p => p.name.toLowerCase().split(' ').includes(want))
-      // the component builder addresses pins by id, so accept that too
+
       || d.pins.find(p => p.id.toLowerCase() === want) || null;
   }
 
   const netOfPin = (it, pin) => (pin ? netOf(it.uid, pin.id) : null);
 
-  // ---------------------------------------------------------- boards
   function boardState(it) {
     let b = S.boards.get(it.uid);
     if (!b) {
@@ -113,7 +98,6 @@ const CirvoSim = (() => {
     return boardItems().filter(it => boardState(it).on);
   }
 
-  /** A pin number as written in code -> the signal printed on the header. */
   function resolvePin(it, pin) {
     const b = boardState(it);
     if (typeof pin === 'string') {
@@ -122,10 +106,9 @@ const CirvoSim = (() => {
     }
     const n = Number(pin);
     if (b.numbering === 'bcm') return 'GPIO' + n;
-    return 'D' + n;                    // arduino / esp32 / esp8266 all use D<n>
+    return 'D' + n;
   }
 
-  // ------------------------------------------------- electrical pass
   function drive(key, v, duty, strength) {
     if (key == null) return;
     const cur = S.V.get(key);
@@ -143,7 +126,6 @@ const CirvoSim = (() => {
     S.V.clear();
     const ds = devices();
 
-    // 1. power rails of every board that is switched on
     boardItems().forEach(it => {
       const b = boardState(it);
       const d = partOf(it);
@@ -156,7 +138,7 @@ const CirvoSim = (() => {
         else if (sig === '5V' || sig === 'VCC' || sig === '+5V') drive(key, 5, 1, STR.rail);
         else if (sig === 'VIN' || sig === 'RAW') drive(key, 5, 1, STR.rail);
       });
-      // 2. whatever the running code has configured
+
       b.gpio.forEach((g, sig) => {
         const p = pinBySignal(it, sig);
         if (!p) return;
@@ -168,7 +150,6 @@ const CirvoSim = (() => {
       });
     });
 
-    // 3. batteries and regulators
     ds.forEach(d => {
       if (d.model === 'supply') {
         drive(d.net('+'), d.p.sim.volts || 9, 1, STR.rail);
@@ -181,10 +162,8 @@ const CirvoSim = (() => {
       }
     });
 
-    // 4. analog sources — sensors, pots, LDRs
     ds.forEach(d => analogSource(d));
 
-    // 5. switches, buttons and relay contacts tie nets together
     for (let pass = 0; pass < 4; pass++) {
       let changed = false;
       ds.forEach(d => {
@@ -202,11 +181,9 @@ const CirvoSim = (() => {
       if (!changed) break;
     }
 
-    // 6. every device works out what it is doing now
     ds.forEach(d => d.update());
   }
 
-  // a net's high level, its low level, and how much of the time it is high
   const vhi = (k) => { const n = at(k); return n ? n.v : 0; };
   const vlo = (k) => { const n = at(k); return n && n.duty >= 1 ? n.v : 0; };
   const hiFrac = (k) => { const n = at(k); return n ? (n.duty == null ? 1 : n.duty) : 0; };
@@ -214,7 +191,6 @@ const CirvoSim = (() => {
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const world = (k) => S.world[k];
 
-  // --------------------------------------------------------- devices
   function devices() {
     if (!S.dirty) return S.devices;
     S.devices = items().map(makeDevice).filter(Boolean);
@@ -244,7 +220,6 @@ const CirvoSim = (() => {
     return v === undefined ? dflt : v;
   };
 
-  /** Sensors, pots and light-dependent parts push a voltage onto their net. */
   function analogSource(d) {
     if (d.analog) d.analog();
   }
@@ -258,7 +233,6 @@ const CirvoSim = (() => {
   };
 
   const MODELS = {
-    // ------------------------------------------------------- emitters
     led(d) {
       d.update = () => {
         const a = d.net('Anode'), c = d.net('Cathode');
@@ -268,20 +242,13 @@ const CirvoSim = (() => {
         d.state = { glow: level > 0.002 ? { colour, level } : null };
       };
     },
-    /**
-     * A light on a part that has no other behaviour: it lights from the volts
-     * across two of its own pins, exactly like an LED. This is what the
-     * component builder writes when you point a light at a + and a - pin, so a
-     * part drawn this morning behaves on the canvas with no code and no new
-     * model — which is the whole reason the builder can make working parts.
-     */
+
     lamp(d) {
       d.update = () => {
         const a = d.net(d.p.sim.anode || '+'), c = d.net(d.p.sim.cathode || '-');
         const on = live(a) && live(c) && (vhi(a) - vlo(c)) >= (d.p.sim.threshold || ON_THRESHOLD);
         const level = on ? clamp(hiFrac(a) * (1 - hiFrac(c)), 0, 1) : 0;
-        // no colour here: the anchor's own colour is the fallback, so the
-        // builder's colour picker is what decides what it burns
+
         d.state = { glow: level > 0.002 ? { colour: d.p.sim.colour || null, level } : null };
       };
     },
@@ -317,7 +284,6 @@ const CirvoSim = (() => {
       d.update = () => { d.state = { leds: d.pixels.map(c => c.slice()) }; };
     },
 
-    // ------------------------------------------------------ switching
     relay(d) {
       d.update = () => {
         const powered = live(d.net('VCC'));
@@ -340,9 +306,6 @@ const CirvoSim = (() => {
       };
     },
     button(d) {
-      // On a 6 mm tactile switch pins 1-2 are one side and 3-4 the other, and
-      // they are already joined by the part's own groups. Pressing bridges the
-      // two sides, so the tie has to be 1 to 3.
       d.ties = () => (ctl(d, 'btn', 0) ? [[d.net('1'), d.net('3')]] : null);
       d.update = () => { d.state = { pressed: !!ctl(d, 'btn', 0) }; };
     },
@@ -356,7 +319,6 @@ const CirvoSim = (() => {
       d.update = () => { d.state = { toggled: !!ctl(d, 'sw', 0) }; };
     },
 
-    // ------------------------------------------------------- analogue
     potentiometer(d) {
       d.analog = () => {
         const a = d.net('1'), b = d.net('3'), w = d.net('Wiper');
@@ -382,7 +344,7 @@ const CirvoSim = (() => {
       };
       d.update = () => { d.state = { reading: sensorFraction(d) }; };
     },
-    'digital-out'(d) {                     // PIR and friends
+    'digital-out'(d) {
       d.analog = () => {
         const supply = supplyNear(d, ['VCC', '+5V']);
         const hot = world('motion') > 0.5;
@@ -395,7 +357,6 @@ const CirvoSim = (() => {
       d.update = () => { d.state = { spin: world('flow') > 0 ? world('flow') / 10 : 0 }; };
     },
 
-    // ------------------------------------------------------ measuring
     adc(d) {
       d.api.read = (ch) => {
         const pin = pinByName(d.it, 'CH' + ch) || pinByName(d.it, 'A' + ch);
@@ -434,7 +395,6 @@ const CirvoSim = (() => {
       d.api.read = () => [ctl(d, 'stick_x', 0.5), ctl(d, 'stick_y', 0.5), ctl(d, 'sw', 0)];
     },
 
-    // -------------------------------------------------------- motion
     servo(d) {
       d.angle = 90;
       d.api.angle = (a) => { d.angle = clamp(a, 0, d.p.sim.range_deg || 180); };
@@ -476,8 +436,6 @@ const CirvoSim = (() => {
       };
     },
     'stepper-driver'(d) {
-      // IN1-IN4 sink the four coils; the socket carries them straight to the
-      // motor, so the phases have to be re-driven onto those nets
       const PHASE = ['Blue', 'Pink', 'Yellow', 'Orange'];
       d.on = [false, false, false, false];
       d.analog = () => {
@@ -511,9 +469,6 @@ const CirvoSim = (() => {
       };
     },
 
-    // ------------------------------------------------ passives that conduct
-    // Without these a GPIO -> resistor -> LED chain would leave the LED on a
-    // dead net, which is the first thing anyone builds.
     resistor(d) {
       d.ties = () => [[d.net('A'), d.net('B')]];
     },
@@ -532,7 +487,6 @@ const CirvoSim = (() => {
       d.ties = () => null;
     },
 
-    // ------------------------------------------------------- displays
     display(d) {
       const k = d.p.sim.kind;
       d.buf = { kind: k, lines: [], pixels: [], text: '', dirty: 0 };
@@ -552,8 +506,6 @@ const CirvoSim = (() => {
       };
       d.api.show = (s) => { if (s !== undefined) d.buf.text = String(s); };
       d.update = () => {
-        // an unpowered display shows nothing at all — the artwork's own
-        // placeholder is what you see, exactly like a dark panel
         const powered = live(d.net('VCC')) || live(d.net('VIN')) || live(d.net('3.3V'));
         d.state = powered ? {
           screen: {
@@ -589,7 +541,6 @@ const CirvoSim = (() => {
     };
   }
 
-  /** 0..1 for whatever a sensor board is pointed at in the virtual world. */
   function sensorFraction(d) {
     const reads = (d.p.sim.reads || [])[0] || '';
     if (reads.indexOf('soil') === 0) return clamp(1 - world('soil') / 100, 0.02, 0.98);
@@ -600,7 +551,6 @@ const CirvoSim = (() => {
     return 0.5;
   }
 
-  // ============================================================ python
   let skReady = null;
 
   function loadSkulpt() {
@@ -617,9 +567,6 @@ const CirvoSim = (() => {
 
   class Stopped extends Error { }
 
-  // Every in-flight sleep, so Stop can cut them short rather than waiting for the
-  // timer to expire — a program sleeping 10 s would otherwise ignore Stop for
-  // 10 s and keep its pins driven.
   const naps = new Set();
 
   function nap(ms) {
@@ -629,10 +576,7 @@ const CirvoSim = (() => {
       entry.timer = setTimeout(() => {
         naps.delete(entry);
         if (!S.running) { rej(new Stopped()); return; }
-        // A real sleep just handed control back to the browser — that is
-        // exactly the "still alive" signal a hang guard should reset on, so
-        // the compute budget below only ever measures time between sleeps,
-        // never the running total of a long-lived but well-behaved program.
+
         Sk.execStart = Date.now();
         res(Sk.builtin.none.none$);
       }, Math.min(Math.max(0, ms), 3600000));
@@ -671,7 +615,7 @@ const CirvoSim = (() => {
       || (d.p.sim.kind && model === 'display:' + d.p.sim.kind));
     if (!ds.length) return -1;
     if (near == null) return devices().indexOf(ds[0]);
-    // prefer the one actually wired to that board pin
+
     const bh = boardHandle(null);
     const bit = boardItems()[bh];
     if (bit) {
@@ -775,9 +719,6 @@ const CirvoSim = (() => {
     return mod;
   }
 
-  // Python-side shims. They read like the real libraries on purpose — code
-  // written against gpiozero, RPi.GPIO or MicroPython's machine should run
-  // here unchanged for anything the models actually cover.
   const PY = {};
 
   PY['src/lib/gpiozero.py'] = `
@@ -1236,11 +1177,6 @@ class Stepper:
         self._write([0, 0, 0, 0])
 `;
 
-  // --------------------------------------------------- library shims
-  // Real code imports real libraries. These are thin adapters onto the same
-  // bridge the `cirvo` module uses, so a program written for a Pi runs here
-  // unchanged — which is the whole point of typing it out.
-
   PY['src/lib/luma/__init__.py'] = '';
   PY['src/lib/luma/core/__init__.py'] = '';
   PY['src/lib/luma/core/interface/__init__.py'] = '';
@@ -1601,6 +1537,55 @@ class ADS1115:
 class ADS1015(ADS1115): pass
 `;
 
+  PY['src/lib/spidev.py'] = `
+import _cirvo
+
+class SpiDev:
+    def __init__(self, bus=None, device=None):
+        self.max_speed_hz = 500000
+        self.mode = 0
+        self.bits_per_word = 8
+        self._h = -1
+        if bus is not None and device is not None:
+            self.open(bus, device)
+    def open(self, bus, device):
+        self._h = _cirvo.find('adc', None)
+    def close(self):
+        self._h = -1
+    def _mcp3008(self, data):
+        if self._h < 0:
+            self._h = _cirvo.find('adc', None)
+        if self._h < 0:
+            raise RuntimeError("no ADC on the canvas — drop an MCP3008 next to the board")
+        if len(data) < 2:
+            return [0] * len(data)
+        channel = (data[1] >> 4) & 0x07
+        raw = int(max(0, min(1023, round(_cirvo.dev_call(self._h, 'read', [channel]) * 1023))))
+        out = [0, (raw >> 8) & 3, raw & 0xFF]
+        while len(out) < len(data): out.append(0)
+        return out[:len(data)]
+    def xfer2(self, data): return self._mcp3008(data)
+    def xfer(self, data): return self._mcp3008(data)
+    def writebytes(self, data): pass
+    def readbytes(self, n): return [0] * n
+    def __enter__(self): return self
+    def __exit__(self, *a): self.close()
+`;
+
+  PY['src/lib/Adafruit_MCP3008.py'] = `
+import _cirvo
+
+class MCP3008:
+    def __init__(self, clk=None, cs=None, miso=None, mosi=None, spi=None):
+        self._h = _cirvo.find('adc', None)
+        if self._h < 0:
+            raise RuntimeError("no ADC on the canvas")
+    def read_adc(self, channel):
+        return int(max(0, min(1023, round(_cirvo.dev_call(self._h, 'read', [channel]) * 1023))))
+    def read_adc_difference(self, differential):
+        return 0
+`;
+
   PY['src/lib/mfrc522.py'] = `
 import _cirvo
 
@@ -1619,8 +1604,6 @@ class SimpleMFRC522:
         return (None, None)
 `;
 
-  // Skulpt's own `time` works, but it cannot be interrupted — this one checks
-  // whether the run was stopped before and after every sleep.
   function buildTime() {
     const mod = { __name__: new Sk.builtin.str('time') };
     mod.sleep = fn((s) => nap(jsv(s) * 1000));
@@ -1633,12 +1616,10 @@ class SimpleMFRC522:
     return mod;
   }
 
-  // What a program can import, and what to say when it reaches for something
-  // else — a bare "No module named X" tells a beginner nothing about the fix.
   const PROVIDED = new Set([
     'gpiozero', 'RPi', 'machine', 'cirvo', '_cirvo', 'luma', 'RPLCD',
     'Adafruit_DHT', 'adafruit_dht', 'board', 'busio', 'digitalio', 'neopixel',
-    'w1thermsensor', 'Adafruit_ADS1x15', 'mfrc522',
+    'w1thermsensor', 'Adafruit_ADS1x15', 'mfrc522', 'spidev', 'Adafruit_MCP3008',
     'time', 'math', 'random', 'json', 'string', 're', 'sys', 'os',
     'collections', 'itertools', 'functools', 'operator', 'struct', 'copy',
   ]);
@@ -1646,9 +1627,11 @@ class SimpleMFRC522:
   const HINTS = {
     smbus: 'read the sensor directly instead: `from cirvo import BME280, BH1750`',
     smbus2: 'read the sensor directly instead: `from cirvo import BME280, BH1750`',
-    spidev: 'use `from gpiozero import MCP3008` for the ADC',
     serial: 'a UART link to the outside world is not modelled',
     pyserial: 'a UART link to the outside world is not modelled',
+    bluetooth: 'a UART link to the outside world is not modelled',
+    pybluez: 'a UART link to the outside world is not modelled',
+    network: 'there is no network from inside the simulation',
     picamera: 'the camera is artwork only, there is no image to capture',
     picamera2: 'the camera is artwork only, there is no image to capture',
     numpy: 'not available — the runtime is a Python subset, use plain lists and math',
@@ -1661,16 +1644,47 @@ class SimpleMFRC522:
     PIL: 'draw with `luma.core.render.canvas`, or `from cirvo import OLED`',
     Pillow: 'draw with `luma.core.render.canvas`, or `from cirvo import OLED`',
     Adafruit_SSD1306: 'use `luma.oled.device.ssd1306`, or `from cirvo import OLED`',
+    adafruit_ssd1306: 'use `luma.oled.device.ssd1306`, or `from cirvo import OLED`',
+    Adafruit_Nokia_LCD: 'use `luma.lcd.device.pcd8544`, or `from cirvo import LCD`',
+    nokia5110: 'use `luma.lcd.device.pcd8544`, or `from cirvo import LCD`',
+    Adafruit_ILI9341: 'use `luma.lcd.device.ili9341`, or `from cirvo import TFT`',
+    adafruit_ili9341: 'use `luma.lcd.device.ili9341`',
+    max7219: 'use `from cirvo import Matrix`',
+    luma_led_matrix: 'use `from cirvo import Matrix` — `luma.led_matrix` itself is not modelled',
+    tm1637: 'use `from cirvo import SevenSegment`',
+    Adafruit_BME280: 'read it directly instead: `from cirvo import BME280`',
+    adafruit_bme280: 'read it directly instead: `from cirvo import BME280`',
+    BME280: 'read it directly instead: `from cirvo import BME280`',
+    BH1750: 'read it directly instead: `from cirvo import BH1750`',
+    mh_z19: 'read it directly instead: `from cirvo import CO2`',
+    I2C_LCD_driver: 'use `RPLCD.i2c.CharLCD`, or `from cirvo import LCD`',
+    pylcd1602: 'use `RPLCD.i2c.CharLCD`, or `from cirvo import LCD`',
+    dht: 'use `Adafruit_DHT`, `adafruit_dht`, or `from cirvo import DHT11, DHT22`',
+    onewire: 'use `w1thermsensor`, or `from cirvo import DS18B20`',
+    ds18x20: 'use `w1thermsensor`, or `from cirvo import DS18B20`',
+    rpi_ws281x: 'use `import neopixel` (the CircuitPython-style strip driver)',
+    ws281x: 'use `import neopixel` (the CircuitPython-style strip driver)',
+    adafruit_ads1x15: 'use `import Adafruit_ADS1x15` (the classic, non-CircuitPython package name)',
+    pyky040: 'use `from cirvo import Encoder`',
     RPi_GPIO: 'import it as `import RPi.GPIO as GPIO`',
     pigpio: 'use `gpiozero` or `RPi.GPIO`',
     wiringpi: 'use `gpiozero` or `RPi.GPIO`',
+  };
+
+  const ATTR_HINTS = {
+    'machine.I2C': 'there is no simulated I²C bus — read the sensor directly instead: `from cirvo import BME280, BH1750`',
+    'machine.SPI': 'there is no simulated SPI bus — use `from gpiozero import MCP3008` for the ADC',
+    'machine.UART': 'a UART link to the outside world is not modelled',
+    'machine.RTC': 'there is no simulated clock chip — read wall-clock time with `time.time()` instead',
+    'machine.Timer': 'not available — write one loop with time.sleep() instead',
+    'machine.WDT': 'not available — there is nothing here that can hang the board',
+    'machine.reset': 'not available — reload the page instead',
   };
 
   const AVAILABLE = 'gpiozero · RPi.GPIO · machine · cirvo · luma · RPLCD · '
     + 'Adafruit_DHT · adafruit_dht · board · busio · digitalio · neopixel · '
     + 'w1thermsensor · Adafruit_ADS1x15 · mfrc522 · time · math · random · json';
 
-  /** Top-level module names a program imports, without executing it. */
   function importsIn(code) {
     const found = new Set();
     code.split('\n').forEach(raw => {
@@ -1707,7 +1721,6 @@ class SimpleMFRC522:
     registered = true;
   }
 
-  // ------------------------------------------------------- the loop
   function anyPowered() {
     return boardItems().some(it => boardState(it).on);
   }
@@ -1737,27 +1750,16 @@ class SimpleMFRC522:
 
   const wake = () => { S.vStale = true; schedule(); };
 
-  /**
-   * Python reads happen between animation frames, so the voltage table can be
-   * one write behind: configure a pull-up and read the pin on the next line and
-   * the pull-up would not exist yet. Any read settles the circuit first.
-   */
   function ensureFresh() {
     if (S.vStale) { evaluate(); S.vStale = false; }
   }
 
-  /**
-   * Settle immediately after a write instead of waiting for the next frame.
-   * A stepper walks its phases every 2 ms; at 24 ms per frame the sampler would
-   * miss eleven transitions out of twelve and read the motion as backwards.
-   */
   function settle() { S.vStale = true; evaluate(); S.vStale = false; schedule(); }
 
   function emitLog(text, kind) {
     if (S.onLog) S.onLog(String(text), kind || 'out');
   }
 
-  // ------------------------------------------------------- controls
   function controlDef(it, cid) {
     const d = partOf(it);
     return d && (d.controls || []).find(c => c.id === cid);
@@ -1800,7 +1802,6 @@ class SimpleMFRC522:
     frame();
   }
 
-  // ------------------------------------------------------ public API
   function attach(opts) {
     S.getDoc = opts.getDoc;
     S.getLib = opts.getLib;
@@ -1813,7 +1814,7 @@ class SimpleMFRC522:
   function invalidate() {
     S.nets = null;
     S.dirty = true;
-    // forget boards and controls that are no longer on the canvas
+
     const live = new Set(items().map(i => i.uid));
     [...S.boards.keys()].forEach(k => { if (!live.has(k)) S.boards.delete(k); });
     [...S.controls.keys()].forEach(k => { if (!live.has(k.split(':')[0])) S.controls.delete(k); });
@@ -1850,11 +1851,7 @@ class SimpleMFRC522:
         return Sk.builtinFiles.files[x];
       },
       __future__: Sk.python3,
-      // Not a program time limit — sleep() resets it (see nap() above), so a
-      // well-behaved program can run for hours. What this actually catches is
-      // a `while True:` with no sleep in it at all: 20 s of the JS main thread
-      // never returning to the browser, which would otherwise hang the tab
-      // for good with no way back short of reloading the page.
+
       execLimit: 20000,
       killableWhile: true,
       killableFor: true,
@@ -1870,6 +1867,11 @@ class SimpleMFRC522:
         emitLog(msg, 'err');
         const miss = msg.match(/No module named\s+(\S+)/);
         if (miss) emitLog(importHint(miss[1]), 'sys');
+        const badAttr = msg.match(/module '(\w+)' has no attribute '(\w+)'/);
+        if (badAttr) {
+          const tip = ATTR_HINTS[badAttr[1] + '.' + badAttr[2]];
+          if (tip) emitLog(tip + '.', 'sys');
+        }
         if (/TimeLimitError/.test(msg)) {
           emitLog('That loop never reaches a sleep() — add one (even sleep(0.01)) so it '
             + 'keeps giving the page a chance to breathe. A loop that sleeps runs for as '
@@ -1878,8 +1880,7 @@ class SimpleMFRC522:
       }
     } finally {
       S.running = false;
-      // gpiozero closes its devices at exit, so a finished or stopped program
-      // leaves the pins as inputs — the LED goes dark, as it would on real hardware
+
       S.boards.forEach(b => b.gpio.clear());
       if (S.onStatus) S.onStatus();
       wake();
