@@ -1,0 +1,167 @@
+{
+  "id": "tomato-literature-2026",
+  "name": "Tomato (Solanum lycopersicum) greenhouse optimum, literature-based estimate",
+  "crop": "tomato, Solanum lycopersicum",
+  "units": {
+    "tdb": "degC",
+    "vpd": "kPa"
+  },
+  "status": "Estimate for the demo. Values follow commonly cited greenhouse tomato ranges; exact numbers and DOIs still need to be checked against the sources before any use in a paper.",
+  "derivation": {
+    "day_08_17": "Tdb 24 = centre of a 22-26 degC day optimum for greenhouse tomato; VPD 0.8 kPa, inside the 0.3-1.0 kPa range given as ideal for tomato (Shamshiri et al. 2018)",
+    "night_19_06": "Tdb 17 = centre of a 15-19 degC night optimum (Shamshiri et al. 2018; Peet and Welles 2005); VPD 0.5 kPa",
+    "transition_07_18": "linear midpoint of day and night values",
+    "day_night_hours": "assumption, same as the aehobak profile: 08-17 day, 19-06 night",
+    "default_zone_tolerances": "tTol 1.5 degC (day 22.5-25.5, night 15.5-18.5), vpdTol 0.5 kPa, vpdMin 0.3 kPa (day 0.3-1.3, night 0.3-1.0)"
+  },
+  "references": [
+    "Shamshiri RR, Jones JW, Thorp KR, Ahmad D, Che Man H, Taheri S (2018) Review of optimum temperature, humidity, and vapour pressure deficit for microclimate evaluation and control in greenhouse cultivation of tomato: a review. Int Agrophysics 32:287-302. doi:10.1515/intag-2017-0005",
+    "Peet MM, Welles G (2005) Greenhouse tomato production. In: Heuvelink E (ed) Tomatoes. CABI, Wallingford, pp 257-304"
+  ],
+  "rows": [
+    {
+      "hour": 0,
+      "tdb": 17.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 1,
+      "tdb": 17.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 2,
+      "tdb": 17.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 3,
+      "tdb": 17.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 4,
+      "tdb": 17.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 5,
+      "tdb": 17.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 6,
+      "tdb": 17.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 7,
+      "tdb": 20.5,
+      "vpd": 0.65,
+      "period": "transition"
+    },
+    {
+      "hour": 8,
+      "tdb": 24.0,
+      "vpd": 0.8,
+      "period": "day"
+    },
+    {
+      "hour": 9,
+      "tdb": 24.0,
+      "vpd": 0.8,
+      "period": "day"
+    },
+    {
+      "hour": 10,
+      "tdb": 24.0,
+      "vpd": 0.8,
+      "period": "day"
+    },
+    {
+      "hour": 11,
+      "tdb": 24.0,
+      "vpd": 0.8,
+      "period": "day"
+    },
+    {
+      "hour": 12,
+      "tdb": 24.0,
+      "vpd": 0.8,
+      "period": "day"
+    },
+    {
+      "hour": 13,
+      "tdb": 24.0,
+      "vpd": 0.8,
+      "period": "day"
+    },
+    {
+      "hour": 14,
+      "tdb": 24.0,
+      "vpd": 0.8,
+      "period": "day"
+    },
+    {
+      "hour": 15,
+      "tdb": 24.0,
+      "vpd": 0.8,
+      "period": "day"
+    },
+    {
+      "hour": 16,
+      "tdb": 24.0,
+      "vpd": 0.8,
+      "period": "day"
+    },
+    {
+      "hour": 17,
+      "tdb": 24.0,
+      "vpd": 0.8,
+      "period": "day"
+    },
+    {
+      "hour": 18,
+      "tdb": 20.5,
+      "vpd": 0.65,
+      "period": "transition"
+    },
+    {
+      "hour": 19,
+      "tdb": 17.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 20,
+      "tdb": 17.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 21,
+      "tdb": 17.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 22,
+      "tdb": 17.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 23,
+      "tdb": 17.0,
+      "vpd": 0.5,
+      "period": "night"
+    }
+  ]
+}

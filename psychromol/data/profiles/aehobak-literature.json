@@ -1,0 +1,168 @@
+{
+  "id": "aehobak-literature-2026",
+  "name": "Aehobak (Cucurbita moschata) greenhouse optimum, literature-based",
+  "crop": "aehobak, Cucurbita moschata",
+  "units": {
+    "tdb": "degC",
+    "vpd": "kPa"
+  },
+  "derivation": {
+    "day_08_17": "Tdb 23.5 = centre of 22-25 degC day optimum (Goo et al. 2022; Jeju ARES guide 23-25); VPD 1.0 = centre of 0.5-1.5 kPa (Yu et al. 2023)",
+    "night_19_06": "Tdb 14 = centre of 13-15 degC night optimum (Goo et al. 2022; Jeju ARES guide 12-15); VPD 0.5 kPa, lower bound 0.3 kPa (Shamshiri et al. 2018)",
+    "transition_07_18": "linear midpoint of day and night values",
+    "day_night_hours": "assumption: 08-17 day, 19-06 night (March sunrise about 06:40, sunset about 18:50 at Muan)",
+    "default_zone_tolerances": "tTol 1.5 degC (day 22-25, night 12.5-15.5), vpdTol 0.5 kPa, vpdMin 0.3 kPa (day 0.5-1.5, night 0.3-1.0)"
+  },
+  "references": [
+    "Goo HW, Kim EJ, Na HY, Park KS (2022) Effects of heating initiative temperature and CO2 fertilizing concentration on the growth and yield of summer squash in a greenhouse. J Bio-Environ Control 31(4):468-475. doi:10.12791/KSBEC.2022.31.4.468",
+    "Yu X, Zhang Y, Zhao X, Li J (2023) Systemic effects of the vapor pressure deficit on the physiology and productivity of protected vegetables. Vegetable Research 3:20. doi:10.48130/VR-2023-0020",
+    "Shamshiri RR, Jones JW, Thorp KR, Ahmad D, Che Man H, Taheri S (2018) Review of optimum temperature, humidity, and vapour pressure deficit for microclimate evaluation and control in greenhouse cultivation of tomato: a review. Int Agrophys 32:287-302. doi:10.1515/intag-2017-0005",
+    "Jeju Special Self-Governing Province Agricultural Research and Extension Services. Pumpkin/squash cultivation guide (extension document)"
+  ],
+  "rows": [
+    {
+      "hour": 0,
+      "tdb": 14.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 1,
+      "tdb": 14.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 2,
+      "tdb": 14.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 3,
+      "tdb": 14.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 4,
+      "tdb": 14.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 5,
+      "tdb": 14.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 6,
+      "tdb": 14.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 7,
+      "tdb": 18.75,
+      "vpd": 0.75,
+      "period": "transition"
+    },
+    {
+      "hour": 8,
+      "tdb": 23.5,
+      "vpd": 1.0,
+      "period": "day"
+    },
+    {
+      "hour": 9,
+      "tdb": 23.5,
+      "vpd": 1.0,
+      "period": "day"
+    },
+    {
+      "hour": 10,
+      "tdb": 23.5,
+      "vpd": 1.0,
+      "period": "day"
+    },
+    {
+      "hour": 11,
+      "tdb": 23.5,
+      "vpd": 1.0,
+      "period": "day"
+    },
+    {
+      "hour": 12,
+      "tdb": 23.5,
+      "vpd": 1.0,
+      "period": "day"
+    },
+    {
+      "hour": 13,
+      "tdb": 23.5,
+      "vpd": 1.0,
+      "period": "day"
+    },
+    {
+      "hour": 14,
+      "tdb": 23.5,
+      "vpd": 1.0,
+      "period": "day"
+    },
+    {
+      "hour": 15,
+      "tdb": 23.5,
+      "vpd": 1.0,
+      "period": "day"
+    },
+    {
+      "hour": 16,
+      "tdb": 23.5,
+      "vpd": 1.0,
+      "period": "day"
+    },
+    {
+      "hour": 17,
+      "tdb": 23.5,
+      "vpd": 1.0,
+      "period": "day"
+    },
+    {
+      "hour": 18,
+      "tdb": 18.75,
+      "vpd": 0.75,
+      "period": "transition"
+    },
+    {
+      "hour": 19,
+      "tdb": 14.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 20,
+      "tdb": 14.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 21,
+      "tdb": 14.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 22,
+      "tdb": 14.0,
+      "vpd": 0.5,
+      "period": "night"
+    },
+    {
+      "hour": 23,
+      "tdb": 14.0,
+      "vpd": 0.5,
+      "period": "night"
+    }
+  ]
+}

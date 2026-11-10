@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PsychroMol</title>
+  <meta name="description" content="Psychrometric chart decision support for greenhouse microclimate">
+  <link rel="icon" type="image/webp" href="icon/psychrometric-chart.webp">
+  <meta name="theme-color" content="#123b45">
+  <link rel="stylesheet" href="style.css">
+  <script src="vendor/d3.v7.min.js"></script>
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="M7 16c3-1 6-4 8-10"/><path d="M9 18c4-2 7-5 9-9"/></symbol>
+    <symbol id="i-series" viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="m7 14 3-4 3 3 5-7"/></symbol>
+    <symbol id="i-tools" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M12 11h2M16 11h0M8 15h2M12 15h2M8 18h2M12 18h2M16 15v3"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5z" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.5 2.5L16 9.5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5 2.8 19.5h18.4z"/><path d="M12 10v4.5M12 17.2v.3"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.8v.3"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m-4.5-4.5L12 15l4.5-4.5M5 19.5h14"/></symbol>
+    <symbol id="i-fit" viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 12h16M12 4v16"/></symbol>
+  </svg>
+
+  <header class="topbar">
+    <a class="brand" href="#chart" data-i18n-attr="aria-label:app.home">
+      <img src="icon/psychrometric-chart.webp" alt="" width="30" height="30">
+      <span>PsychroMol</span>
+    </a>
+    <nav class="tabs" data-i18n-attr="aria-label:nav.pages">
+      <a href="#chart" data-page="chart"><svg class="ic"><use href="#i-chart"/></svg><span data-i18n="nav.chart"></span></a>
+      <a href="#series" data-page="series"><svg class="ic"><use href="#i-series"/></svg><span data-i18n="nav.series"></span></a>
+      <a href="#tools" data-page="tools"><svg class="ic"><use href="#i-tools"/></svg><span data-i18n="nav.tools"></span></a>
+      <a href="#settings" data-page="settings" class="tab-settings"><svg class="ic"><use href="#i-settings"/></svg><span data-i18n="nav.settings"></span></a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="empty" id="empty" hidden>
+      <h2 data-i18n="empty.title"></h2>
+      <p data-i18n="empty.text"></p>
+      <div class="row"><button class="primary" data-action="demo" data-i18n="btn.demo"></button><a class="btn" href="#settings" data-i18n="btn.mydata"></a></div>
+    </div>
+
+    <!-- ============ CHART ============ -->
+    <section id="page-chart" class="page">
+      <div class="dash">
+        <div class="now-col" aria-live="polite">
+          <section class="panel now">
+            <div class="now-head">
+              <h2 data-i18n="kpi.title"></h2>
+              <output id="time-label">–</output>
+            </div>
+            <div id="verdict" class="verdict"></div>
+            <div class="kpis" id="kpis"></div>
+          </section>
+          <section class="panel decide">
+            <div class="side-head">
+              <h2 data-i18n="dss.title"></h2>
+              <span class="side-links">
+                <a href="#tools" id="to-tools" data-i18n="dss.toTools"></a>
+                <a href="#settings/texts" data-i18n="dss.edit"></a>
+              </span>
+            </div>
+            <div id="dss-panel"></div>
+          </section>
+        </div>
+
+        <section class="panel hours-card" data-i18n-attr="aria-label:tl.strip">
+          <div class="timeline">
+            <button id="play" class="icon-btn" data-i18n-attr="aria-label:tl.play"><svg class="ic"><use href="#i-play"/></svg></button>
+            <button id="prev" class="icon-btn" data-i18n-attr="aria-label:tl.prev"><svg class="ic"><use href="#i-prev"/></svg></button>
+            <input id="slider" type="range" min="0" max="0" value="0" data-i18n-attr="aria-label:tl.hour">
+            <button id="next" class="icon-btn" data-i18n-attr="aria-label:tl.next"><svg class="ic"><use href="#i-next"/></svg></button>
+          </div>
+          <div class="hours" id="strip"></div>
+        </section>
+
+        <div class="panel chart-card">
+          <div class="toolbar">
+            <div class="seg" role="group" data-i18n-attr="aria-label:chart.diagram">
+              <button id="view-psy" aria-pressed="true"><img src="icon/type-psychrometric.png" alt=""><span data-i18n="chart.psy"></span></button>
+              <button id="view-mollier" aria-pressed="false"><img src="icon/type-mollier.png" alt=""><span data-i18n="chart.mollier"></span></button>
+            </div>
+            <div class="toolbar-right">
+              <button id="fit" class="btn-sm" data-i18n-attr="title:chart.fitTitle"><svg class="ic"><use href="#i-fit"/></svg><span data-i18n="chart.fit"></span></button>
+              <button id="reset-range" class="btn-sm"><svg class="ic"><use href="#i-expand"/></svg><span data-i18n="chart.full"></span></button>
+              <button id="dl-png" class="btn-sm"><svg class="ic"><use href="#i-download"/></svg>PNG</button>
+              <button id="dl-svg" class="btn-sm"><svg class="ic"><use href="#i-download"/></svg>SVG</button>
+            </div>
+          </div>
+          <svg id="chart" role="img" data-i18n-attr="aria-label:chart.aria"></svg>
+          <div class="legend">
+            <span><i class="key zone"></i><span data-i18n="legend.zone"></span></span>
+            <span><i class="key dot cur"></i><span data-i18n="legend.cur"></span></span>
+            <span><i class="key dash corr"></i><span data-i18n="legend.corr"></span></span>
+            <span><i class="key line a-heating"></i><span data-i18n="act.heating"></span></span>
+            <span><i class="key line a-fogging"></i><span data-i18n="act.fogging"></span></span>
+            <span><i class="key line a-ventilation"></i><span data-i18n="act.ventilation"></span></span>
+            <span><i class="key line a-dehumidification hatch"></i><span data-i18n="act.dehumidification"></span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TIME SERIES + RAW DATA ============ -->
+    <section id="page-series" class="page" hidden>
+      <div class="card">
+        <div class="card-head">
+          <h2 data-i18n="series.title"></h2>
+          <p class="muted" data-i18n="series.note"></p>
+        </div>
+        <div id="series"></div>
+        <div class="legend">
+          <span><i class="key line ink"></i><span data-i18n="legend.measured"></span></span>
+          <span><i class="key zone"></i><span data-i18n="legend.band"></span></span>
+          <span><i class="key dash risk"></i><span data-i18n="legend.thr"></span></span>
+          <span><i class="key cell a-heating"></i><b data-i18n="letter.heating"></b> <span data-i18n="act.heating"></span></span>
+          <span><i class="key cell a-fogging"></i><b data-i18n="letter.fogging"></b> <span data-i18n="act.fogging"></span></span>
+          <span><i class="key cell a-ventilation"></i><b data-i18n="letter.ventilation"></b> <span data-i18n="act.ventilation"></span></span>
+          <span><i class="key cell a-dehumidification hatch"></i><b data-i18n="letter.dehumidification"></b> <span data-i18n="act.dehumidification"></span></span>
+          <span><i class="key cell none"></i><span data-i18n="legend.none"></span></span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head row">
+          <h2 data-i18n="raw.title"></h2>
+          <button id="export" class="btn-sm"><svg class="ic"><use href="#i-download"/></svg><span data-i18n="res.export"></span></button>
+        </div>
+        <p id="raw-note" class="muted"></p>
+        <div class="table-wrap"><table id="raw-table"></table></div>
+        <button id="raw-more" class="btn-sm" hidden data-i18n="raw.more"></button>
+      </div>
+    </section>
+
+    <!-- ============ TOOLS: general psychrometric calculator ============ -->
+    <section id="page-tools" class="page" hidden>
+      <div class="report-head" id="report-head">
+        <h1 id="report-title"></h1>
+        <p class="muted" id="report-meta"></p>
+      </div>
+      <div class="chart-layout">
+        <div class="card chart-card">
+          <div class="toolbar">
+            <div class="seg" role="group" data-i18n-attr="aria-label:chart.diagram">
+              <button id="tview-psy" aria-pressed="true"><img src="icon/type-psychrometric.png" alt=""><span data-i18n="chart.psy"></span></button>
+              <button id="tview-mollier" aria-pressed="false"><img src="icon/type-mollier.png" alt=""><span data-i18n="chart.mollier"></span></button>
+            </div>
+            <div class="toolbar-right">
+              <button id="tfit" class="btn-sm"><svg class="ic"><use href="#i-fit"/></svg><span data-i18n="tools.fit"></span></button>
+              <button id="treset-range" class="btn-sm"><svg class="ic"><use href="#i-expand"/></svg><span data-i18n="chart.full"></span></button>
+              <button id="tdl-png" class="btn-sm"><svg class="ic"><use href="#i-download"/></svg>PNG</button>
+              <button id="tdl-svg" class="btn-sm"><svg class="ic"><use href="#i-download"/></svg>SVG</button>
+            </div>
+          </div>
+          <svg id="tchart" role="img" data-i18n-attr="aria-label:tools.chartAria"></svg>
+          <p class="muted hint" data-i18n="tools.hint"></p>
+        </div>
+
+        <aside class="card side">
+          <div class="side-inner">
+            <div class="seg seg-wide tabs-side" role="tablist">
+              <button role="tab" data-ttab="calc" aria-selected="true" data-i18n="tools.tabCalc"></button>
+              <button role="tab" data-ttab="lines" aria-selected="false" data-i18n="tools.lines"></button>
+            </div>
+            <div data-tpane="calc">
+            <h2 data-i18n="tools.project"></h2>
+            <div class="proj-row">
+              <select id="proj-select" data-i18n-attr="aria-label:tools.openProject"></select>
+              <button id="proj-new" class="btn-sm" data-i18n="tools.new"></button>
+              <button id="proj-del" class="btn-sm danger" data-i18n="tools.delete"></button>
+            </div>
+            <label><span data-i18n="tools.projName"></span> <input id="proj-name"></label>
+            <div class="row">
+              <button id="proj-export" class="btn-sm" data-i18n="tools.export"></button>
+              <label class="btn btn-sm file-btn"><span data-i18n="tools.import"></span><input id="proj-import" type="file" accept=".json"></label>
+              <button id="proj-pdf" class="btn-sm primary" data-i18n="tools.pdf"></button>
+            </div>
+
+            <h2 class="sep" data-i18n="tools.gh"></h2>
+            <label class="inline"><input type="checkbox" id="gh-show"> <span data-i18n="tools.ghShow"></span></label>
+            <div class="gh-hour">
+              <button id="gh-prev" class="btn-sm" data-i18n-attr="aria-label:tl.prev"><svg class="ic"><use href="#i-prev"/></svg></button>
+              <span id="gh-label"></span>
+              <button id="gh-next" class="btn-sm" data-i18n-attr="aria-label:tl.next"><svg class="ic"><use href="#i-next"/></svg></button>
+            </div>
+            <button id="gh-add" class="btn" data-i18n="tools.ghAdd"></button>
+            <p class="muted small" data-i18n="tools.ghNote"></p>
+
+            <h2 class="sep" data-i18n="tools.find"></h2>
+            <div class="find">
+              <select id="find-k1"></select><input id="find-v1" type="number" step="any">
+              <select id="find-k2"></select><input id="find-v2" type="number" step="any">
+            </div>
+            <div class="row"><input id="find-label" class="lbl-in" data-i18n-attr="placeholder:tools.label"><button id="find-add" class="primary" data-i18n="tools.addPoint"></button></div>
+            <p id="find-status" class="status"></p>
+
+            <h2 class="sep" data-i18n="tools.process"></h2>
+            <div class="fields-proc">
+              <label><span data-i18n="tools.from"></span> <select id="proc-a"></select></label>
+              <label><span data-i18n="tools.to"></span> <select id="proc-b"></select></label>
+              <label><span data-i18n="tools.flow"></span> <input id="proc-flow" type="number" min="0" step="any" value="1000"></label>
+            </div>
+            <button id="proc-add" class="btn" data-i18n="tools.addProcess"></button>
+
+            <h2 class="sep" data-i18n="tools.mix"></h2>
+            <div class="fields-proc">
+              <label><span data-i18n="tools.streamA"></span> <select id="mix-a"></select></label>
+              <label><span data-i18n="tools.flowA"></span> <input id="mix-qa" type="number" min="0" step="any" value="1000"></label>
+              <label><span data-i18n="tools.streamB"></span> <select id="mix-b"></select></label>
+              <label><span data-i18n="tools.flowB"></span> <input id="mix-qb" type="number" min="0" step="any" value="1000"></label>
+            </div>
+            <button id="mix-add" class="btn" data-i18n="tools.addMix"></button>
+            </div>
+            <div data-tpane="lines" hidden>
+              <p class="muted" data-i18n="tools.linesNote"></p>
+              <div id="lines-fields" class="lines"></div>
+              <button id="lines-reset" class="btn-sm" data-i18n="tools.linesReset"></button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="card">
+        <h2 data-i18n="tools.points"></h2>
+        <div class="table-wrap"><table id="points-table" class="calc"></table></div>
+      </div>
+      <div class="card">
+        <h2 data-i18n="tools.processes"></h2>
+        <p class="muted" data-i18n="tools.procNote"></p>
+        <div class="table-wrap"><table id="procs-table" class="calc"></table></div>
+      </div>
+    </section>
+
+    <!-- ============ SETTINGS ============ -->
+    <section id="page-settings" class="page settings" hidden>
+      <div class="card" id="set-data">
+        <h2 data-i18n="src.title"></h2>
+        <p class="muted" data-i18n="src.note"></p>
+        <div class="seg seg-wide" role="radiogroup" data-i18n-attr="aria-label:src.title">
+          <button data-source="demo" role="radio" data-i18n="src.demo"></button>
+          <button data-source="file" role="radio" data-i18n="src.file"></button>
+          <button data-source="api" role="radio" data-i18n="src.api"></button>
+        </div>
+
+        <div data-pane="demo">
+          <div class="seg seg-wide" role="radiogroup" data-i18n-attr="aria-label:demo.pick">
+            <button data-demo="aehobak" role="radio" data-i18n="demo.aehobak"></button>
+            <button data-demo="tomato" role="radio" data-i18n="demo.tomato"></button>
+          </div>
+        </div>
+
+        <div data-pane="file">
+          <p class="muted" data-i18n="src.fileNote"></p>
+          <label class="drop" id="drop-file"><input type="file" id="file-input" accept=".csv,.json"><span><span data-i18n="data.drop"></span> <u data-i18n="data.browse"></u></span></label>
+        </div>
+
+        <div data-pane="api">
+          <p class="muted" data-i18n="src.apiNote"></p>
+          <div class="fields-api">
+            <label class="span2"><span data-i18n="data.url"></span> <input id="api-url" type="url" placeholder="http://192.168.0.104:5000/api/custom.json"></label>
+            <label><span data-i18n="data.interval"></span>
+              <span class="interval"><input id="api-interval" type="number" min="1" step="1"><select id="api-unit" data-i18n-attr="aria-label:data.unit"><option value="s" data-i18n="unit.s"></option><option value="min" data-i18n="unit.min"></option><option value="h" data-i18n="unit.h"></option></select></span></label>
+          </div>
+          <div class="row"><button id="api-test" class="btn" data-i18n="src.test"></button><button id="api-toggle" class="primary" data-i18n="data.start"></button></div>
+        </div>
+
+        <div data-pane="file api" class="mapping">
+          <h3 data-i18n="map.title"></h3>
+          <p class="muted" data-i18n="map.note"></p>
+          <div class="fields-map">
+            <label data-pane="api"><span data-i18n="map.path"></span> <input id="map-path" placeholder="data" list="field-list"></label>
+            <label><span data-i18n="map.time"></span> <input id="map-time" data-map="time" placeholder="timestamp" list="field-list"></label>
+            <label><span data-i18n="map.t"></span> <input id="map-t" data-map="t" placeholder="temperature" list="field-list"></label>
+            <label><span data-i18n="map.hum"></span> <input id="map-hum" data-map="hum" placeholder="humidity" list="field-list"></label>
+            <label><span data-i18n="map.humType"></span>
+              <select id="map-humtype"><option value="rh" data-i18n="hum.rh"></option><option value="w_gkg" data-i18n="hum.w_gkg"></option><option value="w_kgkg" data-i18n="hum.w_kgkg"></option><option value="tdp" data-i18n="hum.tdp"></option><option value="vpd" data-i18n="hum.vpd"></option></select></label>
+            <label><span data-i18n="map.outT"></span> <input id="map-outT" data-map="outT" placeholder="out_tdb" list="field-list"></label>
+            <label><span data-i18n="map.outRh"></span> <input id="map-outRh" data-map="outRh" placeholder="out_rh" list="field-list"></label>
+          </div>
+          <datalist id="field-list"></datalist>
+          <pre id="preview" class="preview" hidden></pre>
+        </div>
+        <p id="src-status" class="status"></p>
+        <div id="storage" class="storage row" hidden>
+          <span id="storage-info" class="muted"></span>
+          <button id="clear-store" class="btn-sm danger" data-i18n="store.clear"></button>
+        </div>
+      </div>
+
+      <details class="card" id="set-texts">
+        <summary><h2 data-i18n="texts.title"></h2></summary>
+        <p class="muted" data-i18n="texts.note"></p>
+        <div id="texts-fields" class="texts"></div>
+        <button id="texts-reset" class="btn-sm" data-i18n="texts.reset"></button>
+      </details>
+
+      <details class="card">
+        <summary><h2 data-i18n="set.general"></h2></summary>
+        <div class="fields3">
+          <label><span data-i18n="lang.label"></span> <select id="lang"><option value="en">English</option><option value="ko">한국어</option></select></label>
+          <label><span data-i18n="set.alt"></span> <input id="altitude" type="number" step="1"></label>
+        </div>
+        <p class="muted" id="pressure-note"></p>
+        <h3 data-i18n="set.gh"></h3>
+        <div class="fields3">
+          <label><span data-i18n="set.len"></span> <input id="gh-l" type="number" min="0" step="0.1"></label>
+          <label><span data-i18n="set.wid"></span> <input id="gh-w" type="number" min="0" step="0.1"></label>
+          <label><span data-i18n="set.hgt"></span> <input id="gh-h" type="number" min="0" step="0.1"></label>
+        </div>
+        <p class="muted" id="gh-vol"></p>
+        <h3 data-i18n="set.act"></h3>
+        <div class="checks">
+          <label><input type="checkbox" data-act="heating"> <i class="key line a-heating"></i> <span data-i18n="set.heat"></span></label>
+          <label><input type="checkbox" data-act="fogging"> <i class="key line a-fogging"></i> <span data-i18n="set.fog"></span></label>
+          <label><input type="checkbox" data-act="ventilation"> <i class="key line a-ventilation"></i> <span data-i18n="set.vent"></span></label>
+          <label><input type="checkbox" data-act="dehumidification"> <i class="key line a-dehumidification hatch"></i> <span data-i18n="set.dehum"></span></label>
+        </div>
+      </details>
+
+      <details class="card">
+        <summary><h2 data-i18n="set.zoneDss"></h2></summary>
+        <label class="crop-pick"><span data-i18n="set.crop"></span>
+          <select id="crop">
+            <option value="aehobak" data-i18n="crop.aehobak"></option>
+            <option value="tomato" data-i18n="crop.tomato"></option>
+          </select></label>
+        <p class="muted" data-i18n="set.profileNote"></p>
+        <div class="fields2">
+          <label><span data-i18n="set.ttol"></span> <input id="ttol" type="number" step="0.5" min="0"></label>
+          <label><span data-i18n="set.vtol"></span> <input id="vtol" type="number" step="0.05" min="0"></label>
+          <label><span data-i18n="set.vmin"></span> <input id="vmin" type="number" step="0.05" min="0"></label>
+          <label><span data-i18n="set.cm"></span> <input id="cm" type="number" step="0.5" min="0"></label>
+          <label>ΔT_ref (°C) <input id="tref" type="number" step="0.1" min="0.1"></label>
+          <label>ΔW_ref (g/kg) <input id="wref" type="number" step="0.05" min="0.05"></label>
+          <label><span data-i18n="set.cos"></span> <input id="cosmin" type="number" step="0.01" min="0" max="1"></label>
+        </div>
+        <p class="muted" data-i18n="set.refNote"></p>
+        <h3 data-i18n="set.base"></h3>
+        <div class="fields2">
+          <label><span data-i18n="set.rhHi"></span> <input id="rh-hi" type="number" step="1"></label>
+          <label><span data-i18n="set.rhLo"></span> <input id="rh-lo" type="number" step="1"></label>
+        </div>
+        <label class="inline"><input id="use-zone-t" type="checkbox"> <span data-i18n="set.useZoneT"></span></label>
+        <h3 data-i18n="set.axes"></h3>
+        <div class="fields3">
+          <label><span data-i18n="set.tmin"></span> <input id="r-tmin" type="number" step="1"></label>
+          <label><span data-i18n="set.tmax"></span> <input id="r-tmax" type="number" step="1"></label>
+          <label><span data-i18n="set.wmax"></span> <input id="r-wmax" type="number" step="1" min="1"></label>
+        </div>
+      </details>
+
+      <details class="card prose">
+        <summary><h2 data-i18n="about.title"></h2></summary>
+        <div data-i18n-html="about.body"></div>
+      </details>
+
+      <div class="row">
+        <button id="reset" class="btn" data-i18n="set.reset"></button>
+        <span class="muted" data-i18n="set.stored"></span>
+      </div>
+    </section>
+  </main>
+
+  <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+</body>
+</html>
