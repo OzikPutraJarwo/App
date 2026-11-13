@@ -79,6 +79,8 @@ const hatch = (a) => (a === "dehumidification" ? " hatch" : "");
 const icon = (name) => `<svg class="ic" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 // Action chip: colour plus the action's letter, so the action never relies on colour alone.
 const chip = (a) => `<span class="achip a-${a}${hatch(a)}" aria-hidden="true">${esc(t(`letter.${a}`))}</span>`;
+// Two-action ("pair") chip: both colours side by side, each with its letter.
+const chipPair = ([a, b]) => `<span class="achip pair" style="--c1:var(--a-${a});--c2:var(--a-${b})" aria-hidden="true"><span>${esc(t(`letter.${a}`))}</span><span>${esc(t(`letter.${b}`))}</span></span>`;
 const WEEKDAY = { en: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], ko: ["일", "월", "화", "수", "목", "금", "토"] };
 const dayLabel = (time) => {
   const d = new Date(`${time.slice(0, 10)}T00:00:00Z`);
@@ -244,9 +246,9 @@ function renderStrip() {
   let html = "", day = "";
   for (let i = from; i < from + max; i++) {
     const r = data.results[i], time = r.row.time, d = time.slice(0, 10);
-    const a = r.rec && !r.rec.inZone ? r.rec.actions[0] : null;
+    const acts = r.rec && !r.rec.inZone ? r.rec.actions : [];
     const what = r.rec ? (r.rec.inZone ? t("inZone") : r.rec.actions.map((k) => ACTION_LABEL[k]).join(" + ") || t("noFeasible")) : "–";
-    const mark = r.rec?.inZone ? `<span class="achip in" aria-hidden="true">${icon("check")}</span>` : a ? chip(a) : `<span class="achip none" aria-hidden="true">–</span>`;
+    const mark = r.rec?.inZone ? `<span class="achip in" aria-hidden="true">${icon("check")}</span>` : acts.length > 1 ? chipPair(acts) : acts.length ? chip(acts[0]) : `<span class="achip none" aria-hidden="true">–</span>`;
     const newDay = d !== day; day = d;
     html += `<button type="button" class="hr${i === data.index ? " cur" : ""}${newDay ? " day" : ""}" data-i="${i}" aria-label="${esc(`${time.replace("T", " ")}: ${what}`)}"${i === data.index ? ' aria-current="true"' : ""}>`
       + `<span class="dd">${newDay ? esc(dayLabel(time)) : ""}</span><span class="hh">${time.slice(11, 13)}</span>`

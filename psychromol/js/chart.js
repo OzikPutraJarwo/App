@@ -62,6 +62,22 @@ export function drawChart(svgEl, opts) {
     <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(135)"><rect width="6" height="6" fill="var(--a-dehumidification)"/><line x1="0" y1="0" x2="0" y2="6" stroke="rgba(255,255,255,.6)" stroke-width="2"/></pattern>`);
   const g = svg.append("g").attr("clip-path", "url(#plot)");
   const labels = svg.append("g");
+  // Direct labels (actions, outside air, Tools points) never sit on top of each
+  // other: a label that overlaps one already placed moves down a line.
+  const placed = [];
+  const albl = (px, py, text) => {
+    const el = labels.append("text").attr("x", px).attr("y", py).attr("class", "c-albl").text(text);
+    const node = el.node();
+    if (!node.getBBox) return el;
+    for (let k = 0; k < 6; k++) {
+      const b = node.getBBox();
+      const hit = placed.some((o) => b.x < o.x + o.width && o.x < b.x + b.width && b.y < o.y + o.height && o.y < b.y + b.height);
+      if (!hit) break;
+      el.attr("y", Number(el.attr("y")) + b.height + 1);
+    }
+    placed.push(node.getBBox());
+    return el;
+  };
 
   const sample = (fn, t0, t1, n = 80) => d3.range(n + 1).map((i) => t0 + ((t1 - t0) * i) / n).map((t) => [t, fn(t)]).filter(([, w]) => w >= 0 && w <= wMax * 1.3);
 
@@ -131,7 +147,7 @@ export function drawChart(svgEl, opts) {
   if (current && outside) {
     g.append("path").attr("d", line([P(current.t, current.w), P(outside.t, outside.w)])).attr("class", "c-mix");
     g.append("circle").attr("cx", P(outside.t, outside.w)[0]).attr("cy", P(outside.t, outside.w)[1]).attr("r", 5).attr("class", "c-out");
-    labels.append("text").attr("x", P(outside.t, outside.w)[0] + 8).attr("y", P(outside.t, outside.w)[1] + 4).attr("class", "c-albl").text(tr("chart.outside"));
+    albl(P(outside.t, outside.w)[0] + 8, P(outside.t, outside.w)[1] + 4, tr("chart.outside"));
   }
 
   // Correction vector and the recommended action path, with a direct label.
@@ -147,10 +163,10 @@ export function drawChart(svgEl, opts) {
       g.append("path").attr("d", line(pts)).attr("class", "c-act").attr("stroke", `var(--a-${act})`)
         .attr("stroke-dasharray", act === "dehumidification" ? "8 3" : null).attr("marker-end", "url(#arrow)");
       const e = pts[pts.length - 1];
-      labels.append("text").attr("x", e[0] + 8).attr("y", e[1] - 6).attr("class", "c-albl").text(ACTION_LABEL[act]);
+      albl(e[0] + 8, e[1] - 6, ACTION_LABEL[act]);
     } else if (rec.match === "pair") {
       const e = P(rec.target.t, rec.target.w);
-      labels.append("text").attr("x", e[0] + 8).attr("y", e[1] - 6).attr("class", "c-albl").text(rec.actions.map((a) => ACTION_LABEL[a]).join(" + "));
+      albl(e[0] + 8, e[1] - 6, rec.actions.map((a) => ACTION_LABEL[a]).join(" + "));
     }
   }
   if (current) {
@@ -166,7 +182,7 @@ export function drawChart(svgEl, opts) {
     for (const q of marks.points || []) {
       const [cx, cy] = P(q.t, q.w);
       g.append("circle").attr("cx", cx).attr("cy", cy).attr("r", 6).attr("class", "c-upt");
-      labels.append("text").attr("x", cx + 9).attr("y", cy - 7).attr("class", "c-albl").text(q.label);
+      albl(cx + 9, cy - 7, q.label);
     }
   }
 
