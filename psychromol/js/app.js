@@ -155,6 +155,7 @@ function route() {
   PAGES.forEach((p) => { $(`page-${p}`).hidden = p !== page; });
   document.querySelectorAll("[data-page]").forEach((a) => { if (a.dataset.page === page) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
   const sub = location.hash.split("/")[1];
+  if (!(page === "settings" && sub)) window.scrollTo(0, 0);
   if (page === "settings" && sub) { const el = $(`set-${sub}`); if (el) { el.open = true; el.scrollIntoView({ block: "start" }); } }
   renderPage(page);
 }
@@ -270,17 +271,16 @@ function renderDss(r) {
   if (rec.inZone) action = `<div class="alert ok">${icon("check")}<span>${esc(t("dss.inZone"))}</span></div>`;
   else if (!rec.actions.length) action = `<div class="alert warn">${icon("info")}<span>${esc(t("dss.noAction"))}${outside ? "" : t("dss.noOutside")}</span></div>`;
   else {
-    const head = t(rec.match === "pair" ? "dss.pair" : rec.match === "partial" ? "dss.partial" : "dss.reach");
-    action = `<h3 class="act-head">${head}</h3>` + rec.actions.map((a) => `
+    const head = rec.match === "pair" ? "dss.pair" : rec.match === "partial" ? "dss.partial" : "";
+    action = (head ? `<h3 class="act-head">${t(head)}</h3>` : "") + rec.actions.map((a) => `
       <div class="action">${chip(a)}
-        <div><strong>${esc(ACTION_LABEL[a])}</strong><span>${esc(t(`actd.${a}`))}</span></div></div>`).join("") +
-      `<p class="ends">${rec.match === "pair" ? "" : t("dss.ends", { t: fmt(rec.end.t), w: fmt(rec.end.w * 1000, 2), vpd: fmt(rec.end.state.VPD / 1000, 2) })}${t("dss.dh", { dh: fmt(rec.dh, 2) })}${rec.energyMJ !== null ? t("dss.energy", { e: fmt(rec.energyMJ, 2) }) : ""}.</p>`;
+        <div><strong>${esc(ACTION_LABEL[a])}</strong></div></div>`).join("") +
+      `<p class="ends">${esc(((rec.match === "pair" ? "" : t("dss.ends", { t: fmt(rec.end.t), w: fmt(rec.end.w * 1000, 2), vpd: fmt(rec.end.state.VPD / 1000, 2) })) + t("dss.dh", { dh: fmt(rec.dh, 2) }) + (rec.energyMJ !== null ? t("dss.energy", { e: fmt(rec.energyMJ, 2) }) : "")).replace(/^ · /, ""))}</p>`;
   }
 
   const alarmText = [alarm.rh && `RH ${t(`alarm.${alarm.rh}`)}`, alarm.t && `Tdb ${t(`alarm.${alarm.t}`)}`].filter(Boolean).join(", ");
   panel.innerHTML = `
     ${action}${alerts.join("")}
-    <div class="target">${t("dss.target", { tlo: fmt(zone.tLo), thi: fmt(zone.tHi), vlo: fmt(zone.vpdLo, 2), vhi: fmt(zone.vpdHi, 2), cm: fmt(zone.cm) })}</div>
     <div class="compare">${t("dss.baseline")} <strong>${alarmText ? esc(t("dss.fires", { what: alarmText })) : t("dss.silent")}</strong></div>`;
 }
 
