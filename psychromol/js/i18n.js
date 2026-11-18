@@ -182,6 +182,8 @@ const DICT = {
     "st.inside": "{n} records · {a} → {b}",
     "st.nothing": "No data.",
     "st.demo": "{n} hours",
+    "span.title": "Show", "span.day": "One day", "span.all": "All data",
+    "span.note": "One day shows a single day: the example day of the demo, or the latest day of your own data. All data shows every hour.",
     "st.noRows": "The file was read, but no rows were recognised. Check the fields below.",
     "st.apiTest": "{n} records received, {k} recognised.",
     
@@ -417,6 +419,8 @@ const DICT = {
     "st.inside": "{n}건 · {a} → {b}",
     "st.nothing": "데이터 없음.",
     "st.demo": "{n}시간",
+    "span.title": "표시 범위", "span.day": "하루", "span.all": "전체 데이터",
+    "span.note": "하루: 예시 데이터는 예시 날짜, 내 데이터는 가장 최근 날짜 하나만 표시합니다. 전체 데이터: 모든 시간을 표시합니다.",
     "st.noRows": "파일은 읽었지만 인식된 행이 없습니다. 아래 필드를 확인하세요.",
     "st.apiTest": "기록 {n}개 수신, {k}개 인식.",
     

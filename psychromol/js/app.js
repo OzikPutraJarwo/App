@@ -19,8 +19,9 @@ const FULL_RANGE = { tMin: 0, tMax: 45, wMin: 0, wMax: 30 };
 // Demo datasets (hourly, 3 months; made by tools/make-demo-data.mjs). Each demo
 // sets the crop.
 const DEMOS = {
-  aehobak: { file: "data/demo/aehobak-synthetic-2026-03-05.json", crop: "aehobak" },
-  tomato: { file: "data/demo/tomato-synthetic-2025-08-10.json", crop: "tomato" },
+  // day: the example day shown when "Show: One day" is on (same days as the KSBEC talk)
+  aehobak: { file: "data/demo/aehobak-synthetic-2026-03-05.json", crop: "aehobak", day: "2026-04-13" },
+  tomato: { file: "data/demo/tomato-synthetic-2025-08-10.json", crop: "tomato", day: "2025-08-02" },
 };
 const PROFILES = { aehobak: "data/profiles/aehobak-literature.json", tomato: "data/profiles/tomato-literature.json" };
 const SOURCES = ["demo", "file", "api"];
@@ -35,6 +36,7 @@ const DEFAULTS = {
   source: "demo", // exactly one of SOURCES; sources are never combined
   demo: "aehobak", // key of DEMOS
   crop: "aehobak", // key of PROFILES (the demo sets it; user picks it for file/API)
+  span: "day", // "day": show one day (demo example day, or the latest day of file/API data); "all": every row
   altitude: 0,
   greenhouse: { l: 0, w: 0, h: 0 },
   actuators: { ...DEFAULT_DSS.actuators },
@@ -52,7 +54,8 @@ const DEFAULTS = {
 };
 
 let cfg = load();
-const data = { series: [], profile: [], outside: [], index: 0, results: [], live: false, fileRecs: null };
+// all = every row of the active source; series = the rows shown and evaluated (see spanRows).
+const data = { all: [], series: [], profile: [], outside: [], index: 0, results: [], live: false, fileRecs: null };
 let poller = null, player = null;
 
 function load() {
@@ -130,8 +133,18 @@ if (worker) worker.onmessage = (e) => {
   renderPage();
 };
 
+// Rows shown for the "Show" setting. Each hour is evaluated on its own, so
+// showing one day does not change any hour's result.
+function spanRows(all) {
+  if (cfg.span === "all" || !all.length) return all;
+  const want = cfg.source === "demo" ? DEMOS[cfg.demo]?.day : null;
+  const day = want && all.some((r) => r.time.startsWith(want)) ? want : all.at(-1).time.slice(0, 10);
+  return all.filter((r) => r.time.startsWith(day));
+}
+
 function recompute() {
   tableRows = TABLE_STEP;
+  data.series = spanRows(data.all);
   data.outside = outsideFromSeries(data.series);
   data.index = Math.min(data.index, Math.max(data.series.length - 1, 0));
   jobId++;
@@ -312,7 +325,7 @@ function renderTable() {
 // ---------- data source: demo | file | api (one at a time) ----------
 
 function useSeries(rows, msg) {
-  data.series = rows;
+  data.all = rows;
   data.index = 0;
   refresh();
   if (msg) toast(msg);
@@ -324,9 +337,10 @@ async function loadDemo() {
   try {
     if (cfg.crop !== d.crop) { cfg.crop = d.crop; save(); await loadProfile(); }
     const text = await fetch(d.file).then((r) => r.text());
-    data.series = toSeries(parseText(text, ".json"), pressure());
+    data.all = toSeries(parseText(text, ".json"), pressure());
+    recompute();
     data.index = Math.max(0, data.series.findIndex((r) => r.time.endsWith("T13:00")));
-    refresh();
+    renderPage();
   } catch (e) { toast(t("toast.demoFail", { e: e.message }), true); }
 }
 
@@ -338,16 +352,16 @@ async function loadProfile() {
 async function setDemo(key) {
   if (!DEMOS[key] || (key === cfg.demo && data.series.length)) return;
   cfg.demo = key; save();
-  data.series = []; data.index = 0;
+  data.all = data.series = []; data.index = 0;
   await loadDemo();
   renderSource();
 }
 
 // Rows saved in the browser for the file or API source.
 async function loadStored(src) {
-  try { data.series = (await loadRows(src)).sort((a, b) => a.time.localeCompare(b.time)); }
-  catch { data.series = []; }
-  data.index = Math.max(data.series.length - 1, 0);
+  try { data.all = (await loadRows(src)).sort((a, b) => a.time.localeCompare(b.time)); }
+  catch { data.all = []; }
+  data.index = Number.MAX_SAFE_INTEGER; // recompute clamps it to the last shown row
   refresh();
 }
 
@@ -356,7 +370,7 @@ async function setSource(src) {
   stopPolling(true);
   cfg.api.running = false;
   cfg.source = src; save();
-  data.series = []; data.index = 0; data.live = false;
+  data.all = data.series = []; data.index = 0; data.live = false;
   if (src === "demo") await loadDemo();
   else await loadStored(src);
   renderSource();
@@ -367,21 +381,22 @@ async function renderStorage() {
   $("storage").hidden = !stored;
   if (!stored) return;
   const u = await usage();
-  $("storage-info").textContent = t("store.info", { n: data.series.length, mb: u === null ? "–" : fmt(u / 1e6, 2) });
+  $("storage-info").textContent = t("store.info", { n: data.all.length, mb: u === null ? "–" : fmt(u / 1e6, 2) });
 }
 
 function renderSource() {
   document.querySelectorAll("[data-source]").forEach((b) => b.setAttribute("aria-checked", b.dataset.source === cfg.source));
   document.querySelectorAll("[data-pane]").forEach((el) => { el.hidden = !el.dataset.pane.split(" ").includes(cfg.source); });
   $("api-toggle").textContent = t(poller ? "data.stop" : "data.start");
+  document.querySelectorAll("[data-span]").forEach((b) => b.setAttribute("aria-checked", b.dataset.span === cfg.span));
   renderStorage();
   if (cfg.source === "api") return;
   document.querySelectorAll("[data-demo]").forEach((b) => b.setAttribute("aria-checked", b.dataset.demo === cfg.demo));
   $("crop").value = cfg.crop;
   $("crop").disabled = cfg.source === "demo";
-  if (cfg.source === "demo") setStatus(data.series.length ? t("st.demo", { n: data.series.length }) : "", data.series.length ? "ok" : "");
-  else if (!data.series.length) setStatus(data.fileRecs ? t("st.noRows") : t("st.nothing"), data.fileRecs ? "err" : "");
-  else setStatus(t("st.inside", { n: data.series.length, a: data.series[0].time.replace("T", " "), b: data.series.at(-1).time.replace("T", " ") }), "ok");
+  if (cfg.source === "demo") setStatus(data.all.length ? t("st.demo", { n: data.all.length }) : "", data.all.length ? "ok" : "");
+  else if (!data.all.length) setStatus(data.fileRecs ? t("st.noRows") : t("st.nothing"), data.fileRecs ? "err" : "");
+  else setStatus(t("st.inside", { n: data.all.length, a: data.all[0].time.replace("T", " "), b: data.all.at(-1).time.replace("T", " ") }), "ok");
 }
 
 // Shows the fields found in the first record and how the first row was read.
@@ -410,7 +425,7 @@ async function handleFile(file) {
     const text = await file.text();
     data.fileRecs = parseText(text, file.name.toLowerCase());
     parseFileRecs();
-    toast(data.series.length ? t("toast.inside", { n: data.series.length }) : t("toast.readFail", { f: file.name }), !data.series.length);
+    toast(data.all.length ? t("toast.inside", { n: data.all.length }) : t("toast.readFail", { f: file.name }), !data.all.length);
   } catch (e) { setStatus(t("toast.readFailDetail", { f: file.name, e: e.message }), "err"); }
 }
 
@@ -456,22 +471,24 @@ function startPolling() {
     try {
       const { rows, fields } = await fetchSensor(api.url, pressure(), { path: api.path, map: readMap() });
       $("field-list").innerHTML = fields.map((f) => `<option value="${esc(f)}">`).join("");
-      const seen = new Set(data.series.map((r) => r.time));
+      const seen = new Set(data.all.map((r) => r.time));
       const fresh = rows.filter((r) => !seen.has(r.time));
       const follow = data.index >= data.series.length - 1;
-      const last = data.series.at(-1)?.time ?? "";
-      data.series.push(...fresh);
-      if (!data.busy && fresh.every((r) => r.time > last) && data.profile.length && data.results.length === data.series.length - fresh.length) {
+      const last = data.all.at(-1)?.time ?? "";
+      data.all.push(...fresh);
+      // "All data": series is the same array as all, so new rows can be evaluated
+      // alone. "One day": the shown day may move, so recompute (one day is cheap).
+      if (data.series === data.all && !data.busy && fresh.every((r) => r.time > last) && data.profile.length && data.results.length === data.series.length - fresh.length) {
         data.outside = outsideFromSeries(data.series);
         data.results.push(...evaluate(fresh, data.profile, data.outside, settings(), pressure()));
       } else {
-        data.series.sort((a, b) => a.time.localeCompare(b.time));
+        data.all.sort((a, b) => a.time.localeCompare(b.time));
         recompute();
       }
       if (follow) data.index = data.series.length - 1;
       data.live = true;
       if (fresh.length) await saveRows("api", fresh);
-      setStatus(t("st.apiOk", { time: new Date().toLocaleTimeString(), n: fresh.length, total: data.series.length }), "ok");
+      setStatus(t("st.apiOk", { time: new Date().toLocaleTimeString(), n: fresh.length, total: data.all.length }), "ok");
       renderPage();
     } catch (err) { setStatus(t("st.apiFail", { e: err.message }), "err"); }
     busy = false;
@@ -493,6 +510,16 @@ function bindData() {
   document.addEventListener("click", (e) => { if (e.target.closest("[data-action='demo']")) { setSource("demo"); location.hash = "#chart"; } });
   document.querySelectorAll("[data-source]").forEach((b) => b.addEventListener("click", () => setSource(b.dataset.source)));
   document.querySelectorAll("[data-demo]").forEach((b) => b.addEventListener("click", () => setDemo(b.dataset.demo)));
+  document.querySelectorAll("[data-span]").forEach((b) => b.addEventListener("click", () => {
+    if (cfg.span === b.dataset.span) return;
+    cfg.span = b.dataset.span; save();
+    const time = data.series[data.index]?.time;
+    recompute();
+    // keep the same hour open when it is still shown
+    const i = data.series.findIndex((r) => r.time === time);
+    data.index = i >= 0 ? i : Math.max(0, data.series.findIndex((r) => r.time.endsWith("T13:00")));
+    renderSource();
+  }));
   $("crop").addEventListener("change", async (e) => { cfg.crop = e.target.value; save(); await loadProfile(); refresh(); });
   $("file-input").addEventListener("change", (e) => handleFile(e.target.files[0]));
   const drop = $("drop-file");
@@ -506,7 +533,7 @@ function bindData() {
     if (!confirm(t("store.confirm"))) return;
     if (cfg.source === "api") stopPolling();
     await clearRows(cfg.source);
-    data.series = []; data.index = 0; data.fileRecs = null;
+    data.all = data.series = []; data.index = 0; data.fileRecs = null;
     refresh(); renderSource(); toast(t("store.cleared"));
   });
   for (const el of document.querySelectorAll("[data-map], #map-humtype, #map-path")) el.addEventListener("change", () => {
