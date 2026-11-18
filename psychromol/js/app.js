@@ -20,8 +20,8 @@ const FULL_RANGE = { tMin: 0, tMax: 45, wMin: 0, wMax: 30 };
 // sets the crop.
 const DEMOS = {
   // day: the example day shown when "Show: One day" is on (same days as the KSBEC talk)
-  aehobak: { file: "data/demo/aehobak-synthetic-2026-03-05.json", crop: "aehobak", day: "2026-04-13" },
-  tomato: { file: "data/demo/tomato-synthetic-2025-08-10.json", crop: "tomato", day: "2025-08-02" },
+  aehobak: { file: "data/demo/aehobak-synthetic-2026-03-05.json", crop: "aehobak", day: "2026-04-13", hour: "03:00" },
+  tomato: { file: "data/demo/tomato-synthetic-2025-08-10.json", crop: "tomato", day: "2025-08-02", hour: "13:00" },
 };
 const PROFILES = { aehobak: "data/profiles/aehobak-literature.json", tomato: "data/profiles/tomato-literature.json" };
 const SOURCES = ["demo", "file", "api"];
@@ -141,6 +141,13 @@ function spanRows(all) {
   const day = want && all.some((r) => r.time.startsWith(want)) ? want : all.at(-1).time.slice(0, 10);
   return all.filter((r) => r.time.startsWith(day));
 }
+
+// Hour a demo opens at: the KSBEC deck's example hour on the example day.
+const demoStart = () => {
+  const d = DEMOS[cfg.demo];
+  const i = data.series.findIndex((r) => r.time === `${d.day}T${d.hour}`);
+  return i >= 0 ? i : Math.max(0, data.series.findIndex((r) => r.time.endsWith(`T${d.hour}`)));
+};
 
 function recompute() {
   tableRows = TABLE_STEP;
@@ -339,7 +346,7 @@ async function loadDemo() {
     const text = await fetch(d.file).then((r) => r.text());
     data.all = toSeries(parseText(text, ".json"), pressure());
     recompute();
-    data.index = Math.max(0, data.series.findIndex((r) => r.time.endsWith("T13:00")));
+    data.index = demoStart();
     renderPage();
   } catch (e) { toast(t("toast.demoFail", { e: e.message }), true); }
 }
@@ -517,7 +524,7 @@ function bindData() {
     recompute();
     // keep the same hour open when it is still shown
     const i = data.series.findIndex((r) => r.time === time);
-    data.index = i >= 0 ? i : Math.max(0, data.series.findIndex((r) => r.time.endsWith("T13:00")));
+    data.index = i >= 0 ? i : cfg.source === "demo" ? demoStart() : data.series.length - 1;
     renderSource();
   }));
   $("crop").addEventListener("change", async (e) => { cfg.crop = e.target.value; save(); await loadProfile(); refresh(); });
