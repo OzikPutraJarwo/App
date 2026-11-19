@@ -69,6 +69,9 @@ export function drawChart(svgEl, opts) {
     const el = labels.append("text").attr("x", px).attr("y", py).attr("class", "c-albl").text(text);
     const node = el.node();
     if (!node.getBBox) return el;
+    // Keep the label inside the chart when a zoom pushes its point to an edge.
+    const b0 = node.getBBox();
+    if (b0.x < 2) el.attr("x", px + 2 - b0.x); else if (b0.x + b0.width > W - 2) el.attr("x", px - (b0.x + b0.width - W + 2));
     for (let k = 0; k < 6; k++) {
       const b = node.getBBox();
       const hit = placed.some((o) => b.x < o.x + o.width && o.x < b.x + b.width && b.y < o.y + o.height && o.y < b.y + b.height);
@@ -211,6 +214,7 @@ export function drawChart(svgEl, opts) {
       <div class="r"><b>${s.Tdp.toFixed(1)} °C</b> Tdp · <b>${s.h.toFixed(1)}</b> kJ/kg h</div>${i >= 0 ? `<div class="t">${tr("chart.clickHour")}</div>` : addHint}`, e);
   }).on("pointerleave", () => opts.tooltip?.(null))
     .on("click", (e) => {
+      if (Date.now() - (pinches.get(svgEl)?.end || 0) < 500) return; // no tap right after a pinch
       const [px, py] = d3.pointer(e);
       const i = nearest(px, py);
       if (i >= 0) return opts.onPick?.(i);
@@ -225,6 +229,62 @@ export function drawChart(svgEl, opts) {
     const dy = e.deltaY * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? 400 : 1);
     zoomTo(svgEl, inv(px, py), Math.exp(Math.max(-300, Math.min(300, dy)) * 0.0015), range, opts.onZoom);
   } : null;
+
+  // Two-finger pinch zooms on touch screens. One finger still scrolls the page
+  // (CSS touch-action: pan-y), so the browser never page-zooms over the chart.
+  // The chart point under the fingers stays under them while they move.
+  if (!opts.onZoom) { svgEl.ontouchstart = svgEl.ontouchmove = svgEl.ontouchend = svgEl.ontouchcancel = null; return; }
+  const plot = { x0: m.left, x1: W - m.right, y0: H - m.bottom, y1: m.top };
+  const two = (e) => {
+    const [a, b] = [e.touches[0], e.touches[1]].map((t) => d3.pointer(t, svgEl));
+    return { mid: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2], dist: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1 };
+  };
+  svgEl.ontouchstart = (e) => {
+    if (e.touches.length !== 2) return;
+    e.preventDefault();
+    const z = zooms.get(svgEl);
+    if (z?.raf) { cancelAnimationFrame(z.raf); z.raf = 0; }
+    const { mid, dist } = two(e);
+    const prev = pinches.get(svgEl);
+    pinches.set(svgEl, { ...prev, on: true, dist, at: inv(...mid), range: { tMin: range.tMin, tMax: range.tMax, wMin: range.wMin || 0, wMax: range.wMax }, plot, view, last: null });
+    opts.tooltip?.(null);
+  };
+  svgEl.ontouchmove = (e) => {
+    const s = pinches.get(svgEl);
+    if (!s?.on || e.touches.length !== 2) return;
+    e.preventDefault();
+    const { mid, dist } = two(e);
+    s.last = pinchRange(s, mid, s.dist / dist);
+    opts.onZoom(s.last, false);
+  };
+  svgEl.ontouchend = svgEl.ontouchcancel = (e) => {
+    const s = pinches.get(svgEl);
+    if (!s?.on || e.touches.length >= 2) return;
+    s.on = false; s.end = Date.now();
+    if (s.last) opts.onZoom(s.last, true);
+  };
+}
+
+// Range for a pinch: the start range scaled by f around the touched chart point,
+// then shifted so that point sits under the fingers' current midpoint. In the
+// Mollier view only W is a straight axis, so only W follows the fingers.
+const pinches = new WeakMap();
+function pinchRange(s, mid, f) {
+  const R = s.range, at = s.at, wg = at.w * 1000, P = s.plot;
+  const tSpan = Math.max(LIMIT.tSpan, Math.min((R.tMax - R.tMin) * f, LIMIT.tMax - LIMIT.tMin));
+  const wSpan = Math.max(LIMIT.wSpan, Math.min((R.wMax - R.wMin) * f, LIMIT.wMax));
+  let tMin, wMin;
+  if (s.view === "mollier") {
+    tMin = at.t - (at.t - R.tMin) * tSpan / (R.tMax - R.tMin);
+    wMin = wg - (mid[0] - P.x0) / (P.x1 - P.x0) * wSpan;
+  } else {
+    tMin = at.t - (mid[0] - P.x0) / (P.x1 - P.x0) * tSpan;
+    wMin = wg - (P.y0 - mid[1]) / (P.y0 - P.y1) * wSpan;
+  }
+  const [t0, t1] = clampSpan(tMin, tMin + tSpan, LIMIT.tMin, LIMIT.tMax, LIMIT.tSpan);
+  const [w0, w1] = clampSpan(wMin, wMin + wSpan, 0, LIMIT.wMax, LIMIT.wSpan);
+  const r3 = (v) => Math.round(v * 1000) / 1000;
+  return { tMin: r3(t0), tMax: r3(t1), wMin: r3(w0), wMax: r3(w1) };
 }
 
 // ---------- smooth zoom ----------
